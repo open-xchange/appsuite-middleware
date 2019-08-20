@@ -55,6 +55,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.regional.RegionalSettingsService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link AbstractDateReplacement} - An abstract class for date string replacements using {@link DateFormat#format(Date)}.
@@ -79,14 +81,20 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
 
     protected TimeZone timeZone;
 
+    protected int contextId;
+
+    protected int userId;
+
     /**
      * Initializes a new {@link AbstractDateReplacement}
      *
      * @param date The date
      * @param withTime <code>true</code> to include given date's time information; otherwise <code>false</code>
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link AbstractDateReplacement}
      */
-    protected AbstractDateReplacement(final Date date, final boolean withTime) {
-        this(date, withTime, null, null);
+    protected AbstractDateReplacement(final Date date, final boolean withTime, int contextId, int userId) {
+        this(date, withTime, null, null, contextId, userId);
     }
 
     /**
@@ -96,11 +104,15 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
      * @param withTime <code>true</code> to include given date's time and time zone; otherwise <code>false</code>
      * @param locale The locale
      * @param timeZone The time zone; may be <code>null</code>
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link AbstractDateReplacement}
      */
-    protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale, TimeZone timeZone) {
+    protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale, TimeZone timeZone, int contextId, int userId) {
         super();
         this.withTime = withTime;
         this.date = date;
+        this.contextId = contextId;
+        this.userId = userId;
         this.dateFormat = getDateFormat(withTime, locale, timeZone);
         if (!withTime) {
             this.timeZone = TimeZone.getTimeZone("UTC"); // No need to start calculating TZ offset with dates only. Assume UTC.
@@ -116,6 +128,8 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         clone.dateFormat = (DateFormat) (this.dateFormat == null ? null : dateFormat.clone());
         clone.locale = (Locale) (this.locale == null ? null : this.locale.clone());
         clone.timeZone = (TimeZone) (this.timeZone == null ? null : timeZone.clone());
+        clone.contextId = this.contextId;
+        clone.userId = this.userId;
         return clone;
     }
 
@@ -229,10 +243,16 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         this.dateFormat.setTimeZone(timeZone);
     }
 
-    private static DateFormat getDateFormat(final boolean withTime, final Locale locale, final TimeZone timeZone) {
+    private DateFormat getDateFormat(final boolean withTime, final Locale locale, final TimeZone timeZone) {
+        RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
         final Locale l = locale == null ? Locale.ENGLISH : locale;
         if (withTime) {
-            final SimpleDateFormat sdf = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, l);
+            SimpleDateFormat sdf;
+            if (null == service) {
+                sdf = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, l);
+            } else {
+                sdf = (SimpleDateFormat) service.getDateTimeFormat(contextId, userId, l, DateFormat.DEFAULT, DateFormat.DEFAULT);
+            }
             /*
              * Add day of week to pattern and time zone if not null
              */
@@ -250,7 +270,12 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         /*
          * The date-only instance
          */
-        DateFormat format = DateFormat.getDateInstance(DateFormat.DEFAULT, l);
+        DateFormat format;
+        if (null == service) {
+            format = DateFormat.getDateInstance(DateFormat.DEFAULT, l);
+        } else {
+            format = service.getDateFormat(contextId, userId, l, DateFormat.DEFAULT);
+        }
         if (timeZone != null) {
             format.setTimeZone(timeZone);
         }

@@ -73,9 +73,11 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
      * Initializes a new {@link ChangeExceptionsReplacement}
      *
      * @param dates The change exception dates
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link ChangeExceptionsReplacement}
      */
-    public ChangeExceptionsReplacement(final Date[] dates) {
-        this(dates, null, null);
+    public ChangeExceptionsReplacement(final Date[] dates, int contextId, int userId) {
+        this(dates, null, null, contextId, userId);
     }
 
     /**
@@ -84,9 +86,11 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
      * @param dates The change exception dates
      * @param locale The locale
      * @param timeZone The time zone
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link ChangeExceptionsReplacement}
      */
-    public ChangeExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
-        super(dates, Notifications.FORMAT_CHANGE_EXCEPTIONS, locale, timeZone);
+    public ChangeExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone, int contextId, int userId) {
+        super(dates, Notifications.FORMAT_CHANGE_EXCEPTIONS, locale, timeZone, contextId, userId);
         fallback = Notifications.NO_CHANGE_EXCEPTIONS;
     }
 

@@ -55,6 +55,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.i18n.tools.TemplateReplacement;
+import com.openexchange.regional.RegionalSettingsService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link AbstractMultipleDateReplacement} - An abstract class for date string
@@ -77,13 +79,19 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 
     protected TimeZone timeZone;
 
+    protected int contextId;
+
+    protected int userId;
+
     /**
      * Initializes a new {@link AbstractMultipleDateReplacement}
      *
      * @param dates The dates
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link AbstractMultipleDateReplacement}
      */
-    protected AbstractMultipleDateReplacement(final Date[] dates) {
-        this(dates, null, null);
+    protected AbstractMultipleDateReplacement(final Date[] dates, int contextId, int userId) {
+        this(dates, null, null, contextId, userId);
     }
 
     /**
@@ -92,10 +100,14 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
      * @param dates The dates
      * @param locale The locale
      * @param timeZone The time zone; may be <code>null</code>
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link AbstractMultipleDateReplacement}
      *
      */
-    protected AbstractMultipleDateReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
+    protected AbstractMultipleDateReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone, int contextId, int userId) {
         super();
+        this.contextId = contextId;
+        this.userId = userId;
         if (dates == null) {
             this.dates = null;
         } else {
@@ -104,8 +116,18 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
                 this.dates[i] = (Date) dates[i].clone();
             }
         }
-        this.dateFormat = locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat
-                .getDateInstance(DateFormat.DEFAULT, locale);
+        RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
+        Locale l;
+        if (null == locale) {
+            l = Locale.ENGLISH;
+        } else {
+            l = locale;
+        }
+        if (null == service) {
+            this.dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, l);
+        } else {
+            this.dateFormat = service.getDateFormat(contextId, userId, l, DateFormat.DEFAULT);
+        }
         if (timeZone != null) {
             if (dateFormat instanceof SimpleDateFormat) {
                 /*
@@ -136,6 +158,8 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
         clone.dateFormat = (DateFormat) (this.dateFormat == null ? null : dateFormat.clone());
         clone.locale = (Locale) (this.locale == null ? null : this.locale.clone());
         clone.timeZone = (TimeZone) (this.timeZone == null ? null : timeZone.clone());
+        clone.contextId = this.contextId;
+        clone.userId = this.userId;
         return clone;
     }
 
@@ -244,8 +268,14 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
         if (locale == null || locale.equals(this.locale)) {
             return;
         }
+        
         this.locale = locale;
-        this.dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+        RegionalSettingsService service = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
+        if (null == service) {
+            this.dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+        } else {
+            this.dateFormat = service.getDateFormat(contextId, userId, locale, DateFormat.DEFAULT);
+        }
         if (this.timeZone != null) {
             this.dateFormat.setTimeZone(timeZone);
         }

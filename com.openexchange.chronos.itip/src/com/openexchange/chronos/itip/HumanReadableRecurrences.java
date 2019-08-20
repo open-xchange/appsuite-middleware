@@ -108,12 +108,15 @@ public class HumanReadableRecurrences {
         }
     }
 
-    public String getEnd() {
+    public String getEnd(DateFormat df) {
         if (rrule.getCount() != null) {
             return format(locale, HRRStrings.OCCURRENCES, rrule.getCount());
         }
 
         if (rrule.getUntil() != null) {
+            if (null != df) {
+                return format(locale, HRRStrings.UNTIL, df.format(new Date(rrule.getUntil().getTimestamp())));
+            }
             return format(locale, HRRStrings.UNTIL, DateFormat.getDateInstance(DateFormat.FULL, locale).format(new Date(rrule.getUntil().getTimestamp())));
         }
 

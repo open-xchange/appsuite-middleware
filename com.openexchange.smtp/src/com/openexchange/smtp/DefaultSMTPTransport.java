@@ -86,6 +86,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.MailAccountSMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
@@ -264,10 +265,17 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
              */
             final Date sentDate = srcMail.getSentDate();
             {
+                DateFormat df;
+                RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+                if (null == regionalSettingsService) {
+                    df = DateFormat.getDateInstance(DateFormat.LONG, locale);
+                } else {
+                    df = regionalSettingsService.getDateFormat(session.getContextId(), session.getUserId(), locale, DateFormat.LONG);
+                }
                 final MimeBodyPart text = new MimeBodyPart();
                 final String txt = performLineFolding(
                     strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT)
-                    .replaceFirst("#DATE#", sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate)))
+                    .replaceFirst("#DATE#", sentDate == null ? "" : quoteReplacement(df.format(sentDate)))
                     .replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())), usm.getAutoLinebreak());
                 MessageUtility.setText(txt, defaultMimeCS, text);
                 // text.setText(txt,defaultMimeCS);

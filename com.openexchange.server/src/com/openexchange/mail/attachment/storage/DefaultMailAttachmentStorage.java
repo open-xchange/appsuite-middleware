@@ -275,7 +275,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 }
                 {
                     final Date date = (Date) storeProps.get("date");
-                    final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
+                    final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault(), session));
                     desc = Strings.replaceSequenceWith(desc, "#DATE#", repl);
                 }
                 {

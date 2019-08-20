@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import java.text.DateFormat;
-import java.util.Locale;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.i18n.tools.RenderMap;
@@ -100,17 +98,6 @@ public interface State {
 	 *         otherwise <code>false</code>
 	 */
 	public boolean sendMail(UserSettingMail userSettingMail, int owner, int participant, int modificationUser);
-
-	/**
-	 * Gets the date/time formatter with default formatting styles for the given
-	 * locale.
-	 *
-	 * @param locale
-	 *            The locale
-	 * @return The date/time formatter with default formatting styles for the
-	 *         given locale
-	 */
-	public DateFormat getDateFormat(Locale locale);
 
 	/**
 	 * Adds special replacements to render map.

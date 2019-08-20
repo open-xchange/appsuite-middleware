@@ -60,6 +60,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.TemplateService;
@@ -77,7 +78,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
+        return new Class<?>[] { ContextService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class, RegionalSettingsService.class,
             TemplateService.class, ResourceService.class, UserService.class, ConfigurationService.class, HtmlService.class, LeanConfigurationService.class};
     }
 

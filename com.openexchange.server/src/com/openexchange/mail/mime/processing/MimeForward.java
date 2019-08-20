@@ -784,7 +784,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @return The forward text
      */
     static String generateForwardText(String firstSeenText, LocaleAndTimeZone ltz, MailMessage msg, boolean html, Session session) {
-        String forwardPrefix = generatePrefixText(MailStrings.FORWARD_PREFIX, ltz, msg);
+        String forwardPrefix = generatePrefixText(MailStrings.FORWARD_PREFIX, ltz, msg, session);
         if (html) {
             forwardPrefix = HtmlProcessing.htmlFormat(forwardPrefix);
         }

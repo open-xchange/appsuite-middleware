@@ -86,6 +86,7 @@ import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -232,7 +233,15 @@ public class EventConverter {
 
     private String getDescription(Contact contact) {
         if (hasYear(contact.getBirthday())) {
-            DateFormat dateFormat = null == locale ? DateFormat.getDateInstance(DateFormat.MEDIUM) : DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+            RegionalSettingsService regionalSettingsService = services.getService(RegionalSettingsService.class);
+            DateFormat dateFormat;
+            if (null != locale && null != regionalSettingsService) {
+                dateFormat = regionalSettingsService.getDateFormat(contact.getContextId(), contact.getCreatedBy(), locale, DateFormat.MEDIUM);
+            } else if (null != locale) {
+                dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+            } else {
+                dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+            }
             dateFormat.setTimeZone(TimeZones.UTC);
             String descriptionFormat = StringHelper.valueOf(locale).getString(BirthdaysCalendarStrings.EVENT_DESCRIPTION);
             return String.format(descriptionFormat, dateFormat.format(contact.getBirthday()));

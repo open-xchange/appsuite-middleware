@@ -69,6 +69,7 @@ import com.openexchange.importexport.ImportExportService;
 import com.openexchange.importexport.actions.ExportActionFactory;
 import com.openexchange.importexport.actions.ImportActionFactory;
 import com.openexchange.importexport.impl.ImportExportServiceImpl;
+import com.openexchange.regional.RegionalSettingsService;
 
 /**
  * {@link ImportExportActivator}
@@ -95,7 +96,8 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			IDBasedCalendarAccessFactory.class,
 			ICalService.class,
 			CalendarService.class,
-			CalendarUtilities.class
+			CalendarUtilities.class,
+			RegionalSettingsService.class
 		};
 	}
 

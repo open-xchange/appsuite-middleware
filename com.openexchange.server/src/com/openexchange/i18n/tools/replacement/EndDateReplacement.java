@@ -70,9 +70,11 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * @param endDate The end date
      * @param fulltime <code>true</code> if given end date denotes a full-time end date; otherwise <code>false</code>
      * @param isTask <code>true</code> if this end date denotes a task's end date; otherwise <code>false</code>
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link EndDateReplacement}
      */
-    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask) {
-        this(endDate, fulltime, isTask, null, null);
+    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, int contextId, int userId) {
+        this(endDate, fulltime, isTask, null, null, contextId, userId);
     }
 
     /**
@@ -83,14 +85,18 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * @param isTask <code>true</code> if this end date denotes a task's end date; otherwise <code>false</code>
      * @param locale The locale
      * @param timeZone The time zone
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link EndDateReplacement}
      */
-    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale, final TimeZone timeZone) {
+    public EndDateReplacement(final Date endDate, final boolean fulltime, final boolean isTask, final Locale locale, final TimeZone timeZone, int contextId, int userId) {
         super(
             correctDayOfMonth(endDate, fulltime, isTask),
             !fulltime,
             isTask ? Notifications.FORMAT_DUE_DATE : Notifications.FORMAT_END_DATE,
             locale,
-            timeZone);
+            timeZone,
+            contextId,
+            userId);
         fallback = isTask ? Notifications.NO_DUE_DATE : Notifications.NO_END_DATE;
     }
 

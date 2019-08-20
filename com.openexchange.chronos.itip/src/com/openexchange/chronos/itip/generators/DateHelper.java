@@ -60,6 +60,8 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.HumanReadableRecurrences;
 import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.osgi.Services;
+import com.openexchange.regional.RegionalSettingsService;
 
 /**
  * {@link DateHelper}
@@ -77,12 +79,18 @@ public class DateHelper {
     private TimeZone timezone;
     private final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-    public DateHelper(Event event, Locale locale, TimeZone tz) {
+    public DateHelper(Event event, Locale locale, TimeZone tz, int contextId, int userId) {
         super();
         this.event = event;
         if (locale != null && tz != null) {
-            timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
-            dateFormat = DateFormat.getDateInstance(DateFormat.FULL, locale);
+            RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+            if (null != regionalSettingsService) {
+                timeFormat = regionalSettingsService.getTimeFormat(contextId, userId, locale, DateFormat.SHORT);
+                dateFormat = regionalSettingsService.getDateFormat(contextId, userId, locale, DateFormat.FULL);
+            } else {
+                timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+                dateFormat = DateFormat.getDateInstance(DateFormat.FULL, locale);
+            }
             this.locale = locale;
             this.timezone = tz;
             weekdayFormat = new SimpleDateFormat("E", locale);
@@ -91,6 +99,10 @@ public class DateHelper {
             dateFormat.setTimeZone(timezone);
             weekdayFormat.setTimeZone(timezone);
         }
+    }
+
+    public DateHelper(Event event, Locale locale, TimeZone tz) {
+        this(event, locale, tz, 0, 0);
     }
 
     public String getRecurrenceDatePosition() {
@@ -113,7 +125,7 @@ public class DateHelper {
     public String formatRecurrenceRule(Event event) {
         if (CalendarUtils.isSeriesMaster(event)) {
             HumanReadableRecurrences recurInfo = new HumanReadableRecurrences(event, locale);
-            return recurInfo.getString() + ", " + recurInfo.getEnd();
+            return recurInfo.getString() + ", " + recurInfo.getEnd(dateFormat);
         }
         return "";
     }

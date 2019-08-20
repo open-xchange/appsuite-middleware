@@ -81,9 +81,11 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
      * @param withTime <code>true</code> to include given date's time and time
      *            zone; otherwise <code>false</code>
      * @param format The format string
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link AbstractFormatDateReplacement}
      */
-    protected AbstractFormatDateReplacement(final Date date, final boolean withTime, final String format) {
-        super(date, withTime);
+    protected AbstractFormatDateReplacement(final Date date, final boolean withTime, final String format, int contextId, int userId) {
+        super(date, withTime, contextId, userId);
         this.format = format;
     }
 
@@ -96,10 +98,12 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
      * @param format The format string
      * @param locale The locale
      * @param timeZone The time zone
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link AbstractFormatDateReplacement}
      */
     public AbstractFormatDateReplacement(final Date date, final boolean withTime, final String format,
-            final Locale locale, final TimeZone timeZone) {
-        super(date, withTime, locale, timeZone);
+            final Locale locale, final TimeZone timeZone, int contextId, int userId) {
+        super(date, withTime, locale, timeZone, contextId, userId);
         this.format = format;
     }
 

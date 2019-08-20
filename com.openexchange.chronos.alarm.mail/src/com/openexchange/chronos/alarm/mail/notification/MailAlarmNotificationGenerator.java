@@ -82,6 +82,7 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
@@ -187,6 +188,7 @@ public class MailAlarmNotificationGenerator {
 
     private String generateSubject() throws OXException {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        RegionalSettingsService regionalSettingsService = requireService(RegionalSettingsService.class, services);
         Locale locale = user.getLocale();
         if (locale == null) {
             locale = Locale.getDefault();
@@ -196,7 +198,13 @@ public class MailAlarmNotificationGenerator {
         if (summary.length() > 40) {
             summary = summary.substring(0, 36).concat("...");
         }
-        DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, user.getLocale()) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, user.getLocale());
+        DateFormat df;
+        if (null == regionalSettingsService) {
+            df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
+        } else {
+            df = CalendarUtils.isAllDay(event) ? regionalSettingsService.getDateFormat(ctx.getContextId(), user.getId(), locale, DateFormat.LONG) :
+                                                 regionalSettingsService.getDateTimeFormat(ctx.getContextId(), user.getId(), locale, DateFormat.LONG, DateFormat.SHORT);
+        }
         String formattedStartDate = df.format(new Date(event.getStartDate().getTimestamp()));
 
         return translator.translate(MailAlarmMailStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
@@ -242,7 +250,7 @@ public class MailAlarmNotificationGenerator {
     }
 
     private DateHelper dateHelperFor(final NotificationParticipant participant) {
-        return new DateHelper(event, participant.getLocale(), participant.getTimeZone());
+        return new DateHelper(event, participant.getLocale(), participant.getTimeZone(), participant.getContext().getContextId(), participant.getUser().getId());
     }
 
     private static class PassthroughWrapper implements TypeWrapper {

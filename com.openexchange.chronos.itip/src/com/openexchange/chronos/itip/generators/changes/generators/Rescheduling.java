@@ -62,8 +62,10 @@ import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerator;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.regional.RegionalSettingsService;
 
 /**
  * {@link Rescheduling}
@@ -84,39 +86,50 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         List<Sentence> sentences = handleChangedTimeZones(original, updated);
         if (timeChanged(original, updated)) {
             String msg = Messages.HAS_RESCHEDULED;
-            sentences.add(new Sentence(msg).add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL).add(updatedTimeString(updated, diff, locale, timezone), ArgumentType.UPDATED));
+            sentences.add(new Sentence(msg).add(timeString(original, diff, locale, timezone, ctx), ArgumentType.ORIGINAL).add(updatedTimeString(updated, diff, locale, timezone, ctx), ArgumentType.UPDATED));
         }
         return sentences;
     }
 
-    private String timeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
+    private String timeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone, Context ctx) {
         Format format = chooseFormat(diff);
         if (differentDays(event.getStartDate(), event.getEndDate())) {
             format = Format.DIFFERENT_DAYS;
         }
-        return time(format, event, locale, timezone);
+        return time(format, event, locale, timezone, ctx);
     }
 
-    private String updatedTimeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
+    private String updatedTimeString(Event event, ITipEventUpdate diff, Locale locale, TimeZone timezone, Context ctx) {
         Format format = chooseFormat(diff);
         if (differentDays(event.getStartDate(), event.getEndDate())) {
             format = Format.DIFFERENT_DAYS;
         }
-        return updatedTime(format, event, locale, timezone);
+        return updatedTime(format, event, locale, timezone, ctx);
     }
 
-    private String updatedTime(Format format, Event updated, Locale locale, TimeZone timezone) {
+    private String updatedTime(Format format, Event updated, Locale locale, TimeZone timezone, Context ctx) {
         Date startDate = new Date(updated.getStartDate().getTimestamp());
         Date endDate = new Date(updated.getEndDate().getTimestamp());
 
-        DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
+        RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+        DateFormat longDate;
+        if (null == regionalSettingsService) {
+            longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
+        } else {
+            longDate = regionalSettingsService.getDateFormat(ctx.getContextId(), updated.getCreatedBy().getEntity(), locale, DateFormat.LONG);
+        }
         longDate.setTimeZone(timezone);
         if (updated.getStartDate().isAllDay()) {
             longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
             endDate = forceCorrectDay(endDate);
         }
 
-        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        DateFormat time;
+        if (null == regionalSettingsService) {
+            time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        } else {
+            time = regionalSettingsService.getTimeFormat(ctx.getContextId(), updated.getCreatedBy().getEntity(), locale, DateFormat.SHORT);
+        }
         time.setTimeZone(timezone);
         switch (format) {
             case SAME_DAY:
@@ -135,11 +148,17 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         return ""; // Won't happen
     }
 
-    private String time(Format format, Event original, Locale locale, TimeZone timezone) {
+    private String time(Format format, Event original, Locale locale, TimeZone timezone, Context ctx) {
         Date startDate = new Date(original.getStartDate().getTimestamp());
         Date endDate = new Date(original.getEndDate().getTimestamp());
 
-        DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
+        RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+        DateFormat longDate;
+        if (null == regionalSettingsService) {
+            longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
+        } else {
+            longDate = regionalSettingsService.getDateFormat(ctx.getContextId(), original.getCreatedBy().getEntity(), locale, DateFormat.LONG);
+        }
         if (original.getStartDate().isAllDay()) {
             longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
             endDate = forceCorrectDay(endDate);
@@ -147,7 +166,12 @@ public class Rescheduling implements ChangeDescriptionGenerator {
             longDate.setTimeZone(timezone);
         }
 
-        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        DateFormat time;
+        if (null == regionalSettingsService) {
+            time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+        } else {
+            time = regionalSettingsService.getTimeFormat(ctx.getContextId(), original.getCreatedBy().getEntity(), locale, DateFormat.SHORT);
+        }
         time.setTimeZone(timezone);
 
         switch (format) {

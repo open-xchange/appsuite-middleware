@@ -608,7 +608,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                      * No reply text found at all
                      */
                     retvalContentType.setParameter("nature", "virtual");
-                    String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, origMsg);
+                    String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, origMsg, session);
                     boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
                     if (isHtml) {
                         replyPrefix = HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append('\n').append('\n').toString());
@@ -779,7 +779,7 @@ public final class MimeReply extends AbstractMimeProcessing {
         }
         if (found && !usm.isDropReplyForwardPrefix()) {
             boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
-            String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, msg);
+            String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, msg, session);
             {
                 char nextLine = '\n';
                 if (isHtml) {

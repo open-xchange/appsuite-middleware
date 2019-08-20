@@ -741,7 +741,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
     }
 
     private DateHelper dateHelperFor(final NotificationParticipant participant) {
-        return new DateHelper(updated, participant.getLocale(), participant.getTimeZone());
+        return new DateHelper(updated, participant.getLocale(), participant.getTimeZone(), participant.getContext().getContextId(), participant.getUser().getId());
     }
 
     @Override

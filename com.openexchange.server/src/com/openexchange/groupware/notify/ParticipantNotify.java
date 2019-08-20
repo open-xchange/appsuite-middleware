@@ -953,7 +953,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 isFulltime = false;
             }
             final Date start = newObj.getStartDate();
-            renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(start, oldObj.getStartDate())) : false));
+            renderMap.put(new StartDateReplacement(start, isFulltime, session.getContextId(), session.getUserId()).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(start, oldObj.getStartDate())) : false));
             Date end = newObj.getEndDate();
             /*
              * Determine changed status with original end time
@@ -969,9 +969,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 }
             }
 
-            renderMap.put(new EndDateReplacement(end, isFulltime, isTask).setChanged(endChanged));
+            renderMap.put(new EndDateReplacement(end, isFulltime, isTask, session.getContextId(), session.getUserId()).setChanged(endChanged));
         }
-        renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate() : (oldObj == null ? null : oldObj.getCreationDate()), null));
+        renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate() : (oldObj == null ? null : oldObj.getCreationDate()), null, session.getContextId(), session.getUserId()));
         {
             final SeriesReplacement seriesRepl;
             if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
@@ -990,13 +990,13 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final DeleteExceptionsReplacement deleteExceptionsReplacement;
             final Date[] deleteExcs = newObj.getDeleteException();
             if (newObj.containsDeleteExceptions() || deleteExcs != null) {
-                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs);
+                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs, session.getContextId(), session.getUserId());
                 deleteExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(deleteExcs, oldObj.getDeleteException())) : false);
             } else if (oldObj != null && oldObj.containsDeleteExceptions()) {
-                deleteExceptionsReplacement = new DeleteExceptionsReplacement(oldObj.getDeleteException());
+                deleteExceptionsReplacement = new DeleteExceptionsReplacement(oldObj.getDeleteException(), session.getContextId(), session.getUserId());
                 deleteExceptionsReplacement.setChanged(false);
             } else {
-                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs);
+                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs, session.getContextId(), session.getUserId());
                 deleteExceptionsReplacement.setChanged(false);
             }
             renderMap.put(deleteExceptionsReplacement);
@@ -1005,14 +1005,14 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final ChangeExceptionsReplacement changeExceptionsReplacement;
             final Date[] changeExcs = newObj.getChangeException();
             if (newObj.containsChangeExceptions() || changeExcs != null) {
-                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
+                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs, session.getContextId(), session.getUserId());
                 changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(changeExcs, oldObj.getChangeException())) : false);
             } else if (oldObj != null && oldObj.containsChangeExceptions()) {
                 final Date[] oldChangeExcs = oldObj.getChangeException();
-                changeExceptionsReplacement = new ChangeExceptionsReplacement(oldChangeExcs);
+                changeExceptionsReplacement = new ChangeExceptionsReplacement(oldChangeExcs, session.getContextId(), session.getUserId());
                 changeExceptionsReplacement.setChanged(false);
             } else {
-                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
+                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs, session.getContextId(), session.getUserId());
                 changeExceptionsReplacement.setChanged(false);
             }
             renderMap.put(changeExceptionsReplacement);

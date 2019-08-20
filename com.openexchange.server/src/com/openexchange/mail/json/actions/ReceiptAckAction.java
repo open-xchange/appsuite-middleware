@@ -79,7 +79,6 @@ public final class ReceiptAckAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            //final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */

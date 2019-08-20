@@ -68,9 +68,11 @@ public final class DeleteExceptionsReplacement extends AbstractFormatMultipleDat
      * Initializes a new {@link DeleteExceptionsReplacement}
      *
      * @param dates The delete exception dates
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link DeleteExceptionsReplacement}
      */
-    public DeleteExceptionsReplacement(final Date[] dates) {
-        this(dates, null, null);
+    public DeleteExceptionsReplacement(final Date[] dates, int contextId, int userId) {
+        this(dates, null, null, contextId, userId);
     }
 
     /**
@@ -79,9 +81,11 @@ public final class DeleteExceptionsReplacement extends AbstractFormatMultipleDat
      * @param dates The delete exception dates
      * @param locale The locale
      * @param timeZone The time zone
+     * @param contextId The user's context id
+     * @param userId The id of the user to use the {@link DeleteExceptionsReplacement}
      */
-    public DeleteExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
-        super(dates, Notifications.FORMAT_DELETE_EXCEPTIONS, locale, timeZone);
+    public DeleteExceptionsReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone, int contextId, int userId) {
+        super(dates, Notifications.FORMAT_DELETE_EXCEPTIONS, locale, timeZone, contextId, userId);
         fallback = Notifications.NO_DELETE_EXCEPTIONS;
     }
 
