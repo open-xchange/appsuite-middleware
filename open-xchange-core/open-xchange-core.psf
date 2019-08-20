@@ -112,6 +112,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.guard.api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.configuration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.dns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.health"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.health.impl"/>

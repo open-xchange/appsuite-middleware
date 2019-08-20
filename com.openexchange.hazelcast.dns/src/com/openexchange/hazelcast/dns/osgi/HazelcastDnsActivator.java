@@ -48,66 +48,36 @@
  */
 
 
-package com.openexchange.hazelcast.configuration.osgi;
+package com.openexchange.hazelcast.dns.osgi;
 
-import org.eclipse.osgi.framework.console.CommandProvider;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
-import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
-import com.openexchange.hazelcast.configuration.reloadable.HazelcastDnsNetworkJoinReloadable;
-import com.openexchange.hazelcast.configuration.reloadable.HazelcastSSLReloadable;
-import com.openexchange.hazelcast.configuration.reloadable.HazelcastStaticNetworkJoinReloadable;
 import com.openexchange.hazelcast.dns.HazelcastDnsService;
-import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
+import com.openexchange.hazelcast.dns.internal.HazelcastDnsServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.StringParser;
 
 /**
- * {@link HazelcastConfigurationActivator}
+ * {@link HazelcastDnsActivator} - The activator for <code>"com.openexchange.hazelcast.dns"</code> bundle.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastConfigurationActivator extends HousekeepingActivator {
+public class HazelcastDnsActivator extends HousekeepingActivator {
 
-    private HazelcastConfigurationServiceImpl configService;
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastDnsActivator.class);
 
     /**
-     * Initializes a new {@link HazelcastConfigurationActivator}.
+     * Initializes a new {@link HazelcastActivator}.
      */
-    public HazelcastConfigurationActivator() {
+    public HazelcastDnsActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, StringParser.class, DynamicPortableFactory.class, TimerService.class, HazelcastDnsService.class};
+        return new Class[0];
     }
 
     @Override
-    protected synchronized void startBundle() throws Exception {
-        Services.set(this);
-        openTrackers();
-        HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
-        this.configService = configService;
-        registerService(HazelcastConfigurationService.class, configService);
-        registerService(Reloadable.class, new HazelcastStaticNetworkJoinReloadable(configService));
-        registerService(Reloadable.class, new HazelcastDnsNetworkJoinReloadable(configService));
-        registerService(Reloadable.class, new HazelcastSSLReloadable(configService));
-        registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
-    }
-
-    @Override
-    public synchronized void stopBundle() throws Exception {
-        super.stopBundle();
-        HazelcastConfigurationServiceImpl configService = this.configService;
-        if (configService != null) {
-            this.configService = null;
-            configService.shutDown();
-        }
-        Services.set(null);
+    protected void startBundle() throws Exception {
+        registerService(HazelcastDnsService.class, new HazelcastDnsServiceImpl());
     }
 
 }

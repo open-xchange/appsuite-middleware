@@ -47,63 +47,73 @@
  *
  */
 
-package com.openexchange.hazelcast.configuration.internal;
+package com.openexchange.hazelcast.configuration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.hazelcast.config.Config;
-import com.hazelcast.instance.BuildInfoProvider;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadables;
+import com.openexchange.java.Strings;
 
 /**
- * {@link HazelcastSSLReloadable}
+ * {@link KnownNetworkJoin} - An enumeration of known network joins.
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class HazelcastSSLReloadable implements ForcedReloadable {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(HazelcastSSLReloadable.class);
-
-    private final HazelcastConfigurationServiceImpl hzConfiguration;
+public enum KnownNetworkJoin {
 
     /**
-     * Initializes a new {@link HazelcastSSLReloadable}.
-     *
+     * Empty. No discovery for single-node setups.
      */
-    public HazelcastSSLReloadable(HazelcastConfigurationServiceImpl hzConfiguration) {
-        super();
-        this.hzConfiguration = hzConfiguration;
+    EMPTY("empty"),
+    /**
+     * Fixed set of cluster member nodes given by configuration.
+     */
+    STATIC("static"),
+    /**
+     * Automatic discovery of other nodes via multicast.
+     */
+    MULTICAST("multicast"),
+    /**
+     * AWS discovery mechanism.
+     */
+    AWS("aws"),
+    /**
+     * Consult a DNS server to resolve the domain names to the most recent set of IP addresses of all service nodes.
+     */
+    DNS("dns"),
+    ;
+
+    private final String identifier;
+
+    private KnownNetworkJoin(String identifier) {
+        this.identifier = identifier;
     }
 
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        if (false == BuildInfoProvider.getBuildInfo().isEnterprise()) {
-            return;
-        }
-        Config config = hzConfiguration.getConfigDirect();
-        if (null == config) {
-            // Hazelcast has not yet been initialized
-            return;
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    /**
+     * Gets the network join for given identifier.
+     *
+     * @param join The identifier to look-up
+     * @return The appropriate network join or <code>null</code>
+     */
+    public static KnownNetworkJoin networkJoinFor(String join) {
+        if (Strings.isEmpty(join)) {
+            return null;
         }
 
-        Object factory = config.getNetworkConfig().getSSLConfig().getFactoryImplementation();
-        if (null != factory && HazelcastSSLFactory.class.isAssignableFrom(factory.getClass())) {
-            HazelcastSSLFactory hazelcastSSLFactory = (HazelcastSSLFactory) factory;
-            try {
-                hazelcastSSLFactory.init(HazelcastSSLFactory.getPropertiesFromService(configService));
-            } catch (Exception e) {
-                LOGGER.error("Unable to reload {}.", HazelcastSSLFactory.class.getSimpleName(), e);
+        String lookUp = Strings.asciiLowerCase(join);
+        for (KnownNetworkJoin networkJoin : KnownNetworkJoin.values()) {
+            if (lookUp.equals(networkJoin.identifier)) {
+                return networkJoin;
             }
         }
+        return null;
     }
 
-    @Override
-    public Interests getInterests() {
-        // Force reloadable for key stores
-        return Reloadables.getInterestsForAll();
-    }
 }

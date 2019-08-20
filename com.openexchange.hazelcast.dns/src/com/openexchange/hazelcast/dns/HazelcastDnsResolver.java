@@ -47,72 +47,50 @@
  *
  */
 
-package com.openexchange.hazelcast.configuration.internal;
+package com.openexchange.hazelcast.dns;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Services}
+ * {@link HazelcastDnsResolver} - Resolves given domain names to a superset of host addresses.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class Services {
+public interface HazelcastDnsResolver {
 
     /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
+     * Gets the destination address associated with this DNS resolver.
+     * <p>
+     * Resolve requests will be sent to this address.
      *
-     * @return The service look-up or <code>null</code>
+     * @return The destination address associated with this resolver
      */
-    public static ServiceLookup get() {
-        return ref.get();
+    InetSocketAddress getAddress();
+
+    /**
+     * Resolves specified domain names to a (super-)set of host addresses.
+     *
+     * @param domainNames The domain names
+     * @return The (superset of) resolved host addresses or an empty list if DNS failed to resolve domain names
+     * @throws OXException If domain names cannot be resolved
+     */
+    default List<String> resolveByName(String... domainNames) throws OXException {
+        return domainNames == null || domainNames.length == 0 ? Collections.emptyList() : resolveByName(Arrays.asList(domainNames));
     }
 
     /**
-     * Optionally gets specified service.
+     * Resolves specified domain names to a (super-)set of host addresses.
      *
-     * @param c The service class
-     * @return The service or <code>null</code>
+     * @param domainNames The domain names
+     * @return The (superset of) resolved host addresses or an empty list if DNS failed to resolve domain names
+     * @throws OXException If domain names cannot be resolved
      */
-    public static <S extends Object> S optService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        return null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-    }
-
-    /**
-     * Requires specified service
-     *
-     * @param c The service class
-     * @return The service
-     * @throws OXException If no such service is available
-     */
-    public static <S extends Object> S requireService(Class<? extends S> c) throws OXException {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        if (null == service) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
-        }
-        return service;
-    }
-
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
+    List<String> resolveByName(Collection<String> domainNames) throws OXException;
 
 }

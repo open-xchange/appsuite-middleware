@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.hazelcast.configuration.internal;
+package com.openexchange.hazelcast.configuration.reloadable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -58,23 +58,25 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.hazelcast.configuration.KnownNetworkJoin;
+import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
 import com.openexchange.java.Strings;
 
 /**
- * {@link HazelcastReloadable}
+ * {@link HazelcastStaticNetworkJoinReloadable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class HazelcastReloadable implements Reloadable {
+public class HazelcastStaticNetworkJoinReloadable implements Reloadable {
 
     private final HazelcastConfigurationServiceImpl hzConfiguration;
     private final String propertyName;
 
     /**
-     * Initializes a new {@link HazelcastReloadable}.
+     * Initializes a new {@link HazelcastStaticNetworkJoinReloadable}.
      */
-    public HazelcastReloadable(HazelcastConfigurationServiceImpl hzConfiguration) {
+    public HazelcastStaticNetworkJoinReloadable(HazelcastConfigurationServiceImpl hzConfiguration) {
         super();
         this.hzConfiguration = hzConfiguration;
         propertyName = "com.openexchange.hazelcast.network.join.static.nodes";
@@ -88,6 +90,14 @@ public class HazelcastReloadable implements Reloadable {
             return;
         }
 
+        {
+            String sJoin = configService.getProperty("com.openexchange.hazelcast.network.join", KnownNetworkJoin.EMPTY.getIdentifier()).trim();
+            KnownNetworkJoin join = KnownNetworkJoin.networkJoinFor(sJoin);
+            if (join != KnownNetworkJoin.STATIC) {
+                // Static network join is not configured; leave...
+            }
+        }
+
         TcpIpConfig tcpIpConfig = config.getNetworkConfig().getJoin().getTcpIpConfig();
         if (false == tcpIpConfig.isEnabled()) {
             // Static network join is not enabled; leave...
@@ -98,7 +108,7 @@ public class HazelcastReloadable implements Reloadable {
         String[] members = Strings.splitByComma(configService.getProperty(propertyName));
 
         // Apply if there are any
-        Logger logger = org.slf4j.LoggerFactory.getLogger(HazelcastReloadable.class);
+        Logger logger = org.slf4j.LoggerFactory.getLogger(HazelcastStaticNetworkJoinReloadable.class);
         if (null == members || 0 >= members.length) {
             logger.warn("Empty value for property \"{}\". Hazelcast TCP/IP network configuration will not be changed.", propertyName);
             return;

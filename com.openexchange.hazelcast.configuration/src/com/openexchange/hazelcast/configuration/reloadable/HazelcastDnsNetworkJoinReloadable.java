@@ -47,67 +47,75 @@
  *
  */
 
+package com.openexchange.hazelcast.configuration.reloadable;
 
-package com.openexchange.hazelcast.configuration.osgi;
-
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.slf4j.Logger;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.TcpIpConfig;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
+import com.openexchange.config.Reloadables;
+import com.openexchange.hazelcast.configuration.KnownNetworkJoin;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
-import com.openexchange.hazelcast.configuration.reloadable.HazelcastDnsNetworkJoinReloadable;
-import com.openexchange.hazelcast.configuration.reloadable.HazelcastSSLReloadable;
-import com.openexchange.hazelcast.configuration.reloadable.HazelcastStaticNetworkJoinReloadable;
-import com.openexchange.hazelcast.dns.HazelcastDnsService;
-import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.StringParser;
 
 /**
- * {@link HazelcastConfigurationActivator}
+ * {@link HazelcastDnsNetworkJoinReloadable}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class HazelcastConfigurationActivator extends HousekeepingActivator {
+public class HazelcastDnsNetworkJoinReloadable implements Reloadable {
 
-    private HazelcastConfigurationServiceImpl configService;
+    private final HazelcastConfigurationServiceImpl hzConfiguration;
 
     /**
-     * Initializes a new {@link HazelcastConfigurationActivator}.
+     * Initializes a new {@link HazelcastDnsNetworkJoinReloadable}.
      */
-    public HazelcastConfigurationActivator() {
+    public HazelcastDnsNetworkJoinReloadable(HazelcastConfigurationServiceImpl hzConfiguration) {
         super();
+        this.hzConfiguration = hzConfiguration;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, StringParser.class, DynamicPortableFactory.class, TimerService.class, HazelcastDnsService.class};
-    }
-
-    @Override
-    protected synchronized void startBundle() throws Exception {
-        Services.set(this);
-        openTrackers();
-        HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
-        this.configService = configService;
-        registerService(HazelcastConfigurationService.class, configService);
-        registerService(Reloadable.class, new HazelcastStaticNetworkJoinReloadable(configService));
-        registerService(Reloadable.class, new HazelcastDnsNetworkJoinReloadable(configService));
-        registerService(Reloadable.class, new HazelcastSSLReloadable(configService));
-        registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
-    }
-
-    @Override
-    public synchronized void stopBundle() throws Exception {
-        super.stopBundle();
-        HazelcastConfigurationServiceImpl configService = this.configService;
-        if (configService != null) {
-            this.configService = null;
-            configService.shutDown();
+    public void reloadConfiguration(ConfigurationService configService) {
+        Config config = hzConfiguration.getConfigDirect();
+        if (null == config) {
+            // Hazelcast has not yet been initialized
+            return;
         }
-        Services.set(null);
+
+        {
+            String sJoin = configService.getProperty("com.openexchange.hazelcast.network.join", KnownNetworkJoin.EMPTY.getIdentifier()).trim();
+            KnownNetworkJoin join = KnownNetworkJoin.networkJoinFor(sJoin);
+            if (join != KnownNetworkJoin.DNS) {
+                // DNS network join is not configured; leave...
+            }
+        }
+
+        TcpIpConfig tcpIpConfig = config.getNetworkConfig().getJoin().getTcpIpConfig();
+        if (false == tcpIpConfig.isEnabled()) {
+            // Static network join is not enabled; leave...
+            return;
+        }
+
+        Logger logger = org.slf4j.LoggerFactory.getLogger(HazelcastDnsNetworkJoinReloadable.class);
+
+        try {
+            hzConfiguration.reinitializeDnsLookUp(config, configService);
+            logger.info("Applied changed DNS look-up configuration to Hazelcast.");
+        } catch (Exception e) {
+            logger.error("Failed to apply changed DNS look-up configuration to Hazelcast.", e);
+        }
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(
+            "com.openexchange.hazelcast.network.join.dns.domainNames",
+            "com.openexchange.hazelcast.network.join.dns.resolverHost",
+            "com.openexchange.hazelcast.network.join.dns.resolverPort",
+            "com.openexchange.hazelcast.network.join.dns.refreshMillis");
     }
 
 }
