@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Change description for calendar scheduling
 Bundle-SymbolicName: com.openexchange.chronos.scheduling.changes.impl
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
@@ -18,8 +18,6 @@ Import-Package: com.google.common.collect,
  com.openexchange.chronos.ical,
  com.openexchange.chronos.itip,
  com.openexchange.chronos.itip.generators,
- com.openexchange.chronos.schedjoules,
- com.openexchange.chronos.schedjoules.api,
  com.openexchange.chronos.scheduling,
  com.openexchange.chronos.scheduling.annotations,
  com.openexchange.chronos.scheduling.changes,

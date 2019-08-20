@@ -101,6 +101,8 @@ import com.openexchange.server.ServiceLookup;
 public class ExternalMimePartFactory extends AbstractMimePartFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalMimePartFactory.class);
+    
+    private static final String CHARSET = MailProperties.getInstance().getDefaultMimeCharset();
 
     private ICalService iCalService;
 
@@ -214,8 +216,10 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
         ContentType ct = new ContentType();
         ct.setPrimaryType(TEXT);
         ct.setSubType("calendar");
-        MimeBodyPart part = generateIcal(ct, addAttachments, true);
-        return part;
+        ct.setParameter("method", message.getMethod().name());
+        ct.setCharsetParameter(CHARSET);
+        
+        return generateIcal(ct, addAttachments, true);
     }
 
     private MimeBodyPart generateIcal(ContentType contentType, boolean addAttachments, boolean checkASCII) throws MessagingException, OXException {

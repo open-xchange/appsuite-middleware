@@ -145,7 +145,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             if (eventIds != null) {
                 DeleteEventBody body = new DeleteEventBody();
                 body.setEvents(new ArrayList<>(eventIds));
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
             }
             // Clean-up event manager
             eventManager.cleanUp();

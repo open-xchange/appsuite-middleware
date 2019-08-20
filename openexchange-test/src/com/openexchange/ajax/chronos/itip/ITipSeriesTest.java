@@ -153,7 +153,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         id.setId(createdEvent.getId());
         id.setRecurrenceId(recurrenceId);
         body.setEvents(Collections.singletonList(id));
-        ChronosMultipleCalendarResultResponse result = chronosApi.deleteEvent(apiClient.getSession(), now(), body, null, null, null, null, null, null);
+        ChronosMultipleCalendarResultResponse result = chronosApi.deleteEvent(apiClient.getSession(), now(), body, null, null, null, null, null, null, null);
 
         /*
          * Check result

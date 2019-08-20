@@ -152,70 +152,6 @@
         }
       }
     },
-    "/drive?action=moveFile" : {
-      "get" : {
-        "operationId" : "moveFile",
-        "tags" : [ "Drive" ],
-        "summary" : "Moves or renames a file",
-        "description" : "Explicitly performs a move or rename operation for a file. \nThis method is intended for the situation when no phsyical copy of the synchronized data is available on the client.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamPath"
-        }, {
-          "in" : "query",
-          "name" : "checksum",
-          "description" : "The checksum of the directory to update.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "newPath",
-          "description" : "The new target path to apply, relative to the root folder.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "name",
-          "description" : "The name of the file version to update.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "newName",
-          "description" : "The target name to apply.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty JSON object in case of a successful move. The client should perform the move operation locally afterwards, then enter a normal synchronization cycle to acknowledge any changes.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        },
-        "x-ox-examples" : [ {
-          "Example1" : null,
-          "description" : "Basic example",
-          "example" : "==> GET http://local.ox/ajax/drive?action=moveFile&root=163162&apiVersion=6&path=%2f&name=wurst.txt&checksum=f04e78d909d69a8463afd9e4dd159dcc&newName=wurst2.txt&session=213306bec07644ae9b6cc6a16d2be022\n\n<== HTTP 200 OK (43.6119 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\": {}\n    }\n"
-        } ]
-      }
-    },
     "/drive?action=upload&binary=true" : {
       "put" : {
         "operationId" : "uploadFile",
@@ -361,6 +297,70 @@
           "description" : "The binary content of the file version to upload.",
           "required" : true
         }
+      }
+    },
+    "/drive?action=moveFile" : {
+      "get" : {
+        "operationId" : "moveFile",
+        "tags" : [ "Drive" ],
+        "summary" : "Moves or renames a file",
+        "description" : "Explicitly performs a move or rename operation for a file. \nThis method is intended for the situation when no phsyical copy of the synchronized data is available on the client.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamPath"
+        }, {
+          "in" : "query",
+          "name" : "checksum",
+          "description" : "The checksum of the directory to update.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "newPath",
+          "description" : "The new target path to apply, relative to the root folder.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "name",
+          "description" : "The name of the file version to update.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "newName",
+          "description" : "The target name to apply.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty JSON object in case of a successful move. The client should perform the move operation locally afterwards, then enter a normal synchronization cycle to acknowledge any changes.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example1" : null,
+          "description" : "Basic example",
+          "example" : "==> GET http://local.ox/ajax/drive?action=moveFile&root=163162&apiVersion=6&path=%2f&name=wurst.txt&checksum=f04e78d909d69a8463afd9e4dd159dcc&newName=wurst2.txt&session=213306bec07644ae9b6cc6a16d2be022\n\n<== HTTP 200 OK (43.6119 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\": {}\n    }\n"
+        } ]
       }
     },
     "/drive?action=syncfolders" : {
@@ -1098,42 +1098,6 @@
         } ]
       }
     },
-    "/drive?action=subfolders" : {
-      "get" : {
-        "operationId" : "getSynchronizableFolders",
-        "tags" : [ "Drive" ],
-        "summary" : "Gets synchronizable folders.",
-        "description" : "Allows getting a list of folders that are available on the server for synchronization. This request should be used to\nbuild up a folder tree and let the user select the root synchronization folder(s).\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "parent",
-          "description" : "The ID of the parent folder to get the subfolders for as read from a previously fetched directory metadata object.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object holding metadata information for all subfolders. The `files` array of the directory metadata\nobjects will be left out. In case of errors the responsible fields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DriveSubfoldersResponse"
-                }
-              }
-            }
-          }
-        },
-        "x-ox-examples" : [ {
-          "Example1" : null,
-          "description" : "Basic example",
-          "example" : "==> GET http://192.168.32.191/ajax/drive?action=subfolders&session=35cb8c2d1423480692f0d5053d14ba52\n\n<== HTTP 200 OK (241.0252 ms elapsed, 966 bytes received)\n<   Content: \n    {\n      \"data\": [{\n        \"id\": \"com.openexchange.file.storage.googledrive://1/\",\n        \"name\": \"Google Drive\",\n        \"path\": \"/Google Drive\",\n        \"has_subfolders\": true,\n        \"own_rights\": 403710016,\n        \"permissions\": [{\n          \"bits\": 403710016,\n          \"group\": false,\n          \"entity\": 182,\n          \"display_name\": \"Mander, Jens\",\n          \"email_address\": \"jens.mander@example.com\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"]\n      },\n      {\n        \"id\": \"10\",\n        \"name\": \"Freigegebene Dateien\",\n        \"path\": \"/Freigegebene Dateien\",\n        \"created\": 1224493261628,\n        \"modified\": 1417164170136,\n        \"has_subfolders\": true,\n        \"own_rights\": 1,\n        \"permissions\": [{\n          \"bits\": 1,\n          \"group\": true,\n          \"entity\": 0,\n          \"display_name\": \"All users\",\n          \"guest\": false\n        },\n        {\n          \"bits\": 1,\n          \"group\": true,\n          \"entity\": 2147483647,\n          \"display_name\": \"Guests\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"],\n        \"shared\": true\n      },\n      {\n        \"id\": \"15\",\n        \"name\": \"Öffentliche Dateien\",\n        \"path\": \"/Öffentliche Dateien\",\n        \"created\": 1224493261628,\n        \"modified\": 1418383637250,\n        \"has_subfolders\": true,\n        \"own_rights\": 403709956,\n        \"permissions\": [{\n          \"bits\": 403709956,\n          \"group\": true,\n          \"entity\": 0,\n          \"display_name\": \"All users\",\n          \"guest\": false\n        },\n        {\n          \"bits\": 1,\n          \"group\": true,\n          \"entity\": 2147483647,\n          \"display_name\": \"Guests\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"],\n        \"shared\": true\n      },\n      {\n        \"id\": \"com.openexchange.file.storage.dropbox://1/\",\n        \"name\": \"Dropbox\",\n        \"path\": \"/Dropbox\",\n        \"has_subfolders\": true,\n        \"own_rights\": 403710016,\n        \"permissions\": [{\n          \"bits\": 403710016,\n          \"group\": false,\n          \"entity\": 182,\n          \"display_name\": \"Mander, Jens\",\n          \"email_address\": \"jens.mander@example.com\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"]\n      },\n      {\n        \"id\": \"9542\",\n        \"name\": \"Meine Dateien\",\n        \"path\": \"/Meine Dateien\",\n        \"created\": 1320230546147,\n        \"modified\": 1426764458823,\n        \"default_folder\": true,\n        \"has_subfolders\": true,\n        \"own_rights\": 403710016,\n        \"permissions\": [{\n          \"bits\": 403710016,\n          \"group\": false,\n          \"entity\": 182,\n          \"display_name\": \"Mander, Jens\",\n          \"email_address\": \"jens.mander@example.com\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"]\n      }]\n    }\n"
-        } ]
-      }
-    },
     "/drive?action=unsubscribe" : {
       "get" : {
         "operationId" : "unsubscribePushEvents_get_req",
@@ -1231,6 +1195,42 @@
           "description" : "A JSON object named root holding a JSON array of those root folder identifiers to unsubscribe from.",
           "required" : true
         }
+      }
+    },
+    "/drive?action=subfolders" : {
+      "get" : {
+        "operationId" : "getSynchronizableFolders",
+        "tags" : [ "Drive" ],
+        "summary" : "Gets synchronizable folders.",
+        "description" : "Allows getting a list of folders that are available on the server for synchronization. This request should be used to\nbuild up a folder tree and let the user select the root synchronization folder(s).\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "parent",
+          "description" : "The ID of the parent folder to get the subfolders for as read from a previously fetched directory metadata object.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object holding metadata information for all subfolders. The `files` array of the directory metadata\nobjects will be left out. In case of errors the responsible fields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DriveSubfoldersResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example1" : null,
+          "description" : "Basic example",
+          "example" : "==> GET http://192.168.32.191/ajax/drive?action=subfolders&session=35cb8c2d1423480692f0d5053d14ba52\n\n<== HTTP 200 OK (241.0252 ms elapsed, 966 bytes received)\n<   Content: \n    {\n      \"data\": [{\n        \"id\": \"com.openexchange.file.storage.googledrive://1/\",\n        \"name\": \"Google Drive\",\n        \"path\": \"/Google Drive\",\n        \"has_subfolders\": true,\n        \"own_rights\": 403710016,\n        \"permissions\": [{\n          \"bits\": 403710016,\n          \"group\": false,\n          \"entity\": 182,\n          \"display_name\": \"Mander, Jens\",\n          \"email_address\": \"jens.mander@example.com\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"]\n      },\n      {\n        \"id\": \"10\",\n        \"name\": \"Freigegebene Dateien\",\n        \"path\": \"/Freigegebene Dateien\",\n        \"created\": 1224493261628,\n        \"modified\": 1417164170136,\n        \"has_subfolders\": true,\n        \"own_rights\": 1,\n        \"permissions\": [{\n          \"bits\": 1,\n          \"group\": true,\n          \"entity\": 0,\n          \"display_name\": \"All users\",\n          \"guest\": false\n        },\n        {\n          \"bits\": 1,\n          \"group\": true,\n          \"entity\": 2147483647,\n          \"display_name\": \"Guests\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"],\n        \"shared\": true\n      },\n      {\n        \"id\": \"15\",\n        \"name\": \"Öffentliche Dateien\",\n        \"path\": \"/Öffentliche Dateien\",\n        \"created\": 1224493261628,\n        \"modified\": 1418383637250,\n        \"has_subfolders\": true,\n        \"own_rights\": 403709956,\n        \"permissions\": [{\n          \"bits\": 403709956,\n          \"group\": true,\n          \"entity\": 0,\n          \"display_name\": \"All users\",\n          \"guest\": false\n        },\n        {\n          \"bits\": 1,\n          \"group\": true,\n          \"entity\": 2147483647,\n          \"display_name\": \"Guests\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"],\n        \"shared\": true\n      },\n      {\n        \"id\": \"com.openexchange.file.storage.dropbox://1/\",\n        \"name\": \"Dropbox\",\n        \"path\": \"/Dropbox\",\n        \"has_subfolders\": true,\n        \"own_rights\": 403710016,\n        \"permissions\": [{\n          \"bits\": 403710016,\n          \"group\": false,\n          \"entity\": 182,\n          \"display_name\": \"Mander, Jens\",\n          \"email_address\": \"jens.mander@example.com\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"]\n      },\n      {\n        \"id\": \"9542\",\n        \"name\": \"Meine Dateien\",\n        \"path\": \"/Meine Dateien\",\n        \"created\": 1320230546147,\n        \"modified\": 1426764458823,\n        \"default_folder\": true,\n        \"has_subfolders\": true,\n        \"own_rights\": 403710016,\n        \"permissions\": [{\n          \"bits\": 403710016,\n          \"group\": false,\n          \"entity\": 182,\n          \"display_name\": \"Mander, Jens\",\n          \"email_address\": \"jens.mander@example.com\",\n          \"guest\": false\n        }],\n        \"jump\": [\"permissions\"]\n      }]\n    }\n"
+        } ]
       }
     },
     "/drive?action=listen" : {

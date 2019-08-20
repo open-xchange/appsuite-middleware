@@ -76,7 +76,7 @@ public class Bug15585Test extends AbstractChronosTest {
         EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug15585Test", folderId);
         eventManager.createEvent(event, true);
 
-        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.TRUE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         CalendarResult data = response.getData();

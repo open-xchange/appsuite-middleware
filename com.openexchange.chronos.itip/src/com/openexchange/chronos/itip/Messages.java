@@ -108,92 +108,92 @@ public class Messages implements LocalizableStrings {
      */
     public static final String STATUS_CHANGED_INTRO = "%1$s has %2$s the invitation:";
 
-    public static final String STATUS_CHANGED_INSTANCE_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s:";
+    public static final String STATUS_CHANGED_INSTANCE_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s:";
 
     /**
      * Example: "UserXY has accepted the invitation on behalf of UserAB"
      */
     public static final String ACCEPT_ON_BEHALF_INTRO = "%1$s has %2$s the invitation on behalf of %3$s:";
 
-    public static final String ACCEPT_INSTANCE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s on behalf of %4$s:";
+    public static final String ACCEPT_INSTANCE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s on behalf of %4$s:";
 
     /**
      * Example: "UserXY has accepted the invitation on your behalf"
      */
     public static final String ACCEPT_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
 
-    public static final String ACCEPT_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s on your behalf:";
+    public static final String ACCEPT_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s on your behalf:";
 
     /**
      * Example: "UserXY has declined the invitation on behalf of UserAB"
      */
     public static final String DECLINE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation on behalf of %3$s:";
 
-    public static final String DECLINE_INSTANCE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s on behalf of %4$s:";
+    public static final String DECLINE_INSTANCE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s on behalf of %4$s:";
 
     /**
      * Example: "UserXY has declined the invitation on your behalf"
      */
     public static final String DECLINE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
 
-    public static final String DECLINE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s on your behalf:";
+    public static final String DECLINE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s on your behalf:";
 
     /**
      * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
      */
     public static final String TENTATIVE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation on behalf of %3$s:";
 
-    public static final String TENTATIVE_INSTANCE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s on behalf of %4$s:";
+    public static final String TENTATIVE_INSTANCE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s on behalf of %4$s:";
 
     /**
      * Example: "UserXY has tentatively accepted the invitation on your behalf"
      */
     public static final String TENTATIVE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
 
-    public static final String TENTATIVE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s on your behalf:";
+    public static final String TENTATIVE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an appointment of the series %3$s on your behalf:";
 
 //    public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 
     // Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
     public static final String NONE_INTRO =  "%1$s sets the status to %2$s for this appointment:";
 
-    public static final String NONE_INSTANCE_INTRO = "%1$s sets the status to %2$s for an event of the series %3$s:";
+    public static final String NONE_INSTANCE_INTRO = "%1$s sets the status to %2$s for an appointment of the series %3$s:";
 
     public static final String NONE_ON_BEHALF_INTRO =  "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:";
 
-    public static final String NONE_INSTANCE_ON_BEHALF_INTRO = "On behalf of %4$s, %1$s sets the status for an event of the series %3$s to %2$s:";
+    public static final String NONE_INSTANCE_ON_BEHALF_INTRO = "On behalf of %4$s, %1$s sets the status for an appointment of the series %3$s to %2$s:";
 
     public static final String NONE_ON_YOUR_BEHALF_INTRO =  "On your behalf, %1$s sets your status for this appointment to %2$s:";
 
-    public static final String NONE_INSTANCE_ON_YOUR_BEHALF_INTRO = "On your behalf, %1$s sets your status for an event of the series %3$s to %2$s:";
+    public static final String NONE_INSTANCE_ON_YOUR_BEHALF_INTRO = "On your behalf, %1$s sets your status for an appointment of the series %3$s to %2$s:";
 
     public static final String NONE = "none";
 
     public static final String COUNTER_ORGANIZER_INTRO = "%1$s would like you to change the appointment:";
 
-    public static final String COUNTER_PARTICIPANT_INTRO = "%1$s has asked %2$s to change the event:";
+    public static final String COUNTER_PARTICIPANT_INTRO = "%1$s has asked %2$s to change the appointment:";
 
-    public static final String CREATE_INTRO = "You have been invited to an event by %1$s:";
+    public static final String CREATE_INTRO = "You have been invited to an appointment by %1$s:";
 
-    public static final String CREATE_ON_BEHALF_INTRO = "You have been invited to an event organized by %1$s on behalf of %2$s";
+    public static final String CREATE_ON_BEHALF_INTRO = "You have been invited to an appointment organized by %1$s on behalf of %2$s";
 
-    public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an event on your behalf.";
+    public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an appointment on your behalf.";
 
     public static final String CREATE_EXCEPTION_INTRO = "%1$s created a recurrence exception. Original date: %2$s:";
 
-    public static final String UPDATE_INTRO = "%1$s has changed an event:";
+    public static final String UPDATE_INTRO = "%1$s has changed an appointment:";
 
-    public static final String UPDATE_INSTANCE_INTRO = "%1$s has changed an event of the series %2$s:";
+    public static final String UPDATE_INSTANCE_INTRO = "%1$s has changed an appointment of the series %2$s:";
 
     public static final String COMMENT_INTRO = "%1$s";
 
-    public static final String UPDATE_ON_BEHALF_INTRO = "%1$s has changed an event on behalf of %2$s:";
+    public static final String UPDATE_ON_BEHALF_INTRO = "%1$s has changed an appointment on behalf of %2$s:";
 
-    public static final String UPDATE_INSTANCE_ON_BEHALF_INTRO = "%1$s has changed an event of the series %2$s on behalf of %3$s:";
+    public static final String UPDATE_INSTANCE_ON_BEHALF_INTRO = "%1$s has changed an appointment of the series %2$s on behalf of %3$s:";
 
-    public static final String UPDATE_ON_YOUR_BEHALF_INTRO = "%1$s has changed an event on your behalf:";
+    public static final String UPDATE_ON_YOUR_BEHALF_INTRO = "%1$s has changed an appointment on your behalf:";
 
-    public static final String UPDATE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has changed an event of the series %2$s on your behalf:";
+    public static final String UPDATE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has changed an appointment of the series %2$s on your behalf:";
 
     public static final String LABEL_WHEN = "When:";
 
@@ -217,11 +217,11 @@ public class Messages implements LocalizableStrings {
 
     public static final String DELETE_ON_YOUR_BEHALF_INTRO = "%1$s has deleted an appointment on your behalf:";
 
-    public static final String DELETE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has deleted an event of the series %2$s on your behalf:";
+    public static final String DELETE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has deleted an appointment of the series %2$s on your behalf:";
 
     public static final String DELETE_INTRO = "%1$s has deleted an appointment, or you have been removed as a participant:";
 
-    public static final String DELETE_INSTANCE_INTRO = "%1$s has deleted an event of the series %2$s, or you have been removed as a participant:";
+    public static final String DELETE_INSTANCE_INTRO = "%1$s has deleted an appointment of the series %2$s, or you have been removed as a participant:";
 
     public static final String ASK_CHANGE_TITLE = "Change the subject to %1$s.";
 
@@ -302,13 +302,13 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_RESCHEDULED_TIMEZONE_END_DATE = "The timezone of the appointment's end date was changed. Original timezone: %1$s. New timezone: %2$s";
 
-    public static final String ASK_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
+    public static final String ASK_RESCHEDULE = "Reschedule the appointment. Original date: %1$s. New date: %2$s";
 
     public static final String HAS_SPLIT = "The appointment series was updated, beginning at %1$s.";
 
     public static final String HAS_CHANGED_RRULE = "The appointment's recurrence rule has changed to: %1$s.";
 
-    public static final String INTENTION_RESCHEDULE = "Reschedule the event. Original date/time: %1$s. New date/time: %2$s";
+    public static final String INTENTION_RESCHEDULE = "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s";
 
     public static final String LABEL_RESOURCES = "Resources";
 

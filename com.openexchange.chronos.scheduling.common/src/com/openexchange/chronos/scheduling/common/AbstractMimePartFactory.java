@@ -53,7 +53,6 @@ import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import com.openexchange.chronos.scheduling.RecipientSettings;
-import com.openexchange.chronos.scheduling.changes.Change;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
@@ -83,7 +82,8 @@ public abstract class AbstractMimePartFactory implements MimePartFactory {
      * Initializes a new {@link AbstractMimePartFactory}.
      * 
      * @param serviceLookup The {@link ServiceLookup}
-     * @param description The {@link Change} to add to the mail
+     * @param scheduleChange The change to add to the mail
+     * @param recipientSettings The recipient settings
      * @throws OXException In case services are missing
      */
     public AbstractMimePartFactory(ServiceLookup serviceLookup, ScheduleChange scheduleChange, RecipientSettings recipientSettings) throws OXException {

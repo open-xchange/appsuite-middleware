@@ -50,10 +50,6 @@
 package com.openexchange.chronos.scheduling.common;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
@@ -62,10 +58,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.scheduling.changes.Change;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.user.UserService;
 
 /**
  * {@link Utils}
@@ -74,8 +67,6 @@ import com.openexchange.user.UserService;
  * @since v7.10.3
  */
 public class Utils {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
     private Utils() {}
 
@@ -128,64 +119,4 @@ public class Utils {
         }
         return CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL);
     }
-
-    /**
-     * Get the correct time zone for the recipient. If the recipient is not an internal user, the time zone of the
-     * originator is used
-     *
-     * @param userService The {@link UserService} to get the time zone information from
-     * @param contextId The context identifier
-     * @param originator The originator as {@link CalendarUser}
-     * @param recipient The recipient as {@link CalendarUser}
-     * @return The {@link TimeZone}
-     */
-    public static TimeZone getTimeZone(UserService userService, int contextId, CalendarUser originator, CalendarUser recipient) {
-        if (null == userService) {
-            return TimeZone.getDefault();
-        }
-
-        User user = null;
-        if (null != recipient && CalendarUtils.isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
-            user = getUser(userService, contextId, recipient.getEntity());
-        } else if (null != originator) {
-            user = getUser(userService, contextId, originator.getEntity());
-        }
-        return null == user ? TimeZone.getDefault() : TimeZone.getTimeZone(user.getTimeZone());
-    }
-
-    /**
-     * Get the correct locale for the recipient. If the recipient is not an internal user, the locale of the
-     * originator is used
-     *
-     * @param userService The {@link UserService} to get the locale information from
-     * @param contextId The context identifier
-     * @param originator The originator as {@link CalendarUser}
-     * @param recipient The recipient as {@link CalendarUser}
-     * @return The {@link Locale}
-     */
-    public static Locale getLocale(UserService userService, int contextId, CalendarUser originator, CalendarUser recipient) {
-        if (null == userService) {
-            return Locale.getDefault();
-        }
-
-        User user = null;
-        if (null != recipient && CalendarUtils.isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
-            user = getUser(userService, contextId, recipient.getEntity());
-        } else if (null != originator) {
-            user = getUser(userService, contextId, originator.getEntity());
-        }
-        return null == user ? Locale.getDefault() : user.getLocale();
-    }
-
-    private static User getUser(UserService userService, int contextId, int userId) {
-        if (userId > 0 && contextId > 0) {
-            try {
-                return userService.getUser(userId, contextId);
-            } catch (OXException e) {
-                LOGGER.debug("Unable to retrtive user information", e);
-            }
-        }
-        return null;
-    }
-
 }

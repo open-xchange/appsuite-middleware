@@ -30,7 +30,7 @@ public class Bug10733Test extends AbstractChronosTest {
         stringBuffer.append("012345678901234567890123456789012345678901234567890123456789"); // 60 chars
 
         EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), stringBuffer.toString(), folderId);
-        ChronosCalendarResultResponse response = chronosApi.createEvent(getSessionId(), folderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, null, null);
+        ChronosCalendarResultResponse response = chronosApi.createEvent(getSessionId(), folderId, event, Boolean.FALSE, null, Boolean.FALSE, null, null, null, null, null);
         assertNotNull(response.getError());
         assertEquals("Unexpected error message", "CAL-5070", response.getCode());
     }

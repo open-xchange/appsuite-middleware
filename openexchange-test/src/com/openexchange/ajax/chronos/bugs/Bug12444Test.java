@@ -88,7 +88,7 @@ public final class Bug12444Test extends AbstractChronosTest {
         externalWithoutEmail.setCn("External");
         externalWithoutEmail.setCuType(CuTypeEnum.INDIVIDUAL);
         attendees.add(externalWithoutEmail);
-        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.FALSE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         
         assertNotNull("Server responded not with expected exception.", response.getError());
         assertEquals("Wrong exception code.", CalendarExceptionCodes.INVALID_CALENDAR_USER.getPrefix()+"-"+CalendarExceptionCodes.INVALID_CALENDAR_USER.getNumber(), response.getCode());

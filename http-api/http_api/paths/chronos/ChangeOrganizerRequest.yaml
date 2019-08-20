@@ -41,6 +41,7 @@
           Only events which end before this date are returned.
         schema:
           type: string
+      - $ref: '#/components/parameters/QueryParamChronosScheduling'
     responses:
       '200':
         description: >

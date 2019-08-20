@@ -196,7 +196,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
             for (Entry<ApiClient, EventId> entry : eventsToDelete.entrySet()) {
                 DeleteEventBody body = new DeleteEventBody();
                 body.addEventsItem(entry.getValue());
-                new ChronosApi(entry.getKey()).deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
+                new ChronosApi(entry.getKey()).deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
             }
         } catch (Exception e) {
             // Ignore
@@ -312,7 +312,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     protected EventData createEvent(ApiClient apiClient, EventData event, String folderId) throws ApiException {
-        ChronosCalendarResultResponse response = new ChronosApi(apiClient).createEvent(apiClient.getSession(), folderId, event, Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse response = new ChronosApi(apiClient).createEvent(apiClient.getSession(), folderId, event, Boolean.FALSE, null, Boolean.TRUE, null, null, null, Boolean.FALSE, null);
         assertNotNull(response);
         assertNull(response.getError());
         return response.getData().getCreated().get(0);
@@ -328,7 +328,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         id.setId(data.getId());
         DeleteEventBody body = new DeleteEventBody();
         body.addEventsItem(id);
-        new ChronosApi(apiClient).deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
+        new ChronosApi(apiClient).deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null, null);
     }
 
     protected Long now() {

@@ -11,7 +11,7 @@
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceRange'
       - $ref: '#/components/parameters/QueryParamChronosCheckConflicts'
-      - $ref: '#/components/parameters/QueryParamScheduling'
+      - $ref: '#/components/parameters/QueryParamChronosScheduling'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
       - $ref: '#/components/parameters/QueryParamChronosPushToken'
       - $ref: '#/components/parameters/QueryParamChronosFields'
@@ -114,7 +114,7 @@
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
       - $ref: '#/components/parameters/QueryParamChronosCheckConflicts'
-      - $ref: '#/components/parameters/QueryParamScheduling'
+      - $ref: '#/components/parameters/QueryParamChronosScheduling'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
       - in: query
         name: usedGroups

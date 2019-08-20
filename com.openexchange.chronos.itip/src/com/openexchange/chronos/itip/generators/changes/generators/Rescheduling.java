@@ -140,15 +140,13 @@ public class Rescheduling implements ChangeDescriptionGenerator {
             case SAME_DAY:
                 if (updated.getStartDate().isAllDay()) {
                     return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
-                } else {
-                    return String.format("%s - %s", time.format(startDate), time.format(endDate));
                 }
+                    return String.format("%s - %s", time.format(startDate), time.format(endDate));
             case DIFFERENT_DAYS:
                 if (updated.getStartDate().isAllDay()) {
                     return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
-                } else {
-                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
                 }
+                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
         }
         return ""; // Won't happen
     }
@@ -183,15 +181,13 @@ public class Rescheduling implements ChangeDescriptionGenerator {
             case SAME_DAY:
                 if (original.getStartDate().isAllDay()) {
                     return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
-                } else {
-                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), time.format(endDate));
                 }
+                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), time.format(endDate));
             case DIFFERENT_DAYS:
                 if (original.getStartDate().isAllDay()) {
                     return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
-                } else {
-                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
                 }
+                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
         }
         return ""; // Won't happen
     }

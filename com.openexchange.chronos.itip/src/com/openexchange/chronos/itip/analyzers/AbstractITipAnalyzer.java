@@ -435,6 +435,12 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
      * @return The updated event, possibly with restored attachments
      */
     protected static Event restoreAttachments(Event original, Event update) {
+        if (null == original) {
+            /*
+             * New event, skip processing
+             */
+            return update;
+        }
         AbstractSimpleCollectionUpdate<Attachment> attachmentUpdates = new AbstractSimpleCollectionUpdate<Attachment>(original.getAttachments(), update.getAttachments()) {
 
             @Override

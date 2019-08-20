@@ -74,7 +74,7 @@ public class InternalMimePartFactory extends AbstractMimePartFactory {
      * 
      * @param serviceLookup The {@link ServiceLookup}
      * @param scheduleChange The change to add to the mail
-     * @param recipient The recipient
+     * @param recipientSettings The recipient settings
      * @throws OXException In case services are missing
      */
     public InternalMimePartFactory(ServiceLookup serviceLookup, ScheduleChange scheduleChange, RecipientSettings recipientSettings) throws OXException {

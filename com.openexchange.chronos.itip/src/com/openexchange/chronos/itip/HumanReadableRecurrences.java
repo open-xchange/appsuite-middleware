@@ -132,17 +132,14 @@ public class HumanReadableRecurrences {
         if (byDayPart != null) {
             if (byDayPart.size() > 1) {
                 return no();
-            } else {
-                return format(locale, HRRStrings.YEARLY_1, parseCount(locale), parseDays(locale), parseMonth(locale));
             }
-        } else {
-            List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
-            if (byMonthDay.size() > 1) {
-                return no();
-            } else {
-                return format(locale, HRRStrings.YEARLY_2, byMonthDay.get(0), parseMonth(locale));
-            }
+            return format(locale, HRRStrings.YEARLY_1, parseCount(locale), parseDays(locale), parseMonth(locale));
         }
+        List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
+        if (byMonthDay.size() > 1) {
+            return no();
+        }
+        return format(locale, HRRStrings.YEARLY_2, byMonthDay.get(0), parseMonth(locale));
     }
 
     private String monthly() {
@@ -150,17 +147,14 @@ public class HumanReadableRecurrences {
         if (byDayPart != null) {
             if (byDayPart.size() > 1) {
                 return no();
-            } else {
-                return format(locale, HRRStrings.MONTHLY_2, parseCount(locale), parseDays(locale), Autoboxing.I(rrule.getInterval()));
             }
-        } else {
-            List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
-            if (byMonthDay.size() > 1) {
-                return no();
-            } else {
-                return format(locale, HRRStrings.MONTHLY_1, byMonthDay.get(0), Autoboxing.I(rrule.getInterval()));
-            }
+            return format(locale, HRRStrings.MONTHLY_2, parseCount(locale), parseDays(locale), Autoboxing.I(rrule.getInterval()));
         }
+        List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
+        if (byMonthDay.size() > 1) {
+            return no();
+        }
+        return format(locale, HRRStrings.MONTHLY_1, byMonthDay.get(0), Autoboxing.I(rrule.getInterval()));
     }
 
     private String weekly() {

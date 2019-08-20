@@ -182,39 +182,64 @@ public class SchedulingHelper {
             if (false == shouldTrack(createdResource)) {
                 return;
             }
-            /*
-             * prepare notification to calendar owner of newly created resource when acting on behalf, if enabled
-             */
             if (isCalendarOwner(calendarUser) && false == isActing(calendarUser) && isNotifyOnCreate(calendarUser) && shouldTrack(calendarUser, consideredRecipients)) {
+                /*
+                 * prepare notification to calendar owner of newly created resource when acting on behalf, if enabled
+                 */
                 trackCreateNotification(createdResource, originator, calendarUser);
             }
-            /*
-             * prepare notifications and scheduling messages from organizer to attendees
-             */
             if (isOrganizerSchedulingResource(createdResource, calendarUser.getEntity())) {
-                for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(createdResource, consideredRecipients).entrySet()) {
-                    Attendee recipient = entry.getKey();
-                    if (isInternal(recipient)) {
-                        /*
-                         * prepare notifications for each individual internal attendee, if enabled
-                         */
-                        if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == isActing(recipient) && 
-                            false == isCalendarOwner(recipient) && isNotifyOnCreate(recipient) && shouldTrack(recipient, consideredRecipients)) { 
-                            trackCreateNotification(entry.getValue(), originator, recipient);
-                        }
-                    } else {
-                        /*
-                         * prepare scheduling messages for each external attendee
-                         */
-                        if (shouldTrack(recipient, consideredRecipients)) {
-                            trackCreateMessage(entry.getValue(), originator, recipient);
-                        }
-                    }
-                }
+                /*
+                 * prepare notifications and scheduling messages from organizer to attendees
+                 */
+                trackCreation(createdResource, originator, consideredRecipients);
+            } else if (hasExternalOrganizer(createdResource)) {
+                /*
+                 * no elevated attendee privileges possible for externally organized events
+                 */
+                throw new UnsupportedOperationException("cannot track creation messages for externally organized events");
+            } else {
+                /*
+                 * prepare notifications and scheduling messages from attendee acting on behalf of the organizer to (newly added) attendees
+                 */
+                CalendarUser organizer = session.getEntityResolver().applyEntityData(new Organizer(), createdResource.getOrganizer().getEntity());
+                organizer.setSentBy(originator);
+                trackCreation(createdResource, organizer, consideredRecipients);
             }
         } catch (OXException e) {
             session.addWarning(e);            
             LOG.warn("Unexpected error tracking 'create' scheduling messsages: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Tracks notifications and scheduling messages for a newly created calendar object resource in the underlying calendar folder, using 
+     * a specific originator for the generated messages. The acting user as well as the owner of the underlying calendar are skipped 
+     * implicitly.
+     *
+     * @param createdResource The newly created calendar object resource
+     * @param originator The originator of the messages 
+     * @param consideredRecipients The recipients to consider, or <code>null</code> to consider all possible recipients
+     */
+    private void trackCreation(CalendarObjectResource createdResource, CalendarUser originator, List<? extends CalendarUser> consideredRecipients) throws OXException {
+        for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(createdResource, consideredRecipients).entrySet()) {
+            Attendee recipient = entry.getKey();
+            if (isInternal(recipient)) {
+                /*
+                 * prepare notifications for each individual internal attendee, if enabled
+                 */
+                if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == isActing(recipient) && 
+                    false == isCalendarOwner(recipient) && isNotifyOnCreate(recipient) && shouldTrack(recipient, consideredRecipients)) { 
+                    trackCreateNotification(entry.getValue(), originator, recipient);
+                }
+            } else {
+                /*
+                 * prepare scheduling messages for each external attendee
+                 */
+                if (shouldTrack(recipient, consideredRecipients)) {
+                    trackCreateMessage(entry.getValue(), originator, recipient);
+                }
+            }
         }
     }
 
@@ -283,35 +308,17 @@ public class SchedulingHelper {
             if (false == shouldTrack(updatedResource, eventUpdates)) {
                 return;
             }
-            /*
-             * prepare notification to calendar owner of updated resource when acting on behalf, if enabled
-             */
             if (isCalendarOwner(calendarUser) && false == isActing(calendarUser) && isNotifyOnUpdate(calendarUser) && shouldTrack(calendarUser, consideredRecipients)) {
+                /*
+                 * prepare notification to calendar owner of updated resource when acting on behalf, if enabled
+                 */
                 trackUpdateNotification(updatedResource, seriesMaster, eventUpdates, originator, calendarUser);
             }
             if (isOrganizerSchedulingResource(updatedResource, calendarUser.getEntity())) {
                 /*
                  * prepare notifications and scheduling messages from organizer to attendees
                  */
-                for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(updatedResource, consideredRecipients).entrySet()) {
-                    Attendee recipient = entry.getKey();
-                    if (isInternal(recipient)) {
-                        /*
-                         * prepare notifications for each individual internal attendee, if enabled
-                         */
-                        if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == isActing(recipient) && 
-                            false == isCalendarOwner(recipient) && isNotifyOnUpdate(recipient) && shouldTrack(recipient, consideredRecipients)) {
-                            trackUpdateNotification(entry.getValue(), seriesMaster, eventUpdates, originator, recipient);
-                        }
-                    } else {
-                        /*
-                         * prepare scheduling messages for each external attendee
-                         */
-                        if (shouldTrack(recipient, consideredRecipients)) {
-                            trackUpdateMessage(entry.getValue(), seriesMaster, eventUpdates, originator, recipient);
-                        }
-                    }
-                }
+                trackUpdate(updatedResource, seriesMaster, eventUpdates, originator, consideredRecipients);
             } else if (hasExternalOrganizer(updatedResource)) {
                 /*
                  * prepare counter proposal to external organizer once this is allowed, for now this path should not be possible
@@ -321,28 +328,9 @@ public class SchedulingHelper {
                 /*
                  * prepare notifications and scheduling messages from attendee acting on behalf of the organizer to attendees
                  */
-                CalendarUser sentBy = originator;
-                originator = session.getEntityResolver().applyEntityData(new Organizer(), updatedResource.getOrganizer().getEntity());
-                originator.setSentBy(sentBy);
-                for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(updatedResource, consideredRecipients).entrySet()) {
-                    Attendee recipient = entry.getKey();
-                    if (isInternal(recipient)) {
-                        /*
-                         * prepare notifications for each individual internal attendee, if enabled
-                         */
-                        if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == isActing(recipient) && 
-                            false == isCalendarOwner(recipient) && isNotifyOnUpdate(recipient) && shouldTrack(recipient, consideredRecipients)) {
-                            trackUpdateNotification(entry.getValue(), seriesMaster, eventUpdates, originator, recipient);
-                        }
-                    } else {
-                        /*
-                         * prepare scheduling messages for each external attendee
-                         */
-                        if (shouldTrack(recipient, consideredRecipients)) {
-                            trackUpdateMessage(entry.getValue(), seriesMaster, eventUpdates, originator, recipient);
-                        }
-                    }
-                }
+                CalendarUser organizer = session.getEntityResolver().applyEntityData(new Organizer(), updatedResource.getOrganizer().getEntity());
+                organizer.setSentBy(originator);
+                trackUpdate(updatedResource, seriesMaster, eventUpdates, organizer, consideredRecipients);
             }
         } catch (OXException e) {
             session.addWarning(e);            
@@ -350,6 +338,39 @@ public class SchedulingHelper {
         }
     }
 
+    /**
+     * Tracks notifications and scheduling messages for an updated calendar object resource in the underlying calendar folder, using a 
+     * specific originator for the generated messages. The acting user as well as the owner of the underlying calendar are skipped 
+     * implicitly.
+     *
+     * @param updatedResource The updated calendar object resource
+     * @param seriesMaster The series master event in case an instance of an event series is updated, or <code>null</code> if not available
+     * @param eventUpdates The list of performed event updates
+     * @param originator The originator of the messages 
+     * @param consideredRecipients The recipients to consider, or <code>null</code> to consider all possible recipients
+     */
+    private void trackUpdate(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, CalendarUser originator, List<? extends CalendarUser> consideredRecipients) throws OXException {
+        for (Entry<Attendee, CalendarObjectResource> entry : getResourcesPerAttendee(updatedResource, consideredRecipients).entrySet()) {
+            Attendee recipient = entry.getKey();
+            if (isInternal(recipient)) {
+                /*
+                 * prepare notifications for each individual internal attendee, if enabled
+                 */
+                if (CalendarUserType.INDIVIDUAL.matches(recipient.getCuType()) && false == isActing(recipient) && 
+                    false == isCalendarOwner(recipient) && isNotifyOnUpdate(recipient) && shouldTrack(recipient, consideredRecipients)) {
+                    trackUpdateNotification(entry.getValue(), seriesMaster, eventUpdates, originator, recipient);
+                }
+            } else {
+                /*
+                 * prepare scheduling messages for each external attendee
+                 */
+                if (shouldTrack(recipient, consideredRecipients)) {
+                    trackUpdateMessage(entry.getValue(), seriesMaster, eventUpdates, originator, recipient);
+                }
+            }
+        }
+    }
+    
     /**
      * Tracks notifications and scheduling messages for a deleted calendar object resource in the underlying calendar folder, handling both
      * attendee- and organizer scheduling resources.

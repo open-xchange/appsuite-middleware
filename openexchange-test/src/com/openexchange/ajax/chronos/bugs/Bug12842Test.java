@@ -270,7 +270,7 @@ public class Bug12842Test extends AbstractChronosTest {
         cal2.set(Calendar.HOUR_OF_DAY, conflictEnd);
         conflictingEvent.setEndDate(DateTimeUtil.getDateTime(cal2));
         
-        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, conflictingEvent, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, conflictingEvent, Boolean.TRUE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         assertNull(response.getErrorDesc(), response.getError());
         if (shouldConflict) {
             assertFalse(response.getData().getConflicts().isEmpty());

@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.scheduling.impl.osgi;
 
-import java.util.Iterator;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
@@ -80,11 +78,6 @@ public class SchedulingActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOGGER.info("Starting calendar scheduling related services");
 
-        if (false == getServiceSafe(ConfigurationService.class).getBoolProperty("com.openexchange.chronos.itip.enableScheduling", false)) {
-            LOGGER.debug("Scheduling is prohibited by configuration. Therefore won't start scheduling related services.");
-            return;
-        }
-
         broker = new SchedulingBrokerImpl(context);
         /*
          * Register service tracker
@@ -99,12 +92,10 @@ public class SchedulingActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        for (Iterator<TransportProvider> iterator = broker.iterator(); iterator.hasNext();) {
-            iterator.remove();
-        }
+    protected void stopBundle() throws Exception {
+        broker.close();
         unregisterService(SchedulingBroker.class);
-        super.stop(context);
+        super.stopBundle();
     }
 
 }

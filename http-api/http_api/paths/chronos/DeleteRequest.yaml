@@ -39,6 +39,7 @@
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
       - $ref: '#/components/parameters/QueryParamChronosFields'
       - $ref: '#/components/parameters/QueryParamChronosPushToken'
+      - $ref: '#/components/parameters/QueryParamChronosScheduling'
     responses:
       '200':
         description: >

@@ -97,7 +97,10 @@ public class DefaultRecipientSettings implements RecipientSettings {
      * Initializes a new {@link DefaultRecipientSettings}.
      * 
      * @param services A service lookup reference
-     * @param contextId The context identifier
+     * @param session The calendar session
+     * @param originator The originator of the message
+     * @param recipient The recipient of the message
+     * @param resource The resource
      */
     public DefaultRecipientSettings(ServiceLookup services, CalendarSession session, CalendarUser originator, CalendarUser recipient, CalendarObjectResource resource) {
         super();
@@ -146,8 +149,8 @@ public class DefaultRecipientSettings implements RecipientSettings {
             return null;
         }
         /*
-         * generate link from template 
-         */           
+         * generate link from template
+         */
         ConfigurationService configurationService = services.getOptionalService(ConfigurationService.class);
         if (null == configurationService) {
             LOG.warn("", ServiceExceptionCode.absentService(ConfigurationService.class));
