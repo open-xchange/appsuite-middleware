@@ -142,7 +142,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * backendPath - This backends servlet path, which is appended to the default /oidc/ path.
      */
-    backendPath(OIDCProperty.PREFIX, ""),
+    backendPath(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
 
     /**
      * hosts - This contains a comma separated list of hosts, that this backend supports.
@@ -153,7 +153,7 @@ public enum OIDCBackendProperty implements Property {
      * failureRedirect - Defines where a user should be redirected if an error occurs that
      * does not need a special handling.
      */
-    failureRedirect(OIDCProperty.PREFIX, "");
+    failureRedirect(OIDCProperty.PREFIX, OIDCProperty.EMPTY);
 
     private final String fqn;
     private final Object defaultValue;
