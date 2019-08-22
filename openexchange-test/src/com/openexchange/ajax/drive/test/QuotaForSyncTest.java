@@ -101,7 +101,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaNotSent() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(infostoreFolder, infostoreFolder, body, "2", I(2), null, null, null);
+        DriveActionsResponse syncFolders = driveApi.syncFolders(body, "2", I(2), null, null, null);
 
         assertNull(syncFolders.getError());
         for (DriveAction action : syncFolders.getData()) {
@@ -113,7 +113,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaFalse() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(infostoreFolder, infostoreFolder, body, "2", I(2), null, Boolean.FALSE, null);
+        DriveActionsResponse syncFolders = driveApi.syncFolders(body, "2", I(2), null, Boolean.FALSE, null);
 
         assertNull(syncFolders.getError());
         for (DriveAction action : syncFolders.getData()) {
@@ -126,7 +126,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaRequested() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(infostoreFolder, infostoreFolder, body, "2", I(2), null, Boolean.TRUE, null);
+        DriveActionsResponse syncFolders = driveApi.syncFolders(body, "2", I(2), null, Boolean.TRUE, null);
         assertNull(syncFolders.getError());
         //        assertNotNull(syncFolders.getData().getQuota());
     }
@@ -135,7 +135,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaRequestedButWrongVersion_noQuotaReturned() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(infostoreFolder, infostoreFolder, body, null, null, null, Boolean.TRUE, null);
+        DriveActionsResponse syncFolders = driveApi.syncFolders(body, null, null, null, Boolean.TRUE, null);
         assertNull(syncFolders.getError());
         //        assertNull(syncFolders.getData().getQuota());
     }
