@@ -1775,8 +1775,8 @@
       "get" : {
         "operationId" : "autologin",
         "tags" : [ "Login" ],
-        "summary" : "Reuse old session saved in cookies by store request",
-        "description" : "If the session ID was stored in a cookie before via the store request, \nthe user can reuse his old session by using the autologin request.\n",
+        "summary" : "Reuse old session saved if session cookie were persisted by choosing to 'stay signed in' when logging in",
+        "description" : "If the session ID was stored in a cookie before by choosing to 'stay signed in' when logging in, \nthe user can reuse his old session by using the autologin request.\n",
         "parameters" : [ {
           "in" : "query",
           "name" : "authId",
@@ -12107,6 +12107,35 @@
         }
       }
     },
+    "/share/redeem/token" : {
+      "get" : {
+        "operationId" : "get",
+        "summary" : "Redeems a previously reserved token for extended parameters of the redirect location.",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "token",
+          "description" : "The token as received when accessing the share link.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamLanguage"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the extended parameters of the redirect location.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/folders?action=clear" : {
       "put" : {
         "operationId" : "clearFolders",
@@ -14389,8 +14418,8 @@
                     "description" : "Version of the HTTP/JSON interface client. Only for statistic evaluations.",
                     "type" : "string"
                   },
-                  "autologin" : {
-                    "description" : "'’True’ or ’false’. True tells the UI to issue a store request for the session cookie. This store\nrequest is necessary if you want the autologin request not to fail. This must be enabled on\nthe server and a client can test with the autologin request if it is enabled or not.'\n",
+                  "staySignedIn" : {
+                    "description" : "Cookies will be persisted if user choses to stay signed in.\n",
                     "type" : "boolean"
                   },
                   "uiWebPath" : {
@@ -14411,7 +14440,7 @@
                     "default" : false
                   }
                 },
-                "required" : [ "login", "password", "clientToken", "client", "version", "autologin" ]
+                "required" : [ "login", "password", "clientToken", "client", "version" ]
               }
             }
           }
@@ -15451,7 +15480,7 @@
       "get" : {
         "operationId" : "refreshAutoLoginCookie",
         "tags" : [ "Login" ],
-        "summary" : "Refreshes the auto-login cookie.",
+        "summary" : "Deprecated since 7.10.3. Refreshes the auto-login cookie.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         } ],
@@ -16342,6 +16371,10 @@
                   "clientUserAgent" : {
                     "description" : "Value of the User-Agent header of the client host for that the session is created. If this parameter is not specified the User-Agent of the current HTTP client doing this request is used.",
                     "type" : "string"
+                  },
+                  "staySignedIn" : {
+                    "description" : "Cookies will be persisted if user choses to stay signed in",
+                    "type" : "boolean"
                   }
                 },
                 "required" : [ "name", "password" ]

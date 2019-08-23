@@ -81,7 +81,7 @@
                   used.
                 type: string
               staySignedIn:
-                description: Cookies will be persisted if user chose to stay signed in
+                description: Cookies will be persisted if user choses to stay signed in
                 type: boolean
             required:
               - name

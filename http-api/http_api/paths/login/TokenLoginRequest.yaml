@@ -104,7 +104,7 @@
                 type: string
               staySignedIn:
                 description: >
-                  '’True’ or ’false’. Cookies will be persisted if user chose to stay signed in.
+                  Cookies will be persisted if user choses to stay signed in.
                 type: boolean
               uiWebPath:
                 description: >
