@@ -490,14 +490,36 @@ public final class Databases {
     public static boolean tableExists(Connection con, String table) throws SQLException {
         DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            if (false == rs.next()) {
+                return false;
+            }
+            String foundTable = rs.getString("TABLE_NAME");
+            if (table.equals(foundTable)) {
+                return true;
+            }
+            if (table.equalsIgnoreCase(foundTable)) {
+                /*
+                 * assume table exists based on 'lower_case_table_names' configuration
+                 */
+                try (PreparedStatement stmt = con.prepareStatement("SHOW variables LIKE 'lower_case_table_names';"); ResultSet result = stmt.executeQuery()) {
+                    if (result.next()) {
+                        switch (result.getInt("Value")) {
+                            case 1: // table names are stored in lowercase, name comparisons are case-insensitive ("windows")
+                            case 2: // table names are stored in specified lettercase, but lowercased on lookup, name comparisons are case-insensitive ("mac os")
+                                return true;
+                            case 0: // table names are stored in specified lettercase, name comparisons are case-sensitive ("unix")
+                            default:
+                                return false;
+                        }
+                    }
+                }
+            }
+            return false;
         } finally {
             closeSQLStuff(rs);
         }
-        return retval;
     }
 
     private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
