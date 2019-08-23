@@ -496,6 +496,8 @@ public final class Databases {
                 return false;
             }
             String foundTable = rs.getString("TABLE_NAME");
+            closeSQLStuff(rs);
+            rs = null;
             if (table.equals(foundTable)) {
                 return true;
             }
