@@ -74,7 +74,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
     }
 
     @Test
-    public void testCreatingOneItem() throws OXException, IOException, JSONException, OXException {
+    public void testCreatingOneItem() throws OXException, IOException, JSONException {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         ftm.insertFolderOnServer(folder);
 

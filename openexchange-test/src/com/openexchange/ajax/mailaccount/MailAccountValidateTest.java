@@ -82,7 +82,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
     }
 
     @Test
-    public void testValidate() throws OXException, IOException, JSONException, OXException {
+    public void testValidate() throws OXException, IOException, JSONException {
         final MailAccountDescription mailAccountDescription = createMailAccountObject();
         MailAccountValidateResponse response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertFalse("Invalid IP/hostname in mail account succesfully passed validation but shouldn't", response.isValidated());

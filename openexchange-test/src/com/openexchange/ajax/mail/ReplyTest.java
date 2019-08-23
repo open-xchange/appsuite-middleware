@@ -71,7 +71,7 @@ public class ReplyTest extends AbstractReplyTest {
     }
 
     @Test
-    public void testShouldReplyToSenderOnly() throws OXException, IOException, JSONException, OXException {
+    public void testShouldReplyToSenderOnly() throws OXException, IOException, JSONException {
         AJAXClient client2 = null;
         try {
             // note: doesn't work the other way around on the dev system, because only the first account is set up correctly.

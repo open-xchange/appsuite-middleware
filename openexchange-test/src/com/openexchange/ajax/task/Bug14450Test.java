@@ -115,7 +115,7 @@ public class Bug14450Test extends AbstractTaskTest {
     }
 
     @Test
-    public void testGetRequest() throws OXException, IOException, JSONException, OXException {
+    public void testGetRequest() throws OXException, IOException, JSONException {
         GetRequest request = new GetRequest(task.getParentFolderID(), task.getObjectID());
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);

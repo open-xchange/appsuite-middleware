@@ -107,7 +107,7 @@ public class Bug12212Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testMovingExceptionTwiceShouldNeitherCrashNorDuplicate() throws OXException, IOException, JSONException, OXException {
+    public void testMovingExceptionTwiceShouldNeitherCrashNorDuplicate() throws OXException, IOException, JSONException {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();

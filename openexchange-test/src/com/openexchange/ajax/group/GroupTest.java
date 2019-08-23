@@ -66,7 +66,7 @@ public class GroupTest {
         super();
     }
 
-    public static final Group[] searchGroup(AJAXClient client, final String pattern) throws OXException, IOException, JSONException, OXException {
+    public static final Group[] searchGroup(AJAXClient client, final String pattern) throws OXException, IOException, JSONException {
         final SearchRequest request = new SearchRequest(pattern);
         final SearchResponse response = client.execute(request);
         return response.getGroups();

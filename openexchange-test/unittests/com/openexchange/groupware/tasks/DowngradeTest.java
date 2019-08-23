@@ -160,7 +160,7 @@ public class DowngradeTest {
     }
 
     @Test
-    public void testRemovePrivateTasks() throws OXException, OXException {
+    public void testRemovePrivateTasks() throws OXException {
         final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(), ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
         final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
@@ -171,7 +171,7 @@ public class DowngradeTest {
     }
 
     @Test
-    public void testRemovePublicTask() throws OXException, OXException {
+    public void testRemovePublicTask() throws OXException {
         final FolderObject folder = createPublicFolder();
         final int folderId = folder.getObjectID();
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");

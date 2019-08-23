@@ -82,7 +82,7 @@ public class Bug11190Test extends AbstractAJAXSession {
      * results in a broken recurrence.
      */
     @Test
-    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws OXException, IOException, JSONException, OXException {
+    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws OXException, IOException, JSONException {
         AJAXClient ajaxClient = getClient();
         final TimeZone timezone = ajaxClient.getValues().getTimeZone();
         final int folderId = ajaxClient.getValues().getPrivateTaskFolder();

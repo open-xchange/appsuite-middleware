@@ -80,7 +80,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * Tests if bug 12614 appears again.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12614Test extends AbstractAJAXSession {
@@ -101,7 +101,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name test name.
      */
     public Bug12614Test() {
@@ -115,11 +115,11 @@ public final class Bug12614Test extends AbstractAJAXSession {
         boss = getClient();
         secretary = getClient2();
         thirdUser = new AJAXClient(testContext.acquireUser());
-        
+
         assertFalse("Could not acquire enough users", boss == null);
         assertFalse("Could not acquire enough users", secretary == null );
         assertFalse("Could not acquire enough users", thirdUser == null);
-        
+
         secTZ = secretary.getValues().getTimeZone();
         bossSharesPrivateFolder();
         secretaryCreatesSeries();
@@ -183,7 +183,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         series.setLastModified(response.getTimestamp());
     }
 
-    private void secretaryCreatesException() throws OXException, IOException, JSONException, OXException {
+    private void secretaryCreatesException() throws OXException, IOException, JSONException {
         final int recurrence_position = 2;
         final GetRequest request = new GetRequest(sharedFolder.getObjectID(), series.getObjectID(), recurrence_position);
         final GetResponse response = secretary.execute(request);

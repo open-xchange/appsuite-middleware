@@ -480,7 +480,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return retVal;
     }
 
-    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, OXException {
+    public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException {
         if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new ArrayList<OXWebdavResource>();
         }

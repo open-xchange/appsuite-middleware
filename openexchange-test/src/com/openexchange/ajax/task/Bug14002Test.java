@@ -114,7 +114,7 @@ public class Bug14002Test extends AbstractTaskTest {
     }
 
     @Test
-    public void testPercentageComplete() throws OXException, IOException, JSONException, OXException {
+    public void testPercentageComplete() throws OXException, IOException, JSONException {
         GetRequest request = new GetRequest(task.getParentFolderID(), task.getObjectID());
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);

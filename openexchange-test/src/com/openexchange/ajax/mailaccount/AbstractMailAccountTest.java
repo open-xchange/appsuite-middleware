@@ -95,7 +95,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
         return mailAccountDescription;
     }
 
-    protected void createMailAccount() throws OXException, IOException, JSONException, OXException {
+    protected void createMailAccount() throws OXException, IOException, JSONException {
         mailAccountDescription = createMailAccountObject();
 
         updateMailAccountDescription(mailAccountDescription, testUser2);

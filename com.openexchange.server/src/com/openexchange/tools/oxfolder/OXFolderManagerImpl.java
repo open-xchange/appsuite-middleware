@@ -1461,7 +1461,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         return false;
     }
 
-    private void processDeletedFolderThroughMove(final FolderObject folder, final CheckPermissionOnRemove checker, final long lastModified) throws OXException, SQLException, OXException {
+    private void processDeletedFolderThroughMove(final FolderObject folder, final CheckPermissionOnRemove checker, final long lastModified) throws OXException, SQLException {
         final int folderId = folder.getObjectID();
         final List<Integer> subflds = FolderObject.getSubfolderIds(folderId, ctx, writeCon);
         for (final Integer subfld : subflds) {
@@ -1474,7 +1474,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         OXFolderSQL.deleteAllSystemPermission(folderId, writeCon, ctx);
     }
 
-    private void processInsertedFolderThroughMove(final FolderObject folder, final CheckPermissionOnInsert checker, final long lastModified) throws OXException, SQLException, OXException {
+    private void processInsertedFolderThroughMove(final FolderObject folder, final CheckPermissionOnInsert checker, final long lastModified) throws OXException, SQLException {
         final int folderId = folder.getObjectID();
         checker.checkParentPermissions(folder.getParentFolderID(), folder.getNonSystemPermissionsAsArray(), lastModified);
         final List<Integer> subflds = FolderObject.getSubfolderIds(folderId, ctx, writeCon);

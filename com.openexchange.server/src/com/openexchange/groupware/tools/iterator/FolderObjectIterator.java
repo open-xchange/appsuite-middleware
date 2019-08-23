@@ -562,7 +562,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     @Override
-    public FolderObject next() throws OXException, com.openexchange.exception.OXException {
+    public FolderObject next() throws OXException {
         if (isClosed) {
             throw SearchIteratorExceptionCodes.CLOSED.create().setPrefix("FLD");
         }

@@ -133,7 +133,7 @@ public class Bug10071Test extends AbstractTaskTest {
     }
 
     @Test
-    public void testDurationAndCostsSetToZero() throws OXException, IOException, JSONException, OXException {
+    public void testDurationAndCostsSetToZero() throws OXException, IOException, JSONException {
         GetRequest request = new GetRequest(task);
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);

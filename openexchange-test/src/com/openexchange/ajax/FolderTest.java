@@ -96,7 +96,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testDeleteFolder() throws OXException, JSONException, IOException, OXException, OXException {
+    public void testDeleteFolder() throws OXException, JSONException, IOException, OXException {
         final int userId = getClient().getValues().getUserId();
 
         FolderObject parentObj = FolderTestManager.createNewFolderObject("DeleteMeImmediately" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
@@ -120,7 +120,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCheckFolderPermissions() throws OXException, IOException, JSONException, OXException {
+    public void testCheckFolderPermissions() throws OXException, IOException, JSONException {
         final int userId = getClient().getValues().getUserId();
         FolderObject newFolder = FolderTestManager.createNewFolderObject("CheckMyPermissions", Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
@@ -131,7 +131,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testInsertRenameFolder() throws OXException, IOException, JSONException, OXException, OXException {
+    public void testInsertRenameFolder() throws OXException, IOException, JSONException, OXException {
         int fuid = -1;
         try {
             final int userId = getClient().getValues().getUserId();

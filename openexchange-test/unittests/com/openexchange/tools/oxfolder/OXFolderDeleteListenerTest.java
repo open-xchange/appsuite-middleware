@@ -63,7 +63,7 @@ public class OXFolderDeleteListenerTest {
 
     // Bug 7503
     @Test
-    public void testPublicFolderTransferPermissionsToAdmin() throws OXException, OXException, OXException, SQLException, OXException {
+    public void testPublicFolderTransferPermissionsToAdmin() throws OXException, OXException, SQLException {
 
         FolderObject testFolder = createPublicInfostoreSubfolderWithAdmin(myInfostoreFolder, userWhichWillBeDeletedId);
         clean.add(testFolder);
@@ -87,7 +87,7 @@ public class OXFolderDeleteListenerTest {
         fail("Can't find permission for user " + user + " for folder " + fo.getFolderName() + " (" + fo.getObjectID() + ")");
     }
 
-    public void simulateUserDelete(final int deleteMe) throws OXException, OXException, SQLException, OXException {
+    public void simulateUserDelete(final int deleteMe) throws OXException, SQLException {
         final DeleteEvent delEvent = DeleteEvent.createDeleteEventForUserDeletion(this, deleteMe, ContextStorage.getInstance().getContext(session.getContextId()));
 
         Connection con = null;

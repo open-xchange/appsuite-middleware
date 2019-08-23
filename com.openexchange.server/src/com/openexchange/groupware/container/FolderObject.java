@@ -1015,11 +1015,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * Returns a list of subfolder IDs. If <code>enforce</code> is set and list has not been already loaded, their IDs are going to be
      * loaded from storage. Otherwise a exception is thrown that no subfolder IDs are present in this folder object.
      */
-    public final List<Integer> getSubfolderIds(final boolean enforce, final Context ctx) throws OXException, SQLException, OXException {
+    public final List<Integer> getSubfolderIds(final boolean enforce, final Context ctx) throws OXException, SQLException {
         return getSubfolderIds(enforce, null, ctx);
     }
 
-    public final List<Integer> getSubfolderIds(final boolean enforce, final Connection readCon, final Context ctx) throws OXException, SQLException, OXException {
+    public final List<Integer> getSubfolderIds(final boolean enforce, final Connection readCon, final Context ctx) throws OXException, SQLException {
         if (!b_subfolderIds) {
             /*
              * Subfolder list not set, yet
