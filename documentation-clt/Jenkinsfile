@@ -1,16 +1,14 @@
-
 @Library('pipeline-library') _
 
 def myLabel = "dockerbuild-${UUID.randomUUID().toString()}"
-def image 
+def image
 
 pipeline {
-
-    agent {
-	kubernetes {
-		label myLabel
-		defaultContainer 'jnlp'
-		yaml """
+  agent {
+    kubernetes {
+      label myLabel
+      defaultContainer 'jnlp'
+      yaml """
 apiVersion: v1
 kind: Pod
 spec:
@@ -21,32 +19,20 @@ spec:
     - cat
     tty: true
 """
-}
-}
-    stages {
-        stage('Run Pandoc Docker') {
-            steps { 
-                container('docker') {
-			
-			sh 'cd /home/jenkins/workspace/buildManpages/documentation-clt; ./createmanpages.sh'
- 			sh 'ls -l /home/jenkins/workspace/buildManpages/documentation-clt'
-			sh 'ls -l /home/jenkins/workspace/buildManpages/documentation-clt/output'	
-			
-		
-	
-        }	
+    }
+  }
+  stages {
+    stage('Run Pandoc Docker') {
+      steps {
+        container('docker') {
+          sh 'cd documentation-clt; ./createmanpages.sh'
+        }
       }
     }
-
     stage('Archive manpages.gz') {
-  	
-	steps {
- 
-	  archiveArtifacts artifacts: 'documentation-clt/output/*.gz'
-	
-	}          
-    }	
+      steps {
+        archiveArtifacts artifacts: 'documentation-clt/output/manpages/*.gz'
+      }
+    }
   }
 }
- 
-
