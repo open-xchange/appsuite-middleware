@@ -50,6 +50,7 @@
 package com.openexchange.mailaccount;
 
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
@@ -87,6 +88,36 @@ public enum KnownStatus implements Status {
 
     ;
 
+    /**
+     * Generates an "unknown" status saying "The account status could not be determined.", with an optional root cause.
+     *
+     * @param e The optional error providing further details
+     * @return The status
+     */
+    public static Status UNKNOWN(OXException e) {
+        return new DefaultStatus("unknown", KnownStatusMessage.MESSAGE_UNKNOWN, e);
+    }
+
+    /**
+     * Generates an "unsupported" status saying "The account is not supported.", with an optional root cause.
+     *
+     * @param e The optional error providing further details
+     * @return The status
+     */
+    public static Status UNSUPPORTED(OXException e) {
+        return new DefaultStatus("unsupported", KnownStatusMessage.MESSAGE_UNSUPPORTED, e);
+    }
+
+    /**
+     * Generates an "inaccessible" status saying "The account cannot be accessed.", with an optional root cause.
+     *
+     * @param e The optional error providing further details
+     * @return The status
+     */
+    public static Status INACCESSIBLE(OXException e) {
+        return new DefaultStatus("inaccessible", KnownStatusMessage.MESSAGE_INACCESSIBLE, e);
+    }
+
     private final String id;
     private final String message;
 
@@ -103,6 +134,11 @@ public enum KnownStatus implements Status {
     @Override
     public String getMessage(Locale locale) {
         return StringHelper.valueOf(null == locale ? Locale.US : locale).getString(message);
+    }
+
+    @Override
+    public OXException getError() {
+        return null;
     }
 
     /**
@@ -122,4 +158,5 @@ public enum KnownStatus implements Status {
         }
         return null;
     }
+
 }

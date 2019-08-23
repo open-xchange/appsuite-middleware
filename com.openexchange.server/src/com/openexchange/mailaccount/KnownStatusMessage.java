@@ -85,4 +85,13 @@ public class KnownStatusMessage implements LocalizableStrings {
     // The message advertising that the affected account is facing an SSL problem
     public static final String MESSAGE_SSL_ERROR = "There was an SSL problem.";
 
+    // The message advertising that the status of the account could not be determined.
+    public static final String MESSAGE_UNKNOWN = "The account status could not be determined.";
+
+    // The message advertising that the affected account is not supported.
+    public static final String MESSAGE_UNSUPPORTED = "The account is not supported.";
+
+    // The message advertising that the affected account cannot be accessed.
+    public static final String MESSAGE_INACCESSIBLE = "The account cannot be accessed.";
+
 }
