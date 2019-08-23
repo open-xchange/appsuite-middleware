@@ -774,12 +774,12 @@ public class ApiClient {
         final LoginApi loginApi = new LoginApi(this);
         LoginResponse loginResponse;
         try {
-            loginResponse = loginApi.doLogin(username, password, null, null, null, null, null, null, null);
+            loginResponse = loginApi.doLogin(username, password, null, null, null, null, null, null, null, null);
         } catch (final ApiException e) {
             if (e.getMessage().contains("CTX-0007")) {
                 // retry login caused by update tasks exception
                 try {
-                    loginResponse = loginApi.doLogin(username, password, null, null, null, null, null, null, null);
+                    loginResponse = loginApi.doLogin(username, password, null, null, null, null, null, null, null, null);
                 } catch (final ApiException e1) {
                     throw new ApiException(e);
                 }
