@@ -87,7 +87,7 @@ public final class GetResponse extends AbstractAJAXResponse {
      * @return the folder
      * @throws OXException parsing the folder out of the response fails.
      */
-    public FolderObject getFolder() throws OXException, OXException {
+    public FolderObject getFolder() throws OXException {
         if (hasError()) {
             return null;
         }

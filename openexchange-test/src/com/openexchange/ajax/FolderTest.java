@@ -120,7 +120,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCheckFolderPermissions() throws OXException, OXException, IOException, JSONException, OXException {
+    public void testCheckFolderPermissions() throws OXException, IOException, JSONException, OXException {
         final int userId = getClient().getValues().getUserId();
         FolderObject newFolder = FolderTestManager.createNewFolderObject("CheckMyPermissions", Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
@@ -131,7 +131,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testInsertRenameFolder() throws OXException, OXException, IOException, JSONException, OXException, OXException {
+    public void testInsertRenameFolder() throws OXException, IOException, JSONException, OXException, OXException {
         int fuid = -1;
         try {
             final int userId = getClient().getValues().getUserId();

@@ -78,7 +78,7 @@ public class ContactParser extends CommonParser {
         super(parseAll, timeZone);
     }
 
-    public void parse(final Contact contactobject, final JSONObject jsonobject) throws OXException, OXException {
+    public void parse(final Contact contactobject, final JSONObject jsonobject) throws OXException {
         try {
             parseElementContact(contactobject, jsonobject);
         } catch (final JSONException e) {

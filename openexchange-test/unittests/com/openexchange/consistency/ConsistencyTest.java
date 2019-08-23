@@ -283,7 +283,7 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testCreateDummyFilesForInfoitems() throws OXException, OXException {
+    public void testCreateDummyFilesForInfoitems() throws OXException {
 
         database.forgetChanges(ctx);
         consistency.repairFilesInContext(ctx.getContextId(), RepairPolicy.MISSING_FILE_FOR_INFOITEM, RepairAction.CREATE_DUMMY);
@@ -305,7 +305,7 @@ public class ConsistencyTest {
     }
 
     @Test
-    public void testCreateDummyFilesForAttachments() throws OXException, OXException {
+    public void testCreateDummyFilesForAttachments() throws OXException {
 
         attachments.forgetChanges(ctx);
         consistency.repairFilesInContext(ctx.getContextId(), RepairPolicy.MISSING_FILE_FOR_ATTACHMENT, RepairAction.CREATE_DUMMY);

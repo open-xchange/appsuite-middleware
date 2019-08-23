@@ -146,7 +146,7 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         LOG.info("UpdateTask 'MALPollCreateTableTask' successfully performed!");
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final Connection con) throws OXException, OXException {
+    private void createTable(final String tablename, final String sqlCreate, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             if (Tools.tableExists(con, tablename)) {

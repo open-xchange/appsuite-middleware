@@ -126,7 +126,7 @@ public class SearchEngineTest {
     // Bug 11569
 
     @Test
-    public void testSearchForPercent() throws OXException, OXException {
+    public void testSearchForPercent() throws OXException {
         final DocumentMetadata doc1 = createWithTitle("100%");
         createWithTitle("Hallo");
 

@@ -136,7 +136,7 @@ public final class ResourceDeleteTest {
     private static final String SQL_DELETE_DELETE = "DELETE FROM del_resource WHERE cid = ? AND id = ?";
 
     @Test
-    public void testResourceDelete() throws OXException, OXException, SQLException {
+    public void testResourceDelete() throws OXException, SQLException {
         int id = -1;
         try {
             final Resource resource = createDummyResource(admin, ctx);

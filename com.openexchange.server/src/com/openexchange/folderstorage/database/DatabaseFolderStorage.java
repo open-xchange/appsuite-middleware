@@ -674,7 +674,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
      * @throws OXException
      * @throws OXException
      */
-    private static int getFolderType(int module, final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
+    private static int getFolderType(int module, final int parentId, final Context ctx, final Connection con) throws OXException {
         int type = -1;
         int pid = parentId;
         /*

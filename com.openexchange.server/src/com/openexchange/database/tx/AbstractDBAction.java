@@ -111,7 +111,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
         return counter;
     }
 
-    protected int doUpdates(final List<UpdateBlock> updates) throws OXException, OXException {
+    protected int doUpdates(final List<UpdateBlock> updates) throws OXException {
         return doUpdates(updates.toArray(new UpdateBlock[updates.size()]));
     }
 

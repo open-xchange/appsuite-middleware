@@ -782,7 +782,7 @@ public final class Init {
         ParticipantConfig.getInstance().initialize(config);
     }
 
-    public static void startAndInjectDatabaseBundle() throws OXException, OXException {
+    public static void startAndInjectDatabaseBundle() throws OXException {
         if (null == services.get(DatabaseService.class)) {
             final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
             final TimerService timerService = (TimerService) services.get(TimerService.class);

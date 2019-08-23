@@ -93,7 +93,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
     private final int ctxId;
 
-    public CompositeUWAService(final DatabaseService dbService, final ConfigViewFactory configViews, final ConfigurationService config, final IDGeneratorService idGenerator, final int userId, final int ctxId) throws OXException, OXException {
+    public CompositeUWAService(final DatabaseService dbService, final ConfigViewFactory configViews, final ConfigurationService config, final IDGeneratorService idGenerator, final int userId, final int ctxId) throws OXException {
         userScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);
         contextScope = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         positions = new PositionSQLStorage(UWAWidget.METADATA, dbService, userId, ctxId);

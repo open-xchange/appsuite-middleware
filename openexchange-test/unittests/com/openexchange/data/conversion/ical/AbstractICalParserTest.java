@@ -129,7 +129,7 @@ public abstract class AbstractICalParserTest {
             };
 
             @Override
-            public List<Resource> find(final List<String> names, final Context ctx) throws OXException, OXException {
+            public List<Resource> find(final List<String> names, final Context ctx) throws OXException {
                 final List<Resource> retval = new ArrayList<Resource>();
                 for (final String name : names) {
                     for (final Resource resource : resources) {
@@ -142,7 +142,7 @@ public abstract class AbstractICalParserTest {
             }
 
             @Override
-            public Resource load(final int resourceId, final Context ctx) throws OXException, OXException {
+            public Resource load(final int resourceId, final Context ctx) throws OXException {
                 return null;
             }
         };

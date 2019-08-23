@@ -753,7 +753,7 @@ class UpdateData {
         }
     }
 
-    void updateReminder() throws OXException, OXException {
+    void updateReminder() throws OXException {
         if (isMove() && getUpdatedParticipants().isEmpty()) {
             Reminder.updateReminderOnMove(ctx, getUpdated().getObjectID(), getFolderId(), getDestFolderId(), getUpdated().getPrivateFlag());
         }
@@ -851,7 +851,7 @@ class UpdateData {
      * @throws OXException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserPermissionBits permissionBits, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserPermissionBits permissionBits, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException {
         // TODO create insert class
         TaskLogic.checkNewTask(task, userId, permissionBits, parts);
         InsertData.insertTask(ctx, task, parts, folders);

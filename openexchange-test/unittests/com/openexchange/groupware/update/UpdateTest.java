@@ -144,7 +144,7 @@ public abstract class UpdateTest {
         }
     }
 
-    protected final void assertNotInFilestorage(List<String> paths) throws OXException, OXException {
+    protected final void assertNotInFilestorage(List<String> paths) throws OXException {
 
         FileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         SortedSet<String> existingPaths = fs.getFileList();

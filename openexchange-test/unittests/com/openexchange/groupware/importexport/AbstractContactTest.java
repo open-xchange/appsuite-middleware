@@ -291,7 +291,7 @@ public class AbstractContactTest {
 
     protected final RdbContactStorage contactStorage;
 
-    public static int createTestFolder(final int type, final ServerSession sessObj, final Context ctx, final String folderTitle) throws OXException, OXException {
+    public static int createTestFolder(final int type, final ServerSession sessObj, final Context ctx, final String folderTitle) throws OXException {
         final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
         final FolderObject fo = new FolderObject();
         fo.setFolderName(folderTitle);
@@ -365,7 +365,7 @@ public class AbstractContactTest {
         return null != contactStorage.get(sessObj, String.valueOf(folderId), String.valueOf(entryNumber), new ContactField[] { ContactField.OBJECT_ID });
     }
 
-    protected Contact getEntry(final int entryNumber) throws OXException, OXException {
+    protected Contact getEntry(final int entryNumber) throws OXException {
         return contactStorage.get(sessObj, String.valueOf(folderId), String.valueOf(entryNumber), ContactField.values());
     }
 

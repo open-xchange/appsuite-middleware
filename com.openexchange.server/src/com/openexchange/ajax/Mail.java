@@ -3433,7 +3433,7 @@ public class Mail extends PermissionServlet {
      */
     protected static final MimeMessage POISON = new MimeMessage(MimeDefaultSession.getDefaultSession());
 
-    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MimeMessage m) throws OXException, OXException, JSONException {
+    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MimeMessage m) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */
@@ -4189,7 +4189,7 @@ public class Mail extends PermissionServlet {
         return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
     }
 
-    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException, OXException {
+    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
         /*
          * Resolve "From" to proper mail account to select right transport server
          */

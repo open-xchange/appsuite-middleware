@@ -298,7 +298,7 @@ public abstract class DataParser {
         return tmp;
     }
 
-    public static int checkInt(final JSONObject json, final String name) throws OXException, OXException {
+    public static int checkInt(final JSONObject json, final String name) throws OXException {
         final String tmp = checkString(json, name);
         if (tmp == null || tmp.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -310,7 +310,7 @@ public abstract class DataParser {
         }
     }
 
-    public static long checkLong(final JSONObject json, final String name) throws OXException, OXException {
+    public static long checkLong(final JSONObject json, final String name) throws OXException {
         final String tmp = checkString(json, name);
         if (tmp == null || tmp.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -343,7 +343,7 @@ public abstract class DataParser {
         }
     }
 
-    public static Date checkDate(final JSONObject jsonObj, final String name) throws OXException, OXException {
+    public static Date checkDate(final JSONObject jsonObj, final String name) throws OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -356,7 +356,7 @@ public abstract class DataParser {
         }
     }
 
-    public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws OXException, OXException {
+    public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
@@ -371,7 +371,7 @@ public abstract class DataParser {
         }
     }
 
-    public static UUID checkUUID(final JSONObject jsonObj, final String name) throws OXException, OXException {
+    public static UUID checkUUID(final JSONObject jsonObj, final String name) throws OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);

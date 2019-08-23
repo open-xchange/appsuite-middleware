@@ -319,7 +319,7 @@ public class AppointmentAJAXRequest {
         return Boolean.parseBoolean(value);
     }
 
-    public Date checkTime(final String name, final TimeZone timeZone) throws OXException, OXException {
+    public Date checkTime(final String name, final TimeZone timeZone) throws OXException {
         final String tmp = getParameter(name);
         if (tmp == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);

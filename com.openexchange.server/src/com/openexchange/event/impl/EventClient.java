@@ -223,7 +223,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final Task task) throws OXException, OXException {
+    public void delete(final Task task) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = task.getParentFolderID();
@@ -261,7 +261,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void create(final Contact contact) throws OXException, OXException {
+    public void create(final Contact contact) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = contact.getParentFolderID();
@@ -299,7 +299,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void delete(final Contact contact) throws OXException, OXException {
+    public void delete(final Contact contact) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = contact.getParentFolderID();
@@ -343,7 +343,7 @@ public class EventClient {
      *
      * @param folder The created folder
      */
-    public void create(final FolderObject folder) throws OXException, OXException {
+    public void create(final FolderObject folder) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = folder.getParentFolderID();

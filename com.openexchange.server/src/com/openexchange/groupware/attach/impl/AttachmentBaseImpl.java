@@ -584,7 +584,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
-    private void removeFiles(Context context) throws OXException, OXException {
+    private void removeFiles(Context context) throws OXException {
         final FileStorage fs = getFileStorage(context);
         for (final String fileId : this.getAttachmentFileStoreLocationsperContext(context)) {
             fs.deleteFile(fileId);
@@ -667,7 +667,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-    private String saveFile(final InputStream data, final AttachmentMetadata attachment, Context ctx) throws OXException, OXException {
+    private String saveFile(final InputStream data, final AttachmentMetadata attachment, Context ctx) throws OXException {
         SaveFileAction action = new SaveFileAction(getFileStorage(ctx), data, attachment.getFilesize(), false);
         action.perform();
         addUndoable(action);
@@ -1084,7 +1084,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         super.startTransaction();
     }
 
-    protected QuotaFileStorage getFileStorage(Context ctx) throws OXException, OXException {
+    protected QuotaFileStorage getFileStorage(Context ctx) throws OXException {
         try {
             QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
             if (null == storageService) {

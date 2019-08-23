@@ -1224,7 +1224,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         return false;
     }
 
-    private static ServerSession getServerSession(final StorageParameters storageParameters) throws OXException, OXException {
+    private static ServerSession getServerSession(final StorageParameters storageParameters) throws OXException {
         final Session s = storageParameters.getSession();
         if (null == s) {
             throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);

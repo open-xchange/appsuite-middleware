@@ -102,7 +102,7 @@ public class Search {
         this.columns = columns;
     }
 
-    public SearchIterator<Task> perform() throws OXException, OXException {
+    public SearchIterator<Task> perform() throws OXException {
         checkConditions();
         prepareFolder();
         if (all.size() + own.size() + shared.size() == 0) {
@@ -124,7 +124,7 @@ public class Search {
         }
     }
 
-    protected void prepareFolder() throws OXException, OXException {
+    protected void prepareFolder() throws OXException {
         SearchIterator<FolderObject> folders;
         if (search.hasFolders()) {
             folders = loadFolder(ctx, search.getFolders());

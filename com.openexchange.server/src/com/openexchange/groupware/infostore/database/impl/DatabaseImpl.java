@@ -1812,7 +1812,7 @@ public class DatabaseImpl extends DBService {
         }
 
         @Override
-        public DocumentMetadata next() throws OXException, OXException {
+        public DocumentMetadata next() throws OXException {
             try {
                 DocumentMetadata retval = null;
                 retval = next;

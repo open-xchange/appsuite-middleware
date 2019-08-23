@@ -86,7 +86,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest {
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
     }
 
-    protected void checkFirstResult(final int objectID) throws OXException, OXException, ParseException {
+    protected void checkFirstResult(final int objectID) throws OXException, ParseException {
         final Contact co = getEntry(objectID);
         assertEquals("Checking name", NAME1, co.getSurName());
         assertEquals("Checking e-Mail", EMAIL1, co.getEmail1());

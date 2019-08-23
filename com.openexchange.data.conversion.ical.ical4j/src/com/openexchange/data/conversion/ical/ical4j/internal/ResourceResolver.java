@@ -68,7 +68,7 @@ public interface ResourceResolver {
      * @throws OXException if loading the resource fails.
      * @throws OXException if the resource service is not available.
      */
-    Resource load(final int resourceId, final Context ctx) throws OXException, OXException;
+    Resource load(final int resourceId, final Context ctx) throws OXException;
 
     /**
      * Find the resources with the given names.
@@ -76,6 +76,6 @@ public interface ResourceResolver {
      * @param ctx Context.
      * @return list of found resources.
      */
-    List<Resource> find(final List<String> names, final Context ctx) throws OXException, OXException;
+    List<Resource> find(final List<String> names, final Context ctx) throws OXException;
 
 }

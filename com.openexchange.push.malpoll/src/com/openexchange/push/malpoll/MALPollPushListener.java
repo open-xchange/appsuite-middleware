@@ -267,7 +267,7 @@ public final class MALPollPushListener implements PushListener {
         }
     }
 
-    private void firstRun(final MailService mailService) throws OXException, OXException {
+    private void firstRun(final MailService mailService) throws OXException {
         /*
          * First run
          */
@@ -291,7 +291,7 @@ public final class MALPollPushListener implements PushListener {
         synchronizeIDs(mailService, hash, loadDBIDs);
     }
 
-    private void subsequentRun(final MailService mailService) throws OXException, OXException {
+    private void subsequentRun(final MailService mailService) throws OXException {
         /*
          * Subsequent run
          */
@@ -302,7 +302,7 @@ public final class MALPollPushListener implements PushListener {
         synchronizeIDs(mailService, hash, true);
     }
 
-    private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws OXException, OXException {
+    private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws OXException {
         final Set<String> newIds;
         final Set<String> delIds;
         {

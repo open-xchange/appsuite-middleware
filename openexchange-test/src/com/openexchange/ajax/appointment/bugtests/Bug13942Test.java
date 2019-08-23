@@ -146,14 +146,14 @@ public class Bug13942Test extends AbstractAJAXSession {
 
     }
 
-    private AJAXClient getClientB() throws OXException, OXException, IOException, JSONException {
+    private AJAXClient getClientB() throws OXException, IOException, JSONException {
         if (clientB == null) {
             clientB = new AJAXClient(testContext.acquireUser());
         }
         return clientB;
     }
 
-    private AJAXClient getClientC() throws OXException, OXException, IOException, JSONException {
+    private AJAXClient getClientC() throws OXException, IOException, JSONException {
         if (clientC == null) {
             clientC = new AJAXClient(testContext.acquireUser());
         }

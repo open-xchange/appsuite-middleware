@@ -302,7 +302,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return eventId;
     }
 
-    private QuotaFileStorage getFileStorage() throws OXException, OXException {
+    private QuotaFileStorage getFileStorage() throws OXException {
         QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
         if (null == storageService) {
             throw AttachmentExceptionCodes.FILESTORE_DOWN.create();

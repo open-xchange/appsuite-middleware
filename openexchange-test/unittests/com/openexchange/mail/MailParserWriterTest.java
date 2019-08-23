@@ -134,7 +134,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
         }
     }
 
-    private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection, final ServerSession session) throws OXException, OXException {
+    private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection, final ServerSession session) throws OXException {
         System.out.println(FolderWriter.writeMailFolder(MailAccount.DEFAULT_ID, f, mailConnection.getMailConfig(), session));
         final MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders(f.getFullname(), true);
         for (final MailFolder folder : flds) {

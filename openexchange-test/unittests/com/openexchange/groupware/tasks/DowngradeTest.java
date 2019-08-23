@@ -160,7 +160,7 @@ public class DowngradeTest {
     }
 
     @Test
-    public void testRemovePrivateTasks() throws OXException, OXException, OXException {
+    public void testRemovePrivateTasks() throws OXException, OXException {
         final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(), ctx);
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
         final TasksSQLInterface taskSQL = new TasksSQLImpl(session);
@@ -171,7 +171,7 @@ public class DowngradeTest {
     }
 
     @Test
-    public void testRemovePublicTask() throws OXException, OXException, OXException {
+    public void testRemovePublicTask() throws OXException, OXException {
         final FolderObject folder = createPublicFolder();
         final int folderId = folder.getObjectID();
         final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
@@ -192,7 +192,7 @@ public class DowngradeTest {
 
     /* ----------------- Test help methods --------------------- */
 
-    private void downgradeDelegate() throws OXException, OXException {
+    private void downgradeDelegate() throws OXException {
 
         final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
 
@@ -224,7 +224,7 @@ public class DowngradeTest {
         }
     }
 
-    private void downgradeNoTasks() throws OXException, OXException {
+    private void downgradeNoTasks() throws OXException {
         final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
 
             private static final long serialVersionUID = 400233948268970280L;
@@ -286,7 +286,7 @@ public class DowngradeTest {
 
     /* ---------------------- Special tests help methods ----------------- */
 
-    private FolderObject createPublicFolder() throws OXException, OXException {
+    private FolderObject createPublicFolder() throws OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
@@ -311,7 +311,7 @@ public class DowngradeTest {
         }
     }
 
-    private void updatePublicFolder(final FolderObject folder) throws OXException, OXException {
+    private void updatePublicFolder(final FolderObject folder) throws OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);
@@ -327,7 +327,7 @@ public class DowngradeTest {
         }
     }
 
-    private void deletePublicFolder(final FolderObject folder) throws OXException, OXException {
+    private void deletePublicFolder(final FolderObject folder) throws OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             final OXFolderManager oxma = OXFolderManager.getInstance(session, con, con);

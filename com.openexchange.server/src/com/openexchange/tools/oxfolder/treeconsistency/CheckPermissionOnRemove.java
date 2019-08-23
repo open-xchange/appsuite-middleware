@@ -148,7 +148,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
         }
     }
 
-    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> toRemove) throws OXException, OXException, SQLException {
+    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> toRemove) throws OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * Stop recursive check

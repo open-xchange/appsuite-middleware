@@ -71,7 +71,7 @@ public interface UserResolver {
         }
     };
 
-    List<User> findUsers(List<String> mails, Context ctx) throws OXException, OXException;
+    List<User> findUsers(List<String> mails, Context ctx) throws OXException;
 
-    User loadUser(int userId, Context ctx) throws OXException, OXException;
+    User loadUser(int userId, Context ctx) throws OXException;
 }

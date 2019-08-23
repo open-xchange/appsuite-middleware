@@ -985,7 +985,7 @@ public class OXFolderTools {
         return true;
     }
 
-    private static final boolean hasNonVisibleParent(final FolderObject fo, final int userId, final UserConfiguration userConf, final Context ctx) throws OXException, OXException, SQLException {
+    private static final boolean hasNonVisibleParent(final FolderObject fo, final int userId, final UserConfiguration userConf, final Context ctx) throws OXException, SQLException {
         if (fo.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
             return false;
         }

@@ -130,7 +130,7 @@ public final class ResourceUpdateTest {
     }
 
     @Test
-    public void testResourceUpdate() throws OXException, OXException {
+    public void testResourceUpdate() throws OXException {
         int id = -1;
         try {
             final Resource resource = createDummyResource(admin, ctx);
@@ -181,7 +181,7 @@ public final class ResourceUpdateTest {
     }
 
     @Test
-    public void testResourceUpdateIncomplete() throws OXException, OXException {
+    public void testResourceUpdateIncomplete() throws OXException {
         int id = -1;
         try {
             final Resource resource = createDummyResource(admin, ctx);

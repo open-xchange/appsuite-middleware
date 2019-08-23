@@ -121,13 +121,13 @@ public class DropBoxScenarioTest {
         }
     }
 
-    private void switchUser(final String username) throws OXException, OXException, OXException, SQLException {
+    private void switchUser(final String username) throws OXException, OXException, SQLException {
         factory.endRequest(200);
         factory.setSessionHolder(new DummySessionHolder(username, ctx));
         factory.beginRequest();
     }
 
-    private void createDropBox() throws OXException, OXException, OXException {
+    private void createDropBox() throws OXException, OXException {
         final Session session = factory.getSessionHolder().getSessionObject();
         final OXFolderManager mgr = OXFolderManager.getInstance(session);
         final OXFolderAccess acc = new OXFolderAccess(ContextStorage.getInstance().getContext(session.getContextId()));

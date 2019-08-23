@@ -330,7 +330,7 @@ public class PermissionTest implements SessionHolder {
         return perm;
     }
 
-    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission... permissions) throws OXException, OXException {
+    public FolderObject createFolder(final FolderObject parent, final String fname, OCLPermission... permissions) throws OXException {
         if (permissions.length == 0) {
             permissions = new OCLPermission[] { adminPermission(cleanupUser) };
         }
