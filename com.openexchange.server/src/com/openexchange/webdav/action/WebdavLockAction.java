@@ -125,10 +125,10 @@ public class WebdavLockAction extends AbstractAction {
 	        final XMLOutputter outputter = new XMLOutputter();
 			outputter.output(responseDoc, res.getOutputStream());
 
-		} catch (final JDOMException e) {
+		} catch (JDOMException e) {
 			LOG.error("JDOM Exception",e);
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			LOG.debug("Client gone?", e);
 		}
 	}

@@ -69,7 +69,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
                 }
             });
             doUpdates(getQueryCatalog().getInsert(), getAttachments(), false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -104,7 +104,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
         };
         try {
             doUpdates(updates);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

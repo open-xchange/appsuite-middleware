@@ -124,7 +124,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                     }
                     calculateMinMaxAdds(resultMap, queryMap);
 
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     Databases.closeSQLStuff(sqlResult, stmt);
@@ -204,7 +204,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                         queryMap.put(TOTAL, sqlResult.getInt(1));
                     }
                     calculateMinMaxAdds(resultMap, queryMap);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     Databases.closeSQLStuff(sqlResult, stmt);

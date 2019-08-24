@@ -84,7 +84,7 @@ public class TestServlet extends HttpServlet {
            System.out.println("Going asleep...");
            Thread.sleep(100000);
            System.out.println("... and now continues processing.");
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
            e.printStackTrace();
         }
          *
@@ -114,7 +114,7 @@ public class TestServlet extends HttpServlet {
             resp.getOutputStream().write(firstChunk);
             try {
                 Thread.sleep(40000);// 40 sec
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Restore interrupted status
                 Thread.currentThread().interrupt();
             }

@@ -152,7 +152,7 @@ public final class ParallelsHostnameService implements HostnameService {
                     LOG.debug("getHostname: no guest host configured, falling back to HOST {} for branded context {}", guestHostname, I(contextId));
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
 

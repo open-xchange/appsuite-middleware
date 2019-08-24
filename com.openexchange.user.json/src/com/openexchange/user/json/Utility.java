@@ -112,10 +112,10 @@ public final class Utility {
         }
         try {
             return f.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utility.class);
             LOG.error("", e);
         }

@@ -234,9 +234,9 @@ public class ProvisioningSetup {
         Properties props = new Properties();
         try (FileInputStream fis = new FileInputStream(propFile)){
             props.load(fis);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsolutePath(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(propFile.getAbsolutePath(), e);
         }
         return props;

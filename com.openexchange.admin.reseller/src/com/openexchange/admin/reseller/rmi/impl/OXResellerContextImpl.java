@@ -111,11 +111,11 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
             final Restriction[] restrictions = firstExtensionByName.getRestriction();
             try {
                 checkRestrictionsPerContext(OXResellerTools.array2HashSet(restrictions), this.oxresell);
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 throw new PluginException(e);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 throw new PluginException(e);
-            } catch (final OXResellerException e) {
+            } catch (OXResellerException e) {
                 throw new PluginException(e.getMessage());
             }
         }
@@ -216,7 +216,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
                 );
             oxresell.writeCustomId(ctx);
             oxresell.ownContextToAdmin(ctx, auth);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             try {
                 // own context to subadmin; if we don't do that, the deletion
                 // in the cleanup of postCreate will deny to delete
@@ -236,11 +236,11 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
             final Restriction[] restrictions = firstExtensionByName.getRestriction();
             try {
                 checkRestrictionsPerContext(OXResellerTools.array2HashSet(restrictions), this.oxresell);
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 throw new PluginException(e);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 throw new PluginException(e);
-            } catch (final OXResellerException e) {
+            } catch (OXResellerException e) {
                 throw new PluginException(e.getMessage());
             }
         }
@@ -282,7 +282,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
                 undoInfo.put("reseller.subadmin", Integer.valueOf(sid));
             }
             return undoInfo;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new PluginException(e);
         }
     }
@@ -318,7 +318,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
             final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
             final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(auth.getLogin())})[0];
             oxctx.disableAll(reason, "context2subadmin", "WHERE context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId());
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new PluginException(e);
         }
     }
@@ -348,7 +348,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
             final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
             final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(auth.getLogin())})[0];
             oxctx.enableAll("context2subadmin", "WHERE context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId());
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new PluginException(e);
         }
     }
@@ -371,7 +371,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
                     final OXContextExtensionImpl ctxext = new OXContextExtensionImpl(oxresell.getContextOwner(ctx), oxresell.getRestrictionsFromContext(ctx));
                     ctxext.setCustomid(oxresell.getCustomId(ctx));
                     retval.add(ctxext);
-                } catch (final StorageException e) {
+                } catch (StorageException e) {
                     throw new PluginException(e);
                 }
             } else {
@@ -384,7 +384,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
                     contextExtension.setCustomid(oxresell.getCustomId(ctx));
                     retval.add(contextExtension);
                     ctx.removeExtension(contextExtension);
-                } catch (final StorageException e) {
+                } catch (StorageException e) {
                     throw new PluginException(e);
                 }
             }
@@ -432,7 +432,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
             final Restriction[] restrictions = firstExtensionByName.getRestriction();
             try {
                 this.oxresell.applyRestrictionsToContext(restrictions, ctx);
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 throw new PluginException(e);
             }
         }
@@ -450,7 +450,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
             if (!oxresell.checkOwnsContextAndSetSid(ctx, auth)) {
                 throw new PluginException("ContextID " + ctx.getId() + " does not belong to " + auth.getLogin());
             }
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new PluginException(e);
         }
     }

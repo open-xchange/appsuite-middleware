@@ -149,7 +149,7 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
             }
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
         }
     }
@@ -185,23 +185,23 @@ public abstract class CreateCore extends UserFilestoreAbstraction {
                             }
                         }
                         System.out.println("User " + create.getId() + " successfully created in context " + context.getId());
-                    } catch (final RemoteException e) {
+                    } catch (RemoteException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final StorageException e) {
+                    } catch (StorageException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final InvalidCredentialsException e) {
+                    } catch (InvalidCredentialsException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final NoSuchContextException e) {
+                    } catch (NoSuchContextException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final InvalidDataException e) {
+                    } catch (InvalidDataException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
-                    } catch (final DatabaseUpdateException e) {
+                    } catch (DatabaseUpdateException e) {
                         System.err.println("Failed to create user \"" + adminuser.getName() + "\" in context " + context.getId() + ": " + e);
                     }
-                } catch (final ParseException e1) {
+                } catch (ParseException e1) {
                     System.err.println("Failed to create user in context " + context.getId() + ": " + e1);
                 }
-            } catch (final ParseException e1) {
+            } catch (ParseException e1) {
                 System.err.println("Failed to create user in context in line" + linenumber + ": " + e1);
             }
             linenumber++;

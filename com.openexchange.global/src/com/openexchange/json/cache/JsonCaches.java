@@ -127,7 +127,7 @@ public final class JsonCaches {
                 }
             }
             return asHex(md.digest());
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             return "";
         }
     }
@@ -223,7 +223,7 @@ public final class JsonCaches {
                 }
             }
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             return false;
         }
     }

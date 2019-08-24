@@ -169,10 +169,10 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     public void close() {
         try {
             runner.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(TaskIterator2.class);
             logger.error("Failed to close search iterator", e.getCause());
         }
@@ -204,7 +204,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                     case CalendarObject.PARTICIPANTS:
                         try {
                             readParticipants(tasks);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             throw e;
                         }
                         break;
@@ -215,7 +215,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                             } else {
                                 Reminder.loadReminder(ctx, userId, tasks, con);
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             throw e;
                         }
                         break;
@@ -226,7 +226,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                     }
                 }
                 ready.addAll(tasks);
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
                 throw TaskExceptionCode.THREAD_ISSUE.create(e);
@@ -325,9 +325,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                     preread.offer(task);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             exc = TaskExceptionCode.NO_CONNECTION.create(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             exc = TaskExceptionCode.SQL_ERROR.create(e);
         } catch (final Throwable t) {
             ExceptionUtils.handleThrowable(t);

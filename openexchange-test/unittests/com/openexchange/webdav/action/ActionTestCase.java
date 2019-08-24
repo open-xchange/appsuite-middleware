@@ -83,7 +83,7 @@ public abstract class ActionTestCase {
             clean.add(coll.getUrl());
 
             CollectionTest.createStructure(coll, factory);
-        } catch (final Exception x) {
+        } catch (Exception x) {
             x.printStackTrace();
             tearDown();
             throw x;

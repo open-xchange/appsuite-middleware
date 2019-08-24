@@ -149,10 +149,10 @@ public class CodecUtils {
             String result = null;
             try {
                 result = decode(encoded, ENCODINGS[i], charset);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.debug("", e);
                 result = encoded;
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.debug("", e);
                 result = encoded;
             }

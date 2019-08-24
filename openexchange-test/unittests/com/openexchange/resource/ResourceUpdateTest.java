@@ -118,7 +118,7 @@ public final class ResourceUpdateTest {
             ctx = resolveContext(login);
             user = resolveUser(login, ctx);
             admin = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
@@ -230,7 +230,7 @@ public final class ResourceUpdateTest {
             ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
             fail("Update succeeded with invalid string identifier");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -249,7 +249,7 @@ public final class ResourceUpdateTest {
             ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
             fail("Update succeeded with invalid email address");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -268,7 +268,7 @@ public final class ResourceUpdateTest {
             ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
             fail("Update succeeded with missing mandatory field");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -287,7 +287,7 @@ public final class ResourceUpdateTest {
             ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource, resource.getLastModified());
 
             fail("Update succeeded with invalid string identifier");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -315,7 +315,7 @@ public final class ResourceUpdateTest {
         final Connection writeCon;
         try {
             writeCon = Database.get(cid, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return;
         }
@@ -326,13 +326,13 @@ public final class ResourceUpdateTest {
             stmt.setInt(2, id);
             stmt.executeUpdate();
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             if (null != stmt) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                 }
                 stmt = null;
             }

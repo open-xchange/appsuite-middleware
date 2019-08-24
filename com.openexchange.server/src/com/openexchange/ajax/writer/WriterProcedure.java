@@ -88,7 +88,7 @@ public class WriterProcedure<T extends SystemObject> implements TObjectProcedure
         try {
             writer.write(obj, tz, json, session);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             error = e;
             return false;
         }

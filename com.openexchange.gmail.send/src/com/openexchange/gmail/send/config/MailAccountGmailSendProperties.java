@@ -96,7 +96,7 @@ public final class MailAccountGmailSendProperties extends MailAccountTransportPr
         if (null != conTimeoutStr) {
             try {
                 return Integer.parseInt(conTimeoutStr);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Gmail Send Connection Timeout: Invalid value.", e);
                 return GmailSendProperties.getInstance().getConnectionTimeout();
             }
@@ -108,7 +108,7 @@ public final class MailAccountGmailSendProperties extends MailAccountTransportPr
 
                 try {
                     return Integer.parseInt(conTimeoutStr);
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("Gmail Send Connection Timeout: Invalid value.", e);
                     return GmailSendProperties.getInstance().getConnectionTimeout();
                 }
@@ -124,7 +124,7 @@ public final class MailAccountGmailSendProperties extends MailAccountTransportPr
         if (null != timeoutStr) {
             try {
                 return Integer.parseInt(timeoutStr.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Gmail Send Timeout: Invalid value.", e);
                 return GmailSendProperties.getInstance().getTimeout();
             }
@@ -135,7 +135,7 @@ public final class MailAccountGmailSendProperties extends MailAccountTransportPr
             if (null != timeoutStr) {
                 try {
                     return Integer.parseInt(timeoutStr.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("Gmail Send Timeout: Invalid value.", e);
                     return GmailSendProperties.getInstance().getTimeout();
                 }

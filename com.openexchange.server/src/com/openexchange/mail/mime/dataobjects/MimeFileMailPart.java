@@ -115,7 +115,7 @@ public abstract class MimeFileMailPart extends MailPart {
                 getContentType().setCharsetParameter(cs);
             }
             this.dataSource = fileDataSource;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
         }
@@ -157,7 +157,7 @@ public abstract class MimeFileMailPart extends MailPart {
                     getContentType().setCharsetParameter(cs);
                 }
                 dataSource = new FileDataSource(file, getContentType().toString());
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
@@ -185,7 +185,7 @@ public abstract class MimeFileMailPart extends MailPart {
                 try {
                     charset = detectCharset(new FileInputStream(file));
                     LOG.debug("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
-                } catch (final FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
             }
@@ -193,9 +193,9 @@ public abstract class MimeFileMailPart extends MailPart {
             try {
                 fis = new FileInputStream(file);
                 cachedContent = readStream(fis, charset);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -227,7 +227,7 @@ public abstract class MimeFileMailPart extends MailPart {
     public InputStream getInputStream() throws OXException {
         try {
             return new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

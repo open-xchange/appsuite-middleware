@@ -294,7 +294,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             };
             ServiceTracker<HTTPResponseProcessor, HTTPResponseProcessor> tracker = track(HTTPResponseProcessor.class, listener);
             tracker.open();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
         }
@@ -339,7 +339,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Stopping bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
         }

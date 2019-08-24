@@ -107,7 +107,7 @@ public class GetActionTest {
             final AJAXRequestResult result = action.perform(requestData, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should fail");
             assertNull(result);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             //SUCCESS
         }
 
@@ -122,7 +122,7 @@ public class GetActionTest {
             final AJAXRequestResult result = action.perform(requestData, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should fail");
             assertNull(result);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             //SUCCESS
             assertTrue(e.getMessage().contains("parameter"));
         }
@@ -147,7 +147,7 @@ public class GetActionTest {
             final AJAXRequestResult result = action.perform(requestData, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should fail");
             assertNull(result);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             //SUCCESS
         }
     }

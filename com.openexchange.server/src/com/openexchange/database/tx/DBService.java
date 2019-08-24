@@ -252,7 +252,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         for (final Undoable undo : undos) {
             try {
                 undo.undo();
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 LOG.error("", x);
                 failed.add(undo);
             }
@@ -313,7 +313,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             } else {
                 addUndoable(action);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (dbTransaction) {
                 try {
                     rollbackDBTransaction();
@@ -326,7 +326,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             if (dbTransaction) {
                 try {
                     finishDBTransaction();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     log(e);
                 }
             }

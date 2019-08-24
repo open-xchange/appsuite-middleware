@@ -141,7 +141,7 @@ public abstract class DataParser {
         }
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
         }
     }
@@ -168,7 +168,7 @@ public abstract class DataParser {
         }
         try {
             return new BigDecimal(tmp);
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -179,7 +179,7 @@ public abstract class DataParser {
         final String tmp;
         try {
             tmp = jsonObj.getString(name);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             return null;
         }
         if (com.openexchange.java.Strings.isEmpty(tmp) || jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
@@ -199,14 +199,14 @@ public abstract class DataParser {
         }
         try {
             return Long.valueOf(tmp);
-        } catch (final NumberFormatException e1) {
+        } catch (NumberFormatException e1) {
             // Check if it parses into a BigInteger.
             try {
                 new BigInteger(tmp);
                 final OXException e = OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e1, name);
                 e.addProblematic(parsing);
                 throw e;
-            } catch (final NumberFormatException e2) {
+            } catch (NumberFormatException e2) {
                 final OXException e = OXJSONExceptionCodes.NUMBER_PARSING.create(e1, tmp, name);
                 e.addProblematic(parsing);
                 throw e;
@@ -245,7 +245,7 @@ public abstract class DataParser {
                 final OXException exc = OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, name);
                 exc.addProblematic(parsing);
                 throw exc;
-            } catch (final NumberFormatException e2) {
+            } catch (NumberFormatException e2) {
                 final OXException exc = OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
                 exc.addProblematic(parsing);
                 throw e;
@@ -305,7 +305,7 @@ public abstract class DataParser {
         }
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
         }
     }
@@ -317,7 +317,7 @@ public abstract class DataParser {
         }
         try {
             return Long.parseLong(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
         }
     }
@@ -338,7 +338,7 @@ public abstract class DataParser {
 
         try {
             return Float.parseFloat(tmp);
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -351,7 +351,7 @@ public abstract class DataParser {
 
         try {
             return new Date(Long.parseLong(tmp));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -366,7 +366,7 @@ public abstract class DataParser {
             final int offset = timeZone.getOffset(d.getTime());
             d.setTime(d.getTime()-offset);
             return d;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -378,7 +378,7 @@ public abstract class DataParser {
         }
         try {
             return UUID.fromString(tmp);
-        } catch (final IllegalArgumentException exc) {
+        } catch (IllegalArgumentException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -416,7 +416,7 @@ public abstract class DataParser {
             }
 
             return i;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -452,7 +452,7 @@ public abstract class DataParser {
         }
         try {
             return UUID.fromString(tmp);
-        } catch (final IllegalArgumentException exc) {
+        } catch (IllegalArgumentException exc) {
             return null;
         }
     }
@@ -474,7 +474,7 @@ public abstract class DataParser {
             }
 
             return d;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }

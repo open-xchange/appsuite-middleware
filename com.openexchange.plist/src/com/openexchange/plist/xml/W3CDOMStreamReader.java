@@ -459,7 +459,7 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         }
         try {
             return StaxUtils.toString(document);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             return super.toString();
         } catch (final Throwable t) {
             t.printStackTrace();

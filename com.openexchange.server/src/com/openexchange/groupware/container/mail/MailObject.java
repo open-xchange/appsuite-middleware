@@ -114,7 +114,7 @@ public class MailObject {
         // Host name initialization
         try {
             staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             staticHostName = "localhost";
             warnSpam = e;
         }
@@ -330,7 +330,7 @@ public class MailObject {
                 multipart = new MimeMultipart("mixed");
             }
             multipart.addBodyPart(bodyPart);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -404,12 +404,12 @@ public class MailObject {
                 multipart = new MimeMultipart("mixed");
             }
             multipart.addBodyPart(bodyPart);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -585,7 +585,7 @@ public class MailObject {
                 if (null != organization && 0 < organization.length()) {
                     msg.setHeader(HEADER_ORGANIZATION, organization);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Header \"Organization\" could not be set", e);
             }
             /*
@@ -650,7 +650,7 @@ public class MailObject {
             } finally {
                 transport.close();
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

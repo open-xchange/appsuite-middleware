@@ -117,7 +117,7 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
                     MailAccountStorageService.class,
                     true);
                 mailAccount = storageService.getMailAccount(pop3AccountId, session.getUserId(), session.getContextId());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }

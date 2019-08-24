@@ -130,7 +130,7 @@ public class IfHeaderParser {
 			final IfHeaderEntity entity =  new IfHeaderEntity.LockToken(tag(cs));
 			entity.setMatches(matches);
 			return entity;
-		} catch (final IfHeaderParseException x) {
+		} catch (IfHeaderParseException x) {
 			throw new IfHeaderParseException("Unfinished LockToken", x.getColumn());
 		}
 

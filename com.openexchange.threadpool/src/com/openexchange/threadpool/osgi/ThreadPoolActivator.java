@@ -204,7 +204,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                             public Void call() throws Exception {
                                 try {
                                     doHandleEvent(event);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     LOG.warn("Handling event {} failed.", event.getTopic(), e);
                                 }
                                 return null;
@@ -251,7 +251,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              * Open service trackers
              */
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool", e);
             throw e;
         }
@@ -283,13 +283,13 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 try {
                     threadPool.shutdownNow();
                     threadPool.awaitTermination(10000L);
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {
                     this.threadPool = null;
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Failed shut-down of bundle com.openexchange.threadpool", e);
             throw e;
         }

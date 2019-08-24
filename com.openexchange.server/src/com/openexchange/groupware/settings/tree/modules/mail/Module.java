@@ -110,7 +110,7 @@ public class Module implements PreferencesItemService {
                     mail = MailAccess.getInstance(session);
                     mail.connect();
                     setting.setSingleValue(Boolean.TRUE);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     setting.setSingleValue(Boolean.FALSE);
                     LOG.error("", e);
                 } finally {

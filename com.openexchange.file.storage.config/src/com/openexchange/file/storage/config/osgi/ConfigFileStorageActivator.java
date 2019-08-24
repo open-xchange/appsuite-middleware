@@ -150,7 +150,7 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
              * Register services
              */
             registerService(FileStorageAccountManagerProvider.class, new ConfigFileStorageAccountManagerProvider(), null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Starting bundle \"com.openexchange.file.storage.config\" failed.", e);
             throw e;
         }
@@ -164,7 +164,7 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
             Services.setServices(null);
             dropFileStorageProperties();
             super.stopBundle();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage.config\" failed.", e);
             throw e;
         }

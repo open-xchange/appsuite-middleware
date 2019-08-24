@@ -84,9 +84,9 @@ public class CapabilityDeleteListener implements DeleteListener {
             stmt = writeCon.prepareStatement("DELETE FROM capability_context WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -102,9 +102,9 @@ public class CapabilityDeleteListener implements DeleteListener {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, event.getId());
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

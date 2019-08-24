@@ -124,7 +124,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         if (c != null) {
             try {
                 c.close();
-            } catch (final IOException ex) {
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }

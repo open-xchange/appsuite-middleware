@@ -194,7 +194,7 @@ public class WebDAVClient {
         try {
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
             return report.getResponseBodyAsMultiStatus().getResponses();
-        } catch (final DavException e) {
+        } catch (DavException e) {
             Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
             return null;
         } finally {
@@ -206,7 +206,7 @@ public class WebDAVClient {
         try {
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
             return report.getResponseBodyAsSyncCollection();
-        } catch (final DavException e) {
+        } catch (DavException e) {
             Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
             return null;
         } finally {
@@ -249,7 +249,7 @@ public class WebDAVClient {
             int executeMethod = executeMethod(propFind);
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod);
             return propFind.getResponseBodyAsMultiStatus().getResponses();
-        } catch (final DavException e) {
+        } catch (DavException e) {
             Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
             return null;
         } finally {

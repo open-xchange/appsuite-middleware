@@ -187,7 +187,7 @@ public class Activator extends HousekeepingActivator {
                             final String finalScope = property.get("final");
                             final String isProtected = property.get("protected");
                             return (finalScope == null || finalScope.equals("user")) && (isProtected == null || !Boolean.parseBoolean(isProtected));
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             LOG.error("", x);
                             return false;
                         }

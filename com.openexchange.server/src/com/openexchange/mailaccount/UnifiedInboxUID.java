@@ -269,7 +269,7 @@ public final class UnifiedInboxUID {
     private static String encodeQP(final String string) {
         try {
             return Charsets.toAsciiString(com.openexchange.mailaccount.utils.QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)));
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             // Cannot occur
             throw new IllegalStateException(e);
         }
@@ -278,7 +278,7 @@ public final class UnifiedInboxUID {
     private static String decodeQP(final String string) {
         try {
             return new String(com.openexchange.mailaccount.utils.QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(string)), com.openexchange.java.Charsets.UTF_8);
-        } catch (final DecoderException e) {
+        } catch (DecoderException e) {
             throw new IllegalStateException(e);
         }
     }

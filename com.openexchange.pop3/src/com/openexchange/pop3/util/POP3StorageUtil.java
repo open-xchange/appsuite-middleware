@@ -95,7 +95,7 @@ public class POP3StorageUtil {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         PreparedStatement stmt = null;
@@ -112,7 +112,7 @@ public class POP3StorageUtil {
                 return rs.getString(1);
             }
             return null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -137,7 +137,7 @@ public class POP3StorageUtil {
         final Connection con;
         try {
             con = Database.get(cid, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         PreparedStatement stmt = null;
@@ -159,7 +159,7 @@ public class POP3StorageUtil {
             stmt.setString(pos++, POP3StoragePropertyNames.PROPERTY_STORAGE);
             stmt.setString(pos++, name);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -219,7 +219,7 @@ public class POP3StorageUtil {
         final Connection con;
         try {
             con = Database.get(cid, false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         final List<String> uidls = new ArrayList<String>();
@@ -234,7 +234,7 @@ public class POP3StorageUtil {
             while (rs.next()) {
                 uidls.add(rs.getString(1));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -277,7 +277,7 @@ public class POP3StorageUtil {
         }
         try {
             return Integer.parseInt(seconds.toString());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("LOGIN-DELAY seconds cannot be parsed to an integer: {}", capabilities, e);
             return -1;
         }

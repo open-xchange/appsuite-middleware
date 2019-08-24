@@ -242,7 +242,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
             } else {
                 throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create("Blocking worker not allowed");
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

@@ -149,7 +149,7 @@ public final class ResourceCreateTest {
             id = resource.getIdentifier();
 
             fail("Creation succeeded with invalid string identifier");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -171,7 +171,7 @@ public final class ResourceCreateTest {
             id = resource.getIdentifier();
 
             fail("Creation succeeded with invalid email address");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             //   Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -206,7 +206,7 @@ public final class ResourceCreateTest {
 
             fail("Creation succeeded with duplicate identifier");
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -241,7 +241,7 @@ public final class ResourceCreateTest {
 
             fail("Creation succeeded with duplicate email address");
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -263,7 +263,7 @@ public final class ResourceCreateTest {
             id = resource.getIdentifier();
 
             fail("Creation succeeded with missing mandatory field");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Exception is expected
         } finally {
             deleteResource(id, ctx.getContextId());
@@ -279,7 +279,7 @@ public final class ResourceCreateTest {
         final Connection writeCon;
         try {
             writeCon = Database.get(cid, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             return;
         }
@@ -294,7 +294,7 @@ public final class ResourceCreateTest {
             if (null != stmt) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                 }
                 stmt = null;
             }

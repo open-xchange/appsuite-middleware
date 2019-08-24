@@ -263,7 +263,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
     protected static String decodeUrl(final String s) {
         try {
             return com.openexchange.java.Strings.isEmpty(s) ? s : (URL_CODEC.decode(P_ENC.matcher(s).replaceAll("%$1")));
-        } catch (final DecoderException e) {
+        } catch (DecoderException e) {
             return s;
         }
     }

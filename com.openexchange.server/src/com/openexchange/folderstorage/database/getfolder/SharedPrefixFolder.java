@@ -144,7 +144,7 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         return OXFolderIteratorSQL.hasVisibleSharedFolders(
@@ -170,13 +170,13 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         String creatorDisplayName;
         try {
             creatorDisplayName = UserStorage.getInstance().getUser(sharedOwner, ctx).getDisplayName();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (sharedOwner != OCLPermission.ALL_GROUPS_AND_USERS) {
                 throw e;
             }
@@ -210,7 +210,7 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         Queue<FolderObject> q;
@@ -253,7 +253,7 @@ public final class SharedPrefixFolder {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(exc, exc.getMessage());
         }
         Queue<FolderObject> q;

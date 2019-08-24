@@ -261,9 +261,9 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             }
 
             return newId;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollbackTransaction) {
@@ -388,12 +388,12 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             if (started) {
                                 realStorage.commitTransaction(storageParameters);
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             if (started) {
                                 realStorage.rollback(storageParameters);
                             }
                             throw e;
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             if (started) {
                                 realStorage.rollback(storageParameters);
                             }
@@ -464,12 +464,12 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                     if (started) {
                         realStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }

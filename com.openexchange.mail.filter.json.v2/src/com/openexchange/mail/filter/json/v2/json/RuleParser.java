@@ -139,7 +139,7 @@ public class RuleParser {
             if (json.has(attributeName)) {
                 try {
                     mapper.setAttribute(rule, json.get(attributeName), session);
-                } catch (final ClassCastException e) {
+                } catch (ClassCastException e) {
                     throw new JSONException(e);
                 }
             }

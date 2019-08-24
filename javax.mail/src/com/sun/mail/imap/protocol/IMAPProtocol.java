@@ -883,7 +883,7 @@ public class IMAPProtocol extends Protocol {
                 
 		    tag = writeCommand("AUTHENTICATE PLAIN " + ASCIIUtility.toString(bos.toByteArray()), null);
 		    bos.reset(); // reset buffer
-	    } catch (final Exception ex) {
+	    } catch (Exception ex) {
 		    // Convert this into a BYE response
 		    r = Response.byeResponse(ex);
 		    done = true;
@@ -891,7 +891,7 @@ public class IMAPProtocol extends Protocol {
 	} else {
 	    try {
 		    tag = writeCommand("AUTHENTICATE PLAIN", null);
-	    } catch (final Exception ex) {
+	    } catch (Exception ex) {
 		    // Convert this into a BYE response
 		    r = Response.byeResponse(ex);
 		    done = true;
@@ -2707,7 +2707,7 @@ public class IMAPProtocol extends Protocol {
     if (sterm != null) {
         try {
         args.append(getSearchSequence().generateSequence(sterm, "UTF-8"));
-        } catch (final IOException ioex) {
+        } catch (IOException ioex) {
         // should never happen
         throw new SearchException(ioex.toString());
         }
@@ -3221,7 +3221,7 @@ public class IMAPProtocol extends Protocol {
 	if (sterm != null) {
 	    try {
 		args.append(getSearchSequence().generateSequence(sterm, "UTF-8"));
-	    } catch (final IOException ioex) {
+	    } catch (IOException ioex) {
 		// should never happen
 		throw new SearchException(ioex.toString());
 	    }

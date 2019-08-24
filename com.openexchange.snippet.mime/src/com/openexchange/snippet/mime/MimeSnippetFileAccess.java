@@ -105,7 +105,7 @@ public class MimeSnippetFileAccess {
             } while (rs.next());
 
             return result;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

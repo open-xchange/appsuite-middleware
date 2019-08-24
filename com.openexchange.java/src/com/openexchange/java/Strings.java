@@ -883,7 +883,7 @@ public class Strings {
                 return new String(bytes, Charsets.UTF_8);
             }
             return s;
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             return s;
         }
     }
@@ -910,7 +910,7 @@ public class Strings {
         try {
             Holder.UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
             return true;
-        } catch (final CharacterCodingException e) {
+        } catch (CharacterCodingException e) {
             return false;
         }
     }

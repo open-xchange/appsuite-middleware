@@ -81,7 +81,7 @@ public class DelUserFolderDiscoverer extends DBService {
         int[] accessibleModules;
         try {
             accessibleModules = CapabilityUserConfigurationStorage.loadUserConfiguration(userId, ctx).getAccessibleModules();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!UserConfigurationCodes.NOT_FOUND.equals(e)) {
                 throw e;
             }

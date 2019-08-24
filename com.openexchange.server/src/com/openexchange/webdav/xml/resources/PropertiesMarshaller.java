@@ -157,7 +157,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		}
 		try {
 			return URLEncoder.encode(string,charset).replaceAll("\\+","%20");
-		} catch (final UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			LOG.error(e.toString());
 			return string;
 		}

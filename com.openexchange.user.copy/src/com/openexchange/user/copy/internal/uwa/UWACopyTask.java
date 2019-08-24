@@ -160,7 +160,7 @@ public class UWACopyTask implements CopyUserTaskService {
 
             wstmt.executeBatch();
             pstmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(wstmt);
@@ -208,7 +208,7 @@ public class UWACopyTask implements CopyUserTaskService {
 
                 widgets.add(widget);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(wrs, wstmt);

@@ -93,7 +93,7 @@ public final class AllSeenAction extends AbstractMailAction {
              * Return
              */
             return new AJAXRequestResult(Boolean.TRUE, "native");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

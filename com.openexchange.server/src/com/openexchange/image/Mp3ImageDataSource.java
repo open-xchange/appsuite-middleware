@@ -367,7 +367,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                 }
             }
             return mp3File;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             fileAccess.finish();

@@ -152,7 +152,7 @@ public class PropertyHelper {
 			final WebdavProperty prop = list.get(0);
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -168,7 +168,7 @@ public class PropertyHelper {
 			for(final WebdavProperty prop : list) {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
 		}
 	}
@@ -193,7 +193,7 @@ public class PropertyHelper {
     private ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

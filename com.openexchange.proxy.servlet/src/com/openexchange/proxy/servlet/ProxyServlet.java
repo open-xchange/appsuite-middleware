@@ -282,7 +282,7 @@ public class ProxyServlet extends SessionServlet {
              */
             try {
                 Streams.close(httpMethod.getResponseBodyAsStream());
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LoggerFactory.getLogger(ProxyServlet.class).error("", e);
             } finally {
                 /*

@@ -104,7 +104,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
          */
         try {
             AJAXConfig.init();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

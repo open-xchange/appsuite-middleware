@@ -80,7 +80,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
         final Connection con;
         try {
             con = cache.getWriteConnectionForConfigDB();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         }
@@ -92,7 +92,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
             con.commit();
             rollback = false;
             return id;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.getMessage());
         } finally {
             if (rollback) {
@@ -106,7 +106,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
         if (null != con) {
             try {
                 con.rollback();
-            } catch (final SQLException e2) {
+            } catch (SQLException e2) {
                 log.error("Error doing rollback", e2);
             }
         }

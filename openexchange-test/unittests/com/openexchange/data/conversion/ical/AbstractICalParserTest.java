@@ -153,7 +153,7 @@ public abstract class AbstractICalParserTest {
         for (final int i : ids) {
             try {
                 found.add(users.getUser(i));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 //IGNORE
             }
         }

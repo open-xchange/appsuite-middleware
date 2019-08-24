@@ -123,7 +123,7 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
                 return property.get().booleanValue();
             }
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return false;
         }

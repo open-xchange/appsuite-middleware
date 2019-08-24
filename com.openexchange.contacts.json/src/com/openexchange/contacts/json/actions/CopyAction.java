@@ -158,24 +158,24 @@ public class CopyAction extends ContactAction {
                         }
                     } while (iterator.hasNext());
                     attachmentBase.commit();
-                } catch (final SearchIteratorException e) {
+                } catch (SearchIteratorException e) {
                     try {
                         attachmentBase.rollback();
-                    } catch (final OXException e1) {
+                    } catch (OXException e1) {
                         LOG.error("Attachment transaction rollback failed", e);
                     }
                     throw e;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     try {
                         attachmentBase.rollback();
-                    } catch (final OXException e1) {
+                    } catch (OXException e1) {
                         LOG.error("Attachment transaction rollback failed", e);
                     }
                     throw e;
                 } finally {
                     try {
                         attachmentBase.finish();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("Attachment transaction finish failed", e);
                     }
                 }

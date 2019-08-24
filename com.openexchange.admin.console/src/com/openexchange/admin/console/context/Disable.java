@@ -84,7 +84,7 @@ public class Disable extends ContextAbstraction {
 
             displayDisabledMessage(successtext, null, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
     }

@@ -152,7 +152,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
 
             // Start UPD listener
             startUdpListener(registry, config);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -176,7 +176,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
             }
 
             Services.set(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -225,7 +225,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
             try {
                 config.udpListenPort = Integer.parseInt(tmp.trim());
                 sb.append("\t").append(PROP_UDP_LISTEN_PORT).append(": ").append(config.udpListenPort).append(ls);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(PROP_UDP_LISTEN_PORT);
             }
         } else {

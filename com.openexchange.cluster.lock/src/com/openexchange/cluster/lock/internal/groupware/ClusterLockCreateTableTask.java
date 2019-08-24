@@ -85,7 +85,7 @@ public class ClusterLockCreateTableTask extends UpdateTaskAdapter {
 
                 stmt = con.prepareStatement(CreateClusterLockTable.CREATE_TABLE_STATEMENT);
                 stmt.executeUpdate();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
         } finally {

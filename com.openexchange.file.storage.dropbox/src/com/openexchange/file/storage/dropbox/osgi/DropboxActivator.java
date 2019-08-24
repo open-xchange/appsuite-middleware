@@ -104,7 +104,7 @@ public final class DropboxActivator extends AbstractCloudStorageActivator {
             super.stopBundle();
             cleanUp();
             DropboxServices.setServices(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(DropboxActivator.class).error("", e);
             throw e;
         }

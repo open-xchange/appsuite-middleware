@@ -241,9 +241,9 @@ public final class ConfigJSlobService implements JSlobService {
                     }
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         } finally {
             Streams.close(reader);
@@ -368,7 +368,7 @@ public final class ConfigJSlobService implements JSlobService {
                     try {
                         boolean isProtected = Boolean.parseBoolean(property.get(METADATA_PROTECTED));
                         attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property, isProtected));
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.warn("Couldn't initialize preference path: {}", preferencePath, e);
                     }
                 }
@@ -678,7 +678,7 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
             jsLob.setJsonObject(jObject);
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         }
     }
@@ -1286,9 +1286,9 @@ public final class ConfigJSlobService implements JSlobService {
             if (jMetaData.length() > 0) {
                 addValueByPath(path, jMetaData, jsonJSlob.getMetaObject());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         }
     }
@@ -1331,9 +1331,9 @@ public final class ConfigJSlobService implements JSlobService {
             if (jMetaData.length() > 0) {
                 addValueByPath(path, jMetaData, jsonJSlob.getMetaObject());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         }
     }
@@ -1422,7 +1422,7 @@ public final class ConfigJSlobService implements JSlobService {
                 return propertyValue;
             }
             return value;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return propertyValue;
         }
     }

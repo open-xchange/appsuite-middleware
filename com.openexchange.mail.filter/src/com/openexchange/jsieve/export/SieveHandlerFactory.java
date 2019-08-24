@@ -126,7 +126,7 @@ public final class SieveHandlerFactory {
                             throw MailFilterExceptionCode.UNABLE_TO_EXTRACT_SIEVE_SERVER_URI.create();
                         }
                         sieveServer = uri.getHost();
-                    } catch (final URISyntaxException e) {
+                    } catch (URISyntaxException e) {
                         throw MailFilterExceptionCode.NO_SERVERNAME_IN_SERVERURL.create(e, mailServerURL);
                     }
                     sievePort = getPort(mailFilterConfig, userId, contextId);
@@ -227,7 +227,7 @@ public final class SieveHandlerFactory {
     private static int getPort(LeanConfigurationService mailFilterConfig, int userId, int contextId) throws OXException {
         try {
             return mailFilterConfig.getIntProperty(userId, contextId, MailFilterProperty.port);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailFilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperty.port.getFQPropertyName());
         }
     }

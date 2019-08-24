@@ -94,7 +94,7 @@ public class JSlobActivator extends HousekeepingActivator {
              */
             registerService(JSlobServiceRegistry.class, JSlobServiceRegistryImpl.getInstance());
             registerService(JSlobStorageRegistry.class, JSlobStorageRegistryImpl.getInstance());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Starting bundle \"com.openexchange.jslob\" failed", e);
             throw e;
         }

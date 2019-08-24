@@ -122,7 +122,7 @@ public class GroupwareTests {
             final JSONObject json;
             try {
                 json = new JSONObject(body);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 System.out.println("Can't parse this body to JSON: \"" + body + '\"');
                 throw e;
             }
@@ -146,7 +146,7 @@ public class GroupwareTests {
             final JSONObject json;
             try {
                 json = new JSONObject(body);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 System.out.println("Can't parse this body to JSON: \"" + body + '\"');
                 throw e;
             }
@@ -174,7 +174,7 @@ public class GroupwareTests {
             final JSONObject json;
             try {
                 json = new JSONObject(body);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 System.out.println("Can't parse this body to JSON: \"" + body + '\"');
                 throw e;
             }
@@ -195,7 +195,7 @@ public class GroupwareTests {
         final JSONObject json;
         try {
             json = new JSONObject(body);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             System.out.println("Can't parse this body to JSON: \"" + body + '\"');
             throw e;
         }

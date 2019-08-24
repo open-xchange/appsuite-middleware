@@ -409,7 +409,7 @@ public final class DatabaseFolderConverter {
             }
             // Handle database folder
             return handleDatabaseFolder(retval, folderId, fo, session, user, userPermissionBits, ctx, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }

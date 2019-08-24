@@ -218,7 +218,7 @@ public final class CSVLibrary {
         FolderObject fo = null;
         try {
             fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folder);
         }
         return fo;
@@ -234,7 +234,7 @@ public final class CSVLibrary {
     public static int getFolderId(final String folderString) throws OXException {
         try{
             return Integer.parseInt(folderString);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folderString);
         }
     }
@@ -271,10 +271,10 @@ public final class CSVLibrary {
                 }
             }
             return bob.toString();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("Bad file descriptor".equals(e.getMessage())) {
                 // Stream is already closed
                 throw ImportExportExceptionCodes.IOEXCEPTION_RETRY.create(e);

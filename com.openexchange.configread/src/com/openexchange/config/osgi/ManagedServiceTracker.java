@@ -90,10 +90,10 @@ public final class ManagedServiceTracker extends ServiceTracker<ManagedService, 
 
                 return service;
             }
-        } catch (final ConfigurationException e) {
+        } catch (ConfigurationException e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManagedServiceTracker.class);
             log.warn("Cannot configure Apache Felix Web Console", e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ManagedServiceTracker.class);
             log.warn("Cannot configure Apache Felix Web Console", e);
         }

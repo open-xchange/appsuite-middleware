@@ -167,12 +167,12 @@ public final class UpdateExecutor {
         LOG.info("Starting {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         try {
             lockSchema(blocking, state);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.getCode() != SchemaExceptionCodes.ALREADY_LOCKED.getNumber()) {
                 // Try to unlock schema
                 try {
                     unlockSchema(blocking, state);
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.error("", e1);
                 }
             }
@@ -233,7 +233,7 @@ public final class UpdateExecutor {
                         PerformParameters params = new PerformParametersImpl(state, connectionProvider, optContextId, logger);
                         task.perform(params);
                         success = true;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                     durMillis = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startNanos, TimeUnit.NANOSECONDS);

@@ -233,7 +233,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         final FileID fileID = new FileID(id);
         try {
             return getFileAccess(fileID.getService(), fileID.getAccountId()).exists(fileID.getFolderId(), fileID.getFileId(), version);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e)) {
                 return false;
             }
@@ -432,7 +432,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         try {
             TimedResult<File> result = getFileAccess(service, accountId).getDocuments(folderID.getFolderId(), addIDColumns(columns), sort, order);
             return fixIDs(result, service, accountId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e) || !INFOSTORE_SERVICE_ID.equals(service)) {
                 throw e;
             }
@@ -465,7 +465,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
 
             return fixIDs(result, service, accountId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e) || !INFOSTORE_SERVICE_ID.equals(service)) {
                 throw e;
             }
@@ -1612,7 +1612,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                             final FileStorageAccountAccess accountAccess = files.getAccountAccess();
                             return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());
                         }
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore failed one in composite search results
                     }
                     return SearchIteratorAdapter.emptyIterator();
@@ -1669,7 +1669,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     static <V> V getFrom(Future<V> future) throws OXException {
         try {
             return future.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (ExecutionException e) {
@@ -1680,7 +1680,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     static <V> V getFrom(Future<V> future, long timeout, TimeUnit unit, V fallbackOnTimeout) throws OXException {
         try {
             return future.get(timeout, unit);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (ExecutionException e) {

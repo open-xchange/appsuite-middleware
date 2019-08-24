@@ -164,7 +164,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                          */
                         registry0 = LocateRegistry.getRegistry(jmxPort);
                         registry0.list();
-                    } catch (final RemoteException e) {
+                    } catch (RemoteException e) {
                         LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", I(jmxPort), e);
                         /*
                          * Create a new one
@@ -232,7 +232,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                         public synchronized void start() throws IOException {
                             try {
                                 registry.bind("server", stub);
-                            } catch (final AlreadyBoundException x) {
+                            } catch (AlreadyBoundException x) {
                                 final IOException io = new IOException(x.getMessage());
                                 io.initCause(x);
                                 throw io;
@@ -295,15 +295,15 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             }
             LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this URL: {}\n", jmxURL);
             running.set(true);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOG.error("", e);
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             LOG.error("", e);
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             LOG.error("", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -337,7 +337,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             while (!objectNames.isEmpty()) {
                 unregisterMBean(objectNames.pop());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
         removeConnectorServer(jmxURL);
@@ -355,7 +355,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         }
         try {
             return InetAddress.getByName(host).getHostName();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             LOG.error("", e);
             return null;
         }
@@ -369,7 +369,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         final ObjectName objectName;
         try {
             objectName = new ObjectName(name);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
         super.registerMBean(objectName, mbean);
@@ -393,7 +393,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         final ObjectName objectName;
         try {
             objectName = new ObjectName(name);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
         super.unregisterMBean(objectName);

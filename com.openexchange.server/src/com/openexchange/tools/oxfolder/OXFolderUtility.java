@@ -358,7 +358,7 @@ public final class OXFolderUtility {
                                 // so
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                 } else {
@@ -1121,7 +1121,7 @@ public final class OXFolderUtility {
                 for (int member : ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, permission.getEntity()).getMember()) {
                     retval.add(member);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         } else {
@@ -1168,7 +1168,7 @@ public final class OXFolderUtility {
     public static String getFolderName(final int folderId, final Context ctx) {
         try {
             return new StringBuilder().append(new OXFolderAccess(ctx).getFolderName(folderId)).append(" (").append(folderId).append(')').toString();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return String.valueOf(folderId);
         }
     }
@@ -1201,7 +1201,7 @@ public final class OXFolderUtility {
         final User u;
         try {
             u = UserStorage.getInstance().getUser(userId, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return String.valueOf(userId);
         }
         if (u == null) {
@@ -1237,7 +1237,7 @@ public final class OXFolderUtility {
         final Group g;
         try {
             g = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, groupId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return String.valueOf(groupId);
         }
         if (g == null) {

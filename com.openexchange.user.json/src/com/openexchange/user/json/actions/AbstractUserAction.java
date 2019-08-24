@@ -157,7 +157,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Long.valueOf(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
@@ -178,7 +178,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Long.parseLong(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
@@ -199,7 +199,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }
@@ -220,7 +220,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         tmp = tmp.trim();
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( parameterName, tmp);
         }
     }

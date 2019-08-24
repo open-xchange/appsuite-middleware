@@ -119,7 +119,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(fstore);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -156,7 +156,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                     if (!file.isDirectory()) {
                         throw new InvalidDataException("No directory: \"" + fstore.getUrl() + "\"");
                     }
-                } catch (final IllegalArgumentException urex) {
+                } catch (IllegalArgumentException urex) {
                     throw new InvalidDataException("Invalid filstore url");
                 }
             }
@@ -176,7 +176,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(fstore);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -238,7 +238,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(store);
                 doNullCheck(store.getId());
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -267,7 +267,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(reason);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -305,7 +305,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     public MaintenanceReason[] listMaintenanceReason(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try {
             doNullCheck(search_pattern);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("The search_pattern is null");
             log.error("", invalidDataException);
             throw invalidDataException;
@@ -331,7 +331,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(db);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -366,7 +366,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(db);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -383,7 +383,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                     throw new InvalidDataException("Database " + db.getName() + " already exists!");
                 }
 
-            } catch (final EnforceableDataObjectException e) {
+            } catch (EnforceableDataObjectException e) {
                 log.error("", e);
                 throw new InvalidDataException(e);
             }
@@ -432,7 +432,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Database db = database;
             try {
                 doNullCheck(db);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -511,7 +511,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(srv);
                 doNullCheck(srv.getName());
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -543,7 +543,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         try {
             try {
                 doNullCheck(database);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 log.error("Invalid data sent by client!", e);
                 throw e;
             }
@@ -578,7 +578,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(server);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -618,7 +618,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             try {
                 doNullCheck(server);
                 doNullCheck(schemaName);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -650,7 +650,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(search_pattern);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -676,7 +676,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(search_pattern);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -707,7 +707,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(search_pattern);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -783,7 +783,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(db);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -815,7 +815,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(search_pattern);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -845,7 +845,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(db);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -882,7 +882,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck((Object[]) reasons);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }
@@ -947,7 +947,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(contextId);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 log.error("Invalid data sent by client!", e1);
                 throw e1;
             }

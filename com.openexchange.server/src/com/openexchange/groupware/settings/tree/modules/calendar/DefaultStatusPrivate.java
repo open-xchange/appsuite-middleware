@@ -107,7 +107,7 @@ public class DefaultStatusPrivate implements PreferencesItemService {
                 try {
                     Object singleValue = setting.getSingleValue();
                     value = (singleValue instanceof Number) ? ((Number) singleValue).intValue() : Integer.parseInt(String.valueOf(singleValue));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue());
                 }
                 if (value < 0 || value > 3) {

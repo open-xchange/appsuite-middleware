@@ -352,7 +352,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
                         }
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
             }
         }

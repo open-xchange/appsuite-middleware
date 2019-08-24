@@ -115,7 +115,7 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 			final Object jsonResult = new JSONObject("{a : "+json+"}").get("a");
 			return new AJAXRequestResult(jsonResult, "json");
 
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			throw new OXException(e);
 		} catch (@SuppressWarnings("unused") final ClassCastException e) {
 			return new AJAXRequestResult(obj.toString(), "string");

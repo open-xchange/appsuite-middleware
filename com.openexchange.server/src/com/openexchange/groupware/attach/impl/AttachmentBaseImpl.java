@@ -186,7 +186,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         if (data != null) {
             try {
                 fileId = saveFile(data, attachment, ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (QuotaFileStorageExceptionCodes.STORE_FULL.getNumber() == e.getCode()) {
                     throw AttachmentExceptionCodes.OVER_LIMIT.create(e);
                 }
@@ -265,7 +265,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             while (rs.next()) {
                 retval.add(rs.getString(1));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, rs);
@@ -291,7 +291,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             while (rs.next()) {
                 retval.add(rs.getString(1));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, rs);
@@ -551,12 +551,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     public void deleteAll(final Context context) throws OXException {
         try {
             removeFiles(context);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw AttachmentExceptionCodes.FILE_DELETE_FAILED.create(e, I(context.getContextId()));
         }
         try {
             removeDatabaseEntries(context);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Exception: ", e);
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
@@ -575,7 +575,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.error("Can't close statement", e);
                 }
             }
@@ -648,7 +648,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 }
 
                 attachment.setId(newId);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw AttachmentExceptionCodes.GENERATIING_ID_FAILED.create(e);
             } finally {
                 if (afterReading) {
@@ -693,10 +693,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             while (rs.next()) {
                 files.add(rs.getString(1));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             try {
                 rollbackDBTransaction();
-            } catch (final OXException x2) {
+            } catch (OXException x2) {
                 switch (x2.getCategories().get(0).getLogLevel()) {
                     case TRACE:
                         LOG.trace("", x2);
@@ -730,7 +730,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             final FileStorage fs = getFileStorage(ctx);
             return fs.getFile(fileId);
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw AttachmentExceptionCodes.READ_FAILED.create(e, fileId);
         }
     }
@@ -756,7 +756,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 throw AttachmentExceptionCodes.ATTACHMENT_NOT_FOUND.create();
             }
             return rs.getString(1);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, rs);
@@ -783,7 +783,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             if (null != iter) {
                 try {
                     iter.close();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.error("", e);
                 }
             }
@@ -842,7 +842,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             if (!found) {
                 throw AttachmentExceptionCodes.ATTACHMENT_WITH_FILEID_NOT_FOUND.create(file_id);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, rs);
@@ -862,7 +862,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             stmt.setInt(1, ctx.getContextId());
             stmt.setString(2, file_id);
             retval[1] = stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, null);
@@ -889,7 +889,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             if (rs.next()) {
                 comment = rs.getString(1);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, rs);
@@ -912,7 +912,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             stmt.setInt(4, ctx.getContextId());
             stmt.setString(5, file_id);
             retval = stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, null);
@@ -986,7 +986,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
             return getFromResultSet(rs, folderId);
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, rs);
@@ -1041,10 +1041,10 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 for (final String fileId : fileIdRemoveList.get()) {
                     fs.deleteFile(fileId);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 try {
                     rollback();
-                } catch (final OXException txe) {
+                } catch (OXException txe) {
                     switch (e.getCategories().get(0).getLogLevel()) {
                         case TRACE:
                             LOG.trace("", e);
@@ -1092,7 +1092,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
 
             return storageService.getQuotaFileStorage(ctx.getContextId(), Info.general());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw AttachmentExceptionCodes.FILESTORE_DOWN.create(e);
         }
     }
@@ -1173,7 +1173,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 }
                 initNext = false;
                 return hasNext;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 this.exception = e;
                 return true;
             }
@@ -1219,7 +1219,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     set.setValue(value);
                     column.doSwitch(set);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
             return m;
@@ -1295,13 +1295,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     rs = null;
                     delegate = new SearchIteratorAdapter<AttachmentMetadata>(values.iterator());
                 }
-            } catch (final SearchIteratorException e) {
+            } catch (SearchIteratorException e) {
                 LOG.error(e.toString());
                 this.exception = e;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error(e.toString());
                 this.exception = e;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error(e.toString());
                 this.exception = e;
             }
@@ -1333,7 +1333,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 retval.put(result.getInt(1), new Date(result.getLong(2)));
             }
             return retval;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);

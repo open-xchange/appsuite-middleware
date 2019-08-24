@@ -80,7 +80,7 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
         super();
         try {
             bindAddress = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw new IllegalArgumentException(e);
         }
     }
@@ -107,7 +107,7 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
         super(enabledCipherSuites, enabledProtocols, needClientAuth);
         try {
             bindAddress = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw new IllegalArgumentException(e);
         }
     }

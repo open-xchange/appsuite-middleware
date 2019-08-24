@@ -356,7 +356,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
             try {
                 transformations.scale(transformParams.getWidth(), transformParams.getHeight(), transformParams.getScaleType(), transformParams.isShrinkOnly());
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
             }
         }
@@ -447,7 +447,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                             if (null == (transformedImage = performTransformImage(session, repetitiveFile, xformParams, cacheKey, fileName))) {
                                 resultFile = repetitiveFile;
                             }
-                        } catch (final IOException e) {
+                        } catch (IOException e) {
                             final String message = e.getMessage();
 
                             if (null != message) {
@@ -479,7 +479,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                                 resultFile = optImageFileHolder;
                             }
                         }
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         if (LOG.isDebugEnabled()) {
                             try {
                                 LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", repetitiveFile.getName(), writeBrokenImage2Disk(repetitiveFile, tmpDirReference).getPath(), e);

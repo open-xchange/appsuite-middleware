@@ -89,7 +89,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setCreatedBy(final int createdBy) {
         try {
             json.put(AttachmentField.CREATED_BY_LITERAL.getName(),createdBy);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -109,7 +109,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         } else if(creationDate != null) {
             try {
                 json.put(AttachmentField.CREATION_DATE_LITERAL.getName(),creationDate.getTime());
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.debug("",e);
             }
         }
@@ -131,7 +131,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
         try {
             json.put(AttachmentField.FILE_MIMETYPE_LITERAL.getName(),fileMIMEType);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -152,7 +152,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
         try {
             json.put(AttachmentField.FILENAME_LITERAL.getName(),filename);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -170,7 +170,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setFilesize(final long filesize) {
         try {
             json.put(AttachmentField.FILE_SIZE_LITERAL.getName(),filesize);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -188,7 +188,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setAttachedId(final int objectId) {
         try {
             json.put(AttachmentField.ATTACHED_ID_LITERAL.getName(),objectId);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -202,7 +202,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setRtfFlag(final boolean rtfFlag) {
         try {
             json.put(AttachmentField.RTF_FLAG_LITERAL.getName(),rtfFlag);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -220,7 +220,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setModuleId(final int moduleId) {
         try {
             json.put(AttachmentField.MODULE_ID_LITERAL.getName(),moduleId);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -237,7 +237,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setId(final int id) {
         try {
             json.put(AttachmentField.ID_LITERAL.getName(),id);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -246,7 +246,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setFolderId(final int folderId) {
         try {
             json.put(AttachmentField.FOLDER_ID_LITERAL.getName(),folderId);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -274,13 +274,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
             try {
                 json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
                 return;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.debug("",e);
             }
         }
         try {
             json.put(AttachmentField.COMMENT_LITERAL.getName(),string);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }
@@ -301,13 +301,13 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
             try {
                 json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
                 return;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.debug("",e);
             }
         }
         try {
             json.put(AttachmentField.FILE_ID_LITERAL.getName(),string);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.debug("",e);
         }
     }

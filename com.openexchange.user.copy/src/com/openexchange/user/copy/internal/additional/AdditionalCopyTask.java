@@ -151,7 +151,7 @@ public class AdditionalCopyTask implements CopyUserTaskService {
             stmt.setInt(3, uid);
 
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);

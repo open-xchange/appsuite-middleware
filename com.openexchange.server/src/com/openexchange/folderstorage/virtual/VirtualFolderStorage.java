@@ -317,7 +317,7 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                     folderStorage.commitTransaction(params);
                 }
                 rollback = false;
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollback) {
@@ -415,12 +415,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                 byContentType.commitTransaction(params);
             }
             return defaultFolderID;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 byContentType.rollback(params);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 byContentType.rollback(params);
             }
@@ -450,12 +450,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                 realFolderStorage.commitTransaction(params);
             }
             return containsForeignObjects;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 realFolderStorage.rollback(params);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 realFolderStorage.rollback(params);
             }
@@ -480,12 +480,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                 realFolderStorage.commitTransaction(params);
             }
             return isEmpty;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 realFolderStorage.rollback(params);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 realFolderStorage.rollback(params);
             }
@@ -515,12 +515,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
             if (started) {
                 folderStorage.commitTransaction(params);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(params);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 folderStorage.rollback(params);
             }
@@ -637,12 +637,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                          * Return
                          */
                         return null;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         for (final FolderStorage fs : openedStorages) {
                             fs.rollback(newParameters);
                         }
                         throw e;
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         for (final FolderStorage fs : openedStorages) {
                             fs.rollback(newParameters);
                         }
@@ -685,12 +685,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                 realFolderStorage.commitTransaction(params);
             }
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 realFolderStorage.rollback(params);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (started) {
                 realFolderStorage.rollback(params);
             }
@@ -925,12 +925,12 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
                 fs.commitTransaction(storageParameters);
             }
             return folders;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openStorages) {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             for (final FolderStorage fs : openStorages) {
                 fs.rollback(storageParameters);
             }

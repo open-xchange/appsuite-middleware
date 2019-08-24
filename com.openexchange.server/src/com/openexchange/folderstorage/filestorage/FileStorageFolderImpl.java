@@ -379,7 +379,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             final ConfigView view = configViewFactory.getView(userId, contextId);
             final Boolean b = view.opt(paramName, boolean.class, Boolean.FALSE);
             return b.booleanValue();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn("", e);
             return false;
         }

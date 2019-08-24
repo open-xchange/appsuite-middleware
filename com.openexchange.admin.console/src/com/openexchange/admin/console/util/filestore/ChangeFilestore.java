@@ -88,7 +88,7 @@ public class ChangeFilestore extends FilestoreAbstraction {
 
             displayChangedMessage(filestoreid, null, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(filestoreid, null, e, parser);
         }
     }

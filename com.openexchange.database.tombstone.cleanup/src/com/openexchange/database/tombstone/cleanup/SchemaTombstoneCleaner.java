@@ -130,7 +130,7 @@ public class SchemaTombstoneCleaner {
             Map<String, Integer> cleanup = cleanup(writeConnection, timestamp);
             writeConnection.commit();
             tableCleanupResults.putAll(cleanup);
-        } catch (final SQLException | OXException e) {
+        } catch (SQLException | OXException e) {
             Databases.rollback(writeConnection);
             LOG.error("Cannot clean up data in schema '{}': {}", schemaName, e.getMessage(), e);
         } finally {

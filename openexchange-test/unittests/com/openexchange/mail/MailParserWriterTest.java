@@ -108,7 +108,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
             } finally {
                 mailConnection.close(true);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -128,7 +128,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
             } finally {
                 mailConnection.close(true);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

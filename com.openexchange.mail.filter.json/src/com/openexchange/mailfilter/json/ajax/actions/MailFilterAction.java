@@ -193,9 +193,9 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
             final Credentials credentials = request.getCredentials();
             final Rule rule = CONVERTER.parse(getJsonBody(request), ServerSessionAdapter.valueOf(request.getSession()));
             return mailFilterService.createFilterRule(credentials, rule);
-        } catch (final SieveException e) {
+        } catch (SieveException e) {
             throw MailFilterExceptionCode.handleSieveException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }
@@ -370,7 +370,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         if (json.hasAndNotNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MailFilterExceptionCode.ID_MISSING.create();
             }
         }

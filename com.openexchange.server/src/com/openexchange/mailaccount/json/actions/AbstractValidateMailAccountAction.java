@@ -235,7 +235,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         final URI uri;
         try {
             uri = URIParser.parse(transportServerURL, URIDefaults.SMTP);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw MailExceptionCode.URI_PARSE_FAILED.create(e, transportServerURL);
         }
         transportConfig.setServer(URITools.getHost(uri));
@@ -248,7 +248,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         try {
             mailTransport.ping();
             close = true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Validating transport account failed.", e);
             Throwable cause = e.getCause();
             while ((null != cause) && (cause instanceof OXException)) {

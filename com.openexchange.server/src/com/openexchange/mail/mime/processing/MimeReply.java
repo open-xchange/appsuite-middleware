@@ -675,9 +675,9 @@ public final class MimeReply extends AbstractMimeProcessing {
             replyMail.setAuthenticityResult(originalMsg.getAuthenticityResult());
 
             return replyMail;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

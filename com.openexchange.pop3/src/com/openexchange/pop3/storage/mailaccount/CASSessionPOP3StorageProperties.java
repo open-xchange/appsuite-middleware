@@ -77,7 +77,7 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
         CASSessionPOP3StorageProperties cached;
         try {
             cached = (CASSessionPOP3StorageProperties) session.getParameter(key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             cached = null;
         }
         if (null == cached) {

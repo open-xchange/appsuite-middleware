@@ -271,7 +271,7 @@ public final class IMAPConfig extends MailConfig {
                     imapCapabilities = imapCaps;
                     capabilities = caps;
                     aclExtension = response.getAclExtension();
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     throw MailConfigException.create(e);
                 }
             }
@@ -353,7 +353,7 @@ public final class IMAPConfig extends MailConfig {
         final URI uri;
         try {
             uri = URIParser.parse(urlInfo.getServerURL(), URIDefaults.IMAP);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw IMAPException.Code.URI_PARSE_FAILED.create(e, urlInfo.getServerURL());
         }
         secure = PROTOCOL_IMAP_SECURE.equals(uri.getScheme());
@@ -374,7 +374,7 @@ public final class IMAPConfig extends MailConfig {
                 imapServerAddress = InetAddress.getByName(imapServer);
                 // TODO: Touch address for proper equality check?
                 // imapServerAddress.toString();
-            } catch (final UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 throw IMAPException.Code.IO_ERROR.create(e, e.getMessage());
             }
         }

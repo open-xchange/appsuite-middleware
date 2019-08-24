@@ -94,13 +94,13 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
                 counter += current.performUpdate(writeCon);
                 current.close();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (current != null) {
                 try {
                     current.close();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }

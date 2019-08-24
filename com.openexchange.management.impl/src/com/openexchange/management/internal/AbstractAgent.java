@@ -231,7 +231,7 @@ public abstract class AbstractAgent {
     public void registerMBean(final String name, final Object mbean) throws OXException {
         try {
             registerMBean(new ObjectName(name), mbean);
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
     }
@@ -245,7 +245,7 @@ public abstract class AbstractAgent {
     public void unregisterMBean(final String name) throws OXException {
         try {
             unregisterMBean(new ObjectName(name));
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, name);
         }
     }
@@ -264,11 +264,11 @@ public abstract class AbstractAgent {
         }
         try {
             mbs.registerMBean(mbean, objectName);
-        } catch (final InstanceAlreadyExistsException e) {
+        } catch (InstanceAlreadyExistsException e) {
             throw ManagementExceptionCode.ALREADY_EXISTS.create(e, mbean.getClass().getName());
-        } catch (final MBeanRegistrationException e) {
+        } catch (MBeanRegistrationException e) {
             throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, mbean.getClass().getName());
-        } catch (final NotCompliantMBeanException e) {
+        } catch (NotCompliantMBeanException e) {
             throw ManagementExceptionCode.NOT_COMPLIANT_MBEAN.create(e, mbean.getClass().getName());
         }
         LOG.debug("{} registered", objectName.getCanonicalName());
@@ -284,9 +284,9 @@ public abstract class AbstractAgent {
         if (mbs.isRegistered(objectName)) {
             try {
                 mbs.unregisterMBean(objectName);
-            } catch (final InstanceNotFoundException e) {
+            } catch (InstanceNotFoundException e) {
                 throw ManagementExceptionCode.NOT_FOUND.create(e, objectName);
-            } catch (final MBeanRegistrationException e) {
+            } catch (MBeanRegistrationException e) {
                 throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, objectName);
             }
             LOG.debug("{} unregistered", objectName.getCanonicalName());
@@ -316,13 +316,13 @@ public abstract class AbstractAgent {
                 gm = gaugeMonitorRef.get();
                 try {
                     mbs.registerMBean(gm, new ObjectName("Services:type=GaugeMonitor"));
-                } catch (final InstanceAlreadyExistsException e) {
+                } catch (InstanceAlreadyExistsException e) {
                     throw ManagementExceptionCode.ALREADY_EXISTS.create(e, gm.getClass().getName());
-                } catch (final MBeanRegistrationException e) {
+                } catch (MBeanRegistrationException e) {
                     throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, gm.getClass().getName());
-                } catch (final NotCompliantMBeanException e) {
+                } catch (NotCompliantMBeanException e) {
                     throw ManagementExceptionCode.NOT_COMPLIANT_MBEAN.create(e, gm.getClass().getName());
-                } catch (final MalformedObjectNameException e) {
+                } catch (MalformedObjectNameException e) {
                     throw ManagementExceptionCode.MALFORMED_OBJECT_NAME.create(e, "Services:type=GaugeMonitor");
                 }
                 gm.start();
@@ -362,9 +362,9 @@ public abstract class AbstractAgent {
             Registry registry = LocateRegistry.createRegistry(port, null, rmiSocketFactory);
             registries.put(Integer.valueOf(port), registry);
             LOG.info("RMI registry created on port {} and bind address {}", I(port), bindAddr);
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw ManagementExceptionCode.UNKNOWN_HOST_ERROR.create(e, e.getMessage());
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw ManagementExceptionCode.REMOTE_ERROR.create(e, e.getMessage());
         }
     }
@@ -396,7 +396,7 @@ public abstract class AbstractAgent {
     protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword) throws OXException {
         try {
             return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw ManagementExceptionCode.MALFORMED_URL.create(e, urlstr);
         }
     }
@@ -431,7 +431,7 @@ public abstract class AbstractAgent {
             connectors.put(url, cs);
             LOG.info("JMX connector server on {} started", url);
             return url;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw ManagementExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -449,7 +449,7 @@ public abstract class AbstractAgent {
         try {
             connector.stop();
             LOG.info("JMX connector server on {} stopped", url);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("JMX connector server on {} could not be stopped", url, e);
             return;
         }
@@ -492,7 +492,7 @@ public abstract class AbstractAgent {
                 serverSocket = new ServerSocket(0);
                 freePort = serverSocket.getLocalPort();
                 portFound = true;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 /*
                  * Squelch the exception
                  */
@@ -508,7 +508,7 @@ public abstract class AbstractAgent {
                             throw new Exception("local exception ...");
                         }
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     /*
                      * Squelch the exception
                      */

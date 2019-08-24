@@ -216,7 +216,7 @@ public class VCardExporter extends AbstractExporter {
         final FolderObject fo;
         try {
             fo = new OXFolderAccess(session.getContext()).getFolderObject(folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
         //check format of folder
@@ -231,9 +231,9 @@ public class VCardExporter extends AbstractExporter {
         final EffectivePermission perm;
         try {
             perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
         return perm.canReadAllObjects();

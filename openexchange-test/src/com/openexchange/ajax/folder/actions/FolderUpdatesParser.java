@@ -81,7 +81,7 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
                 final FolderModuleTransformator trafo = new FolderModuleTransformator();
                 try {
                     return trafo.transform((String) actual);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     e.printStackTrace();
                     return null; // TODO: Tierlieb: Change?
                 }
@@ -90,7 +90,7 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
                 final FolderParser parser = new FolderParser();
                 try {
                     return parser.parseOCLPermission((JSONArray) actual, null);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     e.printStackTrace();
                     return null; // TODO: Tierlieb: Change?
                 }

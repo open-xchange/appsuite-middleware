@@ -173,7 +173,7 @@ public abstract class SessionServlet extends AJAXServlet {
             super.doService(req, resp, checkRateLimit);
         } catch (RateLimitedException e) {
             e.send(resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
@@ -515,16 +515,16 @@ public abstract class SessionServlet extends AJAXServlet {
         if (null == set) {
             try {
                 return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
             }
         }
         try {
             return Integer.parseInt(set);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             try {
                 return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
-            } catch (final OXException oxe) {
+            } catch (OXException oxe) {
                 return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
             }
         }

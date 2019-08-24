@@ -2305,7 +2305,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (this.imapServer != null) {
             try {
                 return URIParser.parse(imapServer, URIDefaults.IMAP).getPort();
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 // Ignore
             }
         }
@@ -2323,7 +2323,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (this.imapServer != null) {
             try {
                 return URIParser.parse(imapServer, URIDefaults.IMAP).getHost();
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 // Ignore
             }
         }
@@ -2352,7 +2352,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             try {
                 final String scheme = URIParser.parse(imapServer, URIDefaults.IMAP).getScheme();
                 return null == scheme ? "imap://" : scheme + "://";
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 // Ignore
             }
         }
@@ -2408,7 +2408,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (this.smtpServer != null) {
             try {
                 return URIParser.parse(smtpServer, URIDefaults.SMTP).getHost();
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 // Ignore
             }
         }
@@ -2427,7 +2427,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             try {
                 final String scheme = URIParser.parse(smtpServer, URIDefaults.SMTP).getScheme();
                 return null == scheme ? "smtp://" : scheme + "://";
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 // Ignore
             }
         }
@@ -2472,7 +2472,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (this.smtpServer != null) {
             try {
                 return URIParser.parse(smtpServer, URIDefaults.SMTP).getPort();
-            } catch (final URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 // Ignore
             }
         }
@@ -4263,9 +4263,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
                 if (ob != null && !tname.equals("serialVersionUID") && !tname.equals("extensions") && !tname.endsWith("set")) {
                     ht.put(tname, ob);
                 }
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // ignore
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 // ignore
             }
         }
@@ -4313,9 +4313,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");
             }
         }

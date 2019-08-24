@@ -141,7 +141,7 @@ public final class GlobalActivator implements BundleActivator {
             closeableControlRegistration = context.registerService(CloseableControlService.class, ThreadLocalCloseableControl.getInstance(), null);
 
             logger.info("Global bundle successfully started");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw e;
         }
@@ -267,7 +267,7 @@ public final class GlobalActivator implements BundleActivator {
             OXExceptionInterceptorRegistration.dropInstance();
 
             logger.info("Global bundle successfully stopped");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw e;
         }

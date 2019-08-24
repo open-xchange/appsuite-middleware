@@ -97,7 +97,7 @@ public class ContextLoader implements Filter<Integer, Context> {
         List<Context> contexts;
         try {
             contexts = loadContexts(input);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new PipesAndFiltersException(e);
         }
         return contexts.toArray(new Context[contexts.size()]);
@@ -109,7 +109,7 @@ public class ContextLoader implements Filter<Integer, Context> {
         final Connection con;
         try {
             con = cache.getReadConnectionForConfigDB();
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             throw new StorageException(e);
         }
         final List<Context> retval = new ArrayList<Context>(cids.size());
@@ -146,13 +146,13 @@ public class ContextLoader implements Filter<Integer, Context> {
                 cs.setWriteDatabase(new Database(rs.getInt(8), dbSchema));
                 retval.add(cs);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
             try {
                 cache.pushReadConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 LOG.error("", e);
             }
         }

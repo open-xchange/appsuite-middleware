@@ -147,7 +147,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public String generateMailServerURL() {
                 try {
                     return acc.generateMailServerURL();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw new IllegalStateException(e);
                 }
             }
@@ -216,7 +216,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             public String generateTransportServerURL() {
                 try {
                     return acc.generateTransportServerURL();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw new IllegalStateException(e);
                 }
             }

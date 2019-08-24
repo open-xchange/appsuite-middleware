@@ -719,7 +719,7 @@ public class StatisticTools extends AbstractJMXTools {
                         sb.append(" = ");
                         try {
                             sb.append(mbc.getAttribute(objectName, attributeInfo.getName()));
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             sb.append('[');
                             sb.append(e.getMessage());
                             sb.append(']');
@@ -797,7 +797,7 @@ public class StatisticTools extends AbstractJMXTools {
                     sb.append(" = ");
                     try {
                         sb.append(mbeanServerConnection.getAttribute(objectName, attribute));
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         sb.append('[');
                         sb.append(e.getMessage());
                         sb.append(']');
@@ -968,7 +968,7 @@ public class StatisticTools extends AbstractJMXTools {
                     sb.append(LINE_SEPARATOR);
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             sb.append("com.openexchange.realtime");
             sb.append(" = ");
             sb.append('[');

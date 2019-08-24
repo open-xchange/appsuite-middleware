@@ -180,17 +180,17 @@ public final class IMAPSort {
                     }
                     return seqNums;
                 }
-            } catch (final FolderClosedException e) {
+            } catch (FolderClosedException e) {
                 /*
                  * Caused by a protocol error such as a socket error. No retry in this case.
                  */
                 throw e;
-            } catch (final StoreClosedException e) {
+            } catch (StoreClosedException e) {
                 /*
                  * Caused by a protocol error such as a socket error. No retry in this case.
                  */
                 throw e;
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 if (e.getNextException() instanceof ProtocolException) {
                     final ProtocolException protocolException = (ProtocolException) e.getNextException();
                     final Response response = protocolException.getResponse();
@@ -505,7 +505,7 @@ public final class IMAPSort {
                     if (jmsSearchTerm != null) {
                         try {
                             args.append(new SearchSequence(protocol).generateSequence(jmsSearchTerm, "UTF-8"));
-                        } catch (final IOException ioex) {
+                        } catch (IOException ioex) {
                             // should never happen
                             throw new WrappingProtocolException("", new SearchException(ioex.toString()));
                         } catch (MessagingException e) {
@@ -750,7 +750,7 @@ public final class IMAPSort {
                         while ((num = ir.readAtomString()) != null) {
                             try {
                                 list.add(Long.parseLong(num));
-                            } catch (final NumberFormatException e) {
+                            } catch (NumberFormatException e) {
                                 LOG.error("", e);
                                 throw new ProtocolException("Invalid UID: " + num, e);
                             }

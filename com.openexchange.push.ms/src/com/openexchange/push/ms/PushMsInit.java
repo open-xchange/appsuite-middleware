@@ -126,7 +126,7 @@ public class PushMsInit {
                         publishTopic.addMessageListener(listener);
                         this.publishTopic = publishTopic;
                         subscriber = listener;
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         throw MsExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 }

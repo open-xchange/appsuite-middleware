@@ -392,10 +392,10 @@ public final class MimeMessageUtility {
         }
         try {
             return future.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
@@ -575,7 +575,7 @@ public final class MimeMessageUtility {
     public static String urlDecode(String s) {
         try {
             return AJAXUtility.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             return s;
         }
     }
@@ -698,7 +698,7 @@ public final class MimeMessageUtility {
                 return getContentTypeFilename(part);
             }
             return retval;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return getContentTypeFilename(part);
         }
     }
@@ -715,7 +715,7 @@ public final class MimeMessageUtility {
         }
         try {
             return new ContentType(hdr).getParameter(PARAM_NAME);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }
@@ -1041,7 +1041,7 @@ public final class MimeMessageUtility {
         public void run() {
             try {
                 part.writeTo(pos);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 pin.setException(e);
             } finally {
                 Streams.close(pos);
@@ -1069,7 +1069,7 @@ public final class MimeMessageUtility {
         public void run() {
             try {
                 part.writeTo(pos);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 pin.setException(e);
             } finally {
                 Streams.close(pos);
@@ -1338,7 +1338,7 @@ public final class MimeMessageUtility {
         try {
             final String detectCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
             return MessageUtility.readStream(new UnsynchronizedByteArrayInputStream(bytes), detectCharset);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Cannot occur
             return rawHeader;
         }
@@ -1391,7 +1391,7 @@ public final class MimeMessageUtility {
                     } else if ("B".equalsIgnoreCase(m.group(2))) {
                         try {
                             sb.append(MimeUtility.decodeWord(m.group()));
-                        } catch (final ParseException e) {
+                        } catch (ParseException e) {
                             /*
                              * Retry with another library
                              */
@@ -1401,11 +1401,11 @@ public final class MimeMessageUtility {
                         sb.append(MimeUtility.decodeWord(m.group()));
                     }
                     lastMatch = m.end();
-                } catch (final UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException e) {
                     LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
-                } catch (final ParseException e) {
+                } catch (ParseException e) {
                     LOG.debug("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
@@ -1547,7 +1547,7 @@ public final class MimeMessageUtility {
     public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict) {
         try {
             return parseAddressList(addresslist, strict, false);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             /*
              * Cannot occur
              */
@@ -1621,7 +1621,7 @@ public final class MimeMessageUtility {
         InternetAddress[] addrs = null;
         try {
             addrs = QuotedInternetAddress.parse(al, strict);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             // Retry with single parse
             final List<String> sAddrs = splitAddrs(al);
             if (null == sAddrs || sAddrs.isEmpty()) {
@@ -1636,7 +1636,7 @@ public final class MimeMessageUtility {
                 }
                 // Hm... single parse did not fail, throw original exception instead
                 return addrList.toArray(new InternetAddress[0]);
-            } catch (final AddressException e1) {
+            } catch (AddressException e1) {
                 if (failOnError) {
                     for (final String sAddr : sAddrs) {
                         final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
@@ -1655,7 +1655,7 @@ public final class MimeMessageUtility {
                     addr.setPersonal(addr.getPersonal(), MailProperties.getInstance().getDefaultMimeCharset());
                 }
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             /*
              * Cannot occur since default charset is checked on global mail configuration initialization
              */
@@ -1836,7 +1836,7 @@ public final class MimeMessageUtility {
             final String replaced = P_REPL2.matcher(P_REPL1.matcher(phrase).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
             // final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
             return new StringBuilder(len + 2).append('"').append(encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return phrase;
@@ -2147,7 +2147,7 @@ public final class MimeMessageUtility {
                 }
             }
             return null;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Close on error
             close = true;
             throw e;
@@ -2198,7 +2198,7 @@ public final class MimeMessageUtility {
              */
             los.writeln();
             os.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -2242,9 +2242,9 @@ public final class MimeMessageUtility {
              */
             los.writeln();
             os.flush();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -2278,9 +2278,9 @@ public final class MimeMessageUtility {
              */
             los.writeln();
             os.flush();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -2545,7 +2545,7 @@ public final class MimeMessageUtility {
             final String fallback = "ISO-8859-1";
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback, errorOnNoContent, maxSize);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 LOG.warn("Mail part removed in the meantime.", e);
                 return null;
@@ -2830,7 +2830,7 @@ public final class MimeMessageUtility {
 
             // Return piped input stream getting filled with bytes from separate thread
             return pin;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -2929,7 +2929,7 @@ public final class MimeMessageUtility {
         }
         try {
             return CharsetDetector.detectCharset(p.getInputStream());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             /*
              * Try to get data from raw input stream
              */
@@ -3176,9 +3176,9 @@ public final class MimeMessageUtility {
                 return false;
             }
             return true;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -3190,7 +3190,7 @@ public final class MimeMessageUtility {
         final DataHandler dh;
         try {
             dh = part.getDataHandler();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
         if (dh == null) {
@@ -3233,9 +3233,9 @@ public final class MimeMessageUtility {
                     }
                 }
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -3304,7 +3304,7 @@ public final class MimeMessageUtility {
             final String[] tmp = priorityStr.split(" +");
             try {
                 priority = Integer.parseInt(tmp[0]);
-            } catch (final NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 LOG.debug("Assuming priority NORMAL due to strange X-Priority header: {}", priorityStr);
                 priority = MailMessage.PRIORITY_NORMAL;
             }
@@ -3448,7 +3448,7 @@ public final class MimeMessageUtility {
         }
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return getAddressHeaderNonStrict(addresses, addressArray);
         }
     }
@@ -3460,12 +3460,12 @@ public final class MimeMessageUtility {
             for (final InternetAddress internetAddress : addresses) {
                 try {
                     addressList.add(new QuotedInternetAddress(internetAddress.toString()));
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     addressList.add(internetAddress);
                 }
             }
             return addressList.toArray(new InternetAddress[addressList.size()]);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
             return getAddressesOnParseError(addressArray);
         }
@@ -3480,7 +3480,7 @@ public final class MimeMessageUtility {
     public static InternetAddress[] getAddressHeader(final String addresses) {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
             return PlainTextAddress.parseAddresses(addresses);
         }
@@ -3547,7 +3547,7 @@ public final class MimeMessageUtility {
         try {
             final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -3567,7 +3567,7 @@ public final class MimeMessageUtility {
     private static Multipart multipartFor(final MimeMessage message, final ContentType contentType, final boolean reparse) throws OXException {
         try {
             return multipartFor(message.getContent(), contentType);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -3581,13 +3581,13 @@ public final class MimeMessageUtility {
                 final String sContentType = message.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
                 message.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(sContentType).toString(true));
                 saveChanges(message);
-            } catch (final Exception x) {
+            } catch (Exception x) {
                 // Content-Type cannot be sanitized
                 org.slf4j.LoggerFactory.getLogger(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
                 throw MimeMailException.handleMessagingException(e);
             }
             return multipartFor(message, contentType, false);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -3610,9 +3610,9 @@ public final class MimeMessageUtility {
         if (content instanceof InputStream) {
             try {
                 return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -3622,9 +3622,9 @@ public final class MimeMessageUtility {
         if (content instanceof String) {
             try {
                 return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }

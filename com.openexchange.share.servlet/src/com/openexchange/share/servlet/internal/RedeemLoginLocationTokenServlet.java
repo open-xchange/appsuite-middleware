@@ -141,7 +141,7 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
             LOG.error("", e);
             try {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred");
-            } catch (final IOException ioe) {
+            } catch (IOException ioe) {
                 LOG.error("", ioe);
             }
         }

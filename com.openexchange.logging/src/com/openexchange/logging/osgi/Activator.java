@@ -298,7 +298,7 @@ public class Activator implements BundleActivator, Reloadable {
             ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logstashAppenderRegistration);
             this.managementTracker = tracker;
             tracker.open();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Could not register LogstashAppenderMBean", e);
         }
 

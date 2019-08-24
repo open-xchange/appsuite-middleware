@@ -130,7 +130,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                         pop3Config.isSecure(),
                         pop3Config.getPOP3Properties(),
                         pop3Config.getLogin());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 final Session ses = pop3Access.getSession();
                 final StringBuilder sb = new StringBuilder("Couldn't detect capabilities from POP3 server \"");
                 sb.append(server).append("\" with login \"");
@@ -167,7 +167,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
              */
             final long stamp = System.currentTimeMillis();
             pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, Long.toString(stamp));
-        } catch (final AlreadyLockedException e) {
+        } catch (AlreadyLockedException e) {
             LOG.debug("\n\tPOP3 account {} locked.", server, e);
         }
         return null;
@@ -184,7 +184,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         }
         try {
             return Long.valueOf(lastAccessedStr);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("", e);
             return null;
         }
@@ -202,7 +202,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         int minutes = 0;
         try {
             minutes = Integer.parseInt(frequencyStr);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("POP3 property \"{}\" is not a number: ``{}''. Using fallback of {} minutes.", POP3StoragePropertyNames.PROPERTY_REFRESH_RATE, frequencyStr, I(FALLBACK_MINUTES),
                 e);
             minutes = FALLBACK_MINUTES;

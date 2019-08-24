@@ -95,12 +95,12 @@ public abstract class ListCore extends ContextAbstraction {
 
                 pattern = getSearchPattern(parser);
                 parseAndSetExtensions(parser, null, auth);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
             ctxs = maincall(parser, pattern, auth);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
         }
 
@@ -111,10 +111,10 @@ public abstract class ListCore extends ContextAbstraction {
                 } else {
                     sysoutOutput(ctxs, parser);
                 }
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 printError(null, null, "Invalid data : " + e.getMessage(), parser);
                 sysexit(1);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }

@@ -119,7 +119,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 				}
 			}
 
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_SERVICE_UNAVAILABLE, e, new Object[0]);
 		} finally {
 		    Streams.flush(out);

@@ -125,10 +125,10 @@ public class BlackWhiteListServlet extends DataServlet {
             } else {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAMETER_ACTION, action);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", e);
             response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
         }

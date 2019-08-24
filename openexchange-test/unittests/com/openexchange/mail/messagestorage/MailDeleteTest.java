@@ -83,7 +83,7 @@ public final class MailDeleteTest extends MessageStorageTest {
         try {
             final long currentTimeMillis = System.currentTimeMillis();
             mailAccess.getMessageStorage().deleteMessages("INBOX", new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, true);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             fail("No Exception should be thrown here. Exception was " + e.getMessage());
         }
     }
@@ -100,7 +100,7 @@ public final class MailDeleteTest extends MessageStorageTest {
 
             final MailMessage message = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
             assertTrue("The message which should be deleted in the mixed delete test, isn't deleted.", null == message);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             fail("No Exception should be thrown here. Exception was " + e.getMessage());
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
@@ -115,7 +115,7 @@ public final class MailDeleteTest extends MessageStorageTest {
          */
         try {
             mailAccess.getMessageStorage().deleteMessages("NonExistingFolder1337", uids, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);

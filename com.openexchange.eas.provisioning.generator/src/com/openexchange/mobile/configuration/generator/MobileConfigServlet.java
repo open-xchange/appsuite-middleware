@@ -227,7 +227,7 @@ public class MobileConfigServlet extends HttpServlet {
                     return;
                 }
             }
-        } catch (final ConfigurationException e) {
+        } catch (ConfigurationException e) {
             LOG.error("A configuration exception occurred, which should not happen", e);
             printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
             return;
@@ -265,11 +265,11 @@ public class MobileConfigServlet extends HttpServlet {
         } else {
             try {
                 generateConfig(req, resp, login, device);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("A template exception occurred, which should not happen", e);
                 printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("A template exception occurred, which should not happen", e);
                 printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
@@ -312,14 +312,14 @@ public class MobileConfigServlet extends HttpServlet {
         ErrorMessage msg = null;
         try {
             msg = ErrorMessage.getErrorMessageByNumber(Integer.parseInt(string));
-        } catch (final NumberFormatException e1) {
+        } catch (NumberFormatException e1) {
             msg = ErrorMessage.MSG_INVALID_ERROR_PARAMETER;
         }
         resp.setContentType("text/html; charset=UTF-8");
         PrintWriter writer;
         try {
             writer = getWriterFromOutputStream(resp.getOutputStream());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("Unable to get output stream to write error message", e);
             return;
         }
@@ -391,7 +391,7 @@ public class MobileConfigServlet extends HttpServlet {
         final String[] usernameAndDomain;
         try {
             usernameAndDomain = splitUsernameAndDomain(login);
-        } catch (final ConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw new OXException(e);
         }
         if (Device.iPhone.equals(device)) {
@@ -415,10 +415,10 @@ public class MobileConfigServlet extends HttpServlet {
     private PrintWriter getWriterFromOutputStream(final ServletOutputStream outputStream) {
         try {
             return new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream), Charset.forName("UTF-8")));
-        } catch (final IllegalCharsetNameException e) {
+        } catch (IllegalCharsetNameException e) {
             LOG.error("", e);
             throw e;
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             LOG.error("", e);
             throw e;
         }
@@ -443,7 +443,7 @@ public class MobileConfigServlet extends HttpServlet {
             } else {
                 loadTemplate.process(generateHashMap(email, host, username, domain), printWriter);
             }
-        } catch (final ConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw new OXException(e);
         } finally {
             printWriter.close();

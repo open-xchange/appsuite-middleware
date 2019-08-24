@@ -128,7 +128,7 @@ public abstract class LockHelper {
 			final int lockId = saveLock(lock);
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -170,7 +170,7 @@ public abstract class LockHelper {
 				}
 			}
 			setLocks(cleanedLocks);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -209,7 +209,7 @@ public abstract class LockHelper {
     private ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

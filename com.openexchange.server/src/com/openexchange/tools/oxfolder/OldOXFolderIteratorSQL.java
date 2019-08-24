@@ -199,10 +199,10 @@ public final class OldOXFolderIteratorSQL {
             stmt.setInt(pos++, FolderObject.SYSTEM_TYPE);
             stmt.setInt(pos, 0);
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -285,10 +285,10 @@ public final class OldOXFolderIteratorSQL {
                 }
             }
             return new FolderObjectIterator(list, false);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -343,10 +343,10 @@ public final class OldOXFolderIteratorSQL {
                 stmt.setLong(pos, since.getTime());
             }
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -395,10 +395,10 @@ public final class OldOXFolderIteratorSQL {
                 stmt.setLong(pos, since.getTime());
             }
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -437,10 +437,10 @@ public final class OldOXFolderIteratorSQL {
                 stmt.setLong(pos, since.getTime());
             }
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -575,7 +575,7 @@ public final class OldOXFolderIteratorSQL {
                 }
             }
             return new FolderObjectIterator(q, false);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Throwable t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
@@ -631,7 +631,7 @@ public final class OldOXFolderIteratorSQL {
                 String creatorDisplayName;
                 try {
                     creatorDisplayName = userStore.getUser(fo.getCreatedBy(), ctx).getDisplayName();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                         throw e;
                     }
@@ -780,10 +780,10 @@ public final class OldOXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos, type == FolderObject.SHARED ? FolderObject.PRIVATE : type);
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -823,7 +823,7 @@ public final class OldOXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos, module);
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Throwable t) {
@@ -855,10 +855,10 @@ public final class OldOXFolderIteratorSQL {
             stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
             stmt.setLong(pos, since.getTime());
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -891,10 +891,10 @@ public final class OldOXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setLong(pos, since.getTime());
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw e;
         } catch (final Throwable t) {
@@ -933,10 +933,10 @@ public final class OldOXFolderIteratorSQL {
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setLong(pos, since.getTime());
             rs = stmt.executeQuery();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw e;
         } catch (final Throwable t) {

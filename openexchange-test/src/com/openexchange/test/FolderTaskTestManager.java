@@ -96,7 +96,7 @@ public class FolderTaskTestManager extends FolderTestManager {
                     org.slf4j.LoggerFactory.getLogger(FolderTestManager.class).warn("Unable to delete the folder with id {} in folder {} with name '{}': {}", I(folder.getObjectID()), I(folder.getParentFolderID()), folder.getFolderName(), getLastResponse().getException().getMessage());
                 }
             }
-        } catch (final Exception e){
+        } catch (Exception e){
             doExceptionHandling(e, "clean-up");
         }
     }

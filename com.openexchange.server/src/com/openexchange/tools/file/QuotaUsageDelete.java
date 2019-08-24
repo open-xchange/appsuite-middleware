@@ -82,7 +82,7 @@ public class QuotaUsageDelete extends ContextDelete {
             stmt = writeCon.prepareStatement("DELETE FROM filestore_usage WHERE cid=?");
             stmt.setInt(1, sqlDelEvent.getContext().getContextId());
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

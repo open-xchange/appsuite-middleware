@@ -203,7 +203,7 @@ public class OXContextRestoreException extends Exception {
             if (null != message) {
                 try {
                     return String.format(message, (Object[]) this.msgArgs);
-                } catch (final IllegalFormatException e) {
+                } catch (IllegalFormatException e) {
                     System.err.println("Illegal message format:" + e.getMessage());
                 }
             }
@@ -219,7 +219,7 @@ public class OXContextRestoreException extends Exception {
             if (null != message) {
                 try {
                     return String.format(message, (Object[]) this.msgArgs);
-                } catch (final IllegalFormatException e) {
+                } catch (IllegalFormatException e) {
                     System.err.println("Illegal message format:" + e.getMessage());
                 }
             }

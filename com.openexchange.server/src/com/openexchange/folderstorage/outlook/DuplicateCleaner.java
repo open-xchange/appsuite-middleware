@@ -137,12 +137,12 @@ public final class DuplicateCleaner {
                     }
                     actionPerformed = true;
                     ids.add(folderId);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
                     LOG.warn("Deleting folder {} failed for tree {}", folderId, treeId, e);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
@@ -160,13 +160,13 @@ public final class DuplicateCleaner {
                 }
                 con.commit(); // COMMIT
                 actionPerformed = true;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 Databases.rollback(con);
                 throw e;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 Databases.rollback(con);
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 Databases.rollback(con);
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {

@@ -145,7 +145,7 @@ public class MessagingFolderAddress {
     public void setAccount(final String account) throws OXException {
         try {
             this.account = Integer.parseInt(account);
-        } catch (final NumberFormatException x) {
+        } catch (NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("account", account);
         }
     }

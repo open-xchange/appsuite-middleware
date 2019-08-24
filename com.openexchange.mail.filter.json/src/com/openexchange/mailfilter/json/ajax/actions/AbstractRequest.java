@@ -148,7 +148,7 @@ public abstract class AbstractRequest {
         try {
             final String username = getUsername();
             return new Credentials(loginName, password, userId, contextId, username, subject, oauthToken);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return new Credentials(loginName, password, userId, contextId, null, subject, oauthToken);
         }
     }

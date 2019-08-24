@@ -92,7 +92,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                         try {
                             mac.clearUserEntries(userId.intValue(), contextId.intValue());
                             // AttachmentTokenRegistry.getInstance().dropFor(session);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("Unable to clear cached mail access for user {} in context {}", userId, contextId, e);
                         }
                     }

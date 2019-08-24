@@ -816,7 +816,7 @@ public final class HttpClients {
                 if (totalStats.getLeased() == 0 && totalStats.getPending() == 0  && totalStats.getAvailable() == 0) {
                     stop();
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 stop();
             }
         }
@@ -845,7 +845,7 @@ public final class HttpClients {
                         try {
                             long b = Long.parseLong(value) * 1000;
                             timeout = (timeout <= b) ? timeout : b;
-                        } catch (final NumberFormatException e) {
+                        } catch (NumberFormatException e) {
                             // Ignore
                         }
                     }

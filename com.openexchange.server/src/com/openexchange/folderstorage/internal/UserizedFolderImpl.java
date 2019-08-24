@@ -188,7 +188,7 @@ public class UserizedFolderImpl implements UserizedFolder {
             clone.creationDateUTC = null == creationDateUTC ? null : new Date(creationDateUTC.getTime());
             clone.locale = (Locale) (null == locale ? null : locale.clone());
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

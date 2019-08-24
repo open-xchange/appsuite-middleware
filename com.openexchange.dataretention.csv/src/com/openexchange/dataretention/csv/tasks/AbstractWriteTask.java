@@ -189,13 +189,13 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
              * Wait for file being created and its starting header line written
              */
             future.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             REFERENCE.set(null);
             throw DataRetentionExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             REFERENCE.set(null);
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -217,13 +217,13 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             ensureExistence();
             // Write CSV line to file
             writeCSVLine(getCSVLine());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             LOG.error("", e);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
     }

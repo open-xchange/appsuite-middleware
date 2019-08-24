@@ -137,7 +137,7 @@ public final class MailSessionEventHandler implements EventHandler {
                         }
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Error while handling session event \"{}\"", topic, e);
             }
         }
@@ -157,7 +157,7 @@ public final class MailSessionEventHandler implements EventHandler {
              */
             try {
                 MailMessageCache.getInstance().removeUserMessages(userId, contextId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
             LOG.debug("All session-related caches cleared for removed session {}", session.getSessionID());

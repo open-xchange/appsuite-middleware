@@ -300,7 +300,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
              * Transport message
              */
             transport(smtpMessage, smtpMessage.getAllRecipients(), getSMTPSession(smtpConfig), smtpConfig);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         }
     }

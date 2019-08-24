@@ -144,13 +144,13 @@ public final class SessionCompositionParameters implements CompositionParameters
                         if (sendAddr != null && sendAddr.length() > 0) {
                             try {
                                 sender = new QuotedInternetAddress(sendAddr, true);
-                            } catch (final AddressException e) {
+                            } catch (AddressException e) {
                                 MimeMessageFiller.LOG.error("Default send address cannot be parsed", e);
                             }
                         }
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 /*
                  * Conflict during look-up
                  */

@@ -145,7 +145,7 @@ public class ReportingMBean implements DynamicMBean {
         final ConfigurationService configurationService;
         try {
             configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
@@ -168,7 +168,7 @@ public class ReportingMBean implements DynamicMBean {
             boolean adminMailLoginEnabled = configurationService.getBoolProperty(COM_OPENEXCHANGE_MAIL_ADMIN_MAIL_LOGIN_ENABLED, false);
             final CompositeDataSupport value = new CompositeDataSupport(configurationRow, CONFIGURATION_NAMES, new Object[] { COM_OPENEXCHANGE_MAIL_ADMIN_MAIL_LOGIN_ENABLED, B(adminMailLoginEnabled) });
             configuration.put(value);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe);
@@ -188,7 +188,7 @@ public class ReportingMBean implements DynamicMBean {
                 final Connection connection;
                 try {
                     connection = dbService.get(readPool, schema);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                     throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
                 }
@@ -238,7 +238,7 @@ public class ReportingMBean implements DynamicMBean {
                             rc.setAccessCombinations(accCombs);
                         }
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.error("", e);
                     throw new MBeanException(e, e.getMessage());
                 } finally {
@@ -247,7 +247,7 @@ public class ReportingMBean implements DynamicMBean {
                 }
             }
             return allctx;
-        } catch (final MBeanException e) {
+        } catch (MBeanException e) {
             LOG.error("", e);
             throw e;
         } catch (OXException | SQLException e) {
@@ -298,7 +298,7 @@ public class ReportingMBean implements DynamicMBean {
                 final Connection connection;
                 try {
                     connection = dbService.get(readPool, schema);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                     throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
                 }
@@ -331,7 +331,7 @@ public class ReportingMBean implements DynamicMBean {
                     }
                     rs.close();
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.error("", e);
                     throw new MBeanException(e, e.getMessage());
                 } finally {
@@ -345,7 +345,7 @@ public class ReportingMBean implements DynamicMBean {
                 total.put(value);
             }
             return total;
-        } catch (final MBeanException e) {
+        } catch (MBeanException e) {
             LOG.error("", e);
             throw e;
         } catch (OpenDataException | OXException | SQLException e) {
@@ -381,7 +381,7 @@ public class ReportingMBean implements DynamicMBean {
                 final CompositeDataSupport value = new CompositeDataSupport(detailRow, DETAIL_NAMES, new Object[] { c.getId(), c.getAdminPermission(), c.getNumUsers(), c.getAge(), c.getCreated(), moduleAccessCombinations });
                 detail.put(value);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe);
@@ -402,7 +402,7 @@ public class ReportingMBean implements DynamicMBean {
             try {
                 final Object value = getAttribute(attributes[i]);
                 resultList.add(new Attribute(attributes[i], value));
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
             }
         }
@@ -461,7 +461,7 @@ public class ReportingMBean implements DynamicMBean {
             final OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport("Detail", "Detailed report about contexts and users", detailType, true, false, false);
             final OpenMBeanAttributeInfo configurationAttribute = new OpenMBeanAttributeInfoSupport("Configuration", "Configuration report", detailType, true, false, false);
             return new OpenMBeanInfoSupport(this.getClass().getName(), "Context, user and server reporting.", new OpenMBeanAttributeInfo[] { totalAttribute, macsAttribute, detailAttribute, configurationAttribute }, null, null, null);
-        } catch (final OpenDataException e) {
+        } catch (OpenDataException e) {
             LOG.error("", e);
         }
         return null;

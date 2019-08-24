@@ -314,7 +314,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                     while (q.size() == 0) {
                         notEmpty.await();
                     }
-                } catch (final InterruptedException ie) {
+                } catch (InterruptedException ie) {
                     notEmpty.signal(); // propagate to non-interrupted thread
                     throw ie;
                 }
@@ -342,7 +342,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 //                while (q.size() == 0) {
 //                    try {
 //                        nanos = notEmpty.awaitNanos(nanos);
-//                    } catch (final InterruptedException ie) {
+//                    } catch (InterruptedException ie) {
 //                        notEmpty.signal(); // propagate to non-interrupted thread
 //                        throw ie;
 //                    }
@@ -373,7 +373,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                     }
                     try {
                         nanos = notEmpty.awaitNanos(nanos);
-                    } catch (final InterruptedException ie) {
+                    } catch (InterruptedException ie) {
                         notEmpty.signal(); // propagate to non-interrupted thread
                         throw ie;
                     }

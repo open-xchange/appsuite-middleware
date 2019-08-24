@@ -110,7 +110,7 @@ public final class JumpActivator extends HousekeepingActivator {
             registerService(JumpService.class, jumpServiceImpl, null);
 
             logger.info("Bundle \"com.openexchange.jump\" successfully started");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Failed starting bundle \"com.openexchange.jump\"");
             throw e;
         }

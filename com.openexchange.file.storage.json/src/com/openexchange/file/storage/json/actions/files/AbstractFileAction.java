@@ -199,7 +199,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
                 array.put(object);
             }
             return new AJAXRequestResult(array);
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
     }

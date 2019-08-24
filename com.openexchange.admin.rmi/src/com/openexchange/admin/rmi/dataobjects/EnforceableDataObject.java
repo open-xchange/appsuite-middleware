@@ -164,13 +164,13 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
                 }
             }
             return this.unset_members.isEmpty();
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw new EnforceableDataObjectException(e);
-        } catch (final NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             throw new EnforceableDataObjectException("No such member: " + e.getMessage());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new EnforceableDataObjectException(e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new EnforceableDataObjectException(e);
         }
     }
@@ -284,15 +284,15 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
                     throw new InvalidDataException("Field \"" + name + "\" is a mandatory field and can't be set to null.");
                 }
             }
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw new InvalidDataException(e);
-        } catch (final NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             throw new InvalidDataException("No such method " + e.getMessage());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new InvalidDataException(e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new InvalidDataException(e);
-        } catch (final InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             throw new InvalidDataException(e);
         }
     }

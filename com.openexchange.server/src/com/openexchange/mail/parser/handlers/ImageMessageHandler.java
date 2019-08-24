@@ -303,7 +303,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
                 nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
                     MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {

@@ -204,7 +204,7 @@ public class HashCalculator {
                 LOG.trace(traceBuilder.toString());
             }
             return hash;
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             LOG.error("", e);
         }
         return "";

@@ -144,7 +144,7 @@ public class ConfigTools {
         }
         try {
             return Long.parseLong(property.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }

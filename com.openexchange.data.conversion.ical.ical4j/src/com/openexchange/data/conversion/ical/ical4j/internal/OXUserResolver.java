@@ -84,7 +84,7 @@ public class OXUserResolver implements UserResolver {
         for (final String mail : mails) {
             try {
                 users.add(userService.searchUser(mail, ctx));
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 if (!LdapExceptionCode.NO_USER_BY_MAIL.equals(x)) {
                     throw x;
                 }

@@ -444,7 +444,7 @@ public class EventClient {
             FolderObject parentFolderObj = null;
             try {
                 parentFolderObj = getFolder(folderId, ctx);
-            } catch (final OXException exc) {
+            } catch (OXException exc) {
                 if (exc.isGeneric(Generic.NO_PERMISSION)) {
                     LOG.error("cannot load folder", exc);
                 } else {

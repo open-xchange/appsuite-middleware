@@ -91,7 +91,7 @@ public class PushHandler implements EventHandler {
             }
             try {
                 event = (CommonEvent) obj;
-            } catch (final ClassCastException cce) {
+            } catch (ClassCastException cce) {
                 LOG.warn("Unexpected type", cce);
                 return;
             }
@@ -103,7 +103,7 @@ public class PushHandler implements EventHandler {
         try {
             final ContextService contextService = PushServiceRegistry.getServiceRegistry().getService(ContextService.class);
             ctx = contextService.getContext(contextId);
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.error("cannot resolve context id: {}", Integer.valueOf(contextId), exc);
             return;
         }
@@ -148,7 +148,7 @@ public class PushHandler implements EventHandler {
         }
         try {
             PushOutputQueue.add(new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         } catch (final Throwable t) {
             LOG.error("", t);

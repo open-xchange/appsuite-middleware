@@ -90,7 +90,7 @@ public class IndexTest {
         try {
             Index.findByName(con, "test_index", "named_index");
             fail("Didn't remove index `named_index`");
-        } catch (final IndexNotFoundException x) {
+        } catch (IndexNotFoundException x) {
             assertTrue(true);
         }
     }

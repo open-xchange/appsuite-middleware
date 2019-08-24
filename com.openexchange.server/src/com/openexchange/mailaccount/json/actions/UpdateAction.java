@@ -258,7 +258,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                         stmt.setInt(pos++, id);
                         stmt.setString(pos++, "pop3.lastaccess");
                         stmt.executeUpdate();
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     } finally {
                         closeSQLStuff(null, stmt);
@@ -267,9 +267,9 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
                 wcon.commit();
                 rollback = 2;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollback > 0) {

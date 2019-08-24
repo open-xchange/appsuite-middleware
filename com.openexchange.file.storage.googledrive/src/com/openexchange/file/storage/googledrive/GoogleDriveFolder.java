@@ -158,7 +158,7 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

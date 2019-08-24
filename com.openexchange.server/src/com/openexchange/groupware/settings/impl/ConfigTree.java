@@ -265,7 +265,7 @@ public final class ConfigTree {
     public void removePreferencesItem(final PreferencesItemService item) {
         try {
             removeSharedValue(getSettingByPath(tree, item.getPath()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.warn("", e);
             } else {
@@ -462,9 +462,9 @@ public final class ConfigTree {
             for (final PreferencesItemService item : items) {
                 addPreferencesItem(item);
             }
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             throw SettingExceptionCodes.INIT.create(e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw SettingExceptionCodes.INIT.create(e);
         }
     }
@@ -483,10 +483,10 @@ public final class ConfigTree {
             for (final PreferencesItemService item : items) {
                 removePreferencesItem(item);
             }
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             final OXException se = SettingExceptionCodes.INIT.create(e);
             LOG.error("", se);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             final OXException se = SettingExceptionCodes.INIT.create(e);
             LOG.error("", se);
         }

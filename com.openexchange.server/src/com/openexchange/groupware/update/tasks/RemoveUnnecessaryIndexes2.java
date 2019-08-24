@@ -73,7 +73,7 @@ public final class RemoveUnnecessaryIndexes2 extends SimpleUpdateTask {
             try {
                 stmt = con.createStatement();
                 stmt.execute("ALTER TABLE `virtualBackupPermission` DROP INDEX `cid`");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             } finally {
                 closeSQLStuff(null, stmt);
@@ -85,7 +85,7 @@ public final class RemoveUnnecessaryIndexes2 extends SimpleUpdateTask {
             try {
                 stmt = con.createStatement();
                 stmt.execute("ALTER TABLE `virtualPermission` DROP INDEX `cid`;");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             } finally {
                 closeSQLStuff(null, stmt);
@@ -97,7 +97,7 @@ public final class RemoveUnnecessaryIndexes2 extends SimpleUpdateTask {
             try {
                 stmt = con.createStatement();
                 stmt.execute("ALTER TABLE `reminder` DROP INDEX `cid`;");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             } finally {
                 closeSQLStuff(null, stmt);

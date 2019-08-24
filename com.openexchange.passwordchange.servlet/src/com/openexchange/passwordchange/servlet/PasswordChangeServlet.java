@@ -117,7 +117,7 @@ public final class PasswordChangeServlet extends SessionServlet {
         Tools.disableCaching(resp);
         try {
             actionGet(req, resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.error("PasswordChangeServlet.doGet()", e);
             handleException(req, resp, e);
         }
@@ -139,17 +139,17 @@ public final class PasswordChangeServlet extends SessionServlet {
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.error("PasswordChangeServlet.doPut()", e);
             handleException(req, resp, e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOGGER.error("PasswordChangeServlet.doPut()", e);
             final Response response = new Response();
             response.setException(PasswordChangeServletExceptionCode.JSON_ERROR.create(e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
-            } catch (final JSONException e1) {
+            } catch (JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
                 throw se;
@@ -165,7 +165,7 @@ public final class PasswordChangeServlet extends SessionServlet {
         final PrintWriter writer = resp.getWriter();
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e1) {
+        } catch (JSONException e1) {
             final ServletException se = new ServletException(e1);
             se.initCause(e1);
             throw se;
@@ -248,7 +248,7 @@ public final class PasswordChangeServlet extends SessionServlet {
 
                 passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies, req.getRemoteAddr()));
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.error("", e);
             response.setException(e);
         }

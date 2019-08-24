@@ -294,7 +294,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     private <T> T handle(ConsistencyPerformer<T> performer) throws RemoteException {
         try {
             return performer.perform(services.getServiceSafe(ConsistencyService.class));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new RemoteException(e.getMessage(), wrapMe);

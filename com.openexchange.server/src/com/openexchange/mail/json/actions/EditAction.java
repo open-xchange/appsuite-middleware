@@ -132,7 +132,7 @@ public final class EditAction extends AbstractMailAction {
                 InternetAddress from;
                 try {
                     from = MessageParser.getFromField(jsonMailObj)[0];
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
                 int accountId = resolveFrom2Account(session, from, false, true);
@@ -178,15 +178,15 @@ public final class EditAction extends AbstractMailAction {
             AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
             result.addWarnings(warnings);
             return result;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final String uid = getUidFromException(e);
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
                 throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
             }
             throw e;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

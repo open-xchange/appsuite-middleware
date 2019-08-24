@@ -99,7 +99,7 @@ public class PutTest extends ActionTestCase {
         try {
             action.perform(req, res);
             assertFalse("Could upload", true);
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, x.getStatus());
         }
     }
@@ -122,7 +122,7 @@ public class PutTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected 409 CONFLICT");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_CONFLICT, x.getStatus());
         }
 

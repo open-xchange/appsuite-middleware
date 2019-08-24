@@ -105,7 +105,7 @@ public class Helper {
                 try {
                     final Charset charset = Charset.forName(encoding);
                     encoded = URLCoder.encode(orig, charset);
-                } catch (final UnsupportedCharsetException uce) {
+                } catch (UnsupportedCharsetException uce) {
                     throw new UnsupportedEncodingException(uce.getMessage());
                 }
             } else {

@@ -125,20 +125,20 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 				return rs.getInt(1);
 			}
 			return -1;
-		} catch (final SQLException x) {
+		} catch (SQLException x) {
 			throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if(stmt != null) {
 				try {
 					stmt.close();
-				} catch (final SQLException e1) {
+				} catch (SQLException e1) {
 					LOG.debug("",e1);
 				}
 			}
 			if(rs != null) {
 				try {
 					rs.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					LOG.debug("",e);
 				}
 			}
@@ -218,17 +218,17 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			writeCon.commit();
 			exists = false;
 			factory.invalidate(getUrl(), getId()	, ((resource.isCollection()) ? Type.COLLECTION : Type.RESOURCE));
-		} catch (final SQLException x) {
+		} catch (SQLException x) {
 		    rollback(writeCon);
             throw WebdavProtocolException.generalError(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    rollback(writeCon);
 			throw WebdavProtocolException.generalError(getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
 			if (stmt != null) {
 				try {
 					stmt.close();
-				} catch (final SQLException e) {
+				} catch (SQLException e) {
 					LOG.debug("",e);
 				}
 			}
@@ -326,7 +326,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			dumpToDB();
 			lockHelper.addLock(lock);
 			lockHelper.dumpLocksToDB();
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -407,10 +407,10 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			stmt.executeUpdate();
 			setId(id);
 			writeCon.commit();
-		} catch (final SQLException x) {
+		} catch (SQLException x) {
 		    rollback(writeCon);
 			throw x;
-		} catch (final OXException e) {
+		} catch (OXException e) {
 		    rollback(writeCon);
 			throw e;
 		} finally {

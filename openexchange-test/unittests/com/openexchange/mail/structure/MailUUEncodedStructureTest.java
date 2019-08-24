@@ -95,7 +95,7 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
             final JSONObject headers = jsonMailObject.getJSONObject("headers");
             final JSONObject ct = headers.getJSONObject("content-type");
             assertEquals("Unexpected content type", "text/plain", ct.get("type"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -130,7 +130,7 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
             assertEquals("Unexpected content type", "multipart/mixed", ct.get("type"));
 
             assertEquals("Unexpected number of parts", 2, jsonBodyObject.length());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

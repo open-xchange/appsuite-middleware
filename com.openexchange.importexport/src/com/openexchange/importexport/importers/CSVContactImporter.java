@@ -155,7 +155,7 @@ public class CSVContactImporter extends AbstractImporter {
         FolderObject fo = null;
         try {
             fo = getFolderObject(session, folder);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
         if (fo == null) {
@@ -172,7 +172,7 @@ public class CSVContactImporter extends AbstractImporter {
             perm = fo.getEffectiveUserPermission(
                 session.getUserId(),
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
         return perm.canCreateObjects();
@@ -208,7 +208,7 @@ public class CSVContactImporter extends AbstractImporter {
                     throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
                 }
 
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
             } finally {
                 Streams.close(input);
@@ -328,7 +328,7 @@ public class CSVContactImporter extends AbstractImporter {
             }
             result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
             result.setDate(new Date());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.getCategory() != Category.CATEGORY_TRUNCATED || (e.getCategory() == Category.CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)) {
                 result.setException(wrapException(e, lineNumber, session));
                 addErrorInformation(result, lineNumber, fields);

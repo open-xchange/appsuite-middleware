@@ -123,12 +123,12 @@ public final class UserCopyServiceImpl implements UserCopyService {
                 if (null != copiedObjects) {
                     copied.put(task.getObjectName(), copiedObjects);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 while (!executed.isEmpty()) {
                     executed.pop().done(copied, true);
                 }
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 while (!executed.isEmpty()) {
                     executed.pop().done(copied, true);
                 }

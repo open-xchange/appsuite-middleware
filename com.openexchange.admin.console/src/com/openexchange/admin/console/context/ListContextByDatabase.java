@@ -124,7 +124,7 @@ public class ListContextByDatabase extends ContextAbstraction {
             }
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
     }

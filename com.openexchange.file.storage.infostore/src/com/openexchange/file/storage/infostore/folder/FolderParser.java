@@ -132,7 +132,7 @@ public final class FolderParser {
             folder.setMeta(fsFolder.getMeta());
 
             return folder;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -150,7 +150,7 @@ public final class FolderParser {
                             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(INFOSTORE);
                         }
                         contentType = ct;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         throw e;
                     }
                 }

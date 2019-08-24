@@ -96,7 +96,7 @@ public abstract class CreateCore extends ResourceAbstraction {
 
             displayCreatedMessage(String.valueOf(id), ctxid, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
             sysexit(1);
         }

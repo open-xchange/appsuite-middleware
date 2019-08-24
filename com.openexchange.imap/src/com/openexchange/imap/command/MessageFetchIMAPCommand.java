@@ -488,14 +488,14 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                     msg.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
                 }
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             /*
              * Discard corrupt message
              */
             final OXException imapExc = MimeMailException.handleMessagingException(e);
             LOG.error("Message #{} discarded", I(msg.getMessageNumber()), imapExc);
             error = true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * Discard corrupt message
              */
@@ -727,7 +727,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             }
             try {
                 msg.setContentType(new ContentType(sb.toString()));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 logger.warn("", e);
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
             }

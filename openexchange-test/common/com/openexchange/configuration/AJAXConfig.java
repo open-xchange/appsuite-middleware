@@ -98,7 +98,7 @@ public class AJAXConfig extends AbstractConfig {
         String property;
         try {
             property = getProperty(key);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return fallBack;
         }
         return property;

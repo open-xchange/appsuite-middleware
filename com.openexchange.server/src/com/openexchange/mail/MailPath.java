@@ -283,7 +283,7 @@ public final class MailPath implements Cloneable, Serializable {
     public Object clone() {
         try {
             return super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             /*
              * Cannot occur since Cloneable is implemented
              */

@@ -98,7 +98,7 @@ public class Bug8681forCSV extends AbstractContactTest {
             imp.canImport(sessObj, Format.CSV, _folders(), null);
             imp.importData(sessObj, Format.CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
             fail("Could write contact without rights to use Contact module");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue(e.similarTo(ImportExportExceptionCodes.CONTACTS_DISABLED.create()));
         } finally {
             override.takeBack();
@@ -129,7 +129,7 @@ public class Bug8681forCSV extends AbstractContactTest {
             imp.canImport(sessObj, Format.OUTLOOK_CSV, _folders(), null);
             imp.importData(sessObj, Format.OUTLOOK_CSV, new ByteArrayInputStream(csv.getBytes()), _folders(), null);
             fail("Could write contact without rights to use Contact module");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue(e.similarTo(ImportExportExceptionCodes.CONTACTS_DISABLED));
         } finally {
             override.takeBack();

@@ -51,7 +51,7 @@ public class IfMatchTest extends ActionTestCase {
             action.setNext(mockAction);
             action.perform(req, res);
             fail("Expected precondition exception");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -109,7 +109,7 @@ public class IfMatchTest extends ActionTestCase {
             action.setNext(mockAction);
             action.perform(req, res);
             fail("Expected precondition exception");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -149,7 +149,7 @@ public class IfMatchTest extends ActionTestCase {
             action.setNext(mockAction);
             action.perform(req, res);
             fail("Expected precondition exception");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -172,7 +172,7 @@ public class IfMatchTest extends ActionTestCase {
             action.setNext(mockAction);
             action.perform(req, res);
             fail("Expected precondition exception");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -211,7 +211,7 @@ public class IfMatchTest extends ActionTestCase {
             action.setNext(mockAction);
             action.perform(req, res);
             fail("Expected precondition exception");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }

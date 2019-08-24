@@ -299,7 +299,7 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
                     JSONValue jValue = (JSONValue) coerced;
                     stmt.setBinaryStream(parameterIndex, jValue.getStream(true)); // meta
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw new SQLException("Meta information could not be coerced to a JSON equivalent.", e);
             }
         }

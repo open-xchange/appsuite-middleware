@@ -120,7 +120,7 @@ public final class MessagingFolderIdentifier implements Serializable {
     public static MessagingFolderIdentifier parseFQN(final String identifier) {
         try {
             return new MessagingFolderIdentifier(identifier);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return null;
         }
     }

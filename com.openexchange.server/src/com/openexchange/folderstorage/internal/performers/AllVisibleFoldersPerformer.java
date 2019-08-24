@@ -148,12 +148,12 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
             }
 
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

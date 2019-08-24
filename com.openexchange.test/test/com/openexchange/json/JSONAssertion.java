@@ -145,7 +145,7 @@ public class JSONAssertion implements JSONCondition {
         for (int i = 0; i < length; i++) {
             try {
                 list.add(getFrom(jsonArray.get(i)));
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 // Ignore
             }
         }
@@ -411,7 +411,7 @@ public class JSONAssertion implements JSONCondition {
                     return false;
                 }
                 return true;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 return false;
             }
         }
@@ -460,7 +460,7 @@ public class JSONAssertion implements JSONCondition {
             try {
                 final Object subObject = ((JSONObject)o).get(key);
                 return assertion.validate(subObject);
-            } catch (final JSONException x) {
+            } catch (JSONException x) {
                 return false;
             }
         }
@@ -487,7 +487,7 @@ public class JSONAssertion implements JSONCondition {
             try {
                 final Object subObject = ((JSONObject)o).get(key);
                 return assertion.validate(subObject);
-            } catch (final JSONException x) {
+            } catch (JSONException x) {
                 return false;
             }
         }
@@ -517,7 +517,7 @@ public class JSONAssertion implements JSONCondition {
                     Object actual;
                     try {
                         actual = arr.get(i);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         complaint = e.toString();
                         return false;
                     }
@@ -536,7 +536,7 @@ public class JSONAssertion implements JSONCondition {
                     Object v;
                     try {
                         v = arr.get(i);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         complaint = e.toString();
                         return false;
                     }

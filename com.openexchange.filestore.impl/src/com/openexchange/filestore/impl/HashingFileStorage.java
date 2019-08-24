@@ -124,7 +124,7 @@ public class HashingFileStorage extends DefaultFileStorage {
             filePath = new File(path, filestorePath[1]);
             try {
                 out = new FileOutputStream(filePath);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 throw FileStorageCodes.FILE_NOT_FOUND.create(e, filePath.toString());
             }
 
@@ -138,7 +138,7 @@ public class HashingFileStorage extends DefaultFileStorage {
             String identifier = new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
             success = true;
             return identifier;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(file, out);

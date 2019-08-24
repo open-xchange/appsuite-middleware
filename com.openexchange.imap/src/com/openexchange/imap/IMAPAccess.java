@@ -429,7 +429,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Error while closing IMAP folder storage: {}", e.getMessage()).toString(), e));
             } finally {
                 folderStorage = null;
@@ -438,7 +438,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (messageStorage != null) {
             try {
                 messageStorage.releaseResources();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Error while closing IMAP message storage: {}", e.getMessage()).toString(), e));
             } finally {
                 messageStorage = null;
@@ -458,7 +458,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (folderStorage != null) {
                 try {
                     folderStorage.releaseResources();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("Error while closing IMAP folder storage,", e);
                 }
             }
@@ -466,7 +466,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             if (null != messageStorage) {
                 try {
                     messageStorage.releaseResources();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("Error while closing IMAP message storage.", e);
                 }
             }
@@ -608,7 +608,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 retval = -1;
             }
             return retval;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, getMailConfig(), session);
         }
     }
@@ -668,10 +668,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 } catch (@SuppressWarnings("unused") MessagingException e) {
                     // Ignore
                 }
-            } catch (final AuthenticationFailedException e) {
+            } catch (AuthenticationFailedException e) {
                 warnings.add(MailExceptionCode.PING_FAILED_AUTH.create(e, config.getServer(), config.getLogin()));
                 throw MimeMailException.handleMessagingException(e, config, session);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
                     List<Object> displayArgs = new ArrayList<>(2);
                     displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
@@ -701,13 +701,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (null != imapStore) {
                     try {
                         imapStore.close();
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         LOG.warn("", e);
                     }
                 }
             }
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.debug("Ping to IMAP server \"{}\" failed", config.getServer(), e);
             return false;
         }
@@ -823,7 +823,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             maxCount = getMaxCount();
             try {
                 imapStore = connectIMAPStore(maxCount);
-            } catch (final AuthenticationFailedException e) {
+            } catch (AuthenticationFailedException e) {
                 if (accountId != MailAccount.DEFAULT_ID) {
                     int accountId = this.accountId;
                     Session session = this.session;
@@ -859,7 +859,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
                 throw e;
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 /*
                  * Check for a SocketTimeoutException
                  */
@@ -931,7 +931,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     config.setAcl(false);
                 }
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, config, session);
         }
     }
@@ -1036,7 +1036,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         while (retryCount++ < maxRetryCount) {
             try {
                 return newConnectedImapStore(imapSession, server, port, login, pw, accountId);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
                     throw e;
                 }
@@ -1583,9 +1583,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null != imapStore) {
             try {
                 imapStore.close();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.error("Error while closing IMAP store.", e);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 LOG.error("Error while closing IMAP store.", e);
             }
         }

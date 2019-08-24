@@ -138,7 +138,7 @@ public final class RangeAction extends AbstractReminderAction {
             }
 
             return new AJAXRequestResult(jsonResponseArray, "json");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

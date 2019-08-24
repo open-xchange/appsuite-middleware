@@ -142,7 +142,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                             try {
                                 createZipArchive(folderPath, uid, sequenceIds, mailInterface, ajaxRequestData.optOutputStream());
                                 return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-                            } catch (final IOException e) {
+                            } catch (IOException e) {
                                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
                             }
                         }
@@ -178,7 +178,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                     mf = null;
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.getCause() instanceof IOException) {
                 final IOException ioe = (IOException) e.getCause();
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(ioe.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
@@ -186,7 +186,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 }
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

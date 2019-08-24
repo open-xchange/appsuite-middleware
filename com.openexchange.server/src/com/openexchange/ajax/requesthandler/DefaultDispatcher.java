@@ -603,13 +603,13 @@ public class DefaultDispatcher implements Dispatcher {
                 addLogProperties(requestData, true);
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
             }
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw (OXException) cause;
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ContinuationException e) {
+        } catch (ContinuationException e) {
             result = handleContinuationException(e, session);
         } finally {
             requestData.cleanUploads();
@@ -700,7 +700,7 @@ public class DefaultDispatcher implements Dispatcher {
         try {
             final ContinuationResponse<Object> cr = continuation.getNextResponse(1000, TimeUnit.NANOSECONDS);
             return new AJAXRequestResult(cr.getValue(), cr.getTimeStamp(), cr.getFormat()).setContinuationUuid(cr.isCompleted() ? null : uuid);
-        } catch (final InterruptedException ie) {
+        } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ie, ie.getMessage());
         }
@@ -801,7 +801,7 @@ public class DefaultDispatcher implements Dispatcher {
                         }
                         combinedFactory.add(factory);
                     }
-                } catch (final IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     LOG.error(e.getMessage());
                 }
             }
@@ -868,7 +868,7 @@ public class DefaultDispatcher implements Dispatcher {
     private AJAXActionService getActionServiceSafe(final String action, final AJAXActionServiceFactory factory) {
         try {
             return factory.createActionService(action);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.trace("Failed to create action {} from factory {}", action, factory.getClass().getName(), e);
             return null;
         }

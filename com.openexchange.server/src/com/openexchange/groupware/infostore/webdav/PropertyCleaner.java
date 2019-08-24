@@ -89,12 +89,12 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
             folderProperties.startTransaction();
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			LOG.error("", e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} finally {
 			try {
 				folderProperties.finish();
-			} catch (final OXException e) {
+			} catch (OXException e) {
 			    LOG.error("", e);
 			}
 		}
@@ -125,7 +125,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
             } finally {
                 try {
                     infoProperties.finish();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }

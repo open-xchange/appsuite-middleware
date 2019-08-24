@@ -193,7 +193,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
              */
             final AbstractAction action = getAction();
             response.setData(action.action(request));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (SessionExceptionCodes.hasPrefix(e)) {
                 LOG.debug("", e);
             } else {
@@ -209,7 +209,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("Error while writing JSON.", e);
             sendError(resp);
         } catch (OXException e) {
@@ -263,7 +263,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             request.setBody(com.openexchange.ajax.AJAXServlet.getBody(req));
             final AbstractAction action = getAction();
             response.setData(action.action(request));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (SessionExceptionCodes.hasPrefix(e)) {
                 LOG.debug("", e);
             } else {
@@ -279,7 +279,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("Error while writing JSON.", e);
             sendError(resp);
         } catch (OXException e) {

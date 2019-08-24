@@ -142,9 +142,9 @@ public class XingUserDataSource implements HaloContactDataSource {
                         LOG.warn("Could not load shared contacts from XING.", e);
                     }
                 }
-            } catch (final XingUnlinkedException e) {
+            } catch (XingUnlinkedException e) {
                 throw XingExceptionCodes.UNLINKED_ERROR.create();
-            } catch (final XingException e) {
+            } catch (XingException e) {
                 throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
             }
         }
@@ -168,9 +168,9 @@ public class XingUserDataSource implements HaloContactDataSource {
             if (!userIds.isEmpty()) {
                 return api.userInfo(userIds.get(0));
             }
-        } catch (final XingUnlinkedException e) {
+        } catch (XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final XingException e) {
+        } catch (XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         }
 

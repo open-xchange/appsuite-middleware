@@ -97,9 +97,9 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 			} finally {
 			    Streams.close(fis);
 			}
-		} catch (final FileNotFoundException exc) {
+		} catch (FileNotFoundException exc) {
 			LOG.error("Cannot find propfile: {}", propfile, exc);
-		} catch (final IOException exc) {
+		} catch (IOException exc) {
 			LOG.error("Cannot read propfile: {}", propfile, exc);
 		}
 

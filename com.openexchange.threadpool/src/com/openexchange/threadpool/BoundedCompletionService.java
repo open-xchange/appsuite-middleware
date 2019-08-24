@@ -100,7 +100,7 @@ public class BoundedCompletionService<V> extends ThreadPoolCompletionService<V> 
         try {
             semaphore.acquire();
             super.submitFutureTask(f);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }

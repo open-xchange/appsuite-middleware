@@ -150,12 +150,12 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
                         if (FolderQueryCacheManager.isInitialized()) {
                             FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }

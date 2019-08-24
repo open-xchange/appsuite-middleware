@@ -88,7 +88,7 @@ public abstract class ExistsCore extends ContextAbstraction {
 
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
 
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
@@ -105,13 +105,13 @@ public abstract class ExistsCore extends ContextAbstraction {
                 System.out.println("Context " + ctxident + " does not exist" + (inServer ? " in server" : ""));
                 sysexit(1);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
         try {
             displayChangedMessage(successtext, null, parser);
             sysexit(0);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }

@@ -94,12 +94,12 @@ public class MsisdnUtility {
                 for (final String number : set) {
                     try {
                         addresses.add(new QuotedInternetAddress(MsisdnCheck.cleanup(number)));
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore invalid number
                         LOG.debug("Ignoring invalid number: {}", number, e);
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not check for valid MSISDN numbers.", e);
             }
         }

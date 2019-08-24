@@ -161,13 +161,13 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator implemen
             String usedServletName = jolokiaConfig.getServletName();
             httpService.registerServlet(usedServletName, jolServlet, jolokiaConfig.getJolokiaConfiguration(), httpContext);
             this.usedServletName = usedServletName;
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             LOG.error("Registering jolokia servlet failed.", e);
             notStarted();
-        } catch (final NamespaceException e) {
+        } catch (NamespaceException e) {
             LOG.error("Registering jolokia servlet failed.", e);
             notStarted();
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("Registering jolokia servlet failed.", e);
             notStarted();
         }

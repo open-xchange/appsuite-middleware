@@ -95,7 +95,7 @@ public abstract class AbstractContinuationAction implements AJAXActionService {
         }
         try {
             return perform(new ContinuationRequest(requestData, session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

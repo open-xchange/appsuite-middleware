@@ -184,7 +184,7 @@ public class GettextParserTest {
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertEquals(I18NExceptionCode.UNEXPECTED_TOKEN.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
@@ -206,7 +206,7 @@ public class GettextParserTest {
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertEquals(com.openexchange.i18n.parsing.I18NExceptionCode.UNEXPECTED_TOKEN_CONSUME.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
@@ -229,7 +229,7 @@ public class GettextParserTest {
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertEquals(I18NExceptionCode.EXPECTED_NUMBER.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
@@ -250,7 +250,7 @@ public class GettextParserTest {
         try {
             parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertEquals(I18NExceptionCode.MALFORMED_TOKEN.getNumber(), x.getCode());
             final Object[] messageArgs = x.getLogArgs();
             final String incorrectToken = (String) messageArgs[0];
@@ -270,7 +270,7 @@ public class GettextParserTest {
     public void testIOException() {
         try {
             new POParser().parse(new ExceptionThrowingInputStream(), "test.po");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertEquals(I18NExceptionCode.IO_EXCEPTION.getNumber(), e.getCode());
             assertEquals("test.po", e.getLogArgs()[0]);
             assertEquals("BUMM!", e.getCause().getMessage());

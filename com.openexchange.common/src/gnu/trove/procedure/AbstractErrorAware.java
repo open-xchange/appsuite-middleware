@@ -100,7 +100,7 @@ abstract class AbstractErrorAware<E extends Exception> {
     protected E valueOf(final Exception e) {
         try {
             return (E) e;
-        } catch (final ClassCastException cce) {
+        } catch (ClassCastException cce) {
             throw new IllegalStateException(e.getMessage(), e);
         }
     }

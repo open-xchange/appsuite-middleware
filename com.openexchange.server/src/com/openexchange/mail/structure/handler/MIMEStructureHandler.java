@@ -211,7 +211,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         if (null != mailId) {
             try {
                 mailJsonObject.put(KEY_ID, mailId);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
             }
         }
@@ -219,7 +219,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         if (null != folder) {
             try {
                 mailJsonObject.put(MailJSONField.FOLDER.getKey(), MailFolderUtility.prepareFullname(mail.getAccountId(), folder));
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
             }
         }
@@ -249,7 +249,7 @@ public final class MIMEStructureHandler implements StructureHandler {
          */
         try {
             headersJsonObject.put("x-original-headers", new String(Base64.encodeBase64(bytes))); // ASCII-only, no charset needed
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
         return true;
@@ -326,7 +326,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         contentType.setParameter("method", toUpperCase(method));
                         part.setContentType(contentType);
                     }
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     LOG.warn("A runtime error occurred.", e);
                 }
             }
@@ -358,7 +358,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             jsonObject.put("smime_body_text", bodyObject);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -368,7 +368,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             currentMailObject.put("smime_body_data", Charsets.toAsciiString(Base64.encodeBase64(data, false)));
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -385,7 +385,7 @@ public final class MIMEStructureHandler implements StructureHandler {
              */
             currentMailObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -417,7 +417,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 file = new File(filename);
             }
             contentType = Strings.asciiLowerCase(MimeType2ExtMap.getContentType(file.getName()));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Throwable t = new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
             LOG.warn("", t);
         }
@@ -429,7 +429,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         final String encodeFN;
         try {
             encodeFN = MimeUtility.encodeText(filename, "UTF-8", "Q");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
         headers.put(CONTENT_TYPE, sb.append(contentType).append("; name=").append(encodeFN).toString());
@@ -502,7 +502,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 }
             }
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -530,7 +530,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 try {
                     nestedMail =
                         MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
             } else {
@@ -570,7 +570,7 @@ public final class MIMEStructureHandler implements StructureHandler {
              */
             add2BodyJsonObject(bodyObject);
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -589,7 +589,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 currentMailObject.put(MailJSONField.RECEIVED_DATE.getKey(), dateObject);
             }
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -605,7 +605,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 currentMailObject.put(key, flags);
             }
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -621,7 +621,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 userFlagsArr.put(userFlag);
             }
             return true;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -642,7 +642,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 fillBodyPart(bodyObject, part, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
             }
             add2BodyJsonObject(bodyObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -663,7 +663,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 fillBodyPart(bodyObject, size, isp, contentType, filename, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
             }
             add2BodyJsonObject(bodyObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -732,9 +732,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                     }
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -778,9 +778,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                     }
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -803,7 +803,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                             out.write(buf, 0, read);
                         }
                         bytes = out.toByteArray();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                         }
@@ -815,7 +815,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 // Add own JSONString implementation to support streaming
                 bodyObject.put(DATA, Charsets.toAsciiString(Base64.encodeBase64(bytes, false)));
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -932,7 +932,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             parent.put(KEY_HEADERS, hdrObject.length() > 0 ? hdrObject : JSONObject.NULL);
             return hdrObject;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -975,7 +975,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 if (null != parsedDate) {
                     dateObject.put("utc", parsedDate.getTime());
                 }
-            } catch (final ParseException pex) {
+            } catch (ParseException pex) {
                 LOG.warn("Date string could not be parsed: {}", date);
             }
         }
@@ -999,7 +999,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return getAddressHeaderNonStrict(addresses);
         }
     }
@@ -1011,12 +1011,12 @@ public final class MIMEStructureHandler implements StructureHandler {
             for (final InternetAddress internetAddress : addresses) {
                 try {
                     addressList.add(new QuotedInternetAddress(internetAddress.toString()));
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     addressList.add(internetAddress);
                 }
             }
             return addressList.toArray(new InternetAddress[addressList.size()]);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
             return getAddressesOnParseError(addressStrings);
         }

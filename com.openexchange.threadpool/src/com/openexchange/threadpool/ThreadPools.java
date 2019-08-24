@@ -176,7 +176,7 @@ public final class ThreadPools {
             retval = task.call();
             ran = true;
             task.afterExecute(null);
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             if (!ran) {
                 task.afterExecute(ex);
                 throw ex;
@@ -324,10 +324,10 @@ public final class ThreadPools {
                 }
             }
             return ret;
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw factory.newUnexpectedError(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw launderThrowable(e, factory);
         }
     }
@@ -393,10 +393,10 @@ public final class ThreadPools {
                 ret.add(completionService.take().get());
             }
             return ret;
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw factory.newUnexpectedError(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw launderThrowable(e, factory);
         }
     }
@@ -441,10 +441,10 @@ public final class ThreadPools {
             for (int i = 0; i < size; i++) {
                 completionService.take().get();
             }
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw factory.newUnexpectedError(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw launderThrowable(e, factory);
         }
     }
@@ -484,7 +484,7 @@ public final class ThreadPools {
      *  final Future&lt;MyResult&gt; future = threadPoolService.submit(task);
      *  try {
      *      return future.get();
-     *  } catch (final ExecutionException e) {
+     *  } catch (ExecutionException e) {
      *      throw launderThrowable(e.getCause(), MyException.class);
      *  }
      *  ...

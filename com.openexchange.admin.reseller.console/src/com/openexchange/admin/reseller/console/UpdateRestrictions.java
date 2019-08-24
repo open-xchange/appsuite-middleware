@@ -91,7 +91,7 @@ public class UpdateRestrictions extends ResellerAbstraction {
             final OXResellerInterface rsi = getResellerInterface();
 
             rsi.updateDatabaseRestrictions(auth);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }

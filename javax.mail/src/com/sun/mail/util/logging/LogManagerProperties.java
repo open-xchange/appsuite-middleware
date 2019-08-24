@@ -135,8 +135,8 @@ final class LogManagerProperties extends Properties {
             if (!Comparable.class.isAssignableFrom(zdtoi.getReturnType())) {
                 throw new NoSuchMethodException(zdtoi.toString());
             }
-        } catch (final RuntimeException ignore) {
-        } catch (final Exception ignore) { //No need for specific catch.
+        } catch (RuntimeException ignore) {
+        } catch (Exception ignore) { //No need for specific catch.
         } catch (final LinkageError ignore) {
         } finally {
             if (lrgi == null || zisd == null || zdtoi == null) {
@@ -175,7 +175,7 @@ final class LogManagerProperties extends Properties {
             m = LogManager.getLogManager();
         } catch (final LinkageError restricted) {
             m = readConfiguration();
-        } catch (final RuntimeException unexpected) {
+        } catch (RuntimeException unexpected) {
             m = readConfiguration();
         }
         return m;
@@ -209,8 +209,8 @@ final class LogManagerProperties extends Properties {
                     in.close();
                 }
             }
-        } catch (final RuntimeException permissionsOrMalformed) {
-        } catch (final Exception ioe) {
+        } catch (RuntimeException permissionsOrMalformed) {
+        } catch (Exception ioe) {
         } catch (final LinkageError unexpected) {
         }
         return props;
@@ -235,7 +235,7 @@ final class LogManagerProperties extends Properties {
             if (m instanceof Properties) {
                 return ((Properties) m).getProperty(name);
             }
-        } catch (final RuntimeException unexpected) {
+        } catch (RuntimeException unexpected) {
         }
 
         if (m != null) {
@@ -244,7 +244,7 @@ final class LogManagerProperties extends Properties {
                     return ((LogManager) m).getProperty(name);
                 }
             } catch (final LinkageError restricted) {
-            } catch (final RuntimeException unexpected) {
+            } catch (RuntimeException unexpected) {
             }
         }
         return null;
@@ -266,12 +266,12 @@ final class LogManagerProperties extends Properties {
                     checked = true;
                     ((LogManager) m).checkAccess();
                 }
-            } catch (final SecurityException notAllowed) {
+            } catch (SecurityException notAllowed) {
                 if (checked) {
                     throw notAllowed;
                 }
             } catch (final LinkageError restricted) {
-            } catch (final RuntimeException unexpected) {
+            } catch (RuntimeException unexpected) {
             }
         }
 
@@ -305,7 +305,7 @@ final class LogManagerProperties extends Properties {
                 global.removeHandler((Handler) null);
                 checked = true;
             }
-        } catch (final NullPointerException unexpected) {
+        } catch (NullPointerException unexpected) {
         }
 
         if (!checked) {
@@ -348,10 +348,10 @@ final class LogManagerProperties extends Properties {
                 return (Comparable<?>) m.invoke((Object) null,
                         LR_GET_INSTANT.invoke(record),
                         ZI_SYSTEM_DEFAULT.invoke((Object) null));
-            } catch (final RuntimeException ignore) {
+            } catch (RuntimeException ignore) {
                 assert LR_GET_INSTANT != null
                         && ZI_SYSTEM_DEFAULT != null : ignore;
-            } catch (final InvocationTargetException ite) {
+            } catch (InvocationTargetException ite) {
                 final Throwable cause = ite.getCause();
                 if (cause instanceof Error) {
                     throw (Error) cause;
@@ -360,7 +360,7 @@ final class LogManagerProperties extends Properties {
                 } else { //Should never happen.
                     throw new UndeclaredThrowableException(ite);
                 }
-            } catch (final Exception ignore) {
+            } catch (Exception ignore) {
             }
         }
         return null;
@@ -391,9 +391,9 @@ final class LogManagerProperties extends Properties {
             } else {
                 throw new NoSuchMethodException(m.toString());
             }
-        } catch (final ExceptionInInitializerError EIIE) {
+        } catch (ExceptionInInitializerError EIIE) {
             throw wrapOrThrow(EIIE);
-        } catch (final InvocationTargetException ite) {
+        } catch (InvocationTargetException ite) {
             throw paramOrError(ite);
         }
     }
@@ -430,9 +430,9 @@ final class LogManagerProperties extends Properties {
                 throw new NoSuchMethodException(toMillis.toString());
             }
             return (Long) toMillis.invoke(parse.invoke(null, value));
-        } catch (final ExceptionInInitializerError EIIE) {
+        } catch (ExceptionInInitializerError EIIE) {
             throw wrapOrThrow(EIIE);
-        } catch (final InvocationTargetException ite) {
+        } catch (InvocationTargetException ite) {
             throw paramOrError(ite);
         }
     }
@@ -566,14 +566,14 @@ final class LogManagerProperties extends Properties {
                     && Comparator.class.isAssignableFrom(m.getReturnType())) {
                 try {
                     reverse = (Comparator<T>) m.invoke(c);
-                } catch (final ExceptionInInitializerError eiie) {
+                } catch (ExceptionInInitializerError eiie) {
                     throw wrapOrThrow(eiie);
                 }
             }
-        } catch (final NoSuchMethodException ignore) {
-        } catch (final IllegalAccessException ignore) {
-        } catch (final RuntimeException ignore) {
-        } catch (final InvocationTargetException ite) {
+        } catch (NoSuchMethodException ignore) {
+        } catch (IllegalAccessException ignore) {
+        } catch (RuntimeException ignore) {
+        } catch (InvocationTargetException ite) {
             paramOrError(ite); //Ignore invocation bugs (returned values).
         }
 
@@ -699,7 +699,7 @@ final class LogManagerProperties extends Properties {
                 }
             }
             return traces.toArray(new String[traces.size()]);
-        } catch (final InvocationTargetException ITE) {
+        } catch (InvocationTargetException ITE) {
             throw paramOrError(ITE);
         }
     }
@@ -731,7 +731,7 @@ final class LogManagerProperties extends Properties {
             if (type.isAssignableFrom(clazz)) {
                 try {
                     return type.cast(clazz.getConstructor().newInstance());
-                } catch (final InvocationTargetException ITE) {
+                } catch (InvocationTargetException ITE) {
                     throw paramOrError(ITE);
                 }
             } else {
@@ -745,7 +745,7 @@ final class LogManagerProperties extends Properties {
             //literal name happens to match a class name in a different case.
             //This is also a nice way to adapt this error for the error manager.
             throw new ClassNotFoundException(NCDFE.toString(), NCDFE);
-        } catch (final ExceptionInInitializerError EIIE) {
+        } catch (ExceptionInInitializerError EIIE) {
             throw wrapOrThrow(EIIE);
         }
     }

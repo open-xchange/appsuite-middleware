@@ -97,7 +97,7 @@ public final class IcsMimeFilter extends MimeFilter {
                 try {
                     final String method = getICalMethod(MessageUtility.getPartInputStream(bodyPart));
                     return null != method && ITIP_METHODS.contains(method.toUpperCase());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(IcsMimeFilter.class);
                     logger.warn("A runtime error occurred.", e);
                 }
@@ -117,7 +117,7 @@ public final class IcsMimeFilter extends MimeFilter {
                 try {
                     final String method = getICalMethod(bodyPart.getInputStream());
                     return null != method && ITIP_METHODS.contains(method.toUpperCase());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(IcsMimeFilter.class);
                     logger.warn("An error occurred.", e);
                 }

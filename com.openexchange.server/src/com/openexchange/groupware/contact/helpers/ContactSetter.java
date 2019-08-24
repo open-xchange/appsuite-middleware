@@ -1606,7 +1606,7 @@ public class ContactSetter implements ContactSwitcher {
         Boolean value;
         try {
             value = (Boolean) value2;
-        } catch (final ClassCastException c) {
+        } catch (ClassCastException c) {
             value = Boolean.valueOf((String) value2);
         }
         contact.setMarkAsDistributionlist(b(value));

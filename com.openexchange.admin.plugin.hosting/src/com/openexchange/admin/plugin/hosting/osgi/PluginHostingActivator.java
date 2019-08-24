@@ -157,7 +157,7 @@ public class PluginHostingActivator extends HousekeepingActivator {
         this.starter = new PluginStarter();
         try {
             this.starter.start(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

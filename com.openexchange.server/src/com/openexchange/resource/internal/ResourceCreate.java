@@ -151,7 +151,7 @@ public final class ResourceCreate extends AbstractResourcePerformer {
     // try {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
-    // } catch (final BundleAccessException e) {
+    // } catch (BundleAccessException e) {
     // throw new OXException(e);
     // }
     // }
@@ -203,13 +203,13 @@ public final class ResourceCreate extends AbstractResourcePerformer {
             con.setAutoCommit(false);
             insert(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -234,7 +234,7 @@ public final class ResourceCreate extends AbstractResourcePerformer {
             final int id = IDGenerator.getId(ctx.getContextId(), Types.PRINCIPAL, con);
             resource.setIdentifier(id);
             storage.insertResource(ctx, con, resource);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         }
     }

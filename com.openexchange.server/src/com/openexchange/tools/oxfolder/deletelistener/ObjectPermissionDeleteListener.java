@@ -131,9 +131,9 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
             } finally {
                 Databases.closeSQLStuff(stmt);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }

@@ -109,7 +109,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 return SearchIteratorAdapter.emptyIterator();
             }
@@ -120,7 +120,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         try {
             return TaskStorage.getInstance().list(ctx, folderId, from, until,
                 orderBy, order, columns, onlyOwn, userId, noPrivate);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -134,7 +134,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         try {
             GetTask get = new GetTask(ctx, user, permissionBits, folderId, taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 // Parent folder does no more exist
                 try {
@@ -159,7 +159,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                 return SearchIteratorAdapter.emptyIterator();
             }
@@ -246,7 +246,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.makeNextRecurrence(session);
 
             collectAddresses(update, false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -323,7 +323,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                 objectAndFolderId[1], objectAndFolderId[0], StorageType.ACTIVE);
             try {
                 tasks.add(get.loadAndCheck());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("", e);
             }
         }

@@ -109,13 +109,13 @@ public class Activator extends HousekeepingActivator {
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
             track(DBMigrationExecutorService.class, new ResellerDBMigrationServiceTracker(this, context));
             openTrackers();
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOG.error("Error while creating one instance for RMI interface", e);
             throw e;
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             LOG.error("", e);
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

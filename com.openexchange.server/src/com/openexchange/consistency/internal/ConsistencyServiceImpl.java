@@ -783,7 +783,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, getStatement(stmt));
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -834,7 +834,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, getStatement(stmt));
         } finally {
             Databases.closeSQLStuff(rs, stmt);

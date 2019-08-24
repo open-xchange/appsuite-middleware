@@ -144,10 +144,10 @@ public final class CustomCharsetProvider extends CharsetProvider {
         final Charset charset;
         try {
             charset = Charset.forName(delegateName);
-        } catch (final IllegalCharsetNameException e) {
+        } catch (IllegalCharsetNameException e) {
             LOG.error("Illegal charset name \"{}\"", e.getCharsetName(), e);
             return false;
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             LOG.error("Detected no support for charset \"{}\"", e.getCharsetName(), e);
             return false;
         }
@@ -210,10 +210,10 @@ public final class CustomCharsetProvider extends CharsetProvider {
         final Charset charset;
         try {
             charset = Charset.forName(delegateName);
-        } catch (final IllegalCharsetNameException e) {
+        } catch (IllegalCharsetNameException e) {
             LOG.error("Illegal charset name \"{}\"", e.getCharsetName(), e);
             return false;
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             LOG.error("Detected no support for charset \"{}\"", e.getCharsetName(), e);
             return false;
         }

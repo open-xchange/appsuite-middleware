@@ -156,7 +156,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             }
             final ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
             return (!configProperty.isDefined() || configProperty.get().booleanValue());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -174,7 +174,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
                     filteredList.add(messagingService);
                 }
             }
-        } catch (final OXException x) {
+        } catch (OXException x) {
             throw x;
         }
 
@@ -187,7 +187,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             if (!configProperty.isDefined() || configProperty.get().booleanValue()) {
                 return true;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         return false;
@@ -210,7 +210,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     public boolean containsMessagingService(final String id, final int user, final int context) {
         try {
             return null == id ? false : (map.containsKey(id) && isAllowed(id, user, context));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }

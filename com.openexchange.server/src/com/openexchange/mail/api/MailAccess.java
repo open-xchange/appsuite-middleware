@@ -689,7 +689,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             connect0(false);
             close(false);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }
@@ -1001,7 +1001,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * An already closed access is not going to be put into cache and is treated as a no-op.
      */
     public void close() {
-        try { close(true); } catch (final Exception x) { LOG.debug("Error while closing MailAccess instance.", x); }
+        try { close(true); } catch (Exception x) { LOG.debug("Error while closing MailAccess instance.", x); }
     }
 
     /**
@@ -1020,7 +1020,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             try {
                 // Release all used, non-cachable resources
                 releaseResources();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", e);
                 put = false;
             }
@@ -1031,7 +1031,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         // Successfully cached: return
                         return;
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.error("", e);
                 }
             }

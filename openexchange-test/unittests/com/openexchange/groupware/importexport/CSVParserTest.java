@@ -106,7 +106,7 @@ public class CSVParserTest {
         parser.setTolerant(false);
         try {
             parser.parse();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue("Exception caught", true);
             assertEquals("Correct exception thrown", "CSV-1000", e.getErrorCode());
             return;
@@ -121,7 +121,7 @@ public class CSVParserTest {
         parser.setTolerant(false);
         try {
             parser.parse();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue("Exception caught", true);
             assertEquals("Correct exception thrown", "CSV-1000", e.getErrorCode());
             return;

@@ -73,7 +73,7 @@ public final class RdiffActivator extends HousekeepingActivator {
         log.info("Starting bundle: com.openexchange.rdiff");
         try {
             registerService(RdiffService.class, new RdiffServiceImpl(), null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Starting bundle failed: com.openexchange.rdiff", e);
             throw e;
         }
@@ -85,7 +85,7 @@ public final class RdiffActivator extends HousekeepingActivator {
         log.info("Stopping bundle: com.openexchange.rdiff");
         try {
             unregisterServices();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Stopping bundle failed: com.openexchange.rdiff", e);
             throw e;
         }

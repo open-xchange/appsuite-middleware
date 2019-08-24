@@ -84,7 +84,7 @@ public final class DropboxOAuthActivator extends AbstractOAuthActivator {
             // Clear service registry
             DropboxOAuthServices.setServices(null);
             super.stopBundle();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(DropboxOAuthActivator.class).error("", e);
             throw e;
         }

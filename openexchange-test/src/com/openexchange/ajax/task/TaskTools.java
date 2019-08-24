@@ -136,7 +136,7 @@ public final class TaskTools extends ParticipantTools {
         final DeleteRequest request = new DeleteRequest(folder, task, lastUpdate);
         try {
             client.execute(request);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
     }

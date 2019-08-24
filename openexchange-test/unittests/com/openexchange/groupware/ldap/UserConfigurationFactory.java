@@ -152,7 +152,7 @@ public class UserConfigurationFactory {
             configs.put(10, config);
             settings.put(10, mailSetting);
 
-        } catch (final OXException x) {
+        } catch (OXException x) {
             throw new RuntimeException(x);
         }
     }

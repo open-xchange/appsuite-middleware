@@ -125,7 +125,7 @@ public final class ContinuationActivator extends HousekeepingActivator {
                                             final Cache cache = cacheService.getCache(regionName);
                                             cache.remove(new StringBuilder(16).append(userId).append('@').append(contextId).toString());
                                         }
-                                    } catch (final Exception e) {
+                                    } catch (Exception e) {
                                         // Failed handling session
                                     }
                                 }
@@ -139,7 +139,7 @@ public final class ContinuationActivator extends HousekeepingActivator {
             registerService(ContinuationRegistryService.class, new ContinuationRegistryServiceImpl(regionName, this));
 
             logger.info("Bundle \"com.openexchange.continuation\" successfully started");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Error while starting bundle \"com.openexchange.continuation\"", e);
             throw e;
         }

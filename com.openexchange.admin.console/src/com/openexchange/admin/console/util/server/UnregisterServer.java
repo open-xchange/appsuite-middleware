@@ -88,7 +88,7 @@ public class UnregisterServer extends ServerAbstraction {
 
             displayUnregisteredMessage(successtext, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
     }

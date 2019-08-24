@@ -173,7 +173,7 @@ public class Bug16158Test {
                     final SessionControl control = sessionData.getSession(session.getSessionID());
                     notFound = null == control;
                 }
-            } catch (final NullPointerException e) {
+            } catch (NullPointerException e) {
                 e.printStackTrace();
                 notFound = true;
             }
@@ -202,7 +202,7 @@ public class Bug16158Test {
             while (run && !timeout) {
                 try {
                     Thread.sleep(1);
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 final RotateShortResult removed = sessionData.rotateShort();

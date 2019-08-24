@@ -99,7 +99,7 @@ public abstract class AbstractTextXtractService implements TextXtractService {
                 input = TikaInputStream.get(new URL(resource));
             }
             return extractFrom(input, optMimeType);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(input);

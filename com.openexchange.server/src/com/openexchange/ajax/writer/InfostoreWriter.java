@@ -148,7 +148,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
         void setMetadata(final Metadata current) {
             try {
                 writer.key(current.getName());
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
             }
         }
@@ -159,7 +159,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             if (null != meta && !meta.isEmpty()) {
                 try {
                     writer.value(new JSONObject(meta));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     LOG.error("", e);
                 }
             } else {
@@ -265,7 +265,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
                 try {
                     writer.array();
                     writer.endArray();
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     LOG.debug("", e);
                 }
                 return null;
@@ -278,7 +278,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
                     writer.value(cat);
                 }
                 writer.endArray();
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.debug("", e);
             }
             return null;
@@ -369,7 +369,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             }
             try {
                 writer.value(string);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
             }
         }
@@ -377,7 +377,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
         private void writeInteger(final long l) {
             try {
                 writer.value(l);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
             }
         }
@@ -385,7 +385,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
         private void writeNull() {
             try {
                 writer.value(null);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
             }
         }
@@ -393,7 +393,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
         private void writeBoolean(final boolean b) {
             try {
                 writer.value(b);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
             }
         }

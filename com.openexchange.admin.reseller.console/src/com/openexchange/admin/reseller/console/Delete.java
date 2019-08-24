@@ -102,7 +102,7 @@ public class Delete extends ResellerAbstraction {
 
             displayDeletedMessage(successtext, null, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
             sysexit(1);
         }

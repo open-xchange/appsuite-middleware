@@ -124,7 +124,7 @@ public class RdbFileAccessStorage {
                 String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
                 LOG.error("There have been {} changes for adding a new file access but there should only be 1. Executed SQL: {}", I(affectedRows), sql);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -154,7 +154,7 @@ public class RdbFileAccessStorage {
 
             int deletedRows = statement.executeUpdate();
             LOG.debug("Deleted {} rows for user {} in context {}", I(deletedRows), I(userId), I(contextId));
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
@@ -207,7 +207,7 @@ public class RdbFileAccessStorage {
                 long bytes = result.getLong(2);
                 return new FileAccess(contextId, userId, start, end, count, bytes);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, statement);

@@ -91,7 +91,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
             // Wait for at least 1 element.
             try {
                 pass(queue.take(), col);
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
                 throw new PipesAndFiltersException(e);
@@ -125,7 +125,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
     public void put(final T element) throws PipesAndFiltersException {
         try {
             queue.put(element);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             throw new PipesAndFiltersException(e);
@@ -136,7 +136,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
     public void exception(final PipesAndFiltersException e) {
         try {
             queue.put(e);
-        } catch (final InterruptedException e1) {
+        } catch (InterruptedException e1) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             LOG.error("", e1);
@@ -147,7 +147,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
     public void finished() throws PipesAndFiltersException {
         try {
             queue.put(eof);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             throw new PipesAndFiltersException(e);

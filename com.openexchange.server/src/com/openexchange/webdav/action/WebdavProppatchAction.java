@@ -129,10 +129,10 @@ public class WebdavProppatchAction extends AbstractAction {
             res.setContentType("text/xml");
             outputter.output(responseDoc, res.getOutputStream());
 
-        } catch (final JDOMException e) {
+        } catch (JDOMException e) {
             LOG.error("JDOMException: ", e);
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.debug("Client gone?", e);
         }
     }
@@ -180,7 +180,7 @@ public class WebdavProppatchAction extends AbstractAction {
                         final Writer w = new AllocatingStringWriter();
                         outputter.output(propertyElement.cloneContent(), w);
                         property.setValue(w.toString());
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         status = 500;
                     }
 
@@ -198,7 +198,7 @@ public class WebdavProppatchAction extends AbstractAction {
 
                 try {
                     resource.putProperty(property);
-                } catch (final WebdavProtocolException e) {
+                } catch (WebdavProtocolException e) {
                     status = e.getStatus();
                 }
             }
@@ -238,7 +238,7 @@ public class WebdavProppatchAction extends AbstractAction {
 
             try {
                 resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
-            } catch (final WebdavProtocolException e) {
+            } catch (WebdavProtocolException e) {
                 status = e.getStatus();
             }
 

@@ -167,7 +167,7 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             storage.rememberSubscription(subscription);
             subscriptionsToDelete.add(I(subscription.getId()));
             fail("Exception expected");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue("Wrong error code", SubscriptionErrorMessage.IDGiven.equals(e));
         }
     }

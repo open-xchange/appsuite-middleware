@@ -94,7 +94,7 @@ public class MigrateMSLiveSubscriptionsTask implements UpdateTaskV2 {
             stmt.setString(2, DEPRECATED_SERVICE_ID);
             stmt.setString(3, DEPRECATED_SOURCE_ID);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         }
     }

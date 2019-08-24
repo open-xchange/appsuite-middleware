@@ -177,7 +177,7 @@ public class TrackingFileStorageUnregisterListenerRegistry extends ServiceTracke
                 } else {
                     try {
                         ranking = Integer.parseInt(oRanking.toString().trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         ranking = defaultRanking;
                     }
                 }

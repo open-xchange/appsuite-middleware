@@ -114,7 +114,7 @@ public class JavaImageMetadataService implements ImageMetadataService {
                 if (null != reader) {
                     try {
                         reader.dispose();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                 }
@@ -206,7 +206,7 @@ public class JavaImageMetadataService implements ImageMetadataService {
                 if (null != reader) {
                     try {
                         reader.dispose();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                 }

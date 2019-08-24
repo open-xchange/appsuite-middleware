@@ -217,7 +217,7 @@ public final class OXFolderSQL {
                 set.add(rs.getInt(1));
             }
             return set.toArray();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -2331,7 +2331,7 @@ public final class OXFolderSQL {
         if (writeCon == null) {
             try {
                 writeCon = DBPool.pickupWriteable(ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
             closeWrite = true;
@@ -2358,7 +2358,7 @@ public final class OXFolderSQL {
             if (isAuto) {
                 writeCon.commit();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if (isAuto) {
                 writeCon.rollback();
             }
@@ -2531,7 +2531,7 @@ public final class OXFolderSQL {
                     for (int i = reassignPerms.size(); i-- > 0;) {
                         FolderCacheManager.getInstance().removeFolderObject(iter.next(), ctx);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -2661,7 +2661,7 @@ public final class OXFolderSQL {
                         final OCLPermission mergedPerm = getMergedPermission(entity, destUser, fuid, permTable, readConArg, ctx);
                         deleteSingleEntityPermission(entity, fuid, permTable, wc, ctx);
                         updateSingleEntityPermission(mergedPerm, destUser, fuid, permTable, wc, ctx);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("", e);
                         continue Next;
                     }
@@ -2673,7 +2673,7 @@ public final class OXFolderSQL {
                     stmt.setInt(4, entity);
                     try {
                         executeUpdate(stmt);
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         LOG.error("", e);
                         continue Next;
                     } finally {
@@ -2896,7 +2896,7 @@ public final class OXFolderSQL {
                     for (int i = reassignFolders.size(); i-- > 0;) {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -2944,7 +2944,7 @@ public final class OXFolderSQL {
                     for (int i = reassignFolders.size(); i-- > 0;) {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -3196,7 +3196,7 @@ public final class OXFolderSQL {
             return stmt.executeBatch();
         } catch (IllegalMixOfCollationsSQLException e) {
             throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
                 LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));

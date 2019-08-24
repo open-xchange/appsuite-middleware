@@ -99,7 +99,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
                 try {
                     final ConfigView view = getService(ConfigViewFactory.class).getView(userId, contextId);
                     return view.get("com.openexchange.http.deferrer.url", String.class);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     final String url = getService(ConfigurationService.class).getProperty("com.openexchange.http.deferrer.url");
                     logger.error("Failed to retrieve deferrer URL via config-cascade look-up. Using global one instead: {}", null == url ? "null" : url, e);
                     return url;

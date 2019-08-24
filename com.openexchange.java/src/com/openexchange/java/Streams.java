@@ -483,7 +483,7 @@ public class Streams {
         if (null != toClose) {
             try {
                 toClose.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -500,7 +500,7 @@ public class Streams {
                 if (null != toClose) {
                     try {
                         toClose.close();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                 }
@@ -519,7 +519,7 @@ public class Streams {
                 if (null != toClose) {
                     try {
                         toClose.close();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                 }
@@ -536,7 +536,7 @@ public class Streams {
         if (null != toClose) {
             try {
                 toClose.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -553,7 +553,7 @@ public class Streams {
                 if (null != toClose) {
                     try {
                         toClose.close();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                 }
@@ -572,7 +572,7 @@ public class Streams {
                 if (null != toClose) {
                     try {
                         toClose.close();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                 }
@@ -589,7 +589,7 @@ public class Streams {
         if (null != toFlush) {
             try {
                 toFlush.flush();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

@@ -198,16 +198,16 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                 }
             }
             error = false;
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (final InstanceNotFoundException e) {
+        } catch (InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
-        } catch (final MBeanException e) {
+        } catch (MBeanException e) {
             final Throwable t = e.getCause();
             final String message;
             if (null == t) {
@@ -216,9 +216,9 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                 message = t.getMessage();
             }
             System.err.println(null == message ? "Unexpected error." : "Unexpected error: " + message);
-        } catch (final ReflectionException e) {
+        } catch (ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
             printHelp();
         } finally {

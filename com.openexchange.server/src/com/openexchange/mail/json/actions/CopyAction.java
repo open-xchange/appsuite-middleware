@@ -93,9 +93,9 @@ public final class CopyAction extends AbstractMailAction {
             data.put(FolderChildFields.FOLDER_ID, destFolder);
             data.put(DataFields.ID, msgUID);
             return new AJAXRequestResult(data, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

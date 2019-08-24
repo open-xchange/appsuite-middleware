@@ -265,7 +265,7 @@ public final class InfostorePerformer implements SessionHolder {
         }
         try {
             registry.add(new UserAgentBehaviour("Microsoft Data Access Internet Publishing Provider DAV", new IgnoreLocksIfHeaderApply()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Can't add default overrides", e);
         }
         registry.log();
@@ -330,9 +330,9 @@ public final class InfostorePerformer implements SessionHolder {
             BehaviourLookup.getInstance().setRequest(webdavRequest);
             LOG.debug("Executing {}", action);
             actions.get(action).perform(webdavRequest, webdavResponse);
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             resp.setStatus(x.getStatus());
-        } catch (final NullPointerException x) {
+        } catch (NullPointerException x) {
             LOG.error("Null reference detected.", x);
         } finally {
             BehaviourLookup.getInstance().unsetRequest();

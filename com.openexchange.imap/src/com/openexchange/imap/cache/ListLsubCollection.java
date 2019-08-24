@@ -513,7 +513,7 @@ final class ListLsubCollection implements Serializable {
     private void init(boolean clearMaps, IMAPStore imapStore, boolean ignoreSubscriptions) throws OXException {
         try {
             init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), ignoreSubscriptions, imapStore);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -745,7 +745,7 @@ final class ListLsubCollection implements Serializable {
         }
         try {
             return imapStore.getFolder(fullName).exists();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             // Swallow
             LOG.debug("Failed checking existence for {}", fullName, e);
         }
@@ -772,7 +772,7 @@ final class ListLsubCollection implements Serializable {
                 }
 
             });
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -789,7 +789,7 @@ final class ListLsubCollection implements Serializable {
     public void update(String fullName, IMAPStore imapStore, boolean ignoreSubscriptions) throws OXException {
         try {
             update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), ignoreSubscriptions);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -837,7 +837,7 @@ final class ListLsubCollection implements Serializable {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
-        } catch (final ProtocolException e) {
+        } catch (ProtocolException e) {
             LOG.warn("Dummy >>LSUB \"\" \"\"<< command failed.", e);
         }
     }
@@ -1461,7 +1461,7 @@ final class ListLsubCollection implements Serializable {
     public void addSingle(final String fullName, final IMAPStore imapStore) throws OXException {
         try {
             addSingle(fullName, (IMAPFolder) imapStore.getFolder("INBOX"));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -1607,7 +1607,7 @@ final class ListLsubCollection implements Serializable {
                 }
 
             });
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

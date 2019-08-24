@@ -230,7 +230,7 @@ public abstract class CLIOption {
             }
             try {
                 return Integer.valueOf(value);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new CLIIllegalOptionValueException(this, value, e);
             }
         }
@@ -253,7 +253,7 @@ public abstract class CLIOption {
         protected Object parseValueInternal(final String value, final Locale locale) throws CLIIllegalOptionValueException {
             try {
                 return Long.valueOf(value);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new CLIIllegalOptionValueException(this, value, e);
             }
         }

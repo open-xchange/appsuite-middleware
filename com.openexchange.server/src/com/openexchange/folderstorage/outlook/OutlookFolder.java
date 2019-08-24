@@ -162,7 +162,7 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder,
                 clone.properties = cloneProps;
             }
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

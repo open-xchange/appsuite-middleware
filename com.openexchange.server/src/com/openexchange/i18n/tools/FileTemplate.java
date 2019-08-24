@@ -95,7 +95,7 @@ public class FileTemplate extends CompiledLineParserTemplate {
                 collect.append(buf, 0, length);
             }
             return collect.toString();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             return e.toString();
         } finally {

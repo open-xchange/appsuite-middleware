@@ -78,7 +78,7 @@ public abstract class AbstractConfigWrapper {
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
 			try {
 				return Integer.parseInt(tmp);
-			} catch (final NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				LOG.warn("property no parsable: {}:{}", name, Integer.valueOf(value));
 			}
 		}
@@ -102,7 +102,7 @@ public abstract class AbstractConfigWrapper {
 			for (int a = 0; a < ports.length; a++) {
 				try {
 					ports[a] = Integer.parseInt(s[a]);
-				} catch (final NumberFormatException ex) {
+				} catch (NumberFormatException ex) {
 					LOG.warn("port in port range no parsable: {}", s[a]);
 				}
 			}

@@ -88,11 +88,11 @@ public class SendDataAction extends AbstractMailAction {
     protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         try {
             return delegate.performWithoutUploads(req);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

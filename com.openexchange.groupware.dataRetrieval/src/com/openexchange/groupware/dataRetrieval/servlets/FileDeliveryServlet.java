@@ -152,7 +152,7 @@ public class FileDeliveryServlet extends HttpServlet {
             if (configuration.expiresAfterAccess()) {
                 paramMap.remove(token);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } finally {

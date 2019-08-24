@@ -55,23 +55,23 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             return taskMgmtInterface.getTaskResults(soap2Context(ctx), soap2Credentials(cred), id.intValue());
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.taskmgmt.soap.RemoteException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.RemoteException();
             com.openexchange.admin.soap.taskmgmt.rmi.RemoteException value = new com.openexchange.admin.soap.taskmgmt.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.taskmgmt.soap.StorageException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.StorageException();
             com.openexchange.admin.soap.taskmgmt.exceptions.StorageException value = new com.openexchange.admin.soap.taskmgmt.exceptions.StorageException();
             faultDetail.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException();
             faultDetail.setInvalidDataException(value);
@@ -79,7 +79,7 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         } catch (final java.lang.InterruptedException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InterruptedException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InterruptedException();
             throw new InterruptedException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             com.openexchange.admin.soap.taskmgmt.soap.ExecutionException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.ExecutionException();
             com.openexchange.admin.soap.taskmgmt.concurrent.ExecutionException value = new com.openexchange.admin.soap.taskmgmt.concurrent.ExecutionException();
             faultDetail.setExecutionException(value);
@@ -92,23 +92,23 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             taskMgmtInterface.flush(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.taskmgmt.soap.RemoteException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.RemoteException();
             com.openexchange.admin.soap.taskmgmt.rmi.RemoteException value = new com.openexchange.admin.soap.taskmgmt.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.taskmgmt.soap.StorageException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.StorageException();
             com.openexchange.admin.soap.taskmgmt.exceptions.StorageException value = new com.openexchange.admin.soap.taskmgmt.exceptions.StorageException();
             faultDetail.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException();
             faultDetail.setInvalidDataException(value);
@@ -126,23 +126,23 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             return taskMgmtInterface.getJobList(soap2Context(ctx), soap2Credentials(cred));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.taskmgmt.soap.RemoteException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.RemoteException();
             com.openexchange.admin.soap.taskmgmt.rmi.RemoteException value = new com.openexchange.admin.soap.taskmgmt.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.taskmgmt.soap.StorageException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.StorageException();
             com.openexchange.admin.soap.taskmgmt.exceptions.StorageException value = new com.openexchange.admin.soap.taskmgmt.exceptions.StorageException();
             faultDetail.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException();
             faultDetail.setInvalidDataException(value);
@@ -155,23 +155,23 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             taskMgmtInterface.deleteJob(soap2Context(parameters.ctx), soap2Credentials(parameters.auth), parameters.i.intValue());
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.taskmgmt.soap.RemoteException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.RemoteException();
             com.openexchange.admin.soap.taskmgmt.rmi.RemoteException value = new com.openexchange.admin.soap.taskmgmt.rmi.RemoteException();
             value.setMessage(e.getMessage());
             faultDetail.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidCredentialsException();
             faultDetail.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.taskmgmt.soap.StorageException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.StorageException();
             com.openexchange.admin.soap.taskmgmt.exceptions.StorageException value = new com.openexchange.admin.soap.taskmgmt.exceptions.StorageException();
             faultDetail.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InvalidDataException();
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException();
             faultDetail.setInvalidDataException(value);

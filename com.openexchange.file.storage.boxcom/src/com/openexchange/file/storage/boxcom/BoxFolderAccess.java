@@ -141,7 +141,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     Info folderInfo = boxFolder.getInfo("trashed_at", "id");
                     checkFolderValidity(folderInfo);
                     return Boolean.TRUE;
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_NOT_FOUND == e.getResponseCode()) {
                         return Boolean.FALSE;
                     }
@@ -163,7 +163,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     checkFolderValidity(boxFolder.getInfo());
 
                     return parseBoxFolder(boxFolder.getInfo(), boxFolder);
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
                     }
@@ -210,7 +210,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                         }
                     }
                     return folders.toArray(new FileStorageFolder[folders.size()]);
-                } catch (final BoxAPIException e) {
+                } catch (BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
                     }

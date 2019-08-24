@@ -187,9 +187,9 @@ public abstract class AbstractConfig {
         try {
             fis = new FileInputStream(propFile);
             props.load(fis);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(e, propFile.getAbsolutePath());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(e, propFile.getAbsolutePath());
         } finally {
             Streams.close(fis);

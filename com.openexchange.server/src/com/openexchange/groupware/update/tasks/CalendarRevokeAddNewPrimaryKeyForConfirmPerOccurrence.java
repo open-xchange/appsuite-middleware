@@ -135,7 +135,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM delDateExternal WHERE cid = " + contextId + " AND objectId IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -147,7 +147,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM del_date_rights WHERE cid = " + contextId + " AND object_id IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -159,7 +159,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM del_dates_members WHERE cid = " + contextId + " AND object_id IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -171,7 +171,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM del_dates WHERE cid = " + contextId + " AND intfield01 IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -215,7 +215,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM dateExternal WHERE cid = " + contextId + " AND objectId IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -227,7 +227,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM prg_date_rights WHERE cid = " + contextId + " AND object_id IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -239,7 +239,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM prg_dates_members WHERE cid = " + contextId + " AND object_id IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -251,7 +251,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                                 try {
                                     stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM prg_dates WHERE cid = " + contextId + " AND intfield01 IN " + str);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
                                 } finally {
                                     Databases.closeSQLStuff(stmt);
@@ -306,7 +306,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {

@@ -104,7 +104,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         try {
             mail.writeTo(fileHolder.asOutputStream());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                 fileHolder.close();
                 throw e;

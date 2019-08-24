@@ -132,7 +132,7 @@ public class MailAccountDeleteListener implements DeleteListener {
             stmt.addBatch("DELETE FROM user_mail_account WHERE cid=" + ctx.getContextId());
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -171,7 +171,7 @@ public class MailAccountDeleteListener implements DeleteListener {
                 }
             }
             return ids;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

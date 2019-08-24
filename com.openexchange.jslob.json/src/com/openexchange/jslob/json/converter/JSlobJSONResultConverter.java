@@ -109,7 +109,7 @@ public class JSlobJSONResultConverter implements ResultConverter {
                 jArray.put(convertJSlob(jslob));
             }
             result.setResultObject(jArray, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

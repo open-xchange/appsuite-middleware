@@ -160,7 +160,7 @@ public final class Timeout implements Runnable {
                     loop = false;
                     try {
                         condition.await(timeoutMillis, TimeUnit.MILLISECONDS);
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                         Thread.currentThread().interrupt();
                         LOG.error("", e);

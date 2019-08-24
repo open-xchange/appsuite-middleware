@@ -439,7 +439,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  */
                 try {
                     startUp(context);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     Throwable t = e;
                     if (t.getCause() instanceof BundleException) {
                         t = t.getCause();
@@ -469,7 +469,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
              */
             bundle.stop();
             LOG.error("{}{}Bundle \"{}\" stopped.{}", sep, sep, bundle.getSymbolicName(), sep);
-        } catch (final BundleException e) {
+        } catch (BundleException e) {
             LOG.error("{}{}Bundle \"{}\" could not be stopped.{}", sep, sep, bundle.getSymbolicName(), sep, e);
         }
     }
@@ -506,7 +506,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         } catch (final org.osgi.framework.ServiceException e) {
             LOG.error("", e);
             // Do not re-throw!
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -535,7 +535,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     public void stop(final BundleContext context) throws Exception {
         try {
             doStop(context);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         } finally {

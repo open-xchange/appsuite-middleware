@@ -89,7 +89,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
     public User copyUser(final User user, final Context src, final Context dest, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, NoSuchUserException, DatabaseUpdateException, NoSuchContextException, UserExistsException {
         try {
             doNullCheck(user);
-        } catch (final InvalidDataException e2) {
+        } catch (InvalidDataException e2) {
             final InvalidDataException invalidDataException = new InvalidDataException(THE_GIVEN_SOURCE_USER_OBJECT_IS_NULL);
             LOG.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
@@ -124,10 +124,10 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
                 throw userExistsExeption;
             }
 
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             LOG.error("", e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOG.error("", e);
             throw e;
         } catch (RuntimeException e) {
@@ -142,7 +142,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         final int newUserId;
         try {
             newUserId = service.copyUser(srcContextId, dstContextId, srcUserId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             final StorageException storageException = new StorageException(e.getMessage());
             setStackTraceSafe(storageException, e);
@@ -163,7 +163,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
     private void setStackTraceSafe(final Exception dest, final Exception src) {
         try {
             dest.setStackTrace(src.getStackTrace());
-        } catch (final Exception x) {
+        } catch (Exception x) {
             // Ignore
         }
     }

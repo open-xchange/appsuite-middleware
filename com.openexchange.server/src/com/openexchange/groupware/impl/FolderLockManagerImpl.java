@@ -123,9 +123,9 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
                 }
             }
             return locks;
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw new OXException();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             close(stmt, rs);

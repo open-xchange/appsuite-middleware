@@ -140,7 +140,7 @@ public class TaskResultConverter extends AbstractTaskJSONResultConverter {
         for (Task task : taskList) {
             try {
                 taskwriter.writeArray(task, columns, jArray);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }

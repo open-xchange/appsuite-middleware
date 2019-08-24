@@ -87,7 +87,7 @@ public class CalendarRequest {
                         continue;
                     }
 					participants[pos] = new UserParticipant(foundUser.getId());
-				} catch (final OXException e) {
+				} catch (OXException e) {
 				    log.debug("Couldn't resolve external participant \"{}\" to an internal user", part.getEmailAddress(), e); //...and continue doing this for the remaining users
 				}
 			}

@@ -128,7 +128,7 @@ public class IdMutextMap {
                             it.remove();
                         }
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }

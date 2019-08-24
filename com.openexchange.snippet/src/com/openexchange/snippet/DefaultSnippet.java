@@ -222,7 +222,7 @@ public class DefaultSnippet implements Snippet {
             }
             try {
                 misc = new JSONTokener(obj.toString()).nextValue();
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 // Not a valid JSON value
                 misc = JSONObject.NULL;
             }
@@ -409,7 +409,7 @@ public class DefaultSnippet implements Snippet {
             Object obj;
             try {
                 obj = new JSONTokener(misc.toString()).nextValue();
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 // Not a valid JSON value
                 return this;
             }

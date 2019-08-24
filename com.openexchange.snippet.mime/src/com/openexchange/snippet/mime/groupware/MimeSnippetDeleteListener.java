@@ -117,9 +117,9 @@ public final class MimeSnippetDeleteListener implements DeleteListener {
             for (final String id : ids) {
                 MimeSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

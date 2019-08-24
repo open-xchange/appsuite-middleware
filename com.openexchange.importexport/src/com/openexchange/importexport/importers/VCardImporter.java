@@ -114,14 +114,14 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             int folderId = 0;
             try {
                 folderId = Integer.parseInt(folder);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
             }
 
             FolderObject fo;
             try {
                 fo = folderAccess.getFolderObject(folderId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 return false;
             }
 
@@ -137,9 +137,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             EffectivePermission perm;
             try {
                 perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
 
@@ -164,7 +164,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             FolderObject fo;
             try {
                 fo = folderAccess.getFolderObject(folderId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(folder);
             }
 
@@ -221,7 +221,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         try {
                             super.createContact(session, contactObj, Integer.toString(contactFolderId), vCardImport.getVCard());
                             count++;
-                        } catch (final OXException oxEx) {
+                        } catch (OXException oxEx) {
                             if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
                                 LOG.debug("", oxEx);
                             } else {
@@ -241,10 +241,10 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     break;
                 }
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage());
         } finally {

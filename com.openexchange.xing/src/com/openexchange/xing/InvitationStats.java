@@ -143,7 +143,7 @@ public final class InvitationStats {
                     invalidAddresses = l;
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
         }
     }

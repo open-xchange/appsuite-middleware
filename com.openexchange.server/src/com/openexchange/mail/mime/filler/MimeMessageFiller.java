@@ -288,7 +288,7 @@ public class MimeMessageFiller {
                 for (int i = 0; i < size; i++) {
                     try {
                         mfm.removeByID(iter.next());
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                 }
@@ -321,7 +321,7 @@ public class MimeMessageFiller {
                         MimeUtility.encodeText(organization, mailProperties.getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Header \"Organization\" could not be set", e);
             }
         }
@@ -337,7 +337,7 @@ public class MimeMessageFiller {
                 try {
                     final String encoded = MimeUtility.fold(20, MimeUtility.encodeText(client, mailProperties.getDefaultMimeCharset(), null));
                     mimeMessage.setHeader(HDR_X_ORIGINATING_CLIENT, encoded);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Header \"X-Originating-Client\" could not be set", e);
                 }
             }
@@ -564,7 +564,7 @@ public class MimeMessageFiller {
                 InternetAddress[] replyTo = null;
                 try {
                     replyTo = QuotedInternetAddress.parse(hdrReplyTo, true);
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     LOG.error("Specified Reply-To address cannot be parsed", e);
                 }
 
@@ -578,13 +578,13 @@ public class MimeMessageFiller {
                 if (!isEmpty(replyTo)) {
                     try {
                         mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyTo, true));
-                    } catch (final AddressException e) {
+                    } catch (AddressException e) {
                         LOG.error("Default Reply-To address cannot be parsed", e);
                         try {
                             mimeMessage.setHeader(
                                 MessageHeaders.HDR_REPLY_TO,
                                 MimeUtility.encodeWord(replyTo, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
-                        } catch (final UnsupportedEncodingException e1) {
+                        } catch (UnsupportedEncodingException e1) {
                             /*
                              * Cannot occur since default mime charset is supported by JVM
                              */
@@ -716,7 +716,7 @@ public class MimeMessageFiller {
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());
                     }
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
             }
@@ -795,9 +795,9 @@ public class MimeMessageFiller {
             if (null == mimeMessage.getSubject()) {
                 mimeMessage.setSubject(StringHelper.valueOf(compositionParameters.getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
             }
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -1211,7 +1211,7 @@ public class MimeMessageFiller {
                 mimeMessage.setHeader(MessageHeaders.HDR_X_OX_VCARD, "true");
             }
             return mp;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error(VCARD_ERROR, e);
         }
         return primaryMultipart;
@@ -1381,7 +1381,7 @@ public class MimeMessageFiller {
                          */
                         final byte[] bs = QuotedPrintableCodec.decodeQuotedPrintable(image.getData().getBytes());
                         dataSource = new MessageDataSource(bs, image.getContentType());
-                    } catch (final DecoderException e) {
+                    } catch (DecoderException e) {
                         LOG.warn("Couldn't decode {} image data.", image.getTransferEncoding(), e);
                         continue NextImg;
                     }
@@ -1747,7 +1747,7 @@ public class MimeMessageFiller {
             html.setHeader(HDR_MIME_VERSION, VERSION_1_0);
             html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
             return html;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new MessagingException("Unsupported encoding.", e);
         }
     }
@@ -1880,7 +1880,7 @@ public class MimeMessageFiller {
                                     if (null != securitySettings) {
                                         il.setAuth(securitySettings.getAuthentication());
                                     }
-                                } catch (final IllegalArgumentException e) {
+                                } catch (IllegalArgumentException e) {
                                     final StringBuffer bblankImageTag = new StringBuffer(imageTag.length());
                                     srcMatcher.appendReplacement(bblankImageTag, "");
                                     srcMatcher.appendTail(bblankImageTag);
@@ -1892,7 +1892,7 @@ public class MimeMessageFiller {
                                 ImageLocation il;
                                 try {
                                     il = ImageUtility.parseImageLocationFrom(imageTag);
-                                } catch (final IllegalArgumentException e) {
+                                } catch (IllegalArgumentException e) {
                                     il = null;
                                 }
                                 imageLocation = il;
@@ -1917,7 +1917,7 @@ public class MimeMessageFiller {
                         }
                         try {
                             imageProvider = compositionParameters.createImageProvider(dataSource, imageLocation);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             imageProvider = null;
                             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                                 // Do look-up by identifier
@@ -1945,7 +1945,7 @@ public class MimeMessageFiller {
                                 }
                                 throw e;
                             }
-                        } catch (final RuntimeException rte) {
+                        } catch (RuntimeException rte) {
                             LOG.warn("Couldn't load image data", rte);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
@@ -2016,7 +2016,7 @@ public class MimeMessageFiller {
              */
             try {
                 fileName = MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q");
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 fileName = imageProvider.getFileName();
             }
         }

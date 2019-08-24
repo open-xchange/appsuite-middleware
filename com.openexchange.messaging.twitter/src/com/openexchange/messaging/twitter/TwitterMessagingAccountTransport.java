@@ -100,7 +100,7 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
                     throw TwitterExceptionCodes.MISSING_PROPERTY.create(MessagingHeader.KnownHeader.TO.toString());
                 }
                 twitterAccess.sendDirectMessage(screenName, content.toString());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         } else if (TwitterConstants.TYPE_RETWEET.equalsIgnoreCase(messageType)) {
@@ -119,7 +119,7 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
                 } else {
                     twitterAccess.updateStatus(content.toString());
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
 
@@ -130,7 +130,7 @@ public final class TwitterMessagingAccountTransport extends AbstractTwitterMessa
             try {
                 final StringContent content = checkContent(StringContent.class, message);
                 twitterAccess.updateStatus(content.toString());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }

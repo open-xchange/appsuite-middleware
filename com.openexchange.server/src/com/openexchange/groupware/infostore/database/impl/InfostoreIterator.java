@@ -256,7 +256,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                 if (!next) {
                     close();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 this.exception = InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
             }
         }
@@ -412,7 +412,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                             set.setValue(process(m, rs.getObject(column)));
                             break;
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sb.append("Failed to query \"").append(column).append("\" from result set.").toString());
                 }
                 m.doSwitch(set);

@@ -359,7 +359,7 @@ public class PermissionResolver {
             for (FolderObject folder : folders) {
                 try {
                     FolderCacheManager.getInstance().removeFolderObject(folder.getObjectID(), session.getContext());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOGGER.debug("Failed to drop folder cache entry", e);
                 }
             }

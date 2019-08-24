@@ -107,7 +107,7 @@ public final class GetResponse extends AbstractAJAXResponse {
                 if (data.has(FolderFields.LAST_MODIFIED)) {
                     parsed.setLastModified(new Date(data.getLong(FolderFields.LAST_MODIFIED)));
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create();
             }
             new FolderParser().parse(parsed, data);// .parse(parsed, (JSONObject) getData());
@@ -134,7 +134,7 @@ public final class GetResponse extends AbstractAJAXResponse {
                         data.put(FolderFields.FOLDER_ID, Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID));
                     }
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create();
             }
             com.openexchange.folder.json.parser.FolderParser parser = new com.openexchange.folder.json.parser.FolderParser(new StaticDiscoveryService());
@@ -156,7 +156,7 @@ public final class GetResponse extends AbstractAJAXResponse {
     private void rearrangeId(final JSONObject data) throws JSONException {
         try {
             Integer.parseInt(data.getString(FolderFields.ID));
-        } catch (final NumberFormatException x) {
+        } catch (NumberFormatException x) {
             final String id = data.getString(FolderFields.ID);
             data.remove(FolderFields.ID);
             data.put("full_name", id);

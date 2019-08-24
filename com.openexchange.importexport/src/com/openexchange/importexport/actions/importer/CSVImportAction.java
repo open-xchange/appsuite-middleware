@@ -124,7 +124,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
             if (mapperAmount == 0) {
                 LOG.error("Did not load any CSV importer mappings from directory {}.", path);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("Failed when trying to load CSV importer mappings.", e);
         }
         return imp;

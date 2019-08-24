@@ -137,7 +137,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             trackService(HostnameService.class);
 
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error("", e);
             throw e;
         }
@@ -161,7 +161,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             AbstractOAuthAJAXActionService.setOAuthAccountAssociationService(null);
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error("", e);
             throw e;
         }

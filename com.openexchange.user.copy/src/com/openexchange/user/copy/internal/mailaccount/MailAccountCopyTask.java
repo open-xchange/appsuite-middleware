@@ -215,7 +215,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
                 setStringOrNull(pos++, data.getReplyTo(), stmt);
                 stmt.executeUpdate();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -278,7 +278,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
                 ret.put(id, data);
             } while (rs.next());
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -316,7 +316,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
                 ret.put(id, data);
             } while (rs.next());
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);

@@ -74,7 +74,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
             try {
                 getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), getContext(), getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Found attachment");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 assertTrue(true);
             }
         }

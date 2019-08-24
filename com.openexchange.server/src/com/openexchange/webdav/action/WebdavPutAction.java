@@ -92,9 +92,9 @@ public class WebdavPutAction extends AbstractAction {
 				resource.create();
 			}
 			res.setStatus(HttpServletResponse.SC_CREATED);
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			LOG.debug("Client Gone?", e);
-		} catch (final WebdavProtocolException x) {
+		} catch (WebdavProtocolException x) {
 			if (in != null && in.hasExceeded()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 			} else {

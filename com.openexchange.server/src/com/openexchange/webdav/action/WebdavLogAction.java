@@ -180,7 +180,7 @@ public class WebdavLogAction extends AbstractAction {
                 b.append(lineSeparator);
             }
             LOG.trace(b.toString(), lineSeparator);
-        } catch (final IOException x) {
+        } catch (IOException x) {
             LOG.debug("", x);
         } finally {
             Streams.close(reader);

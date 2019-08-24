@@ -191,7 +191,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                         stmt = null;
 
                         return lAssignments;
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     } finally {
                         Databases.closeSQLStuff(result, stmt);

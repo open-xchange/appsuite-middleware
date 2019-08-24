@@ -111,13 +111,13 @@ public final class Insert {
             con.setAutoCommit(false); // BEGIN
             insertFolder(cid, tree, user, folder, shadow, session, con);
             con.commit(); // COMMIT
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con); // ROLLBACK
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -168,7 +168,7 @@ public final class Insert {
             }
             stmt.setString(pos, null == shadow ? "" : shadow);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -190,7 +190,7 @@ public final class Insert {
                         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
                         new EventClient(serverSession).create(new OXFolderAccess(con, serverSession.getContext()).getFolderObject(unsignedInt(folderId)));
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
                     log.error("", e);

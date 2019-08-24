@@ -108,7 +108,7 @@ public final class UpdatesAction extends AbstractFolderAction {
             }
             try {
                 timestamp = new Date(Long.parseLong(timestampStr));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("timestamp", timestampStr);
             }
         }
@@ -170,7 +170,7 @@ public final class UpdatesAction extends AbstractFolderAction {
             for (int i = 0; i < len; i++) {
                 resultArray.put(jsonArray2.getJSONArray(i).get(0));
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         /*

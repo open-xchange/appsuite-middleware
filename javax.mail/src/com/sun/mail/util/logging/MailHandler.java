@@ -1670,7 +1670,7 @@ public class MailHandler extends Handler {
                 final ByteArrayInputStream in = new ByteArrayInputStream(b);
                 assert in.markSupported() : in.getClass().getName();
                 return URLConnection.guessContentTypeFromStream(in);
-            } catch (final IOException IOE) {
+            } catch (IOException IOE) {
                 reportError(IOE.getMessage(), IOE, ErrorManager.FORMAT_FAILURE);
             }
         }
@@ -1739,9 +1739,9 @@ public class MailHandler extends Handler {
         final Object ccl = getAndSetContextClassLoader(MAILHANDLER_LOADER);
         try {
             msg.writeTo(new ByteArrayOutputStream(MIN_HEADER_SIZE));
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             throw RE; //Avoid catch all.
-        } catch (final Exception noContent) {
+        } catch (Exception noContent) {
             final String txt = noContent.getMessage();
             if (!isEmpty(txt)) {
                 int limit = 0;
@@ -1785,9 +1785,9 @@ public class MailHandler extends Handler {
         try {
             try { //Use direct call so we do not prefix raw email.
                 errorManager.error(toRawString(msg), ex, code);
-            } catch (final RuntimeException re) {
+            } catch (RuntimeException re) {
                 reportError(toMsgString(re), ex, code);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 reportError(toMsgString(e), ex, code);
             }
         } catch (final LinkageError GLASSFISH_21258) {
@@ -1870,7 +1870,7 @@ public class MailHandler extends Handler {
             try {
                 DataSource source = new ByteArrayDataSource(buf.toString(), type);
                 part.setDataHandler(new DataHandler(source));
-            } catch (final IOException IOE) {
+            } catch (IOException IOE) {
                 reportError(IOE.getMessage(), IOE, ErrorManager.FORMAT_FAILURE);
                 part.setText(buf.toString(), charset);
             }
@@ -1894,7 +1894,7 @@ public class MailHandler extends Handler {
             if (!isEmpty(encoding)) { //Support pre K5687.
                 type = encoding;
             }
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(type, ME, ErrorManager.FORMAT_FAILURE);
         }
         return type;
@@ -2106,7 +2106,7 @@ public class MailHandler extends Handler {
             final Map<Object, Object> seen = new HashMap<>();
             try {
                 intern(seen, this.errorManager);
-            } catch (final SecurityException se) {
+            } catch (SecurityException se) {
                 reportError(se.getMessage(), se, ErrorManager.OPEN_FAILURE);
             }
 
@@ -2122,7 +2122,7 @@ public class MailHandler extends Handler {
                 if (result != canidate && result instanceof Formatter) {
                     this.formatter = (Formatter) result;
                 }
-            } catch (final SecurityException se) {
+            } catch (SecurityException se) {
                 reportError(se.getMessage(), se, ErrorManager.OPEN_FAILURE);
             }
 
@@ -2157,7 +2157,7 @@ public class MailHandler extends Handler {
                     attachmentNames[i] = (Formatter) result;
                 }
             }
-        } catch (final Exception skip) {
+        } catch (Exception skip) {
             reportError(skip.getMessage(), skip, ErrorManager.OPEN_FAILURE);
         } catch (final LinkageError skip) {
             reportError(skip.getMessage(), new InvocationTargetException(skip),
@@ -2291,9 +2291,9 @@ public class MailHandler extends Handler {
                 if (!"null".equalsIgnoreCase(names[i])) {
                     try {
                         a[i] = LogManagerProperties.newFilter(names[i]);
-                    } catch (final SecurityException SE) {
+                    } catch (SecurityException SE) {
                         throw SE; //Avoid catch all.
-                    } catch (final Exception E) {
+                    } catch (Exception E) {
                         reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
                     }
                 }
@@ -2338,9 +2338,9 @@ public class MailHandler extends Handler {
                             reportError("Attachment formatter.", CNFE, ErrorManager.OPEN_FAILURE);
                             a[i] = createSimpleFormatter();
                         }
-                    } catch (final SecurityException SE) {
+                    } catch (SecurityException SE) {
                         throw SE; //Avoid catch all.
-                    } catch (final Exception E) {
+                    } catch (Exception E) {
                         reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
                         a[i] = createSimpleFormatter();
                     }
@@ -2381,9 +2381,9 @@ public class MailHandler extends Handler {
                                 | ClassCastException literal) {
                             a[i] = TailNameFormatter.of(names[i]);
                         }
-                    } catch (final SecurityException SE) {
+                    } catch (SecurityException SE) {
                         throw SE; //Avoid catch all.
-                    } catch (final Exception E) {
+                    } catch (Exception E) {
                         reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
                     }
                 } else {
@@ -2417,12 +2417,12 @@ public class MailHandler extends Handler {
                 try {
                     this.auth = LogManagerProperties
                             .newObjectFrom(name, Authenticator.class);
-                } catch (final SecurityException SE) {
+                } catch (SecurityException SE) {
                     throw SE;
-                } catch (final ClassNotFoundException
+                } catch (ClassNotFoundException
                         | ClassCastException literalAuth) {
                     this.auth = DefaultAuthenticator.of(name);
-                } catch (final Exception E) {
+                } catch (Exception E) {
                     reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
                 }
             } else { //Authenticator is installed to provide the user name.
@@ -2446,9 +2446,9 @@ public class MailHandler extends Handler {
             } else {
                 logLevel = Level.WARNING;
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
              throw SE; //Avoid catch all.
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             reportError(RE.getMessage(), RE, ErrorManager.OPEN_FAILURE);
             logLevel = Level.WARNING;
         }
@@ -2467,9 +2467,9 @@ public class MailHandler extends Handler {
             if (hasValue(name)) {
                 filter = LogManagerProperties.newFilter(name);
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
             throw SE; //Avoid catch all.
-        } catch (final Exception E) {
+        } catch (Exception E) {
             reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
         }
     }
@@ -2490,9 +2490,9 @@ public class MailHandler extends Handler {
             } else {
                 this.setCapacity0(DEFAULT_CAPACITY);
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
             throw SE; //Avoid catch all.
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             reportError(RE.getMessage(), RE, ErrorManager.OPEN_FAILURE);
         }
 
@@ -2517,7 +2517,7 @@ public class MailHandler extends Handler {
             if (e != null) {
                 setEncoding0(e);
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
             throw SE; //Avoid catch all.
         } catch (UnsupportedEncodingException | RuntimeException UEE) {
             reportError(UEE.getMessage(), UEE, ErrorManager.OPEN_FAILURE);
@@ -2557,9 +2557,9 @@ public class MailHandler extends Handler {
             if (name != null) {
                 setErrorManager0(LogManagerProperties.newErrorManager(name));
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
             throw SE; //Avoid catch all.
-        } catch (final Exception E) {
+        } catch (Exception E) {
             reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
         }
     }
@@ -2586,9 +2586,9 @@ public class MailHandler extends Handler {
             } else {
                 formatter = createSimpleFormatter();
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
             throw SE; //Avoid catch all.
-        } catch (final Exception E) {
+        } catch (Exception E) {
             reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
             formatter = createSimpleFormatter();
         }
@@ -2617,9 +2617,9 @@ public class MailHandler extends Handler {
                             "No comparator to reverse.");
                 }
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
             throw SE; //Avoid catch all.
-        } catch (final Exception E) {
+        } catch (Exception E) {
             reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
         }
     }
@@ -2637,7 +2637,7 @@ public class MailHandler extends Handler {
             if (val != null) {
                 this.pushLevel = Level.parse(val);
             }
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             reportError(RE.getMessage(), RE, ErrorManager.OPEN_FAILURE);
         }
 
@@ -2659,9 +2659,9 @@ public class MailHandler extends Handler {
             if (hasValue(name)) {
                 this.pushFilter = LogManagerProperties.newFilter(name);
             }
-        } catch (final SecurityException SE) {
+        } catch (SecurityException SE) {
             throw SE; //Avoid catch all.
-        } catch (final Exception E) {
+        } catch (Exception E) {
             reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
         }
     }
@@ -2682,12 +2682,12 @@ public class MailHandler extends Handler {
         if (hasValue(name)) {
             try {
                 this.subjectFormatter = LogManagerProperties.newFormatter(name);
-            } catch (final SecurityException SE) {
+            } catch (SecurityException SE) {
                 throw SE; //Avoid catch all.
             } catch (ClassNotFoundException
                     | ClassCastException literalSubject) {
                 this.subjectFormatter = TailNameFormatter.of(name);
-            } catch (final Exception E) {
+            } catch (Exception E) {
                 this.subjectFormatter = TailNameFormatter.of(name);
                 reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
             }
@@ -2784,9 +2784,9 @@ public class MailHandler extends Handler {
             } finally {
                 getAndSetContextClassLoader(ccl);
             }
-        } catch (final RuntimeException re) {
+        } catch (RuntimeException re) {
             reportError(msg, re, code);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             reportError(msg, e, code);
         }
     }
@@ -2807,7 +2807,7 @@ public class MailHandler extends Handler {
                                 comparator.getClass().getName());
                     }
                 }
-            } catch (final RuntimeException RE) {
+            } catch (RuntimeException RE) {
                 reportError(RE.getMessage(), RE, ErrorManager.FORMAT_FAILURE);
             }
         }
@@ -2837,9 +2837,9 @@ public class MailHandler extends Handler {
                     }
                 }
             }
-        } catch (final RuntimeException re) {
+        } catch (RuntimeException re) {
             reportError(re.getMessage(), re, code);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             reportError(e.getMessage(), e, code);
         }
         return null;
@@ -3063,7 +3063,7 @@ public class MailHandler extends Handler {
 
             try { //Verify subclass or declared mime charset.
                 Charset.forName(getEncodingName());
-            } catch (final RuntimeException RE) {
+            } catch (RuntimeException RE) {
                 UnsupportedEncodingException UEE =
                         new UnsupportedEncodingException(RE.toString());
                 UEE.initCause(RE);
@@ -3110,12 +3110,12 @@ public class MailHandler extends Handler {
                     reportError(msg, me, ErrorManager.OPEN_FAILURE);
                     throw me;
                 }
-            } catch (final MessagingException protocol) {
+            } catch (MessagingException protocol) {
                 //Switching the CCL emulates the current send behavior.
                 Object ccl = getAndSetContextClassLoader(MAILHANDLER_LOADER);
                 try {
                     t = session.getTransport();
-                } catch (final MessagingException fail) {
+                } catch (MessagingException fail) {
                     throw attach(protocol, fail);
                 } finally {
                     getAndSetContextClassLoader(ccl);
@@ -3140,7 +3140,7 @@ public class MailHandler extends Handler {
                     } finally {
                         try {
                             t.close();
-                        } catch (final MessagingException ME) {
+                        } catch (MessagingException ME) {
                             closed = ME;
                         }
                     }
@@ -3151,7 +3151,7 @@ public class MailHandler extends Handler {
                         final String protocol = t.getURLName().getProtocol();
                         verifyProperties(session, protocol);
                     }
-                } catch (final SendFailedException sfe) {
+                } catch (SendFailedException sfe) {
                     Address[] recip = sfe.getInvalidAddresses();
                     if (recip != null && recip.length != 0) {
                         setErrorContent(abort, verify, sfe);
@@ -3162,7 +3162,7 @@ public class MailHandler extends Handler {
                     if (recip != null && recip.length != 0) {
                         reportUnexpectedSend(abort, verify, sfe);
                     }
-                } catch (final MessagingException ME) {
+                } catch (MessagingException ME) {
                     if (!isMissingContent(abort, ME)) {
                         setErrorContent(abort, verify, ME);
                         reportError(abort, ME, ErrorManager.OPEN_FAILURE);
@@ -3204,7 +3204,7 @@ public class MailHandler extends Handler {
                         } else {
                             verifyHost(mailHost);
                         }
-                    } catch (final RuntimeException | IOException IOE) {
+                    } catch (RuntimeException | IOException IOE) {
                         MessagingException ME =
                                 new MessagingException(msg, IOE);
                         setErrorContent(abort, verify, ME);
@@ -3219,7 +3219,7 @@ public class MailHandler extends Handler {
                         local = getLocalHost(t);
                     }
                     verifyHost(local);
-                } catch (final RuntimeException | IOException IOE) {
+                } catch (RuntimeException | IOException IOE) {
                     MessagingException ME = new MessagingException(msg, IOE);
                     setErrorContent(abort, verify, ME);
                     reportError(abort, ME, ErrorManager.OPEN_FAILURE);
@@ -3258,7 +3258,7 @@ public class MailHandler extends Handler {
                     } finally {
                         getAndSetContextClassLoader(ccl);
                     }
-                } catch (final IOException IOE) {
+                } catch (IOException IOE) {
                     MessagingException ME = new MessagingException(msg, IOE);
                     setErrorContent(abort, verify, ME);
                     reportError(abort, ME, ErrorManager.FORMAT_FAILURE);
@@ -3300,10 +3300,10 @@ public class MailHandler extends Handler {
 
             //Verify reply-to addresses.
             verifyAddresses(abort.getReplyTo());
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             setErrorContent(abort, verify, RE);
             reportError(abort, RE, ErrorManager.OPEN_FAILURE);
-        } catch (final Exception ME) {
+        } catch (Exception ME) {
             setErrorContent(abort, verify, ME);
             reportError(abort, ME, ErrorManager.OPEN_FAILURE);
         }
@@ -3322,7 +3322,7 @@ public class MailHandler extends Handler {
             try {
                 try {
                     abort.saveChanges();
-                } catch (final NullPointerException xferEncoding) {
+                } catch (NullPointerException xferEncoding) {
                     //Workaround GNU JavaMail bug in MimeUtility.getEncoding
                     //when the mime message has no content.
                     try {
@@ -3515,7 +3515,7 @@ public class MailHandler extends Handler {
 
         try {
             msg.setSentDate(new java.util.Date());
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3646,7 +3646,7 @@ public class MailHandler extends Handler {
             chunk = chunk.replaceAll("[\\x00-\\x1F\\x7F]+", "");
             final String old = part.getFileName();
             part.setFileName(old != null ? old.concat(chunk) : chunk);
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3681,7 +3681,7 @@ public class MailHandler extends Handler {
             assert msg instanceof MimeMessage : msg;
             ((MimeMessage) msg).setSubject(old != null ? old.concat(chunk)
                     : chunk, MimeUtility.mimeCharset(charset));
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3759,7 +3759,7 @@ public class MailHandler extends Handler {
                     }
                 }
             }
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3777,7 +3777,7 @@ public class MailHandler extends Handler {
             if (lang.length() != 0) {
                 p.setHeader("Accept-Language", lang);
             }
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3848,7 +3848,7 @@ public class MailHandler extends Handler {
     private String head(final Formatter f) {
         try {
             return f.getHead(this);
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             reportError(RE.getMessage(), RE, ErrorManager.FORMAT_FAILURE);
             return "";
         }
@@ -3863,7 +3863,7 @@ public class MailHandler extends Handler {
     private String format(final Formatter f, final LogRecord r) {
         try {
             return f.format(r);
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             reportError(RE.getMessage(), RE, ErrorManager.FORMAT_FAILURE);
             return "";
         }
@@ -3878,7 +3878,7 @@ public class MailHandler extends Handler {
     private String tail(final Formatter f, final String def) {
         try {
             return f.getTail(this);
-        } catch (final RuntimeException RE) {
+        } catch (RuntimeException RE) {
             reportError(RE.getMessage(), RE, ErrorManager.FORMAT_FAILURE);
             return def;
         }
@@ -3898,7 +3898,7 @@ public class MailHandler extends Handler {
             } else {
                 try {
                     value = MimeUtility.encodeText(k.getName());
-                } catch (final UnsupportedEncodingException E) {
+                } catch (UnsupportedEncodingException E) {
                     reportError(E.getMessage(), E, ErrorManager.FORMAT_FAILURE);
                     value = k.getName().replaceAll("[^\\x00-\\x7F]", "\uu001A");
                 }
@@ -3906,7 +3906,7 @@ public class MailHandler extends Handler {
                         + value + " extension.");
             }
             msg.setHeader("X-Mailer", value);
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3920,7 +3920,7 @@ public class MailHandler extends Handler {
             msg.setHeader("Importance", "High");
             msg.setHeader("Priority", "urgent");
             msg.setHeader("X-Priority", "2"); //High
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3938,7 +3938,7 @@ public class MailHandler extends Handler {
     private void setIncompleteCopy(final Message msg) {
         try {
             msg.setHeader("Incomplete-Copy", "");
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -3953,7 +3953,7 @@ public class MailHandler extends Handler {
         if (allowRestrictedHeaders()) {
             try { //RFC 3834 (5.2)
                 msg.setHeader("auto-submitted", "auto-generated");
-            } catch (final MessagingException ME) {
+            } catch (MessagingException ME) {
                 reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
             }
         }
@@ -3979,7 +3979,7 @@ public class MailHandler extends Handler {
                 //not null which causes the local address computation
                 //to fail.  Assume the user wants to omit the from address
                 //header.
-            } catch (final MessagingException ME) {
+            } catch (MessagingException ME) {
                 reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
                 setDefaultFrom(msg);
             }
@@ -3995,7 +3995,7 @@ public class MailHandler extends Handler {
     private void setDefaultFrom(final Message msg) {
         try {
             msg.setFrom();
-        } catch (final MessagingException ME) {
+        } catch (MessagingException ME) {
             reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
         }
     }
@@ -4041,7 +4041,7 @@ public class MailHandler extends Handler {
                 if (address.length > 0) {
                     msg.setReplyTo(address);
                 }
-            } catch (final MessagingException ME) {
+            } catch (MessagingException ME) {
                 reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
             }
         }
@@ -4066,7 +4066,7 @@ public class MailHandler extends Handler {
                                 ErrorManager.FORMAT_FAILURE);
                     }
                 }
-            } catch (final MessagingException ME) {
+            } catch (MessagingException ME) {
                 reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
             }
         }
@@ -4101,7 +4101,7 @@ public class MailHandler extends Handler {
                 if (address.length > 0) {
                     msg.setRecipients(type, address);
                 }
-            } catch (final MessagingException ME) {
+            } catch (MessagingException ME) {
                 reportError(ME.getMessage(), ME, ErrorManager.FORMAT_FAILURE);
             }
         }
@@ -4156,9 +4156,9 @@ public class MailHandler extends Handler {
                 pw.flush();
             } //Close OSW before generating string. JDK-6995537
             return out.toString(charset);
-        } catch (final RuntimeException unexpected) {
+        } catch (RuntimeException unexpected) {
             return t.toString() + ' ' + unexpected.toString();
-        } catch (final Exception badMimeCharset) {
+        } catch (Exception badMimeCharset) {
             return t.toString() + ' ' + badMimeCharset.toString();
         }
     }
@@ -4181,7 +4181,7 @@ public class MailHandler extends Handler {
                     pa = new GetAndSetContext(ccl);
                 }
                 return AccessController.doPrivileged(pa);
-            } catch (final SecurityException ignore) {
+            } catch (SecurityException ignore) {
             }
         }
         return GetAndSetContext.NOT_MODIFIED;
@@ -4242,7 +4242,7 @@ public class MailHandler extends Handler {
             return LogManagerProperties.getLocalHost(s);
         } catch (SecurityException | NoSuchMethodException
                 | LinkageError ignore) {
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             reportError(s.toString(), ex, ErrorManager.OPEN_FAILURE);
         }
         return null;

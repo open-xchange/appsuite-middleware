@@ -912,9 +912,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                 return subfolderFlag;
             }
             return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig.getUserPermissionBits(), null)).hasNext();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             SearchIterators.close(iter);
@@ -1167,7 +1167,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (other.containsSubfolderIds() && (overwrite || !containsSubfolderIds())) {
             try {
                 setSubfolderIds((ArrayList<Integer>) other.getSubfolderIds());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }
@@ -1190,7 +1190,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (containsObjectID()) {
             try {
                 return OXFolderSQL.exists(getObjectID(), null, ctx);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         } else if (containsParentFolderID() && containsFolderName() && containsModule()) {
@@ -1201,7 +1201,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                 }
                 setObjectID(fuid);
                 return true;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
@@ -1240,7 +1240,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (!containsPermissions()) {
             try {
                 setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), ContextStorage.getStorageContext(userPerm.getContextId()), null));
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
@@ -1255,7 +1255,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         if (!containsPermissions()) {
             try {
                 setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), null));
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
@@ -1447,7 +1447,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                         sb.append('|');
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 sb.append("");
             }
         }
@@ -1514,7 +1514,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
                 clone.setMap(copyMap(map));
             }
             return clone;
-        } catch (final CloneNotSupportedException exc) {
+        } catch (CloneNotSupportedException exc) {
             return null;
         }
     }

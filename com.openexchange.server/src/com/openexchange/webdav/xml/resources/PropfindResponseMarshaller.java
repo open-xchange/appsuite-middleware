@@ -110,9 +110,9 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 				} else {
 					props.add(p);
 				}
-			} catch (final WebdavProtocolException e) {
+			} catch (WebdavProtocolException e) {
 				multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(e.getStatus(), e.getUrl(),Arrays.asList(prop)));
-			} catch (final OXException e) {
+			} catch (OXException e) {
                 multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(500, new WebdavPath(), Arrays.asList(prop)));
             }
 		}

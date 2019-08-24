@@ -122,7 +122,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folder, false, lastModified);
             return folder.getObjectID();
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }

@@ -150,7 +150,7 @@ public final class ModifyCharsetExtendedProvider {
             if (ModifyCharsetExtendedProvider.isFinal.booleanValue()) {
                 try {
                     ReflectionHelper.setStaticFinalField(extendedProviderField, provider);
-                } catch (final NoSuchFieldException e) {
+                } catch (NoSuchFieldException e) {
                     // Cannot occur
                 }
             } else {

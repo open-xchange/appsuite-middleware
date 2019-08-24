@@ -99,7 +99,7 @@ public final class ProviderUtility {
                 public int getSSLPort() {
                     return defaultPort;
                 }});
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw MailAccountExceptionCodes.URI_PARSE_FAILED.create(e, serverUrl);
         }
         return new StringBuilder(uri.getHost()).append(':').append(uri.getPort()).toString();

@@ -269,7 +269,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                             } else {
                                 idleAvailable.await();
                             }
-                        } catch (final InterruptedException e) {
+                        } catch (InterruptedException e) {
                             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                             Thread.currentThread().interrupt();
                             LOG.error("Thread {} was interrupted.", threadName, e);
@@ -305,7 +305,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 try {
                     pooled = lifecycle.create();
                     brokenCreate.set(false);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     brokenCreate.set(true);
                     lock.lock();
                     try {
@@ -493,7 +493,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 thread.setName("PoolCleaner");
                 ReentrantLockPool.this.run();
                 thread.setName(origName);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }

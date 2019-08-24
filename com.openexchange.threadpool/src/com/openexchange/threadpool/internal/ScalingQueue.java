@@ -121,10 +121,10 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
                             final CustomFutureTask<?> cft = (CustomFutureTask<?>) r;
                             try {
                                 handleTask(cft);
-                            } catch (final RejectedExecutionException e) {
+                            } catch (RejectedExecutionException e) {
                                 // No remedy
                                 throw e;
-                            } catch (final Exception e) {
+                            } catch (Exception e) {
                                 // Signal failed execution
                                 cft.setException(e);
                             }
@@ -132,7 +132,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
                         defaultHandler.rejectedExecution(r, executor);
                     }
                 }
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // should never happen since we never wait
                 Thread.currentThread().interrupt();
                 throw new RejectedExecutionException(e);

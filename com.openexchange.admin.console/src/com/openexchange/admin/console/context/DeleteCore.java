@@ -90,19 +90,19 @@ public abstract class DeleteCore extends ContextAbstraction {
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
 
                 parseAndSetExtensions(parser, ctx, auth);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
             maincall(ctx, auth);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
 
         try {
             displayDeletedMessage(successtext, null, parser);
             sysexit(0);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }

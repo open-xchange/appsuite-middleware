@@ -109,7 +109,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
             OXException me = null;
             try {
                 mailAccess.getFolderStorage().createFolder(mfd);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 me = e;
             }
             assertTrue("Folder created although an invalid name was specified", me != null);
@@ -217,7 +217,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
             OXException me = null;
             try {
                 mailAccess.getFolderStorage().createFolder(mfd);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 me = e;
                 fullname = null;
             }
@@ -239,7 +239,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
             me = null;
             try {
                 mailAccess.getFolderStorage().createFolder(mfd);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 me = e;
                 fullname = null;
             }
@@ -261,7 +261,7 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
             me = null;
             try {
                 mailAccess.getFolderStorage().createFolder(mfd);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 me = e;
                 fullname = null;
             }

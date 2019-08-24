@@ -108,7 +108,7 @@ public class FileCache {
                 }
                 baos.flush(); // no-op
                 data = filter == null ? baos.toByteArray() : filter.filter(baos);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.debug("Could not read from '{}'", path, e);
                 data = null;
             } finally {

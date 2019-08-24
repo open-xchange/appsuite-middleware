@@ -102,7 +102,7 @@ public final class UWAUtility {
             if (!"http".equals(protocol) && !"https".equals(protocol)) {
                 throw new MalformedURLException("Only http & https protocols supported.");
             }
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             final String message = e.getMessage();
             if (null == message || !message.startsWith("no protocol: ") || !isUri(sUrl)) {
                 throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
@@ -113,7 +113,7 @@ public final class UWAUtility {
             try {
                 final String dummyUrl = "http://localhost" + sUrl.substring(2);
                 @SuppressWarnings("unused") URL url = new java.net.URL(dummyUrl);
-            } catch (final MalformedURLException e1) {
+            } catch (MalformedURLException e1) {
                 throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
             }
         }
@@ -123,7 +123,7 @@ public final class UWAUtility {
         try {
             @SuppressWarnings("unused") URI uri = new URI(s);
             return true;
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             return false;
         }
     }

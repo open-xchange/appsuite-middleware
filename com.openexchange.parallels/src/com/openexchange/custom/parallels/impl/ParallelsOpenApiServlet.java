@@ -116,7 +116,7 @@ public final class ParallelsOpenApiServlet extends DataServlet {
 
             try {
                 jsonObj = convertParameter2JSONObject(req);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("", e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, resp, session);
@@ -127,10 +127,10 @@ public final class ParallelsOpenApiServlet extends DataServlet {
             final Object responseObj = proRequest.action(action,module, jsonObj);
             response.setData(responseObj);
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);

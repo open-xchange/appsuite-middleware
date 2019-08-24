@@ -204,7 +204,7 @@ public class RoundRobinProcessor implements Processor {
 
         try {
             pool.shutdownNow();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             // Ignore
         }
     }

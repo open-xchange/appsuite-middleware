@@ -166,7 +166,7 @@ public final class ContentDisposition extends ParameterizedHeader {
                     parameterList = new ParameterList();
                 }
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.INVALID_CONTENT_DISPOSITION.create(e, contentDisposition);
         }
     }

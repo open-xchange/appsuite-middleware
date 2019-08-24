@@ -2418,7 +2418,7 @@ public class MimeMessage extends Message implements MimePart {
                     sb.append(crlf);
                     sb.append("<unknown-content>");
                     return sb.toString();
-                } catch (final LimitExceededException e) {
+                } catch (LimitExceededException e) {
                     return sb.appendDots().toString();
                 }
             }
@@ -2457,7 +2457,7 @@ public class MimeMessage extends Message implements MimePart {
                     if (is != null) {
                         try {
                             is.close();
-                        } catch (final Exception x) {
+                        } catch (Exception x) {
                             // Ignore
                         }
                     }
@@ -2469,7 +2469,7 @@ public class MimeMessage extends Message implements MimePart {
         } catch (UnsupportedEncodingException e) {
             // Cannot occur
             return super.toString();
-        } catch (final LimitExceededException e) {
+        } catch (LimitExceededException e) {
             // Output what is available
             if (null == os) {
                 return super.toString();
@@ -2477,11 +2477,11 @@ public class MimeMessage extends Message implements MimePart {
             os.appendDots();
             try {
                 return os.toString("ISO-8859-1");
-            } catch (final UnsupportedEncodingException x) {
+            } catch (UnsupportedEncodingException x) {
                 // Cannot occur
                 return super.toString();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return super.toString();
         }
     }

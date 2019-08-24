@@ -141,7 +141,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
                     grizzly.startListeners();
                     LOGGER.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
                     availabilityReg = context.registerService(SignalHttpApiAvailabilityService.class, new SignalHttpApiAvailabilityService() {/*nothing inside*/}, null);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOGGER.error(" ---=== /!\\ ===--- Grizzly network listeners could not be started! ---=== /!\\ ===--- ", e);
                 }
             } else {

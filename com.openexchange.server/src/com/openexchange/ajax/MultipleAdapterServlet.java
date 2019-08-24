@@ -128,7 +128,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final Object response = handler.performRequest(action, request, session, Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
             writeResponseSafely(response, null == user ? localeFrom(session) : user.getLocale(), timestamp, handler.getWarnings(), resp, session);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             writeException(x, null == user ? localeFrom(session) : user.getLocale(), resp, session);
         } catch (final Throwable t) {
             writeException(wrap(t), null == user ? localeFrom(session) : user.getLocale(), resp, session);
@@ -154,7 +154,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         }
         try {
             writeResponse(response, resp, session);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
     }
@@ -183,7 +183,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         response.setException(e);
         try {
             writeResponse(response, resp, session);
-        } catch (final IOException ioe) {
+        } catch (IOException ioe) {
             LOG.error("", ioe);
         }
     }
@@ -222,7 +222,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             if ('[' == c || '{' == c) {
                 try {
                     return JSONObject.parse(reader);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
                 }
             }

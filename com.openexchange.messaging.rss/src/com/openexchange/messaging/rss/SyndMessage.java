@@ -310,13 +310,13 @@ public class SyndMessage implements MessagingMessage {
                         return null;
                     }
                     picUrl = proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance())).toString();
-                } catch (final MalformedURLException e) {
+                } catch (MalformedURLException e) {
                     /*
                      * Not a valid URL
                      */
                     org.slf4j.LoggerFactory.getLogger(SyndMessage.class).warn("Not a valid image URL. Replacing image URL skipped.", e);
                     picUrl = null;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     /*
                      * Not a valid URL
                      */

@@ -125,7 +125,7 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
                 jArray.put(convertCompositionSpace(compositionSpace, optFields));
             }
             result.setResultObject(jArray, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

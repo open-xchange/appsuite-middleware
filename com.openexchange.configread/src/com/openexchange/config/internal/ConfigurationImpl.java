@@ -591,7 +591,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (prop != null) {
             try {
                 return Integer.parseInt(prop.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.trace("", e);
             }
         }
@@ -771,7 +771,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 builder.append(cbuf, 0, read);
             }
             return builder.toString();
-        } catch (final IOException x) {
+        } catch (IOException x) {
             LOG.error("Can't read file: {}", file, x);
             return null;
         } finally {

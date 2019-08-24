@@ -176,7 +176,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
     static {
         try {
             staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             staticHostName = "localhost";
             warnSpam = e;
         }
@@ -418,7 +418,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         }
                         try {
                             internetAddress.setPersonal("", "US-ASCII");
-                        } catch (final UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             LOG.trace("\"US-ASCII\" is not supported", e);
                             // Ignore as personal is cleared
                         }
@@ -559,7 +559,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                                 // No SSL demanded and SMTP server seems not to support TLS
                                 throw MailExceptionCode.NON_SECURE_DENIED.create(smtpConfig.getServer());
                             }
-                        } catch (final IOException e) {
+                        } catch (IOException e) {
                             LOG.trace("Failed to determine SMTP server capabilities", e);
                             smtpProps.put("mail.smtp.starttls.enable", "true");
                         }
@@ -722,7 +722,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 if (isKerberosAuth()) {
                     try {
                         Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, login, password));
-                    } catch (final PrivilegedActionException e) {
+                    } catch (PrivilegedActionException e) {
                         handlePrivilegedActionException(e);
                     }
                 } else {
@@ -879,7 +879,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
              */
             try {
                 checkMimeVersionHeader(mimeMessage);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not check for proper usage of \"MIME-Version\" header according to RFC2045.", e);
             }
         }
@@ -1056,7 +1056,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         if (null != transport) {
             try {
                 transport.close();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.error("Closing SMTP transport failed.", e);
             }
         }
@@ -1104,7 +1104,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         try {
             SMTPConfig smtpConfig = getTransportConfig();
             transport = getSMTPSession(smtpConfig, smtpConfig.isRequireTls()).getTransport(SMTP);
-        } catch (final NoSuchProviderException e) {
+        } catch (NoSuchProviderException e) {
             throw MimeMailException.handleMessagingException(e);
         }
 
@@ -1117,7 +1117,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             if (close) {
                 try {
                     transport.close();
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     LOG.error("Closing SMTP transport failed.", e);
                 }
             }
@@ -1159,7 +1159,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         smtpFiller.setAccountId(accountId);
                         smtpFiller.setCommonHeaders(mimeMessage);
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.trace("Failed to extract MIME message from {} instance", ContentAware.class.getName(), e);
                     mimeMessage = null;
                 }
@@ -1215,9 +1215,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
             MimeMessage sentMimeMessage = sendMimeMessage(mimeMessage, allRecipientz, mtaStatusInfo, composedMail.getSecuritySettings());
             return MimeMessageConverter.convertMessage(sentMimeMessage);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -1258,7 +1258,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             }
 
             return MimeMessageConverter.convertMessage(smtpMessage);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         }
     }
@@ -1300,7 +1300,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             if (!poisoned) {
                 transport(smtpMessage, recipients, getSMTPSession(smtpConfig), smtpConfig);
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } finally {
             Streams.close(stream);
@@ -1314,7 +1314,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         try {
             smtpMessage = new SMTPMessage(getSMTPSession(), MimeHeaderNameChecker.sanitizeHeaderNames(asciiBytes));
             smtpMessage.removeHeader("x-original-headers");
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
         }
 
@@ -1329,7 +1329,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         try {
             smtpMessage = new SMTPMessage(getSMTPSession(), stream);
             smtpMessage.removeHeader("x-original-headers");
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
         }
 

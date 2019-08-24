@@ -108,7 +108,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
                 url = new URL(sUrl.trim());
-            } catch (final MalformedURLException e) {
+            } catch (MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
             final int timeoutMillis;
@@ -119,7 +119,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 } else {
                     try {
                         timeoutMillis = Integer.parseInt(sTimeoutMillis.trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw DataExceptionCodes.INVALID_ARGUMENT.create("timeout", sTimeoutMillis.trim());
                     }
                 }
@@ -136,7 +136,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
             urlCon.setReadTimeout(timeoutMillis);
             try {
                 urlCon.connect();
-            } catch (final SocketTimeoutException e) {
+            } catch (SocketTimeoutException e) {
                 /*
                  * Time-out elapsed
                  */
@@ -211,15 +211,15 @@ public final class URLMailAttachmentDataSource implements DataSource {
              * Return data
              */
             return new SimpleData<D>((D) urlCon.getInputStream(), properties);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * No closure of URL connection here
              */
             throw e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             closeURLConnection(urlCon);
             throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             closeURLConnection(urlCon);
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
@@ -229,7 +229,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
         if (null != urlCon) {
             try {
                 Streams.close(urlCon.getInputStream());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

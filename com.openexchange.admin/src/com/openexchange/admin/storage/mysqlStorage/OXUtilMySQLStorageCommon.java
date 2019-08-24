@@ -132,10 +132,10 @@ public class OXUtilMySQLStorageCommon {
 
         try {
             return cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), passwd, db.getDriver());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
@@ -188,7 +188,7 @@ public class OXUtilMySQLStorageCommon {
                 }
             } while (result.next());
             return schemas;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -220,7 +220,7 @@ public class OXUtilMySQLStorageCommon {
             stmt.setString(1, name);
             result = stmt.executeQuery();
             return result.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -253,7 +253,7 @@ public class OXUtilMySQLStorageCommon {
             con.commit();
             rollback = 2;
             error = false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.toString());
         } finally {
             if (rollback > 0) {
@@ -274,7 +274,7 @@ public class OXUtilMySQLStorageCommon {
         try {
             stmt = con.createStatement();
             stmt.executeUpdate("CREATE DATABASE `" + name + "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -350,7 +350,7 @@ public class OXUtilMySQLStorageCommon {
                     existingTables.add(createdTable);
                 }
                 toCreate.remove(next);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new StorageException("Failed to create tables " + Arrays.toString(next.tablesToCreate()) + ": " + e.getMessage(), e);
             }
         }
@@ -400,7 +400,7 @@ public class OXUtilMySQLStorageCommon {
             }
 
             store.addExecutedTasks(con, taskNames, true, poolId, schema);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
     }
@@ -416,10 +416,10 @@ public class OXUtilMySQLStorageCommon {
         Connection con;
         try {
             con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
@@ -433,7 +433,7 @@ public class OXUtilMySQLStorageCommon {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.toString(), e);
         } finally {
             if (rollback > 0) {
@@ -469,7 +469,7 @@ public class OXUtilMySQLStorageCommon {
         try {
             stmt = con.createStatement();
             stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(stmt);

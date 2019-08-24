@@ -119,9 +119,9 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
                 UNKNOWN_ACTION.create(action);
                 return null;
             }
-        } catch (final OXException x) {
+        } catch (OXException x) {
             throw x;
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw x;
         } catch (final Throwable t) {
             throw wrapThrowable(t);

@@ -124,7 +124,7 @@ public class ShowMailAction extends AppointmentAction {
             object.put("html", mail.getHtml());
 
             return new AJAXRequestResult(object);
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x);
         }
     }

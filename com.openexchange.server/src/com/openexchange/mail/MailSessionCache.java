@@ -90,7 +90,7 @@ public final class MailSessionCache {
         MailSessionCache mailCache = null;
         try {
             mailCache = (MailSessionCache) session.getParameter(key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Class version does not match; just renew session cache.
              */
@@ -130,7 +130,7 @@ public final class MailSessionCache {
         MailSessionCache mailCache = null;
         try {
             mailCache = (MailSessionCache) session.getParameter(key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Class version does not match; just renew session cache.
              */
@@ -150,7 +150,7 @@ public final class MailSessionCache {
         MailSessionCache mailCache = null;
         try {
             mailCache = (MailSessionCache) session.getParameter(key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Class version does not match
              */
@@ -187,7 +187,7 @@ public final class MailSessionCache {
         MailSessionCache mailCache = null;
         try {
             mailCache = (MailSessionCache) session.getParameter(key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Class version does not match
              */
@@ -305,7 +305,7 @@ public final class MailSessionCache {
         try {
             @SuppressWarnings("unchecked") final T retval = (T) accountMap.get(parameterName);
             return retval;
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             return null;
         }
     }

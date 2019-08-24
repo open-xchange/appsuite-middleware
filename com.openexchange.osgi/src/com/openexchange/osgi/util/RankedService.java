@@ -214,7 +214,7 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
                 } else {
                     try {
                         ranking = Integer.parseInt(oRanking.toString().trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         ranking = defaultRanking;
                     }
                 }

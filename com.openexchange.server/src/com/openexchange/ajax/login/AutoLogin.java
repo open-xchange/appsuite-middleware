@@ -174,11 +174,11 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                     if (null != oModules) {
                         json.put("modules", oModules);
                     }
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Keep interrupted state
                     Thread.currentThread().interrupt();
                     throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                } catch (final ExecutionException e) {
+                } catch (ExecutionException e) {
                     // Cannot occur
                     final Throwable cause = e.getCause();
                     LOG.warn("Modules could not be added to login JSON response", cause);
@@ -211,7 +211,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              */
             LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName());
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
                 LOG.debug("", e);
             } else {
@@ -242,12 +242,12 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                     SessionUtility.removeOXCookies(session.getHash(), req, resp);
                     SessionUtility.removeJSESSIONID(req, resp);
                     sessiondService.removeSession(session.getSessionID());
-                } catch (final Exception e2) {
+                } catch (Exception e2) {
                     LOG.error("Cookies could not be removed.", e2);
                 }
             }
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
@@ -262,7 +262,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(LoginServlet.RESPONSE_ERROR, e);
             LoginServlet.sendError(resp);
         }

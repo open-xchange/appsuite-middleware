@@ -123,7 +123,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
         if (performShutDown) {
             try {
                 stopBundle();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 logger.warn("Secret module could not be shut down.", e);
             }
         }

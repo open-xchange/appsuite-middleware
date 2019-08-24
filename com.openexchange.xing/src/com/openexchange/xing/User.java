@@ -244,7 +244,7 @@ public class User {
             } else {
                 this.photoUrls = new PhotoUrls();
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new XingException(e);
         }
     }

@@ -160,7 +160,7 @@ final class POTokenStream {
                 line++;
             }
             return b;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw I18NExceptionCode.IO_EXCEPTION.create(e, filename);
         }
     }
@@ -276,7 +276,7 @@ final class POTokenStream {
             } else {
                 element(Integer.valueOf(number));
             }
-        } catch (final NumberFormatException x) {
+        } catch (NumberFormatException x) {
             throw I18NExceptionCode.EXPECTED_NUMBER.create(number, filename, Integer.valueOf(line));
         }
     }

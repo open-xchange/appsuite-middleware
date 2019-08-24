@@ -2392,7 +2392,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                             }
                             try {
                                 new QuotedInternetAddress(member.getEmailaddress()).validate();
-                            } catch (final AddressException e) {
+                            } catch (AddressException e) {
                                 throw ContactExceptionCodes.INVALID_EMAIL.create(e, member.getEmailaddress());
                             }
                         } else {

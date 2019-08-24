@@ -104,7 +104,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         super();
         try {
             oxGroup = OXGroupStorageInterface.getInstance();
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOGGER.error("", e);
             throw e;
         }
@@ -120,7 +120,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(grp, members);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the arguments for addMember is null", e3);
                 throw e3;
             }
@@ -131,7 +131,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -170,7 +170,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 if (tool.existsGroupMember(ctx, grp_id, members)) {
                     throw new InvalidDataException("Member already exists in group");
                 }
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -186,7 +186,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     for (final User user : members) {
                         cache.remove(cacheService.newCacheKey(contextId, user.getId().intValue()));
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOGGER.error("", e);
                 }
             }
@@ -203,7 +203,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(grp);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for change is null", e3);
                 throw e3;
             }
@@ -214,7 +214,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 LOGGER.error("", e1);
                 throw e1;
             }
@@ -281,31 +281,31 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), old_user_id.intValue()));
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOGGER.error("", e);
                     }
                 }
 
-            } catch (final EnforceableDataObjectException e2) {
+            } catch (EnforceableDataObjectException e2) {
                 final InvalidDataException invalidDataException = new InvalidDataException(e2.getMessage());
                 LOGGER.error("", invalidDataException);
                 throw invalidDataException;
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final DatabaseUpdateException e) {
+            } catch (DatabaseUpdateException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final NoSuchContextException e) {
+            } catch (NoSuchContextException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 LOGGER.error("", e1);
                 throw e1;
-            } catch (final NoSuchUserException e) {
+            } catch (NoSuchUserException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final NoSuchGroupException e) {
+            } catch (NoSuchGroupException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -319,7 +319,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         try {
                             LOGGER.debug("Calling change for plugin: {}", bundlename);
                             oxgroup.change(ctx, grp, auth);
-                        } catch (final PluginException e) {
+                        } catch (PluginException e) {
                             LOGGER.error("Error while calling change for plugin: {}", bundlename, e);
                             throw StorageException.wrapForRMI(e);
                         }
@@ -338,7 +338,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(grp);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for create is null", e3);
                 throw e3;
             }
@@ -349,7 +349,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e2) {
+            } catch (InvalidDataException e2) {
                 LOGGER.error("", e2);
                 throw e2;
             }
@@ -386,10 +386,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         }
                     }
                 }
-            } catch (final InvalidDataException e2) {
+            } catch (InvalidDataException e2) {
                 LOGGER.error("", e2);
                 throw e2;
-            } catch (final NoSuchUserException e) {
+            } catch (NoSuchUserException e) {
                 LOGGER.error("", e);
                 throw e;
             } catch (EnforceableDataObjectException e) {
@@ -410,19 +410,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             LOGGER.debug("Calling create for plugin: {}", bundlename);
                             oxgroup.create(ctx, grp, auth);
                             interfacelist.add(oxgroup);
-                        } catch (final PluginException e) {
+                        } catch (PluginException e) {
                             LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
                             LOGGER.info("Now doing rollback for everything until now...");
                             for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
                                 try {
                                     oxgroupinterface.delete(ctx, new Group[] { grp }, auth);
-                                } catch (final PluginException e1) {
+                                } catch (PluginException e1) {
                                     LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                                 }
                             }
                             try {
                                 oxGroup.delete(ctx, new Group[] { grp });
-                            } catch (final StorageException e1) {
+                            } catch (StorageException e1) {
                                 LOGGER.error("Error doing rollback for creating resource in database", e1);
                             }
                             throw StorageException.wrapForRMI(e);
@@ -442,7 +442,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         for (final Integer member_id : mems) {
                             cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id.intValue()));
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOGGER.error("", e);
                     }
                 }
@@ -462,7 +462,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(grp);
-        } catch (final InvalidDataException e3) {
+        } catch (InvalidDataException e3) {
             LOGGER.error("One of the given arguments for delete is null", e3);
             throw e3;
         }
@@ -481,7 +481,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck((Object[]) grp);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for delete is null", e3);
                 throw e3;
             }
@@ -513,22 +513,22 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 if (!tool.existsGroup(ctx, grp)) {
                     throw new NoSuchGroupException("No such group");
                 }
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final InvalidCredentialsException e) {
+            } catch (InvalidCredentialsException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final DatabaseUpdateException e) {
+            } catch (DatabaseUpdateException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final NoSuchContextException e) {
+            } catch (NoSuchContextException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final NoSuchGroupException e) {
+            } catch (NoSuchGroupException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -545,7 +545,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             LOGGER.debug("Calling delete for plugin: {}", bundlename);
                             oxgroup.delete(ctx, grp, auth);
                             interfacelist.add(oxgroup);
-                        } catch (final PluginException e) {
+                        } catch (PluginException e) {
                             LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
                             throw StorageException.wrapForRMI(e);
                         }
@@ -573,13 +573,13 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                                 cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
                             }
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOGGER.error("", e);
                     }
                 }
                 // END OF JCS
 
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -595,7 +595,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(grp);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for get is null", e3);
                 throw e3;
             }
@@ -606,7 +606,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -653,7 +653,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck((Object[]) groups);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for getData is null", e3);
                 throw e3;
             }
@@ -688,7 +688,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         group.setId(I(tool.getGroupIDByGroupname(ctx, group.getName())));
                     }
                 }
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -733,7 +733,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 return new Group(I(tool.getDefaultGroupForContextWithOutConnection(ctx)));
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 LOGGER.error("Error resolving default group for context", e);
                 throw e;
             }
@@ -749,7 +749,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(grp);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for getMembers is null", e3);
                 throw e3;
             }
@@ -760,7 +760,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -794,7 +794,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(pattern);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for list is null", e3);
                 throw e3;
             }
@@ -805,7 +805,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -832,7 +832,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(usr);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for getMembers is null", e3);
                 throw e3;
             }
@@ -843,7 +843,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -874,7 +874,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(grp, members);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for removeMember is null", e3);
                 throw e3;
             }
@@ -885,7 +885,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -923,7 +923,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     for (final User user : members) {
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOGGER.error("", e);
                 }
             }

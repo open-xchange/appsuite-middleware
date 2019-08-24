@@ -92,7 +92,7 @@ public class QRCodeGenerator {
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, FORMAT_PNG, out);
             return out.toByteArray();
-        } catch (final IOException | WriterException e) {
+        } catch (IOException | WriterException e) {
             throw MultifactorExceptionCodes.UNKNOWN_ERROR.create(e);
         }
     }

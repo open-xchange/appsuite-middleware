@@ -200,7 +200,7 @@ public final class MIMEStructure2ComposedMailParser {
                     }
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -265,7 +265,7 @@ public final class MIMEStructure2ComposedMailParser {
                     }
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -295,7 +295,7 @@ public final class MIMEStructure2ComposedMailParser {
                 alternativeLevel = 0;
             }
             level--;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -330,7 +330,7 @@ public final class MIMEStructure2ComposedMailParser {
             } else {
                 addAsAttachment(Charsets.toAsciiBytes(jsonBody.getString("data")), contentType, headers);
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -338,7 +338,7 @@ public final class MIMEStructure2ComposedMailParser {
     private void parseSimpleBodyBinary(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws OXException {
         try {
             addAsAttachment(Base64.decodeBase64(Charsets.toAsciiBytes(jsonBody.getString("data"))), contentType, headers);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -368,7 +368,7 @@ public final class MIMEStructure2ComposedMailParser {
                         }
                     }
                     attachmentHandler.addAttachment(mailPart);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     org.slf4j.LoggerFactory.getLogger(MIMEStructure2ComposedMailParser.class).warn(
                         "Creating managed file failed. Using in-memory version instead.",
                         e);
@@ -392,7 +392,7 @@ public final class MIMEStructure2ComposedMailParser {
                 }
             }
             attachmentHandler.addAttachment(mailPart);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -482,14 +482,14 @@ public final class MIMEStructure2ComposedMailParser {
                     }
                 }
             }
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             /*
              * Cannot occur
              */
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -502,7 +502,7 @@ public final class MIMEStructure2ComposedMailParser {
                 contentType.setBaseType(jsonContentType.getString("type"));
                 parseParameterList(jsonContentType.getJSONObject("params"), contentType);
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -513,7 +513,7 @@ public final class MIMEStructure2ComposedMailParser {
                 return jsonHeaders.getString("content-id");
             }
             return null;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }

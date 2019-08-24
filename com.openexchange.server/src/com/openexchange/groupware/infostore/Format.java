@@ -144,7 +144,7 @@ public class Format implements Serializable {
         }
         try {
             return ((Format) o).id == id;
-        } catch (final ClassCastException x) {
+        } catch (ClassCastException x) {
             return false;
         }
     }

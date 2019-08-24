@@ -78,7 +78,7 @@ public final class DirectIO {
                         m = ByteBuffer.class.getMethod("cleaner");
                         m.setAccessible(true);
                         cleanerMethod = m;
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DirectIO.class);
                         log.error("Couldn't initialze Java Reflection method for \"cleaner\".", e);
                     }

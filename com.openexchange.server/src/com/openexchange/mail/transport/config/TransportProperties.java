@@ -152,7 +152,7 @@ public final class TransportProperties implements ITransportProperties {
                 logBuilder.append("    Referenced Part Limit: {}{}");
                 args.add(referencedPartLimit);
                 args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 referencedPartLimit = 1048576;
                 logBuilder.append("    Referenced Part Limit: Invalid value \"{}\". Setting to fallback {}{}");
                 args.add(referencedPartLimitStr);

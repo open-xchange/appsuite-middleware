@@ -243,12 +243,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 deleteMetadata();
                 exists = false;
                 factory.removed(this);
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 if (com.openexchange.exception.Category.CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED, x);
                 }
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);
-            } catch (final Exception x) {
+            } catch (Exception x) {
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);
             }
         }
@@ -264,12 +264,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         final ServerSession session = getSession();
         try {
             return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
                 throw (WebdavProtocolException) e;
             }
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -369,7 +369,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 }
                 lock.setOwner(displayName);
 
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Ignore, if lookup fails set no owner.
             }
         }
@@ -410,7 +410,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         try {
             lockHelper.dumpLocksToDB();
             touch();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
                 throw (WebdavProtocolException) e;
             }
@@ -430,12 +430,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             }
             propertyHelper.dumpPropertiesToDB();
             lockHelper.dumpLocksToDB();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
                 throw (WebdavProtocolException) e;
             }
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
@@ -520,7 +520,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         save();
         try {
             lockHelper.deleteLocks();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
                 throw (WebdavProtocolException) e;
             }
@@ -559,7 +559,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             factory.invalidate(dest, copy.getId(), Type.RESOURCE);
             lockHelper.deleteLocks();
             return copy;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
                 throw (WebdavProtocolException) e;
             }
@@ -626,7 +626,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 set.setValue(m.doSwitch(get));
                 m.doSwitch(set);
             }
-        } catch (final OXException x) {
+        } catch (OXException x) {
             if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                 metadata.setId(getId());
                 metadata.setFolderId(((OXWebdavResource) parent()).getId());
@@ -637,7 +637,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 }
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);
             }
-        } catch (final Exception x) {
+        } catch (Exception x) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);
         }
     }
@@ -659,7 +659,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                     dumpMetadataToDB(body, guessSize);
                 } catch (WebdavProtocolException x) {
                     throw x;
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
                         throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
                     }
@@ -667,7 +667,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                         throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, Protocol.SC_INSUFFICIENT_STORAGE, x);
                     }
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
-                } catch (final Exception x) {
+                } catch (Exception x) {
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
                 }
             } else {
@@ -684,10 +684,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                     }
                     database.saveDocument(documentMetadata, body, Long.MAX_VALUE, session);
                     database.commit();
-                } catch (final Exception x) {
+                } catch (Exception x) {
                     try {
                         database.rollback();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("Couldn't rollback transaction. Run the recovery tool.");
                     }
                     if (x instanceof OXException) {
@@ -708,12 +708,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 } finally {
                     try {
                         database.finish();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("Couldn't finish transaction: ", e);
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
                 throw (WebdavProtocolException) e;
             }
@@ -738,7 +738,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 // require "write own" permissions, too, when creating objects via WebDAV (#29950 / SCR-1997)
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
             }
-        } catch (final ClassCastException x) {
+        } catch (ClassCastException x) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_CONFLICT);
         }
 
@@ -762,10 +762,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 }
                 database.commit();
                 setId(metadata.getId());
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 try {
                     database.rollback();
-                } catch (final OXException x2) {
+                } catch (OXException x2) {
                     LOG.error("Couldn't roll back: ", x2);
                 }
                 throw x;
@@ -781,10 +781,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             try {
                 database.saveDocumentMetadata(metadata, Long.MAX_VALUE, setMetadata.toArray(new Metadata[setMetadata.size()]), session);
                 database.commit();
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 try {
                     database.rollback();
-                } catch (final OXException x2) {
+                } catch (OXException x2) {
                     LOG.error("Can't roll back", x2);
                 }
                 throw x;
@@ -803,7 +803,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 return;
             }
             database.touch(getId(), getSession());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e instanceof WebdavProtocolException) {
                 throw (WebdavProtocolException) e;
             }
@@ -840,7 +840,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 throw InfostoreExceptionCodes.DELETE_FAILED.create(Integer.valueOf(nd.get(0).getId()));
             }
             database.commit();
-        } catch (final OXException x) {
+        } catch (OXException x) {
             database.rollback();
             throw x;
         } finally {
@@ -871,7 +871,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     public void transferLock(final WebdavLock lock) throws WebdavProtocolException {
         try {
             lockHelper.transferLock(lock);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
     }

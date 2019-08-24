@@ -250,7 +250,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         try {
             cacheControl.localRemoveAll();
             postClear();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
         }
     }
@@ -390,7 +390,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void putSafe(final Serializable key, final Serializable value) throws OXException {
         try {
             cache.putSafe(key, value);
-        } catch (final ObjectExistsException e) {
+        } catch (ObjectExistsException e) {
             throw CacheExceptionCode.FAILED_SAFE_PUT.create(e, e.getMessage());
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -419,7 +419,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         try {
             cacheControl.localRemove(key);
             postRemove(key, null, false);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw CacheExceptionCode.FAILED_REMOVE.create(e, e.getMessage());
         }
     }
@@ -430,7 +430,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
             final org.apache.jcs.engine.CacheElement ce = new org.apache.jcs.engine.CacheElement(cacheControl.getCacheName(), key, value);
             ce.setElementAttributes(cacheControl.getElementAttributes());
             cacheControl.localUpdate(ce);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }

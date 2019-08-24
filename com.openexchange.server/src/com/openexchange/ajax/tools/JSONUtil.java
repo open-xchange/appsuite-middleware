@@ -217,7 +217,7 @@ public final class JSONUtil {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
             }
             return value;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, name);
         }
     }
@@ -236,7 +236,7 @@ public final class JSONUtil {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
             }
             return jsonObject.optInt(name, -1);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, name);
         }
     }
@@ -255,7 +255,7 @@ public final class JSONUtil {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
             }
             return jsonObject.optBoolean(name, false);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, name);
         }
     }
@@ -276,7 +276,7 @@ public final class JSONUtil {
                 throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
             }
             return value;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create(e);
         }
     }

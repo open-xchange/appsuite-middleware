@@ -122,7 +122,7 @@ public final class Bug9475Test extends AbstractAJAXSession {
         try {
             final VCardImportResponse iResponse = Tools.importVCard(client, new VCardImportRequest(client.getValues().getPrivateContactFolder(), new FileInputStream(tmp), false));
             assertTrue("VCard importer does not give an error.", iResponse.hasError());
-        } catch (final Exception assertionFailed) {
+        } catch (Exception assertionFailed) {
             // Response Parsing dies with an AssertionFailedError on a response code different from 200, which is also okay in our case
             assertTrue(assertionFailed.getMessage().contains("Response code"));
             // quite a hack

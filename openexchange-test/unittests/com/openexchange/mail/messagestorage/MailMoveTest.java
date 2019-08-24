@@ -91,7 +91,7 @@ public final class MailMoveTest extends MessageStorageTest {
                 try {
                     final long currentTimeMillis = System.currentTimeMillis();
                     tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) }, false);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     fail("No exception should be thrown here");
                 }
                 assertNotNull("Move returned no IDs", tmpCopy);
@@ -119,7 +119,7 @@ public final class MailMoveTest extends MessageStorageTest {
                 String[] tmpCopy = null;
                 try {
                     tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new String[] { String.valueOf(System.currentTimeMillis()), uids[0] }, false);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     fail("No exception should be thrown here");
                 }
                 assertNotNull("Move returned no IDs", tmpCopy);
@@ -145,7 +145,7 @@ public final class MailMoveTest extends MessageStorageTest {
             final String tmpFolderName = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append("MichGibtEsNicht").toString();
             try {
                 assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("INBOX", tmpFolderName, uids, false));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
             }
         } finally {
@@ -165,7 +165,7 @@ public final class MailMoveTest extends MessageStorageTest {
                  */
                 try {
                     assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("MichGibtEsHoffentlichNicht", fullname, uids, false));
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
                 }
             } finally {
@@ -259,7 +259,7 @@ public final class MailMoveTest extends MessageStorageTest {
                     MailMessage tmp = null;
                     try {
                         tmp = mailAccess.getMessageStorage().getMessage("INBOX", uids[i], false);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         exc = e;
                     }
                     assertTrue("A moved message still exists in source folder", exc != null || tmp == null);

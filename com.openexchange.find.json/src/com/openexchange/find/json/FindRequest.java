@@ -218,7 +218,7 @@ public class FindRequest {
             */
 
             return prefix;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_PREFIX);
         }
     }

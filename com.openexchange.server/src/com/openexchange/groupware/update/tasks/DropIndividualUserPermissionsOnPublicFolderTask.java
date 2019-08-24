@@ -116,7 +116,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
                     correctGroupZero(con, contextId, permissions);
                     correctContextAdmin(con, contextId, permissions, contextAdminId);
                     dropAllOtherPermissions(con, contextId, isContained(permissions, contextAdminId), contextAdminId);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.error("", e);
                     if (null == re) {
                         re = e;
@@ -126,7 +126,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {

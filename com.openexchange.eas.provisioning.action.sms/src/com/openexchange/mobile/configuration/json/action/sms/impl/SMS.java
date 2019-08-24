@@ -158,7 +158,7 @@ public class SMS {
 			// execute test call
             result = (Map<?, ?>) client.execute("samurai.ClientIdentify", params);
 			// System.err.println(result);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			 wassendingsuccessfull = false;
 			 this.senderrormessage = e.getMessage();
 			 LOG.error("API error occured while executing samurai.ClientIdentify",e);
@@ -182,7 +182,7 @@ public class SMS {
 		try {
 			// execute SMS sending......
             result = (Map<?, ?>) client.execute("samurai.SessionInitiateMulti", params);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			wassendingsuccessfull = false;
 			this.senderrormessage = e.getMessage();
 			LOG.error("API error occured while executing samurai.SessionInitiateMulti",e);

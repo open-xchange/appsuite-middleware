@@ -405,7 +405,7 @@ public final class Response {
         try {
             ResponseWriter.write(this, json);
             json.write(writer);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace(new PrintWriter(writer));
         }
         return writer.toString();

@@ -269,7 +269,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                 }
             }
             return new ResolvedImpl(current,parentId, false);
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, stmt != null ? stmt.toString() : "");
         } finally {
             close(stmt,rs);
@@ -365,7 +365,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 MODE = new NORMAL_MODE();
                 return MODE.getFolder(folderid, ctx);
             }

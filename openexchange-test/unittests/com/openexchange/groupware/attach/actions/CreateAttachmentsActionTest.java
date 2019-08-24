@@ -36,7 +36,7 @@ public class CreateAttachmentsActionTest extends AbstractAttachmentActionTest {
             try {
                 getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), getContext(), getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("The attachment " + attachment.getId() + " was not removed on undo");
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 assertTrue(true);
             }
         }

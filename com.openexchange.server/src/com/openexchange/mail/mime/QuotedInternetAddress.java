@@ -1069,7 +1069,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         address = toACE(src.getAddress());
         try {
             setPersonal(getPersonal(), null);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
             throw new IllegalStateException("Unsupported default charset.");
         }
@@ -1267,7 +1267,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         String a = init(address);
         try {
             this.address = toACE(a);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             LOG.error("ACE string could not be parsed from IDN string: {}", a, e);
             this.address = a;
         }
@@ -1298,7 +1298,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             try {
                 personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal), true);
                 return personal;
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 // 1. ParseException: either its an unencoded string or
                 // it can't be parsed
                 // 2. UnsupportedEncodingException: can't decode it.
@@ -1320,7 +1320,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         if (encodedPersonal == null && personal != null) {
             try {
                 encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
-            } catch (final UnsupportedEncodingException ex) {
+            } catch (UnsupportedEncodingException ex) {
                 LOG.error("", ex);
             }
         }
@@ -1330,7 +1330,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 if (null == personal) {
                     try {
                         personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal), true);
-                    } catch (final Exception ex) {
+                    } catch (Exception ex) {
                         // 1. ParseException: either its an unencoded string or
                         // it can't be parsed
                         // 2. UnsupportedEncodingException: can't decode it.
@@ -1345,7 +1345,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                     personal = personal.substring(1, personal.length() - 1);
                     try {
                         encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
-                    } catch (final UnsupportedEncodingException ex) {
+                    } catch (UnsupportedEncodingException ex) {
                         LOG.error("", ex);
                     }
                 }
@@ -1356,13 +1356,13 @@ public final class QuotedInternetAddress extends InternetAddress {
                         // Personal phrase needs to be quoted
                         try {
                             encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                        } catch (final UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             LOG.error("", e);
                         }
                     } else if (!isAscii(personal)) {
                         try {
                             encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                        } catch (final UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             LOG.error("", e);
                         }
                     }
@@ -1372,7 +1372,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 if (!isAscii(personal)) {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
-                    } catch (final UnsupportedEncodingException e) {
+                    } catch (UnsupportedEncodingException e) {
                         LOG.error("", e);
                     }
                 }
@@ -1461,7 +1461,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
             }
             return -1;
-        } catch (final StringIndexOutOfBoundsException e) {
+        } catch (StringIndexOutOfBoundsException e) {
             return -1;
         }
     }

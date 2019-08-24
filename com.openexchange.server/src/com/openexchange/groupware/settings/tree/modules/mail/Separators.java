@@ -163,7 +163,7 @@ public class Separators implements PreferencesItemService, ConfigTreeEquivalent 
                     } else {
                         setting.setSingleValue(retval.toString());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -178,7 +178,7 @@ public class Separators implements PreferencesItemService, ConfigTreeEquivalent 
                         ma.connect(false);
                         sep = Character.valueOf(ma.getFolderStorage().getFolder("INBOX").getSeparator());
                         sessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), sep);
-                    } catch (final Exception x) {
+                    } catch (Exception x) {
                         // Ignore
                         final Logger logger = org.slf4j.LoggerFactory.getLogger(Separators.class);
                         logger.debug("Failed determining separator character for mail account {} of user {} in context {}", I(accountId), I(session.getUserId()), I(session.getContextId()), x);

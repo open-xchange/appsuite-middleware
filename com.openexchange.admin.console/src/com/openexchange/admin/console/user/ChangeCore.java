@@ -153,7 +153,7 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
 
             displayChangedMessage(successtext, ctx.getId(), parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, ctxid, e, parser);
             sysexit(1);
         }

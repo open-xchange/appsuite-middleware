@@ -92,26 +92,26 @@ public class CreateDummyFileForAttachmentSolver extends CreateDummyFileSolver im
                 if (changed == 1) {
                     LOG.info(MessageFormat.format("Created dummy entry for: {0}. New identifier is: {1}", old_identifier, identifier));
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("{}", e.getMessage(), e);
                 try {
                     attachments.rollback();
                     return;
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.error("{}", e1.getMessage(), e1);
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 LOG.error("{}", e.getMessage(), e);
                 try {
                     attachments.rollback();
                     return;
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.debug("{}", e1.getMessage(), e1);
                 }
             } finally {
                 try {
                     attachments.finish();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("{}", e.getMessage(), e);
                 }
             }

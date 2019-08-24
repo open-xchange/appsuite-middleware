@@ -219,7 +219,7 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(AdditionalFolderField.class, new CalDAVURLField(this));
 
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

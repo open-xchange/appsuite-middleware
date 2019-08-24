@@ -147,7 +147,7 @@ public final class MALPollPushListenerRegistry {
             final MALPollPushListener l = i.next();
             try {
                 l.open();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 org.slf4j.LoggerFactory.getLogger(MALPollPushListenerRegistry.class).error(
                     MessageFormat.format("Opening MAL Poll listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
@@ -210,7 +210,7 @@ public final class MALPollPushListenerRegistry {
             final SimpleKey key = entry.getKey();
             try {
                 MALPollDBUtility.dropMailIDs(key.cid, key.user);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", I(key.user), I(key.cid), e);
             }
         }
@@ -224,7 +224,7 @@ public final class MALPollPushListenerRegistry {
         }
         try {
             MALPollDBUtility.dropMailIDs(key.cid, key.user);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", I(key.user), I(key.cid), e);
         }
         return true;

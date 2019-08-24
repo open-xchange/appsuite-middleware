@@ -216,7 +216,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 try {
                     final Resource resource = resourceResolver.load(res.getIdentifier(), ctx);
                     displayName = resource.getDisplayName();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw new ConversionError(index, e);
                 }
             }
@@ -243,7 +243,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             parameters.add(Role.REQ_PARTICIPANT);
             parameters.add(Rsvp.TRUE);
             component.getProperties().add(attendee);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
             LOG.error("", e);
@@ -273,7 +273,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             if ("defaultSenderAddress".equals(senderSource)) {
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                     address = resolveUserMail(index, userParticipant, ctx);
                 }
@@ -319,7 +319,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 attendeeCommentProperty.getParameters().add(new XParameter("X-CALENDARSERVER-ATTENDEE-REF", attendee.getValue()));
                 component.getProperties().add(attendeeCommentProperty);
             }
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
             LOG.error("", e);
@@ -357,7 +357,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             try {
                 final User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
                 address = user.getMail();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new ConversionError(index, e);
             }
         }
@@ -459,7 +459,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         List<User> users;
         try {
             users = userResolver.findUsers(new ArrayList<String>(mails.keySet()), ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new ConversionError(index, e);
         }
 
@@ -539,7 +539,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
         try {
             resources.addAll(resourceResolver.find(resourceNames, ctx));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new ConversionError(index, e);
         }
 

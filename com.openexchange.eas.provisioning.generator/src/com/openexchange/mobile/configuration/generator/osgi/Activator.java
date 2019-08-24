@@ -107,7 +107,7 @@ public class Activator extends HousekeepingActivator {
         // Test encoding:
         try {
             URLEncoder.encode("test", "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("Stopping mobileconfig bundle because UTF-8 charset encoding is not available: ", e);
             throw e;
         }

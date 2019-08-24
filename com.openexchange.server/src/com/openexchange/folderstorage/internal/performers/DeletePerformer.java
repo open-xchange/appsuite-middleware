@@ -181,9 +181,9 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                  */
                 transactionManager.commit();
                 rollbackTransaction = false;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollbackTransaction) {
@@ -263,9 +263,9 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                 transactionManager.commit();
                 rollbackTransaction = false;
                 return result;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollbackTransaction) {

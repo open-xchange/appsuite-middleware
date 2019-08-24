@@ -64,7 +64,7 @@ public class PoolRunner implements Runnable {
                 DBPool.push(c, con);
 
                 current_run++;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

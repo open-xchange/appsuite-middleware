@@ -237,7 +237,7 @@ public class InfostoreActivator implements BundleActivator {
             registeredSettings.add(context.registerService(ConfigTreeEquivalent.class, retentionDays, null));
 
             this.registeredSettings = registeredSettings;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
             throw e;
@@ -281,7 +281,7 @@ public class InfostoreActivator implements BundleActivator {
                 }
                 this.registrations = null;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Stopping InfostoreActivator failed.", e);
             throw e;

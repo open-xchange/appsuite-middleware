@@ -172,7 +172,7 @@ public class TaskCopyTask implements CopyUserTaskService {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
         }
 
@@ -227,7 +227,7 @@ public class TaskCopyTask implements CopyUserTaskService {
                 }
                 ParticipantStorage.getInstance().insertInternals(dstCtx, dstCon, task.getObjectID(), internals, StorageType.ACTIVE);
                 ParticipantStorage.getInstance().insertExternals(dstCtx, dstCon, task.getObjectID(), externals, StorageType.ACTIVE);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
             }
         }
@@ -303,7 +303,7 @@ public class TaskCopyTask implements CopyUserTaskService {
                     }
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
     }

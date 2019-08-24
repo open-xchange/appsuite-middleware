@@ -672,7 +672,7 @@ public abstract class UserStorage {
                         tmp = new CachingUserStorage(new RdbUserStorage());
                         tmp.startInternal();
                         instance = tmp;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         // Cannot occur
                         LOG.warn("", e);
                     }

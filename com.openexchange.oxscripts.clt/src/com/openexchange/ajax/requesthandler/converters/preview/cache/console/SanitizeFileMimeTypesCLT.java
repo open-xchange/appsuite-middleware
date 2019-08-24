@@ -131,10 +131,10 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
                 System.out.println(rmiService.sanitizeMimeTypesInDatabaseFor(contextId.intValue(), invalids));
             }
             error = false;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             final String errMsg = e.getMessage();
             System.out.println(errMsg == null ? "An error occurred." : errMsg);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final String errMsg = e.getMessage();
             System.out.println(errMsg == null ? "An error occurred." : errMsg);
         } finally {

@@ -298,7 +298,7 @@ public final class SessionUtility {
                     verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
                     rememberPublicSession(req, publicSession);
                     return true;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     // Verification of public session failed
                     LOG.debug("Verification of public session failed", e);
                 }
@@ -344,7 +344,7 @@ public final class SessionUtility {
                 verifySession(req, sessiondService, publicSession.getSessionID(), publicSession);
                 rememberPublicSession(req, publicSession);
                 return true;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Verification of public session failed
                 LOG.debug("Verification of public session failed", e);
             }

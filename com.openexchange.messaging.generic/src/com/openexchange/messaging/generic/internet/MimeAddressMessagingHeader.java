@@ -84,9 +84,9 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
                 retval.add(new MimeAddressMessagingHeader(name, (QuotedInternetAddress) internetAddresse));
             }
             return retval;
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -102,9 +102,9 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
     public static MimeAddressMessagingHeader valueOfRFC822(final String name, final String address) throws OXException {
         try {
             return new MimeAddressMessagingHeader(name, new QuotedInternetAddress(address));
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -138,7 +138,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         internetAddress = new QuotedInternetAddress();
         try {
             internetAddress.setPersonal(personal, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
         }
         internetAddress.setAddress(address);
@@ -207,7 +207,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
     public void setPersonal(final String personal) {
         try {
             internetAddress.setPersonal(personal, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // Cannot occur
         }
     }

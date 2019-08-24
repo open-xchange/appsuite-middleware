@@ -129,7 +129,7 @@ public final class DeleteAction extends AbstractMailAccountAction {
              * Return appropriate result
              */
             return new AJAXRequestResult(responseArray);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

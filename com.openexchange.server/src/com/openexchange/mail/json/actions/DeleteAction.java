@@ -186,9 +186,9 @@ public final class DeleteAction extends AbstractMailAction {
             }
 
             return new AJAXRequestResult(null == jResponse ? new JSONArray(0) : jResponse, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

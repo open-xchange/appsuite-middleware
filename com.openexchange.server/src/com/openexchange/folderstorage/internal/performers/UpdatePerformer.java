@@ -366,9 +366,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollbackTransaction) {

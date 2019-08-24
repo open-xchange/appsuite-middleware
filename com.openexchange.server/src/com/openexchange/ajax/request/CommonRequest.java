@@ -93,7 +93,7 @@ public abstract class CommonRequest {
 			final JSONArray arr = new JSONArray(Arrays.asList(errorParams));
 			response.put("error_params",arr);
 			w.value(response);*/
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			LOG.debug("",e);
 		}
 	}
@@ -128,7 +128,7 @@ public abstract class CommonRequest {
 		}
 		try {
 			ResponseWriter.write(res, w, localeFrom(session));
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			LOG.error("", t);
 		} catch (OXException e) {
 		    LOG.error("", e);

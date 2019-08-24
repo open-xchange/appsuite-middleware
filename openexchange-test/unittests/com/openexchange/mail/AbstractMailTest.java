@@ -176,12 +176,12 @@ public abstract class AbstractMailTest {
                 folderStorage.commitTransaction(storageParameters);
             }
             return total;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
@@ -380,7 +380,7 @@ public abstract class AbstractMailTest {
                 if (null != in) {
                     try {
                         in.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }

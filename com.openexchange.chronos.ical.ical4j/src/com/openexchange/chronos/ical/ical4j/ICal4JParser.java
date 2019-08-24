@@ -290,7 +290,7 @@ public class ICal4JParser {
             synchronized (UTC_PROPERTY) {
                 return UTC_PROPERTY.format(d);
             }
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             return s;
         }
     }

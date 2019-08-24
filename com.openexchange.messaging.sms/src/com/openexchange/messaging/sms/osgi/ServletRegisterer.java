@@ -82,7 +82,7 @@ public class ServletRegisterer {
         final HttpService http_service;
         try {
             http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error registering messaging sms servlet!", e);
             return;
         }
@@ -90,9 +90,9 @@ public class ServletRegisterer {
             String alias = PREFIX.get().getPrefix()+SERVLET_PATH_APPENDIX;
             http_service.registerServlet(alias, new com.openexchange.messaging.sms.servlet.MessagingSMSServlet(), null, null);
             this.alias = alias;
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             LOG.error("Error registering messaging sms servlet!", e);
-        } catch (final NamespaceException e) {
+        } catch (NamespaceException e) {
             LOG.error("Error registering messaging sms servlet!", e);
         }
     }
@@ -101,7 +101,7 @@ public class ServletRegisterer {
         final HttpService http_service;
         try {
             http_service = MessagingSMSServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error unregistering messaging sms servlet!", e);
             return;
         }

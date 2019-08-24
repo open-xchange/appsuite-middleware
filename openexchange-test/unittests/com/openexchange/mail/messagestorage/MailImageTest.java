@@ -128,7 +128,7 @@ public final class MailImageTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

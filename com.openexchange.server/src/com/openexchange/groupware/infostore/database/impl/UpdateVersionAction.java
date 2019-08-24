@@ -135,7 +135,7 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
             fields = getQueryCatalog().filterWritable(fields);
             try {
                 counter = doUpdates(getQueryCatalog().getVersionUpdate(fields), fields, getDocuments());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 final Throwable cause = e.getCause();
                 if (!(cause instanceof DataTruncation)) {
                     throw e;

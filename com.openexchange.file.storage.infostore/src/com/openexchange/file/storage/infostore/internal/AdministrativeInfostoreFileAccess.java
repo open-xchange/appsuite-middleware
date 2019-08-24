@@ -103,7 +103,7 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
             }
 
             return new InfostoreFile(documentMetadata);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
     }

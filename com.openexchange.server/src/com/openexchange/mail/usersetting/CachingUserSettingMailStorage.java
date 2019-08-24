@@ -97,7 +97,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         super();
         try {
             initCache();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -189,11 +189,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                         cache.remove(key);
                     }
                     cache.put(key, usm.clone(), false);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -237,11 +237,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                         cache.remove(key);
                     }
                     cache.put(key, usm.clone(), false);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -295,7 +295,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                      */
                     try {
                         cache.remove(cache.newCacheKey(ctx.getContextId(), user));
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("UserSettingMail could not be removed from cache", e);
                     }
                 }
@@ -303,7 +303,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
                 stmt = null;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -378,7 +378,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                         usm.setNoSave(false);
                         try {
                             cache.put(cache.newCacheKey(ctx.getContextId(), user), usm, false);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("UserSettingMail could not be put into cache", e);
                         }
                     }
@@ -389,7 +389,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             } finally {
                 lock.unlock();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -462,7 +462,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             } finally {
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -591,7 +591,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             } finally {
                 closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -629,7 +629,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
              */
             try {
                 cache.clear();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("UserSettingMail's cache could not be cleared", e);
             }
         }
@@ -644,7 +644,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
              */
             try {
                 cache.remove(cache.newCacheKey(ctx.getContextId(), user));
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("UserSettingMail could not be removed from cache", e);
             }
         }
@@ -654,7 +654,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     public void shutdownStorage() {
         try {
             releaseCache();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }

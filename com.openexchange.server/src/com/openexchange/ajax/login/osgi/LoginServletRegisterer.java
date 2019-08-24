@@ -185,9 +185,9 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
                 LoginConfiguration conf = LoginServlet.getLoginConfiguration();
                 interceptorRegistration = context.registerService(SessionServletInterceptor.class, new CookieRefresher(conf), null);
-            } catch (final ServletException e) {
+            } catch (ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
-            } catch (final NamespaceException e) {
+            } catch (NamespaceException e) {
                 LOG.error("Registering login servlet failed.", e);
             }
         }

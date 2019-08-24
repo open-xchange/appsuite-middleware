@@ -193,7 +193,7 @@ public final class IMAPStoreCache {
         public void run() {
             try {
                 storeCache.closeElapsed();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
             }
         }
@@ -400,11 +400,11 @@ public final class IMAPStoreCache {
          */
         try {
             return getContainer(accountId, server, port, login, session, propagateClientIp, checkConnectivityIfPolled).getStore(imapSession, login, pw, session);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Should not occur
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             final Exception nested = e.getNextException();
             if (nested instanceof OXException) {
                 throw (OXException) nested;

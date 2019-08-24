@@ -126,7 +126,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
             final Threadable kid = clone.kid;
             clone.kid = (Threadable) (kid == null ? null : kid.clone());
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             // Cannot occur
             throw new InternalError("Clone failed although Cloneable: " + e.getMessage());
         }

@@ -120,7 +120,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         strBuilder.append("sequenceId=").append(id).append('\n');
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readMailPart(part, "US-ASCII"));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
         return true;
@@ -231,7 +231,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         strBuilder.append("sequenceId=").append(id).append('\n');
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
         return true;
@@ -326,7 +326,7 @@ public class DumperMessageHandler implements MailMessageHandler {
                 nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
                     MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {
@@ -425,7 +425,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         strBuilder.append("sequenceId=").append(id).append('\n');
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         }
         return true;

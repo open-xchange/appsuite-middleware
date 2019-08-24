@@ -267,11 +267,11 @@ public final class TwitterServiceImpl implements TwitterService {
              * Return PIN
              */
             return pin;
-        } catch (final FailingHttpStatusCodeException e) {
+        } catch (FailingHttpStatusCodeException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
         }
     }

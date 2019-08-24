@@ -92,7 +92,7 @@ public abstract class AbstractColumnsParser<T extends AbstractColumnsResponse> e
                         values[i][j] = inner.get(j);
                     }
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 // delete
                 values[i] = new Integer[] { I(array.getInt(i)) };
             }

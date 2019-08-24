@@ -119,13 +119,13 @@ public final class VirtualFolderDeleteListener implements DeleteListener {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCode.SQL_ERROR.create( e, e.getMessage());
         } finally {
             if (null != stmt) {
                 try {
                     stmt.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LoggerFactory.getLogger(VirtualFolderDeleteListener.class).error("", e);
                 }
             }

@@ -194,7 +194,7 @@ public final class MailForwardTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -291,7 +291,7 @@ public final class MailForwardTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

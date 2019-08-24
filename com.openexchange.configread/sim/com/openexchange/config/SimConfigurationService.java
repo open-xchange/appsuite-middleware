@@ -107,7 +107,7 @@ public class SimConfigurationService implements ConfigurationService {
         if (prop != null) {
             try {
                 return Integer.parseInt(prop.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 // Ignore
             }
         }

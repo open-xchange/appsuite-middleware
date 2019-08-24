@@ -122,7 +122,7 @@ public final class FromTerm extends AbstractAddressTerm {
                 return toRegex(addr).matcher(getAllAddresses(addresses)).find();
             }
             return (Strings.asciiLowerCase(getAllAddresses(addresses)).indexOf(getLowerCaseAddr()) >= 0);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(FromTerm.class).warn("Error during search.", e);
             return false;
         }

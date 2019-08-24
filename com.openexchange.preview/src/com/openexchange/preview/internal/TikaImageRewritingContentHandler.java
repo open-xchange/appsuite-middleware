@@ -107,7 +107,7 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
                         managedFile.setContentType("image/*");
                         documentHandler.extractedFiles.put(resourceName, managedFile);
                         attrs.setValue(i, managedFile.constructURL(documentHandler.session, false));
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         throw new SAXException("Couldn't create image file.", e);
                     }
                 }

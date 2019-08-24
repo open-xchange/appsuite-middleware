@@ -86,9 +86,9 @@ public class TaskParser extends CalendarParser {
         throws OXException {
         try {
             parseElementTask(taskobject, jsonobject, locale);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }

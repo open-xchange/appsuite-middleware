@@ -340,7 +340,7 @@ public final class MailRequest {
                     collectObj = CollectObject.newInstance(jsonObject, op, MAIL_SERVLET);
                     collectObj.addCollectable(jsonObject);
                     contCollecting = false;
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
             }
@@ -368,7 +368,7 @@ public final class MailRequest {
             try {
                 performMultipleInternal(mailInterface);
                 collectObj = null;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }

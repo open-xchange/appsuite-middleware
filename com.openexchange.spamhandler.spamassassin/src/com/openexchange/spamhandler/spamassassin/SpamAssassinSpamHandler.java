@@ -379,7 +379,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                     SpamdProvider provider = spamdservice.getProvider(session);
                     spamdSettings = new SpamdSettings(provider.getHostname(), provider.getPort(), provider.getUsername());
                     LOGGER.debug("Fetched SpamAssassin configuration from SpamdService instance {} (user={}, context={}): {}", spamdservice.getClass().getSimpleName(), I(session.getUserId()), I(session.getContextId()), spamdSettings.toString());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw SpamhandlerSpamassassinExceptionCode.ERROR_GETTING_SPAMD_PROVIDER.create(e, e.getMessage());
                 }
             }
@@ -419,11 +419,11 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             if (Spamc.ExitCodes.EX_OK != responseCode) {
                 throw SpamhandlerSpamassassinExceptionCode.WRONG_SPAMD_EXIT.create(I(responseCode));
             }
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw SpamhandlerSpamassassinExceptionCode.WRONG_TELL_CMD_ARGS.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw SpamhandlerSpamassassinExceptionCode.COMMUNICATION_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw SpamhandlerSpamassassinExceptionCode.COMMUNICATION_ERROR.create(e, e.getMessage());
         }
     }

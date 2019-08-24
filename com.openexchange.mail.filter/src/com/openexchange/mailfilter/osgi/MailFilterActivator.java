@@ -131,7 +131,7 @@ public class MailFilterActivator extends HousekeepingActivator {
             Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
             logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -142,7 +142,7 @@ public class MailFilterActivator extends HousekeepingActivator {
         try {
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

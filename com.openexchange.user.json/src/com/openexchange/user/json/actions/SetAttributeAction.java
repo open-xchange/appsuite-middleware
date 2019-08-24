@@ -129,7 +129,7 @@ public final class SetAttributeAction extends AbstractUserAction {
             userService.setUserAttribute(name, value, id, context);
             // Return
             return new AJAXRequestResult(Boolean.TRUE);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }

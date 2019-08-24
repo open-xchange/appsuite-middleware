@@ -175,7 +175,7 @@ public class SendAddress implements PreferencesItemService {
                         settings.setSendAddr(newAlias);
                         storage.saveUserSettingMail(settings, user.getId(), ctx);
                     }
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }
             }

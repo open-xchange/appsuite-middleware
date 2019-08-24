@@ -123,12 +123,12 @@ public final class ReinitializePerformer extends AbstractPerformer {
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
                     }

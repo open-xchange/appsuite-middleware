@@ -265,7 +265,7 @@ public final class MailAccessWatcher {
                         }
                     } while ((expired = queue.poll(filter)) != null);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 logger.error("", e);
             }
         }

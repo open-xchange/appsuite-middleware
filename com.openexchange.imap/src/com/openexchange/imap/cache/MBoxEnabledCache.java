@@ -136,7 +136,7 @@ public final class MBoxEnabledCache {
                 Boolean mbox;
                 try {
                     mbox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession(), imapConfig.getIMAPProperties().isIgnoreSubscription());
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     throw MimeMailException.handleMessagingException(e, imapConfig, imapConfig.getSession());
                 }
                 if (null == mbox) {
@@ -148,13 +148,13 @@ public final class MBoxEnabledCache {
         }
         try {
             return f.get().booleanValue();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof MessagingException) {
                 throw MimeMailException.handleMessagingException((MessagingException) cause, imapConfig);

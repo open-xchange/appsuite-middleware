@@ -216,7 +216,7 @@ public final class SystemInfostoreFolder {
                 session.setParameter(paramName, b);
             }
             return b.booleanValue();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.debug("", e);
             return false;
         }

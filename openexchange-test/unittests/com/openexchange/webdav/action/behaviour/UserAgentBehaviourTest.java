@@ -34,7 +34,7 @@ public class UserAgentBehaviourTest {
         try {
             new UserAgentBehaviour(".*", new C13(), new C2(), new C123());
             fail("Could create conflicting behaviour");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }

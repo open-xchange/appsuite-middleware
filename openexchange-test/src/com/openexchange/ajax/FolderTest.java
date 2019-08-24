@@ -177,7 +177,7 @@ public class FolderTest extends AbstractAJAXSession {
                     ftm.getFolderFromServer(fuid);
                     ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

@@ -106,7 +106,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     protected void handleAvailability(final Class<?> clazz) {
         try {
             register();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -142,7 +142,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             fileInputStreamRegistry.start(context);
 
             register();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             LOG.error("", x);
             throw x;
         }
@@ -214,7 +214,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             }
             Services.setServiceLookup(null);
             super.stopBundle();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             LOG.error("", x);
             throw x;
         }

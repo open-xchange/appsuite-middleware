@@ -123,7 +123,7 @@ public class PreviewResponseRenderer implements ResponseRenderer {
                 }
             }
             APIResponseRenderer.writeResponse(response, request.getAction(), httpReq, httpResp);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("JSON Error", e);
         }
     }

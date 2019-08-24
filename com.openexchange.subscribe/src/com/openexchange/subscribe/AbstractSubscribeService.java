@@ -302,7 +302,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, newSecret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // This one needs migration
                             final String transcriptedPassword = cryptoService.encrypt(cryptoService.decrypt(password, oldSecret), newSecret);
                             update.put(passwordField, transcriptedPassword);
@@ -341,7 +341,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // This one needs clean-up
                             update.put(passwordField, "");
                             save = true;
@@ -379,7 +379,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         try {
                             // If we can already decrypt with the new secret, we're done with this entry
                             cryptoService.decrypt(password, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // This one needs clean-up
                             if (!subscriptionsToDelete.contains(subscription)) {
                                 subscriptionsToDelete.add(subscription);

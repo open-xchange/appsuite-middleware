@@ -189,7 +189,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
             MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             mass.updateMailAccount(account, changed, userId, contextId, updateProperties);
             return convert(changed);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Problem storing the primary mail account.", e);
             throw new StorageException(e);
         }
@@ -348,7 +348,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
                 setter.invoke(account, URIParser.parse(server, uriDefault));
                 setAttributes(setAttributes, mapper);
             }
-        } catch (final URISyntaxException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+        } catch (URISyntaxException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             LOG.error("Problem storing the primary mail account.", e);
             throw new StorageException(e);
         }

@@ -101,7 +101,7 @@ public class List extends ResellerAbstraction {
             final OXResellerInterface rsi = getResellerInterface();
 
             adms = rsi.list("*", auth);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }
@@ -114,10 +114,10 @@ public class List extends ResellerAbstraction {
             }
 
             sysexit(0);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             printError(null, null, "Invalid data : " + e.getMessage(), parser);
             sysexit(1);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }

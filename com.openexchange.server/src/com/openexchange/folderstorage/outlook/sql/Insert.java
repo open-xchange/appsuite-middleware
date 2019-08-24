@@ -96,13 +96,13 @@ public final class Insert {
             con.setAutoCommit(false); // BEGIN
             insertFolder(cid, tree, user, folder, con);
             con.commit(); // COMMIT
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con); // ROLLBACK
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -152,7 +152,7 @@ public final class Insert {
             }
             stmt.setString(pos, ""); // TODO: Shadow
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             if (isConstraintViolation(e) && e.getMessage().indexOf("Duplicate entry") >= 0) {
                 /*

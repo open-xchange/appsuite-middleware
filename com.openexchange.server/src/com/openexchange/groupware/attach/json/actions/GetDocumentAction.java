@@ -176,7 +176,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             }
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.debug("", e);
             }
         }

@@ -94,7 +94,7 @@ public final class ModifyCharsetStandardProvider {
         CharsetProvider charsetProvider = null;
         try {
             charsetProvider = new AsianReplacementCharsetProvider(backupCharsetProvider);
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
              */
@@ -104,7 +104,7 @@ public final class ModifyCharsetStandardProvider {
         }
         try {
             charsetProvider = new ASCIIReplacementCharsetProvider(null == charsetProvider ? backupCharsetProvider : charsetProvider);
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */

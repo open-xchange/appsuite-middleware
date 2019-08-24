@@ -400,7 +400,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.createAccount(session, "com.openexchange.fantasy", scopes, OAuthInteractionType.OUT_OF_BAND, arguments);
             fail("Should have died");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Hooray;
         }
     }
@@ -410,7 +410,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.getAccount(null, 12);
             fail("Should have died");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // Hooray!
         }
     }
@@ -428,7 +428,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             update.put(OAuthConstants.ARGUMENT_SESSION, null);
             oauth.updateAccount(session, 12, update);
             fail("Should have died");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // Hooray!
         }
     }
@@ -438,7 +438,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             oauth.deleteAccount(session, 12);
             // Don't die here, just gracefully do nothing
-        } catch (final OXException x) {
+        } catch (OXException x) {
             fail(x.getMessage());
         }
     }

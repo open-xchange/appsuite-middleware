@@ -113,7 +113,7 @@ public abstract class Entity2ACL {
          */
         try {
             return Entity2ACLAutoDetector.getEntity2ACLImpl(imapConfig);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw Entity2ACLExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -142,7 +142,7 @@ public abstract class Entity2ACL {
                 imapConfig.setParameter(PARAM_NAME, cached);
             }
             return cached;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig);
         }
     }

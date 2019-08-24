@@ -102,7 +102,7 @@ public class Tree implements PreferencesItemService {
                     final String value = configurationService.getProperty(PROPERTY_NAME, "0");
                     try {
                         tree = Integer.valueOf(value);
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(e, PROPERTY_NAME);
                     }
                 }
@@ -125,7 +125,7 @@ public class Tree implements PreferencesItemService {
                 final Integer tree;
                 try {
                     tree = I(Integer.parseInt(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, value, Strings.join(getPath(), "/"));
                 }
                 ServerUserSetting.getInstance().setFolderTree(ctx.getContextId(), user.getId(), tree);

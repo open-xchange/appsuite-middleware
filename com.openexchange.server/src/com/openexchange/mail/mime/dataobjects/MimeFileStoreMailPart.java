@@ -158,7 +158,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                         fileAccess.saveDocument(file, in, FileStorageFileAccess.DISTANT_FUTURE);
                         fileAccess.commit();
                         retry = false;
-                    } catch (final OXException x) {
+                    } catch (OXException x) {
                         fileAccess.rollback();
                         if (!x.isPrefix("IFO")) {
                             throw x;
@@ -180,7 +180,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                         }
                         file.setFileName(newName);
                         file.setTitle(newName);
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         fileAccess.rollback();
                         throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     } finally {
@@ -193,7 +193,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
             id = String.valueOf(file.getId());
             userId = session.getUserId();
             contextId = session.getContextId();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -258,7 +258,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                     mds.setContentType(contentType.toString());
                 }
                 dataSource = mds;
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             } finally {
@@ -290,7 +290,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
             }
             try {
                 cachedContent = new String(mds.getData(), Charsets.forName(charset));
-            } catch (final UnsupportedCharsetException e) {
+            } catch (UnsupportedCharsetException e) {
                 throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
             }
             return cachedContent;
@@ -317,7 +317,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
     public InputStream getInputStream() throws OXException {
         try {
             return getDataSource().getInputStream();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

@@ -114,7 +114,7 @@ public final class CalendarCollectionUtils {
         try {
             convertDSString(cdao);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("fillDAO:convertDSString error.", e);
         }
         return false;
@@ -273,7 +273,7 @@ public final class CalendarCollectionUtils {
         final RecurringResultsInterface rresults;
         try {
             rresults = calculateRecurring(clone, 0, 0, MAX_OCCURRENCESE, MAX_OCCURRENCESE, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return new Date(maxEnd);
         }

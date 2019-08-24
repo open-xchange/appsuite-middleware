@@ -229,13 +229,13 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
         final int restoreLen = builder.length();
         try {
             builder.append(HtmlServiceImpl.checkURL(url));
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             /*
              * Not a valid URL
              */
             builder.setLength(restoreLen);
             builder.append(url);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HTMLURLReplacerHandler.class);
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
@@ -259,7 +259,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
     private static String urlDecode(final String s) {
         try {
             return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             return s;
         }
     }

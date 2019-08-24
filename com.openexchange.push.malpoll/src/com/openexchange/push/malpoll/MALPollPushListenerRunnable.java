@@ -70,7 +70,7 @@ public final class MALPollPushListenerRunnable implements Runnable {
     public void run() {
         try {
             listener.checkNewMail();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }

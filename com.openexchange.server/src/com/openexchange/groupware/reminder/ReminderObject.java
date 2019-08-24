@@ -186,7 +186,7 @@ public class ReminderObject implements Cloneable {
             clone.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
             clone.date = date == null ? null : new Date(date.getTime());
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError("CloneNotSupportedException although Cloneable.");
         }
     }

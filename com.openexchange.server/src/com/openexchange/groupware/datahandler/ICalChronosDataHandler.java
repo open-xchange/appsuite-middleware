@@ -143,7 +143,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
             inputStreamCopy = copyStream((InputStream) data.getData(), getSize(data));
             handleEvents(session, calendarFolder, inputStreamCopy, folderAndIdArray, result);
             handleTasks(session, taskFolder, inputStreamCopy, folderAndIdArray, result);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             safeClose(inputStreamCopy);
@@ -234,7 +234,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
          */
         try {
             insertTasks(session, taskFolder, tasks, folderAndIdArray);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
@@ -265,7 +265,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         if (hasValue(dataArguments, key)) {
             try {
                 return Integer.parseInt(dataArguments.get(key));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(key, e, dataArguments.get(key));
             }
         }
@@ -275,7 +275,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
     private long getSize(final Data<? extends Object> data) {
         try {
             return Long.parseLong(data.getDataProperties().get(DataProperties.PROPERTY_SIZE));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             return 0;
         }
     }

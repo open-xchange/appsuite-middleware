@@ -122,7 +122,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		}
 		try {
             checkPath();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		exists = true;
@@ -281,7 +281,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 			final WebdavResource res = this.mgr.addLockNullResource(this);
 			try {
                 res.lock(lock);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
             }
 			return;
@@ -305,7 +305,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		final List<WebdavLock> lockList =  getOwnLocks();
 		try {
             addParentLocks(lockList);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		return lockList;
@@ -346,7 +346,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		}
 		try {
             return findParentLock(token);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 	}
@@ -361,7 +361,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 			while((b = data.read()) != -1) {
 				bytes.add(I(b));
 			}
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 

@@ -264,9 +264,9 @@ public class MessagingMessageWriter {
                         baos.write(buf, 0, read);
                     }
                     // No flush needed for ByteArrayOutputStream
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
                     Streams.close(is);

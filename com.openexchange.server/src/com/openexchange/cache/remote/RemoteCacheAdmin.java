@@ -80,9 +80,9 @@ public class RemoteCacheAdmin {
 		            try {
                         tmp = new RemoteCacheAdmin();
                         instance = tmp;
-                    } catch (final RemoteException e) {
+                    } catch (RemoteException e) {
                         LOG.error("", e);
-                    } catch (final AlreadyBoundException e) {
+                    } catch (AlreadyBoundException e) {
                         LOG.error("", e);
                     }
 		        }

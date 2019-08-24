@@ -153,7 +153,7 @@ public final class SystemPublicFolder {
                 subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
             }
             return subfolderIds.toArray();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -208,7 +208,7 @@ public final class SystemPublicFolder {
                 subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
             }
             return subfolderIds;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }

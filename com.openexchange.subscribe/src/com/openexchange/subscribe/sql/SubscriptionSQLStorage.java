@@ -132,7 +132,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -171,14 +171,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             if (subscriptions.size() != 0) {
                 retval = subscriptions.get(0);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -210,14 +210,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -308,7 +308,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -340,7 +340,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -448,7 +448,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             txPolicy.commit(writeConnection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (rollback > 0) {
@@ -487,14 +487,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             if (resultSet.next()) {
                 retval = resultSet.getInt("configuration_id");
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(subscription.getContext(), readConection);
@@ -547,14 +547,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = resultSet.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -576,7 +576,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 delete(sub, writeConnection);
             }
             txPolicy.commit(writeConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
@@ -584,7 +584,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);
@@ -608,7 +608,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             storageService.delete(writeConnection, ctx);
             txPolicy.commit(writeConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
@@ -616,7 +616,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);
@@ -646,7 +646,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 }
             }
             txPolicy.commit(writeConnection);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
@@ -654,7 +654,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             }
             if (modified) {
@@ -695,14 +695,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 final String folderId = resultSet.getString(1);
                 retval.put(folderId, Boolean.TRUE);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
@@ -730,14 +730,14 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
             return resultSet.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);

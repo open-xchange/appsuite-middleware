@@ -153,13 +153,13 @@ public final class UserConfigurationStorageInit implements Initialization {
             UserPermissionBitsStorage.setInstance(bitsImplementingClass.newInstance());
 
 
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
         }
     }

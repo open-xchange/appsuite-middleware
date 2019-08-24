@@ -136,7 +136,7 @@ public class Search {
                     permissionBits.getAccessibleModules(),
                     FolderObject.TASK,
                     ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -155,7 +155,7 @@ public class Search {
                     all.add(Integer.valueOf(folder.getObjectID()));
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         LOG.trace("Search tasks, all: {}, own: {}, shared: {}", all, own, shared);

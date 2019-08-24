@@ -150,7 +150,7 @@ public class StringHelper {
             }
             I18nService service = registry.getI18nService(locale);
             return service.getLocalized(key);
-        } catch (final MissingResourceException x) {
+        } catch (MissingResourceException x) {
             LOG.debug("Missing resource for {}. Using default.", locale, x);
             return key;
         }

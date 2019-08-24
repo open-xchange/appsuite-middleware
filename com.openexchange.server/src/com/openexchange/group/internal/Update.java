@@ -130,7 +130,7 @@ final class Update {
         if (changed.getIdentifier() == GroupStorage.GROUP_ZERO_IDENTIFIER) {
             try {
                 throw GroupExceptionCodes.NO_GROUP_UPDATE.create(GroupTools.getGroupZero(ctx).getDisplayName());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
             }
@@ -213,16 +213,16 @@ final class Update {
             con.setAutoCommit(false);
             update(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -277,16 +277,16 @@ final class Update {
             con.setAutoCommit(false);
             writeConnectionUsed = propagate(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             if(writeConnectionUsed){
@@ -300,7 +300,7 @@ final class Update {
     private boolean propagate(final Connection con) throws OXException {
         try {
             return OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(), con, con, ctx.getContextId());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }

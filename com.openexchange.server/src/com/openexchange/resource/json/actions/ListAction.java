@@ -106,7 +106,7 @@ public final class ListAction extends AbstractResourceAction {
 
                 try {
                     r = services.getServiceSafe(ResourceService.class).getResource(id, session.getContext());
-                } catch (final OXException exc) {
+                } catch (OXException exc) {
                     LOG.debug("resource not found try to find id in user table", exc);
                 }
 

@@ -203,7 +203,7 @@ public class CryptoServiceImpl implements CryptoService {
              *
              */
             retval = java.util.Base64.getEncoder().encodeToString(outputBytes);
-        } catch (final GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
 
@@ -249,9 +249,9 @@ public class CryptoServiceImpl implements CryptoService {
 
             cipher = Cipher.getInstance(CIPHER_TYPE);
             cipher.init(Cipher.DECRYPT_MODE, key, IV);
-        } catch (final GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw SecurityException.create(e);
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // No valid base64 scheme
             throw SecurityException.create(e);
         }
@@ -259,7 +259,7 @@ public class CryptoServiceImpl implements CryptoService {
         try {
             final byte[] outputBytes = cipher.doFinal(encrypted);
             return new String(outputBytes, com.openexchange.java.Charsets.UTF_8);
-        } catch (final GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw BadPassword.create(e);
         }
     }
@@ -311,7 +311,7 @@ public class CryptoServiceImpl implements CryptoService {
             final byte[] key = engine.deriveKey(password, KEY_LENGTH);
             final SecretKey secretKey = new SecretKeySpec(key, ALGORITHM);
             return secretKey;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw CryptoErrorMessage.SecurityException.create(e, e.getMessage());
         }
     }
@@ -322,7 +322,7 @@ public class CryptoServiceImpl implements CryptoService {
             final SecureRandom rand = SecureRandom.getInstance(RANDOM_ALGORITHM);
             salt = new byte[16];
             rand.nextBytes(salt);
-        } catch (final GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
         return salt;

@@ -87,7 +87,7 @@ public class MimeUtilityTest {
             assertEquals("Unexpected first line", "=?UTF-8?B?8J+SqfCfkqnwn5Kp8J+SqfCfkqnwn5Kp8J+SqQ==?=", splits[0].trim());
             assertEquals("Unexpected second line", "=?UTF-8?B?8J+SqfCfkqnwn5Kp8J+SqfCfkqnwn5Kp8J+SqfCfkqk=?=", splits[1].trim());
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

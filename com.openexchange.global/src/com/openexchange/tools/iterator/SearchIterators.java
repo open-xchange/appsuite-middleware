@@ -85,7 +85,7 @@ public final class SearchIterators {
         if (null != iterator) {
             try {
                 iterator.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
                 LoggerHolder.LOGGER.error("Closing SearchIterator instance failed", e);
             }

@@ -96,7 +96,7 @@ public class ObjectUseCountDeleteListener implements DeleteListener {
                 stmt.setInt(1, ctx.getContextId());
             }
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

@@ -178,7 +178,7 @@ public class CSVContactExporter implements Exporter {
         FolderObject fo;
         try {
             fo = getFolderObject(session, folder);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
 
@@ -192,7 +192,7 @@ public class CSVContactExporter implements Exporter {
         try {
             perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
             return perm.canReadAllObjects();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }
@@ -243,7 +243,7 @@ public class CSVContactExporter implements Exporter {
                 fieldList.add(ContactField.MARK_AS_DISTRIBUTIONLIST);
             }
             conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fieldList.toArray(new ContactField[fieldList.size()]));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
 
@@ -267,7 +267,7 @@ public class CSVContactExporter implements Exporter {
                     }
 
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
             }
             writer.flush();
@@ -334,12 +334,12 @@ public class CSVContactExporter implements Exporter {
                             }
 
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
                     } finally {
                         SearchIterators.close(conIter);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
                 }
             }
@@ -363,7 +363,7 @@ public class CSVContactExporter implements Exporter {
         for (final ContactField field : fields) {
             try {
                 l.add((String) field.doSwitch(getter, conObj));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 l.add("");
             }
         }

@@ -164,7 +164,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             if (members != null) {
                 grp.setMembers(members);
             }
-        } catch (final SQLException sql) {
+        } catch (SQLException sql) {
             log.error("SQL Error", sql);
             throw new StorageException(sql.toString());
         } finally {
@@ -263,7 +263,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         final Connection con;
         try {
             con = cache.getConnectionForContext(ctxId);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         }
@@ -478,7 +478,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                             cache = cacheService.getCache("UserSettingMail");
                             cache.remove(key);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         log.error("", e);
                     }
                 }

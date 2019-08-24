@@ -162,12 +162,12 @@ public final class ManagedInputStream extends InputStream {
                     // Input stream completely copied to memory, so close it
                     in.close();
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             } finally {
                 try {
                     in.close();
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     LOG.error("", e);
                 }
             }

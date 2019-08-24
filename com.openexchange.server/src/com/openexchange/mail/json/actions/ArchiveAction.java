@@ -145,9 +145,9 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                 json.put(tmp);
             }
             return new AJAXRequestResult(json, "json");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }

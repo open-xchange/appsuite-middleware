@@ -64,7 +64,7 @@ public abstract class AbstractUndoable implements Undoable {
     public void undo() throws OXException {
 		try {
 			undoAction();
-		} catch (final OXException x) {
+		} catch (OXException x) {
 			final StringBuilder error = new StringBuilder();
 			error.append(x.getMessage());
 			this.error = error.toString();

@@ -86,7 +86,7 @@ public abstract class MultifactorStorageCommon {
             statement.setInt(param++, userId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -119,7 +119,7 @@ public abstract class MultifactorStorageCommon {
             statement.setInt(param++, contextId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);

@@ -168,7 +168,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
 
                 getService(CapabilityService.class).declareCapability(sCapability);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -180,7 +180,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
             UnifiedInboxSynchronousQueueProvider.releaseInstance();
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

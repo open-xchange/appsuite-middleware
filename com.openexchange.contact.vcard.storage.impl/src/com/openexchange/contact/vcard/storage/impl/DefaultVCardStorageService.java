@@ -158,7 +158,7 @@ public class DefaultVCardStorageService implements VCardStorageService {
                 throw VCardStorageExceptionCodes.FILESTORE_DOWN.create();
             }
             return storageService.getQuotaFileStorage(contextId, Info.general());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw VCardStorageExceptionCodes.FILESTORE_DOWN.create(e);
         }
     }

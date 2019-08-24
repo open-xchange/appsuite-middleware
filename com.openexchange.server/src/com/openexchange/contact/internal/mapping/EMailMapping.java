@@ -83,7 +83,7 @@ public abstract class EMailMapping extends StringMapping {
 			if (null != value && !value.trim().isEmpty()) {
 				try {
 					new QuotedInternetAddress(value).validate();
-				} catch (final AddressException e) {
+				} catch (AddressException e) {
 					throw ContactExceptionCodes.INVALID_EMAIL.create(e, value);
 				}
 			}

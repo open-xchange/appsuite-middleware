@@ -124,7 +124,7 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
                 Streams.close(fos);
             }
             managedFile = fileManagement.createManagedFile(tempFile, -1, true);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
         /*

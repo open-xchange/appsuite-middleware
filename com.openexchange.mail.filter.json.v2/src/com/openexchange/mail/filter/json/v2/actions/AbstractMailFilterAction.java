@@ -104,7 +104,7 @@ public abstract class AbstractMailFilterAction implements EnqueuableAJAXActionSe
         if (json.has("id") && !json.isNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MailFilterExceptionCode.ID_MISSING.create();
             }
         }

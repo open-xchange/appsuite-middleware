@@ -264,16 +264,16 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
             String user_dn = getUserDn(loginInfo, config, ldapConfig);
 
             return getAuthenticated(config, ldapConfig, user_dn);
-        } catch (final InvalidNameException e) {
+        } catch (InvalidNameException e) {
             LOG.error("Invalid name error", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-        } catch (final AuthenticationException e) {
+        } catch (AuthenticationException e) {
             LOG.info("Authentication against ldap server failed", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-        } catch (final NamingException e) {
+        } catch (NamingException e) {
             LOG.error("Error setup initial ldap environment!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (final NullPointerException e1) {
+        } catch (NullPointerException e1) {
             LOG.error("Internal error!", e1);
             throw LoginExceptionCodes.COMMUNICATION.create(e1);
         }
@@ -314,16 +314,16 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
             ldapConfig.put(Context.SECURITY_CREDENTIALS, password);
 
             return getAuthenticated(config, ldapConfig, user_dn);
-        } catch (final InvalidNameException e) {
+        } catch (InvalidNameException e) {
             LOG.error("Invalid name error", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-        } catch (final AuthenticationException e) {
+        } catch (AuthenticationException e) {
             LOG.info("Authentication against ldap server failed", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-        } catch (final NamingException e) {
+        } catch (NamingException e) {
             LOG.error("Error setup initial ldap environment!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (final NullPointerException e1) {
+        } catch (NullPointerException e1) {
             LOG.error("Internal error!", e1);
             throw LoginExceptionCodes.COMMUNICATION.create(e1);
         }
@@ -435,7 +435,7 @@ public class UCSLookupImpl implements UCSLookup, Reloadable {
             if (null != ctx) {
                 try {
                     ctx.close();
-                } catch (final NamingException e) {
+                } catch (NamingException e) {
                     LOG.error("", e);
                 }
             }

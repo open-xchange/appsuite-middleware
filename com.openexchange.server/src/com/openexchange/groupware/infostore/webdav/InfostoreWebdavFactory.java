@@ -236,7 +236,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             } else {
                 s.addNewResource(res);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         if(!res.isCollection()) {
@@ -275,7 +275,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
                 s.addNewResource(res);
             }
             return res;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -301,7 +301,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
             resource.setExists(true);
             s.addResource(resource);
             return resource;
-        } catch (final OXException x) {
+        } catch (OXException x) {
             if (x.isGeneric(Generic.NOT_FOUND)) {
                 Connection readCon = null;
                 try {
@@ -310,7 +310,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
                     if(lockNullId>0) {
                         return new InfostoreLockNullResource((AbstractResource) def, this,lockNullId);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw e;
                 } finally {
                     if(readCon != null) {
@@ -469,7 +469,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         for(final int id : toLoad) {
             try {
                 retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
-            } catch (final WebdavProtocolException x) {
+            } catch (WebdavProtocolException x) {
                 //System.out.println(x.getStatus());
                 if(x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                     throw x;
@@ -533,7 +533,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         for(final TransactionAware service : services()) {
             try {
                 service.startTransaction();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("",e);
             }
         }
@@ -545,7 +545,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         for (final TransactionAware service : services()) {
             try {
                 service.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("",e);
             }
         }
@@ -596,7 +596,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
     public ServerSession getSession() throws OXException {
         try {
             return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

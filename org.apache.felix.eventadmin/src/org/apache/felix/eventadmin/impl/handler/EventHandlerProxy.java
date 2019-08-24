@@ -185,7 +185,7 @@ public class EventHandlerProxy {
                 {
                     handlerFilter = this.handlerContext.bundleContext.createFilter(filterObj.toString());
                 }
-                catch (final InvalidSyntaxException e)
+                catch (InvalidSyntaxException e)
                 {
                     valid = false;
                     LogWrapper.getLogger().log(
@@ -290,7 +290,7 @@ public class EventHandlerProxy {
                     this.checkTimeout(this.handler.getClass().getName());
                 }
             }
-            catch (final IllegalStateException ignore)
+            catch (IllegalStateException ignore)
             {
                 // event handler might be stopped - ignore
             }
@@ -309,7 +309,7 @@ public class EventHandlerProxy {
             {
                 this.handlerContext.bundleContext.ungetService(this.reference);
             }
-            catch (final IllegalStateException ignore)
+            catch (IllegalStateException ignore)
             {
                 // event handler might be stopped - ignore
             }

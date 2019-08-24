@@ -97,7 +97,7 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
                 LOG.debug("Context {} ({}) is disabled.", Integer.valueOf(ctx.getContextId()), ctx.getName());
                 throw AuthorizationExceptionCodes.USER_DISABLED.create(ContextExceptionCodes.CONTEXT_DISABLED.create(I(ctx.getContextId()), ctx.getName()), I(user.getId()), I(ctx.getContextId()));
             }
-        } catch (final UndeclaredThrowableException e) {
+        } catch (UndeclaredThrowableException e) {
             throw AuthorizationExceptionCodes.UNKNOWN.create(e);
         }
         if (!user.isMailEnabled()) {

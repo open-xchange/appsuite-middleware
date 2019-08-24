@@ -116,14 +116,14 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
         try {
             client.calendarList().list().execute();
             return true;
-        } catch (final HttpResponseException e) {
+        } catch (HttpResponseException e) {
             if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
                 return false;
             }
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         }
     }

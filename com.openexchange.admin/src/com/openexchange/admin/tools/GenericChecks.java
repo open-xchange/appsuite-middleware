@@ -94,7 +94,7 @@ public class GenericChecks {
         try {
             new QuotedInternetAddress(address);
             return true;
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             return false;
         }
     }

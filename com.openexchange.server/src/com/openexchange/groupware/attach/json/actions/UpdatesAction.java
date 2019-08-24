@@ -103,7 +103,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
             long timestamp = -1;
             try {
                 timestamp = Long.parseLong(requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP).trim());
-            } catch (final NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(
                     AJAXServlet.PARAMETER_TIMESTAMP,
                     requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
@@ -136,9 +136,9 @@ public final class UpdatesAction extends AbstractAttachmentAction {
                 sort,
                 order,
                 timeZoneId), "apiResponse");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final UnknownColumnException e) {
+        } catch (UnknownColumnException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -188,7 +188,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
             SearchIterators.close(iter);

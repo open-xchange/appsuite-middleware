@@ -104,7 +104,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         final ConnectionData data = loadPoolData(poolId, jdbcProperties);
         try {
             Class.forName(data.driverClass);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
         }
         final ContextPoolAdapter retval = new ContextPoolAdapter(poolId, data, (ConnectionData c) -> {
@@ -212,7 +212,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 update(data);
             } catch (OXException oxe) {
                 LOG.error("Unable to load pool data.", oxe);
-            } catch (final ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 OXException exception = DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
                 LOG.error("Unable to reload configuration", exception);
             }

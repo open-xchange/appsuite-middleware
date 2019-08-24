@@ -123,13 +123,13 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		for(final WebdavResource res : copy) {
 			try {
 				res.delete();
-			} catch (final WebdavProtocolException x) {
+			} catch (WebdavProtocolException x) {
 				exceptions.add(x);
 			}
 		}
 		try {
 			super.delete();
-		} catch (final WebdavProtocolException x) {
+		} catch (WebdavProtocolException x) {
 			exceptions.add(x);
 		}
 		if(exceptions.size() > 0) {
@@ -147,7 +147,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
     public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
 		try {
             checkParentExists(dest);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		final List<WebdavProtocolException> exceptions = new ArrayList<WebdavProtocolException>();
@@ -156,7 +156,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			if(!noroot) {
 				try {
                     copy = super.copy(dest,noroot, overwrite);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
                 }
 			} else {
@@ -167,12 +167,12 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			for(final WebdavResource res : tmpList) {
 				try {
 					res.copy(dest.dup().append(res.getUrl().name()));
-				} catch (final WebdavProtocolException x) {
+				} catch (WebdavProtocolException x) {
 					exceptions.add(x);
 				}
 			}
 			return copy;
-		} catch (final WebdavProtocolException x) {
+		} catch (WebdavProtocolException x) {
 			exceptions.add(x);
 		}
 		if(exceptions.size() > 0) {

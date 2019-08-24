@@ -243,7 +243,7 @@ public class HTTPToolkit {
     public static void loadImageFromURL(final Contact contact, final String url) throws OXException {
         try {
             loadImageFromURL(contact, new URL(url));
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
@@ -279,9 +279,9 @@ public class HTTPToolkit {
             } finally {
                 Streams.close(in);
             }
-        } catch (final SocketTimeoutException e) {
+        } catch (SocketTimeoutException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw SubscriptionErrorMessage.IO_ERROR.create("IO problem while reading \"" + url.toString() + "\"", e);
         }
         if (mimeType == null) {
@@ -303,7 +303,7 @@ public class HTTPToolkit {
         try {
             inputStream = Streams.newByteArrayInputStream(data);
             bimg = javax.imageio.ImageIO.read(inputStream);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return false;
         } finally {
             Streams.close(inputStream);

@@ -181,7 +181,7 @@ public final class BoxFile extends DefaultFile {
                         }
                     }
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

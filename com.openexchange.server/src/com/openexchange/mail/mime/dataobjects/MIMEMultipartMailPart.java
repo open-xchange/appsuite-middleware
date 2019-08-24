@@ -132,7 +132,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         if (contentType == null) {
             try {
                 setContentType(extractHeader(STR_CONTENT_TYPE, dataSource.getInputStream(), true));
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -166,7 +166,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         if (contentType == null) {
             try {
                 setContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(inputData), false));
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -197,7 +197,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         final byte[] dataBytes;
         try {
             dataBytes = dataAccess.full();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -239,7 +239,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                     index = newIndex;
                 }
             }
-        } catch (final ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, new StringBuilder(64).append(
                 "Illegal access to multipart data at index ").append(e.getMessage()).append(", but total length is ").append(
                 dataBytes.length).toString());
@@ -372,7 +372,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             if (getHeaderEnd(subArr) < 0) {
                 try {
                     return createTextPart(subArr, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(subArr)));
-                } catch (final UnsupportedCharsetException e) {
+                } catch (UnsupportedCharsetException e) {
                     return createTextPart(subArr, "ISO-8859-1");
                 }
             }
@@ -389,7 +389,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             else {
                 return MimeMessageConverter.convertPart(subArr);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -405,7 +405,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             mbp.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=\"US-ASCII\"");
             return MimeMessageConverter.convertPart(mbp);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -420,7 +420,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 MessageHeaders.HDR_CONTENT_TYPE,
                 new StringBuilder("text/plain; charset=\"").append(charset).append('"').toString());
             return MimeMessageConverter.convertPart(mbp);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -434,7 +434,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     public void loadContent() throws OXException {
         try {
             dataAccess.load();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -451,7 +451,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     public void writeTo(final OutputStream out) throws OXException {
         try {
             dataAccess.writeTo(out);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -500,7 +500,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     private void writeObject(final java.io.ObjectOutputStream out) throws java.io.IOException {
         try {
             loadContent();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final IOException ioex = new IOException(e.getMessage());
             ioex.initCause(e);
             throw ioex;
@@ -872,7 +872,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             } finally {
                 try {
                     in.close();
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     LoggerFactory.getLogger(MIMEMultipartMailPart.DataSourceDataAccess.class).error("", e);
                 }
             }

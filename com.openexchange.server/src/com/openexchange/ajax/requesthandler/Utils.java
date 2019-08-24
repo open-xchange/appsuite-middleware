@@ -76,7 +76,7 @@ public final class Utils {
     public static final String encodeUrl(final String s) {
         try {
             return com.openexchange.java.Strings.isEmpty(s) ? s : URL_CODEC.encode(s);
-        } catch (final EncoderException e) {
+        } catch (EncoderException e) {
             return s;
         }
     }

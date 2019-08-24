@@ -99,7 +99,7 @@ public class Bug8681forVCard extends AbstractVCardTest {
             try {
                 imp.canImport(sessObj, Format.VCARD, folders, null);
                 fail("Could import Contacts without permission on Contact module!");
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 assertEquals("I_E-0607", e.getErrorCode());
             }
         } finally {

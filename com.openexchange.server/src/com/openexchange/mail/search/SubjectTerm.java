@@ -110,7 +110,7 @@ public final class SubjectTerm extends SearchTerm<String> {
         final String subject;
         try {
             subject = msg.getSubject();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(SubjectTerm.class).warn("Error during search.", e);
             return false;
         }

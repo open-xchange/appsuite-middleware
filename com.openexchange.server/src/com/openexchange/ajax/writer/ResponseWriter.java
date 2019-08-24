@@ -188,7 +188,7 @@ public final class ResponseWriter {
                             return traceService.includeStackTraceOnError(userId, contextId);
                         }
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     final Logger logger = org.slf4j.LoggerFactory.getLogger(ResponseWriter.class);
                     logger.error("Could not check includeStackTraceOnError()", e);
                 }
@@ -795,7 +795,7 @@ public final class ResponseWriter {
         ResponseWriter.write(response, json, locale);
         try {
             json.write(writer, asciiOnly);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (e.getCause() instanceof IOException) {
                 /*
                  * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just

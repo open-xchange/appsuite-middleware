@@ -232,7 +232,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
                         messagingFolderType = MessagingFolderType.NONE;
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 org.slf4j.LoggerFactory.getLogger(MessagingFolderImpl.class).error("", e);
                 messagingFolderType = MessagingFolderType.NONE;
             }
@@ -400,7 +400,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         public Object clone() {
             try {
                 return super.clone();
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 /*
                  * Cannot not occur since Cloneable is implemented
                  */

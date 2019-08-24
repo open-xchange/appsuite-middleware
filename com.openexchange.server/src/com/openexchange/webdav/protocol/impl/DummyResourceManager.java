@@ -70,7 +70,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	private DummyResourceManager(){
 		try {
 			resolveCollection("/").create();
-		} catch (final WebdavProtocolException e) {
+		} catch (WebdavProtocolException e) {
 			LOG.error("Can't resolve root", e);
         }
 	}

@@ -90,7 +90,7 @@ public class DeleteAction extends AbstractMessagingAccountAction {
         final String idS = request.getParameter("id");
         try {
             id = Integer.parseInt(idS);
-        } catch (final NumberFormatException x) {
+        } catch (NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("id", idS);
         }
 

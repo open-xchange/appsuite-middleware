@@ -275,12 +275,12 @@ final class MovePerformer extends AbstractPerformer {
                     if (started) {
                         realStorage.commitTransaction(storageParameters);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }
                     throw e;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (started) {
                         realStorage.rollback(storageParameters);
                     }

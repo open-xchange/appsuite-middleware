@@ -343,9 +343,9 @@ public final class MimeForward extends AbstractMimeProcessing {
                 }
             }
             return asInlineForward(originalMsg, session, ctx, usm, forwardMsg);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -537,7 +537,7 @@ public final class MimeForward extends AbstractMimeProcessing {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return originalMsg.getInputStream();
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;

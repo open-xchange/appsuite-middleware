@@ -201,10 +201,10 @@ public class AdminActivator extends HousekeepingActivator {
         try {
             AdminDaemon.initCache(configurationService);
             daemon.initAccessCombinationsInCache();
-        } catch (final OXGenericException e) {
+        } catch (OXGenericException e) {
             log.error("", e);
             throw e;
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error("", e);
             throw e;
         }

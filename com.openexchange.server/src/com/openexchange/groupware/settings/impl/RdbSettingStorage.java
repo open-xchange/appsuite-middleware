@@ -316,7 +316,7 @@ public class RdbSettingStorage extends SettingStorage {
                 return result.getString(1);
             }
             return null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -365,7 +365,7 @@ public class RdbSettingStorage extends SettingStorage {
                 } else {
                     setting.setSingleValue(null);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SettingExceptionCodes.SQL_ERROR.create(e);
             } finally {
                 closeSQLStuff(result, stmt);
@@ -385,7 +385,7 @@ public class RdbSettingStorage extends SettingStorage {
                             parent.removeElement(setting);
                         }
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (OXExceptions.isPermissionDenied(e)) {
                         LOG.debug("Problem while reading setting value.", e);
                     } else {

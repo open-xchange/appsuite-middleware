@@ -389,7 +389,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 secretService.close();
                 secretService = null;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

@@ -125,11 +125,11 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 writeCon.commit();
             }
             return retval;
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             if (connectionHandling) {
                 try {
                     writeCon.rollback();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.debug("{}", e.getMessage(), e);
                 }
             }
@@ -140,7 +140,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             if (connectionHandling) {
                 try {
                     writeCon.setAutoCommit(true);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LOG.debug("{}", e.getMessage(), e);
                 }
                 provider.releaseWriteConnection(ctx, writeCon);
@@ -186,7 +186,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
                 content.put(name, value);
             }
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw GenericConfigStorageExceptionCode.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -309,7 +309,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 list.add(I(rs.getInt(1)));
             }
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GenericConfigStorageExceptionCode.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

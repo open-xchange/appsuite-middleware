@@ -102,7 +102,7 @@ public final class MimeHeaderNameChecker {
                 csb = hcStr.getBytes(Charsets.ISO_8859_1);
             }
             return new CombinedInputStream(csb, new UnsynchronizedByteArrayInputStream(bytes, index, length));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new UnsynchronizedByteArrayInputStream(bytes);
         }
     }

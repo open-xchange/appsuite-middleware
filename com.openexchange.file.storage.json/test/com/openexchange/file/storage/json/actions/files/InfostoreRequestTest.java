@@ -105,7 +105,7 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request.getFieldsToLoad();
             fail("Expected Exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }
@@ -116,7 +116,7 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request.getFieldsToLoad();
             fail("Expected Exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
 
         }
@@ -141,14 +141,14 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request().param("sort", "1024").getSortingField();
             fail("Expected Exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
 
         try {
             request().param("sort", "gnitzness").getSortingField();
             fail("Expected Exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
 
@@ -173,7 +173,7 @@ public class InfostoreRequestTest extends FileTest {
         try {
             request().param("order", "supercalifragilisticexplialidocious").getSortingOrder();
             fail("Expected Exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }

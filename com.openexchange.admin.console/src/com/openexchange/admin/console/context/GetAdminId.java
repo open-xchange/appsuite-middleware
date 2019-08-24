@@ -100,12 +100,12 @@ public class GetAdminId extends ContextAbstraction {
 
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
 
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
             maincall(ctx, auth);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
     }

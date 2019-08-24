@@ -132,24 +132,24 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
                     firstExtensionByName.setCustomid(customid);
                 }
             }
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new OXConsolePluginException(e);
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new OXConsolePluginException(e);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new OXConsolePluginException(e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new OXConsolePluginException(e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new OXConsolePluginException(e);
-        } catch (final OXResellerException e) {
+        } catch (OXResellerException e) {
             throw new OXConsolePluginException("A reseller exception occured: " + e.getMessage());
-        } catch (final NotBoundException e) {
+        } catch (NotBoundException e) {
             throw new OXConsolePluginException(e);
-        } catch (final DuplicateExtensionException e) {
+        } catch (DuplicateExtensionException e) {
             // Throw this one, but this should never occur as we check beforehand
             throw new OXConsolePluginException(e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new OXConsolePluginException(e);
         }
 

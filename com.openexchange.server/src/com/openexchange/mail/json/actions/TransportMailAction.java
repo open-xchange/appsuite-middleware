@@ -125,7 +125,7 @@ public final class TransportMailAction extends AbstractMailAction {
             try {
                 final InternetAddress[] fromAddrs = composedMail.getFrom();
                 accountId = resolveFrom2Account(session, fromAddrs != null && fromAddrs.length > 0 ? fromAddrs[0] : null, true, true);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                     // Re-throw
                     throw e;
@@ -177,15 +177,15 @@ public final class TransportMailAction extends AbstractMailAction {
             try {
                 boolean memorizeAddresses = ServerUserSetting.getInstance().isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue();
                 triggerContactCollector(session, composedMail, memorizeAddresses, true);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Contact collector could not be triggered.", e);
             }
             return new AJAXRequestResult(responseObj, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

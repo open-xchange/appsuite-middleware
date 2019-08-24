@@ -134,10 +134,10 @@ public final class DeleteData {
             TaskLogic.deleteTask(ctx, con, user.getId(), TaskLogic.clone(getOrigTask()), lastModified);
             deleteReminder(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             rollback(con);
             throw e;
         } finally {

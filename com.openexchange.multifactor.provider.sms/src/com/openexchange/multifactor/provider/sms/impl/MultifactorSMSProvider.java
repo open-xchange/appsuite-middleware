@@ -421,7 +421,7 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
         try {
             //Send SMS token
             triggerToken(phoneDevice, multifactorRequest);
-        } catch (final Exception e) {
+        } catch (Exception e) {
            pendingStorage.unregisterDevice(multifactorRequest.getContextId(), multifactorRequest.getContextId(), phoneDevice);
            throw e;
         }

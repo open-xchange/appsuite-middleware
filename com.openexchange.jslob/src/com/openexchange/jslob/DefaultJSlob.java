@@ -150,7 +150,7 @@ public class DefaultJSlob implements JSlob, Cloneable {
             clone.setJsonObject(null == jsonObject ? null : new JSONObject(jsonObject));
             clone.setMetaObject(null == metaObject ? null : new JSONObject(metaObject));
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

@@ -99,7 +99,7 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
 
             con.commit(); // COMMIT
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -153,7 +153,7 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
                 }
                 stmt.executeBatch();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);

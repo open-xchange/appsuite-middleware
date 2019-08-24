@@ -138,7 +138,7 @@ public final class DeleteAction extends AbstractReminderAction {
                     final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
                     final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
                     reminderService.deleteReminder(req.getSession(), reminder);
-                } catch (final OXException oxe) {
+                } catch (OXException oxe) {
                     LOG.debug("", oxe);
                     if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                         response.put(id);
@@ -189,7 +189,7 @@ public final class DeleteAction extends AbstractReminderAction {
                         final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
                         final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
                         reminderService.deleteReminder(req.getSession(), reminder);
-                    } catch (final OXException oxe) {
+                    } catch (OXException oxe) {
                         LOG.debug("", oxe);
                         if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                             response.put(id);

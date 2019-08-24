@@ -330,7 +330,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     tmpFile = tmp;
                     tmpFile.deleteOnExit();
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if (tmpFile != null && !tmpFile.delete()) {
                     LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
@@ -534,7 +534,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 distributedFileManagement.touch(id);
                 return true;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
 
@@ -607,12 +607,12 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             // Safe touch
             try {
                 distributedFileManagement.touch(id);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
             // Return
             return managedFile;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Could not load remote file: {}", id, e);
             return null;
         }
@@ -651,7 +651,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     distributedFileManagement.unregister(id);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Do nothing.
         } finally {
             files.remove(mf.getID());
@@ -666,7 +666,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
         try {
             distributedFileManagement.remove(id);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Do nothing.
         }
     }
@@ -676,7 +676,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (distributedFileManagement != null) {
             try {
                 distributedFileManagement.unregister(id);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Do nothing.
             }
         }

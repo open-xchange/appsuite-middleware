@@ -321,7 +321,7 @@ public class ResourceTest extends AbstractResourceTest {
         try {
             resourceManager.resolveResource(res.getUrl() + "/resource").create();
             fail();
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertTrue("" + x.getStatus(), HttpServletResponse.SC_CONFLICT == x.getStatus() || HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus());
         }
     }
@@ -345,7 +345,7 @@ public class ResourceTest extends AbstractResourceTest {
 
         try {
             Thread.sleep(SKEW + 10);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
         }
         res.save();
         res = res.reload();
@@ -425,7 +425,7 @@ public class ResourceTest extends AbstractResourceTest {
 
         try {
             res.setLength(1L);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.toString());
         }
@@ -495,7 +495,7 @@ public class ResourceTest extends AbstractResourceTest {
 
         try {
             res.putBody(new ByteArrayInputStream(bytes));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.toString());
         }
@@ -514,7 +514,7 @@ public class ResourceTest extends AbstractResourceTest {
         assertEquals(now, res.getLastModified(), SKEW);
         try {
             Thread.sleep(SKEW + 10);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
         }
         now = new Date();
         res.setDisplayName(res.getDisplayName());

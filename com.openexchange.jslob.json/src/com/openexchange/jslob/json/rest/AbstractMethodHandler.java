@@ -187,7 +187,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
                 if ('[' == c || '{' == c) {
                     try {
                         request.setData(JSONObject.parse(reader));
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         request.setData(AJAXServlet.readFrom(reader));
                     }
                 } else {

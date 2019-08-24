@@ -214,13 +214,13 @@ public class ContactTestManager implements TestManager {
         for (final int field : Contact.ALL_COLUMNS) {
             try {
                 contact.set(field, new Integer(field));
-            } catch (final ClassCastException e1) {
+            } catch (ClassCastException e1) {
                 try {
                     contact.set(field, String.valueOf(field));
-                } catch (final ClassCastException e2) {
+                } catch (ClassCastException e2) {
                     try {
                         contact.set(field, new Date(field));
-                    } catch (final ClassCastException e3) {
+                    } catch (ClassCastException e3) {
                         //don't
                     }
                 }
@@ -249,7 +249,7 @@ public class ContactTestManager implements TestManager {
             if (!response.hasError()) {
                 getCreatedEntities().add(contactToCreate);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
         return contactToCreate;
@@ -286,7 +286,7 @@ public class ContactTestManager implements TestManager {
                 getCreatedEntities().add(contacts[i]);
                 i++;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
     }
@@ -307,7 +307,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = getClient().execute(request, getSleep());
             contact.setLastModified(lastResponse.getTimestamp());
             remember(contact);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest for folder " + contact.getParentFolderID() + " and object " + contact.getObjectID());
         }
         return contact;
@@ -323,7 +323,7 @@ public class ContactTestManager implements TestManager {
             contactToDelete.setLastModified(new Date(Long.MAX_VALUE));
             final DeleteRequest request = new DeleteRequest(contactToDelete, getFailOnError());
             lastResponse = getClient().execute(request, getSleep());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "DeleteRequest for folder " + contactToDelete.getParentFolderID() + " and object " + contactToDelete.getObjectID());
         } finally {
             this.setFailOnError(oldValue);
@@ -352,7 +352,7 @@ public class ContactTestManager implements TestManager {
                 throw response.getException();
             }
             returnedContact = response.getContact();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "GetRequest for folder " + folderId + " and object " + objectId);
             return null;
         }
@@ -384,7 +384,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
         return allContacts.toArray(new Contact[] {});
@@ -395,7 +395,7 @@ public class ContactTestManager implements TestManager {
     //        try {
     //            final ImageResponse response = getClient().execute(request);
     //            lastResponse = response;
-    //        } catch (final Exception e) {
+    //        } catch (Exception e) {
     //            doExceptionHandling(e, "AllRequest for folder " + folderId);
     //        }
     //        return null;
@@ -409,7 +409,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
         return allContacts.toArray(new Contact[] {});
@@ -434,7 +434,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
         return allContacts.toArray(new Contact[] {});
@@ -450,7 +450,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "searching for contacts with pattern: " + pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
         }
         return allContacts.toArray(new Contact[] {});
@@ -464,7 +464,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "searching for contacts with first letter: " + firstLetter + ", in folder: " + Integer.toString(folderId) + e.getMessage());
         }
         return allContacts.toArray(new Contact[] {});
@@ -486,7 +486,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "searching for contacts with search-object: " + search + ": " + e.getMessage());
         }
         return allContacts.toArray(new Contact[] {});
@@ -503,7 +503,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "searching for contacts with pattern: " + pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
         }
         return allContacts.toArray(new Contact[] {});
@@ -517,7 +517,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             contacts = transform(data, columns);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "searching for contacts with term: \n" + filter.toString());
         }
         return contacts.toArray(new Contact[] {});
@@ -534,7 +534,7 @@ public class ContactTestManager implements TestManager {
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest");
         }
         return allContacts.toArray(new Contact[] {});
@@ -544,27 +544,27 @@ public class ContactTestManager implements TestManager {
         try {
             lastException = exception;
             throw exception;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (getFailOnError()) {
                 e.printStackTrace();
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if (getFailOnError()) {
                 e.printStackTrace();
                 fail("IOException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             if (getFailOnError()) {
                 e.printStackTrace();
                 fail("SAXException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (getFailOnError()) {
                 e.printStackTrace();
                 fail("JSONException occured during " + action + ": " + e.getMessage());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             if (getFailOnError()) {
                 e.printStackTrace();
                 fail("Unexpected exception occured during " + action + ": " + e.getMessage());
@@ -617,7 +617,7 @@ public class ContactTestManager implements TestManager {
                     try {
                         contactObject.setImage1(loadImage(url));
                         contactObject.setNumberOfImages(1);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore possible error during download attempt
                     }
                 }
@@ -814,7 +814,7 @@ final class ContactMapping {
             put(ContactFields.UID, Contact.UID);
             put(ContactFields.IMAGE1_URL, Contact.IMAGE1_URL);
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             fail(e.getMessage());
         }
     }

@@ -255,7 +255,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -284,7 +284,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 caps.add(rs.getString(1));
             } while (rs.next());
             return caps;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -336,11 +336,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.invalidateGroup(ctx.getId().toString());
                     }
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -497,25 +497,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         final Cache jcs = cacheService.getCache("UserConfiguration");
                         CacheKey key = jcs.newCacheKey(ctx.getId().intValue(), user.getId().toString(), String.valueOf(false));
                         jcs.remove(key);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                     try {
                         final Cache jcs = cacheService.getCache("CapabilitiesUser");
                         jcs.removeFromGroup(user.getId(), ctx.getId().toString());
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                     try {
                         final Cache jcs = cacheService.getCache("Capabilities");
                         jcs.removeFromGroup(user.getId(), ctx.getId().toString());
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("", e);
                     }
                 }
             }
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -580,7 +580,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 // End of JCS
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -754,7 +754,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     cache.removeFromGroup(key, Integer.toString(contextId));
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -788,7 +788,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt.setInt(pos, FolderObject.INFOSTORE);
             rs = stmt.executeQuery();
             return rs.next() ? rs.getInt(1) : -1;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return -1;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1432,7 +1432,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             account.setMailServer(URIParser.parse(imapServer, URIDefaults.IMAP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
@@ -1489,14 +1489,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             account.setTransportServer(URIParser.parse(smtpServer, URIDefaults.SMTP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
         try {
             mass.insertMailAccount(account, userId, context, null, con);
             lockTable("updateTask", con);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new StorageException("Problem storing the primary mail account.", e);
         } catch (SQLException e) {
             throw new StorageException("Problem storing the primary mail account.", e);
@@ -1527,7 +1527,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         final Setting setting = ConfigTree.getInstance().getSettingByPath(key);
                         setting.setSingleValue(value);
                         settStor.save(con, setting);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("Problem while storing GUI preferences.", e);
                     }
                 }
@@ -2301,7 +2301,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.remove(key);
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                     }
@@ -2322,7 +2322,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             LOG.error("Delete contact yielded groupware API error");
             throw new StorageException(e.toString());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             throw new StorageException(e);
         } finally {
@@ -2405,7 +2405,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     releaseWriteContextConnectionWithoutTimeout(con, contextId, cache);
                 }
             } while (retry(condition, users, ctx));
-        } catch (final SQLException sql) {
+        } catch (SQLException sql) {
             throw new StorageException(sql.toString(), sql);
         }
     }
@@ -2455,7 +2455,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 for (int userId : userIds) {
                     invalidateUserCaches(userId, contextId, cacheService);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         } catch (SQLException e) {
@@ -2516,10 +2516,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setGlobalAddressBookDisabled(adminHelper.isGlobalAddressBookDisabled(contextId, user_id, read_ox_con));
             acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(contextId, user_id, read_ox_con));
             return acc;
-        } catch (final SQLException sqle) {
+        } catch (SQLException sqle) {
             LOG.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("OX Error ", e);
             throw new StorageException(e.toString(), e);
         } finally {
@@ -2538,7 +2538,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             prep_edit_user.setInt(3, user_id);
             prep_edit_user.executeUpdate();
 
-        } catch (final SQLException sqle) {
+        } catch (SQLException sqle) {
             LOG.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
         } finally {
@@ -2546,7 +2546,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (prep_edit_user != null) {
                     prep_edit_user.close();
                 }
-            } catch (final SQLException ex) {
+            } catch (SQLException ex) {
                 LOG.error("Error closing statement!", ex);
             }
         }
@@ -2597,7 +2597,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException sqle) {
+        } catch (SQLException sqle) {
             LOG.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
         } finally {
@@ -2605,7 +2605,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (del_st != null) {
                     del_st.close();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Error closing prepared statement!", e);
             }
         }
@@ -2619,7 +2619,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st = con.prepareStatement("DELETE from del_user WHERE cid = ?");
             del_st.setInt(1, ctx.getId().intValue());
             del_st.executeUpdate();
-        } catch (final SQLException sqle) {
+        } catch (SQLException sqle) {
             LOG.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
         } finally {
@@ -2627,7 +2627,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (del_st != null) {
                     del_st.close();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Error closing prepared statement!", e);
             }
         }
@@ -2642,7 +2642,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st.setInt(1, user_id);
             del_st.setInt(2, ctx.getId().intValue());
             del_st.executeUpdate();
-        } catch (final SQLException sqle) {
+        } catch (SQLException sqle) {
             LOG.error("SQL Error ", sqle);
             throw new StorageException(sqle.toString());
         } finally {
@@ -2650,7 +2650,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (del_st != null) {
                     del_st.close();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Error closing prepared statement!", e);
             }
         }
@@ -2732,9 +2732,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final com.openexchange.groupware.contexts.Context gwCtx = ContextStorage.getInstance().getContext(ctx.getId().intValue());
                 UserConfigurationStorage.getInstance().invalidateCache(user.getUserId(), gwCtx);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.toString(), e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new StorageException(e.toString(), e);
         }
     }

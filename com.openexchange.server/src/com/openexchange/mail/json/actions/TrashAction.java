@@ -140,9 +140,9 @@ public final class TrashAction extends AbstractMailAction {
             }
 
             return new AJAXRequestResult(jPaths, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

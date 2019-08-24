@@ -281,7 +281,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         try {
             InternetAddress fromAddresss = toMimeAddress(m.getFrom());
             accountId = MimeMessageFiller.resolveFrom2Account(session, fromAddresss, true, true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                 // Re-throw
                 throw e;
@@ -682,7 +682,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                     try {
                         InternetAddress fromAddresss = toMimeAddress(m.getFrom());
                         accountId = MimeMessageFiller.resolveFrom2Account(ServerSessionAdapter.valueOf(session), fromAddresss, true, true);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e) || MailExceptionCode.INVALID_SENDER.equals(e)) {
                             // Re-throw
                             throw e;
@@ -1072,7 +1072,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             html.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
             return html;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new MessagingException("Unsupported encoding.", e);
         }
     }

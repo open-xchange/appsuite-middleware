@@ -161,25 +161,25 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             mailInterface = MailServletInterface.getInstance(session);
                             final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface, true);
                             MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             // Something went wrong
                             try {
                                 jsonCache.delete(id, session.getUserId(), session.getContextId());
-                            } catch (final Exception ignore) {
+                            } catch (Exception ignore) {
                                 // Ignore
                             }
                         } finally {
                             if (null != mailInterface) {
                                 try {
                                     mailInterface.close(true);
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     // Ignore
                                 }
                             }
                             if (locked) {
                                 try {
                                     jsonCache.unlock(id, session.getUserId(), session.getContextId());
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     // Ignore
                                 }
                             }
@@ -240,7 +240,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             i = Integer.parseInt(s.substring(pos + 1).trim());
                             end = i < 0 ? 0 : i;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
                     }
                     if (start >= end) {
@@ -392,7 +392,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 result.addWarnings(warnings);
             }
             return result;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

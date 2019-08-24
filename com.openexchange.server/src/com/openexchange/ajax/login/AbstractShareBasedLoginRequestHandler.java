@@ -358,7 +358,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         // Look-up necessary credentials
         try {
             doLogin(req, resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             logAndSendException(resp, e);
         }
     }

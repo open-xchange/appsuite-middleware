@@ -167,7 +167,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                 }
 
             }
-        } catch (final DuplicateExtensionException e) {
+        } catch (DuplicateExtensionException e) {
             // Throw this one, but this should never occur as we check beforehand
             throw new OXConsolePluginException(e);
         } catch (InvalidDataException e) {
@@ -221,11 +221,11 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                     firstExtensionByName.setCustomid(customid);
                 }
             }
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new OXConsolePluginException(e);
-        } catch (final OXResellerException e) {
+        } catch (OXResellerException e) {
             throw new OXConsolePluginException("A reseller exception occured: " + e.getMessage());
-        } catch (final DuplicateExtensionException e) {
+        } catch (DuplicateExtensionException e) {
             // Throw this one, but this should never occur as we check beforehand
             throw new OXConsolePluginException(e);
         }

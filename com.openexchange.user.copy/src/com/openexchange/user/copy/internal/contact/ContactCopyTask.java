@@ -229,7 +229,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -253,7 +253,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -281,7 +281,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -321,7 +321,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 contact.setCreatedBy(newUid);
                 contact.setModifiedBy(newUid);
                 contact.setContextId(context.getContextId());
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
         }
@@ -379,7 +379,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 }
                 Databases.closeSQLStuff(rs, stmt);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -416,7 +416,7 @@ public class ContactCopyTask implements CopyUserTaskService {
 
                 list.add(entry);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -457,7 +457,7 @@ public class ContactCopyTask implements CopyUserTaskService {
 
                 contacts.put(I(contact.getObjectID()), contact);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);

@@ -139,7 +139,7 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
             int ctxId;
             try {
                 ctxId = contextService.getContextId(splitted[0]);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw COMMUNICATION.create(e);
             }
             if (ContextStorage.NOT_FOUND == ctxId) {
@@ -150,7 +150,7 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
             int userId;
             try {
                 userId = userService.getUserId(splitted[1], ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (e.equalsCode(LdapExceptionCode.USER_NOT_FOUND.getNumber(), UserExceptionCode.PROPERTY_MISSING.getPrefix())) {
                     throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(splitted[1]);
                 }

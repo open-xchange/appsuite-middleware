@@ -128,7 +128,7 @@ public final class OXConfigurationBase {
             if (null != property && (property = property.trim()).length() > 0) {
                 try {
                     httpProxyPort = Integer.parseInt(property.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // NAN
                     log.warn("Connection timeout property is not a number: {}. Using fallback 0.",
                         property.trim());
@@ -141,7 +141,7 @@ public final class OXConfigurationBase {
             if (null != property && (property = property.trim()).length() > 0) {
                 try {
                     httpConnectionTimeout = Integer.parseInt(property.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // NAN
                     log.warn("Connection timeout property is not a number: {}. Using fallback 20000.",
                         property.trim());
@@ -154,7 +154,7 @@ public final class OXConfigurationBase {
             if (null != property && (property = property.trim()).length() > 0) {
                 try {
                     httpReadTimeout = Integer.parseInt(property.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // NAN
                     log.warn("Read timeout property is not a number: {}. Using fallback 120000.", property.trim());
                     httpReadTimeout = 120000;
@@ -166,7 +166,7 @@ public final class OXConfigurationBase {
             if (null != property && (property = property.trim()).length() > 0) {
                 try {
                     httpRetryCount = Integer.parseInt(property.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // NAN
                     log.warn("Retry count property is not a number: {}. Using fallback 3.", property.trim());
                     httpRetryCount = 3;
@@ -178,7 +178,7 @@ public final class OXConfigurationBase {
             if (null != property && (property = property.trim()).length() > 0) {
                 try {
                     httpRetryIntervalSecs = Integer.parseInt(property.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // NAN
                     log.warn("Retry Interval Seconds property is not a number: {}. Using fallback 10.",
                         property.trim());

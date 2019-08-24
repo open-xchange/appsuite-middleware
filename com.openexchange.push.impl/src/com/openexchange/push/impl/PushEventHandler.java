@@ -132,7 +132,7 @@ public final class PushEventHandler implements EventHandler {
                     PushManagerRegistry registry = PushManagerRegistry.getInstance();
                     registry.startListenerFor(session);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("Error while handling SessionD event \"{}\".", topic, e);
             }
         }

@@ -90,7 +90,7 @@ public final class BoundedExecutor {
         semaphore.acquire();
         try {
             executor.execute(new SemaphoredRunnable(semaphore, command));
-        } catch (final RejectedExecutionException e) {
+        } catch (RejectedExecutionException e) {
             semaphore.release();
             throw e;
         }

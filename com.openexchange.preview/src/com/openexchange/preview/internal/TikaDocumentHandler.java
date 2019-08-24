@@ -157,7 +157,7 @@ public final class TikaDocumentHandler {
             parser = new AutoDetectParser(detector);
             context.set(Parser.class, parser);
             // context.set(EmbeddedDocumentExtractor.class, new FileEmbeddedDocumentExtractor(this));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
@@ -252,7 +252,7 @@ public final class TikaDocumentHandler {
                 return serviceLookup.getService(HtmlService.class).getConformHTML(new String(bout.toByteArray(), Charsets.forName(encoding)), encoding);
             }
             return bout.toString(encoding);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(stream);
@@ -275,11 +275,11 @@ public final class TikaDocumentHandler {
                     getContentHandler(output, documentHandler),
                     documentHandler.metadata,
                     documentHandler.context);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final SAXException e) {
+            } catch (SAXException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-            } catch (final TikaException e) {
+            } catch (TikaException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             }
         }
@@ -299,11 +299,11 @@ public final class TikaDocumentHandler {
             try {
                 parseContext.set(Parser.class, new TikaImageExtractingParser(documentHandler));
                 parser.parse(input, getContentHandler(output, documentHandler), documentHandler.metadata, parseContext);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final SAXException e) {
+            } catch (SAXException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-            } catch (final TikaException e) {
+            } catch (TikaException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
                 // Restore context
@@ -315,7 +315,7 @@ public final class TikaDocumentHandler {
         protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
                 return new TikaImageRewritingContentHandler(getTransformerHandler(output, "xml", documentHandler.encoding), documentHandler);
-            } catch (final TransformerConfigurationException e) {
+            } catch (TransformerConfigurationException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             }
         }
@@ -330,11 +330,11 @@ public final class TikaDocumentHandler {
             try {
                 parseContext.set(Parser.class, new TikaImageExtractingParser(documentHandler));
                 parser.parse(input, getContentHandler(output, documentHandler), documentHandler.metadata, parseContext);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final SAXException e) {
+            } catch (SAXException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-            } catch (final TikaException e) {
+            } catch (TikaException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
                 // Restore context
@@ -348,7 +348,7 @@ public final class TikaDocumentHandler {
                 return new TikaImageRewritingContentHandler(
                     getTransformerHandler(output, "html", documentHandler.encoding),
                     documentHandler);
-            } catch (final TransformerConfigurationException e) {
+            } catch (TransformerConfigurationException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             }
         }
@@ -360,7 +360,7 @@ public final class TikaDocumentHandler {
         protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
                 return new BodyContentHandler(getOutputWriter(output, documentHandler.encoding));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
@@ -372,7 +372,7 @@ public final class TikaDocumentHandler {
         protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
                 return new BoilerpipeContentHandler(getOutputWriter(output, documentHandler.encoding));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
@@ -406,7 +406,7 @@ public final class TikaDocumentHandler {
         public void process(final InputStream stream, final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
                 documentHandler.mediaType = documentHandler.detector.detect(stream, documentHandler.metadata);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }

@@ -117,7 +117,7 @@ public class Message {
                     Date d;
                     try {
                         d = DATE_FORMAT.parse(sdate);
-                    } catch (final ParseException e) {
+                    } catch (ParseException e) {
                         d = null;
                     }
                     this.createdAt = d;

@@ -122,7 +122,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
                         parseTemplate(template);
                     }
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
             } finally {
                 Streams.close(is);
@@ -160,7 +160,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
                 }
             }
             templates.put(key, new StringTemplate(templateText.toString()));
-        } catch (final IOException x) {
+        } catch (IOException x) {
             LOG.error(x.toString());
         } finally {
             Streams.close(r);

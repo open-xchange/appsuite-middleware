@@ -135,7 +135,7 @@ public final class ServerConfig implements Reloadable {
             final AttachmentConfig attachmentConfig = AttachmentConfig.getInstance();
             attachmentConfig.stop();
             attachmentConfig.start();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not reload attachment configuration.", e);
         }
 
@@ -143,7 +143,7 @@ public final class ServerConfig implements Reloadable {
             final InfostoreConfig infostoreConfig = InfostoreConfig.getInstance();
             infostoreConfig.stop();
             infostoreConfig.start();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not reload infostore configuration.", e);
         }
 
@@ -151,7 +151,7 @@ public final class ServerConfig implements Reloadable {
             final NotificationConfig notificationConfig = NotificationConfig.getInstance();
             notificationConfig.stop();
             notificationConfig.start();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not reload infostore configuration.", e);
         }
 
@@ -188,19 +188,19 @@ public final class ServerConfig implements Reloadable {
                 Runtime.getRuntime().exec("chown open-xchange:open-xchange " + uploadDirectory);
                 LOG.info("Temporary upload directory created");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Temporary upload directory could NOT be properly created", e);
         }
         // MAX_FILE_UPLOAD_SIZE
         try {
             maxFileUploadSize = Integer.parseInt(getPropertyInternal(Property.MaxFileUploadSize));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             maxFileUploadSize = 10000;
         }
         // MAX_UPLOAD_IDLE_TIME_MILLIS
         try {
             maxUploadIdleTimeMillis = Integer.parseInt(getPropertyInternal(Property.MaxUploadIdleTimeMillis));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             maxUploadIdleTimeMillis = 300000;
         }
         // PrefetchEnabled
@@ -304,7 +304,7 @@ public final class ServerConfig implements Reloadable {
                 value = getProperty(property.getPropertyName());
             }
             return (V) value;
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             LOG.debug("", e);
             return null;
         }
@@ -417,7 +417,7 @@ public final class ServerConfig implements Reloadable {
                     throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
                 value = Integer.valueOf(getProperty(property.getPropertyName()));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(property.getPropertyName());
             }
         }
@@ -457,7 +457,7 @@ public final class ServerConfig implements Reloadable {
                     throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
                 value = Integer.parseInt(prop.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(e, property.getPropertyName());
             }
         }
@@ -492,7 +492,7 @@ public final class ServerConfig implements Reloadable {
                     throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
                 value = Long.valueOf(getProperty(property.getPropertyName()));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(property.getPropertyName());
             }
         }

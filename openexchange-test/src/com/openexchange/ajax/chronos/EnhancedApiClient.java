@@ -130,7 +130,7 @@ public class EnhancedApiClient extends ApiClient {
             JSONObject json;
             try {
                 json = new JSONObject(json0);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw new ApiException(400, "The required parameter 'json0' when calling createEventWithAttachments is not of type JSONObject. " + json0);
             }
             JSONArray attachments = json.optJSONArray("attachments");
@@ -151,7 +151,7 @@ public class EnhancedApiClient extends ApiClient {
                     final JSONObject attachment = attachments.getJSONObject(index);
                     tmp.put(attachment.getString("filename"), attachment.optString("cid"));
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw new ApiException(400, "A JSON error occurred: " + e.getMessage());
             }
         }

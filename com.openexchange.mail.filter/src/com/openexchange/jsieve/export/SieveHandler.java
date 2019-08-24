@@ -1448,7 +1448,7 @@ public class SieveHandler {
         if (this.punycode) {
             try {
                 retval = QuotedInternetAddress.toACE(username);
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 final OXSieveHandlerException oxSieveHandlerException = new OXSieveHandlerException("The " + description + " \"" + username + "\" could not be transformed to punycode.", this.sieve_host, this.sieve_host_port, null);
                 log.error("", e);
                 throw oxSieveHandlerException;
@@ -1718,7 +1718,7 @@ public class SieveHandler {
             if (matcher.matches()) {
                 try {
                     return Integer.parseInt(matcher.group(1));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     log.error("", e);
                     return -1;
                 }

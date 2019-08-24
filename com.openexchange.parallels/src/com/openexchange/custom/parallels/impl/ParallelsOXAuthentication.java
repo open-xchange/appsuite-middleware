@@ -118,7 +118,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
         try {
             configdb_read = Database.get(false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error while setting up internal database connection", e);
             throw LoginExceptionCodes.DATABASE_DOWN.create(e);
         }
@@ -208,7 +208,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             final int userId;
             try {
                 userId = userservice.getUserId(oxuser_, ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("UserID for {} could not be resolved via OX API from database. Not provisioned yet?", oxuser_,e);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(oxuser_);
             }
@@ -235,13 +235,13 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 }
             };
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("Error in configdb query", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("Error in parsing context id from configdb", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error in loading user or context from loginstring {} from OX API", gui_loginstring, e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } finally {

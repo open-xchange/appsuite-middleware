@@ -107,7 +107,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     public UserPermissionBits getUserPermissionBits(Connection con, int userId, Context ctx) throws OXException {
         try {
             return loadUserPermissionBits(userId, ctx, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -218,7 +218,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 }
             }
             saveUserPermissionBits(permissionBits, userId, insert, ctx.getContextId(), con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }

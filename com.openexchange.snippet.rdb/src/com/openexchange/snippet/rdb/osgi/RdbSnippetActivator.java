@@ -133,7 +133,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
 
             quotaProvider.setSnippetService(snippetService);
             registerService(QuotaProvider.class, quotaProvider);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;
         }

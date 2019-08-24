@@ -96,7 +96,7 @@ public class Create extends ResellerAbstraction {
             final ResellerAdmin create = rsi.create(adm, auth);
             displayCreatedMessage(String.valueOf(create.getId()), null, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }

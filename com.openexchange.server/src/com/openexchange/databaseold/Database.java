@@ -164,7 +164,7 @@ public final class Database {
             } else {
                 getDatabaseService().backReadOnly(con);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -182,7 +182,7 @@ public final class Database {
             } else {
                 getDatabaseService().backReadOnly(ctx, con);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -208,7 +208,7 @@ public final class Database {
             } else {
                 getDatabaseService().backReadOnly(contextId, con);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -235,7 +235,7 @@ public final class Database {
             } else {
                 getDatabaseService().backForUpdateTaskAfterReading(contextId, con);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -248,7 +248,7 @@ public final class Database {
     public static void back(final int poolId, final Connection con) {
         try {
             getDatabaseService().back(poolId, con);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }
@@ -272,7 +272,7 @@ public final class Database {
     public static void backNoTimeoout(final int poolId, final Connection con) {
         try {
             getDatabaseService().backNoTimeoout(poolId, con);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }

@@ -79,7 +79,7 @@ public class MailFolderTest extends AbstractMailTest {
             } finally {
                 mailAccess.close(true);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

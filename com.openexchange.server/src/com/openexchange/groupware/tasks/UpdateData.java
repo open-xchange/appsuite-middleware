@@ -667,10 +667,10 @@ class UpdateData {
                 foldStor.deleteFolder(ctx, con, getTaskId(), getDestFolderId(), DELETED, false);
             }
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             throw TaskExceptionCode.UPDATE_FAILED.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             rollback(con);
             throw e;
         } finally {
@@ -748,7 +748,7 @@ class UpdateData {
     static void sentEvent(final Session session, final Task updated, final Task orig, final FolderObject dest) throws OXException {
         try {
             new EventClient(session).modify(orig, updated, dest);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw TaskExceptionCode.EVENT.create(e);
         }
     }
@@ -783,7 +783,7 @@ class UpdateData {
 
             try {
                 Permission.checkReadInFolder(ctx, user, permissionBits, folder);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
 
@@ -857,7 +857,7 @@ class UpdateData {
         InsertData.insertTask(ctx, task, parts, folders);
         try {
             new EventClient(session).create(task, folder);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

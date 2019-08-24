@@ -118,7 +118,7 @@ public class RdbReminderStorage extends ReminderStorage {
             if (deleted == 0) {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(reminderId), I(ctxId));
             }
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } finally {
             closeSQLStuff(stmt);

@@ -109,7 +109,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
     public int getFileSize() {
         try {
             return (bodyPart.length);
-        } catch (final NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
             return (-1);
         }
     }
@@ -142,7 +142,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
         try {
             final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
             return (inStreamPart);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error("", e);
             return (null);
         }
@@ -162,7 +162,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
             public InputStream getInputStream() throws IOException {
                 try {
                     return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(data), "uuencode");
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     final IOException io = new IOException(e.getMessage());
                     io.initCause(e);
                     throw io;
@@ -195,7 +195,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
             } finally {
                 Streams.close(br);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error("", e);
         }
         return (encodedPart);
@@ -216,7 +216,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
             while ((iChar = in.read()) != -1) {
                 bos.write(iChar);
             }
-        } catch (final IOException ioe) {
+        } catch (IOException ioe) {
             org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error("", ioe);
             throw ioe;
         } finally {

@@ -167,7 +167,7 @@ public final class ParsedFolder implements Folder {
                 clone.subfolders = cloneSub;
             }
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

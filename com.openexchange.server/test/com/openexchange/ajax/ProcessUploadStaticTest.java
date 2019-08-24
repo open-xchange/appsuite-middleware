@@ -154,7 +154,7 @@ public class ProcessUploadStaticTest {
 
             // Await completion
             finishedLatch.await();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -214,7 +214,7 @@ public class ProcessUploadStaticTest {
                 "<html><body>&gt;Content2&lt;</body></html>",
                 jo.getJSONArray("attachments").getJSONObject(0).getString("content"));
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

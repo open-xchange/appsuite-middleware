@@ -174,7 +174,7 @@ public class PermissionLoader implements Runnable {
                 public boolean execute(GroupedPairs pairs) {
                     try {
                         handlePairs(pairs);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("Failed permission loader run.", e);
                     }
                     return true;
@@ -186,7 +186,7 @@ public class PermissionLoader implements Runnable {
                     final Pair next;
                     try {
                         next = pairsToLoad.poll(60, TimeUnit.SECONDS);
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         return;
                     }

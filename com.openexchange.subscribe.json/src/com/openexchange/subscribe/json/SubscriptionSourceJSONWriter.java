@@ -89,7 +89,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         JSONObject retval = null;
         try {
             retval = parse(source);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSONEXCEPTION.create(e);
         }
         return retval;
@@ -115,7 +115,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
                 } else if (FORM_DESCRIPTION.equals(field)) {
                     try {
                         row.put(formWriter.write(source.getFormDescription()));
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         throw JSONEXCEPTION.create(e);
                     }
                 } else if (MODULE.equals(field)) {

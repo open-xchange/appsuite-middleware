@@ -117,14 +117,14 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             Drive drive = this.<Drive> getClient().client;
             drive.about().get().execute();
             return true;
-        } catch (final HttpResponseException e) {
+        } catch (HttpResponseException e) {
             if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
                 return false;
             }
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

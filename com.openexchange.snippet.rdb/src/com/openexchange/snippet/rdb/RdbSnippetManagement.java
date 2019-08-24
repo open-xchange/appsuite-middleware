@@ -147,7 +147,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 fn = da.getFilename();
             }
             return fn;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -179,7 +179,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             try {
                 ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
                 supportsAttachments = property.isDefined() ? property.get().booleanValue() : defaultSupportsAttachments;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
                 supportsAttachments = defaultSupportsAttachments;
             }
@@ -250,7 +250,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     try {
                         list.add(getSnippet0(Integer.toString(id), con));
                         return true;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         error.set(e);
                         return false;
                     }
@@ -261,7 +261,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 throw e;
             }
             return list;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -284,7 +284,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             stmt.setInt(++pos, userId);
             rs = stmt.executeQuery();
             return rs.next() ? rs.getInt(1) : 0;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -325,7 +325,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     try {
                         list.add(getSnippet0(Integer.toString(id), con));
                         return true;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         error.set(e);
                         return false;
                     }
@@ -336,7 +336,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 throw e;
             }
             return list;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -484,7 +484,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
              * Finally return snippet
              */
             return snippet;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -590,7 +590,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             con.commit(); // COMMIT
             rollback = 2;
             return Integer.toString(id);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(closeables);
@@ -741,7 +741,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             con.commit(); // COMMIT
             rollback = 2;
             return identifier;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(closeables);
@@ -846,9 +846,9 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     stmt = null;
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -881,7 +881,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 closeSQLStuff(stmt);
                 stmt = null;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -904,7 +904,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             deleteSnippet(id, userId, contextId, con);
             con.commit(); // COMMIT
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {

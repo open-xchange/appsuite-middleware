@@ -132,7 +132,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
              * Return appropriate result
              */
             return new AJAXRequestResult(Boolean.TRUE);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }

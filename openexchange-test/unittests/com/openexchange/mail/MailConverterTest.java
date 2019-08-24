@@ -83,7 +83,7 @@ public class MailConverterTest extends AbstractMailTest {
             final MailPart part = handler.getMailPart();
 
             assertTrue("Nested message not recognized", part.getContent() instanceof MailMessage);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -115,7 +115,7 @@ public class MailConverterTest extends AbstractMailTest {
                 }
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

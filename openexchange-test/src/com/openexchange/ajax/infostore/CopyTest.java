@@ -193,7 +193,7 @@ public class CopyTest extends InfostoreAJAXTest {
             itm.copyAction(origId, Integer.toString(folderId), file);
             AbstractAJAXResponse resp = itm.getLastResponse();
             assertTrue(resp.hasError());
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             assertTrue(x.getMessage(), x.getMessage().contains("IFO-1700"));
         }
 

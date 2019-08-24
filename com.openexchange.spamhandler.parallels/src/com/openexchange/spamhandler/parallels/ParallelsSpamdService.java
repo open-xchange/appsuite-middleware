@@ -304,25 +304,25 @@ public class ParallelsSpamdService implements SpamdService {
             LOG.error("got error response from xml-rpc service for primary mail {}", xml_rpc_prim_email);
             LOG.error(xml_rpc_response);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("error loading user object from session", e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final URIException e) {
+        } catch (URIException e) {
             LOG.error("error sending request to xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final HttpException e) {
+        } catch (HttpException e) {
             LOG.error("error sending request to xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("error sending request to xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             LOG.error("error parsing response from xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             LOG.error("error parsing response from xmlrpc service",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("error parsing users smtp server as xmlrpc host",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
         }finally{

@@ -127,7 +127,7 @@ public abstract class TaskAction implements AJAXActionService {
                 taskRequest.setTimeZone(getTimeZone(sTimeZone));
             }
             return perform(taskRequest);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -202,7 +202,7 @@ public abstract class TaskAction implements AJAXActionService {
                         continue;
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     //log.error(e); // ...and continue doing this for the remaining users
                 }
             }

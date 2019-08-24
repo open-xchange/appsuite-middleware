@@ -254,7 +254,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
             try {
                 contactService.updateContact(targetFolderSession, folderId, contactId, origContact, origContact.getLastModified());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (!ContactExceptionCodes.OBJECT_HAS_CHANGED.equals(e) || retry <= 0) {
                     throw e;
                 }

@@ -108,7 +108,7 @@ public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
 
             con.commit();
             doRollback = false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (doRollback) {

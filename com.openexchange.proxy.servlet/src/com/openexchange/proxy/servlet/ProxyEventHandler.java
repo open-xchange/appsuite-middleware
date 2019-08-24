@@ -90,7 +90,7 @@ public final class ProxyEventHandler implements EventHandler {
                     }
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Error while handling SessionD event \"{}\"", topic, e);
         }
     }

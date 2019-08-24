@@ -107,7 +107,7 @@ public final class PostMethodHandler extends AbstractMethodHandler {
                 jObject.put("path", pathElements[1]);
                 jObject.put("value", requestData.getData());
                 requestData.setData(jObject, "json");
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         } else {

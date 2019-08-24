@@ -161,13 +161,13 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                 reg.registerListener(this);
                 reg.registerListener(UserSettingMailStorage.getInstance());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             started.set(false);
             // Revoke
             for (final Initialization startedInit : startedStack) {
                 try {
                     startedInit.stop();
-                } catch (final Exception e1) {
+                } catch (Exception e1) {
                     LOG.error("Initialization could not be revoked", e1);
                 }
             }

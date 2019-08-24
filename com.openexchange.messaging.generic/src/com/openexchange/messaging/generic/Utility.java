@@ -185,11 +185,11 @@ public final class Utility {
         }
         try {
             return future.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             org.slf4j.LoggerFactory.getLogger(Utility.class).error("", e);
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
             org.slf4j.LoggerFactory.getLogger(Utility.class).error("", cause);
             return DEFAULT_MAIL_DATE_FORMAT;

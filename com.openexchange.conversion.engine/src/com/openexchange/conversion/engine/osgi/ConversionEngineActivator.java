@@ -96,7 +96,7 @@ public final class ConversionEngineActivator extends HousekeepingActivator {
              */
             registerService(ConversionService.class, new ConversionServiceImpl());
             LOG.info("Conversion engine successfully started");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -111,7 +111,7 @@ public final class ConversionEngineActivator extends HousekeepingActivator {
              */
             ConversionEngineRegistry.getInstance().clearAll();
             LOG.info("Conversion engine successfully stopped");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

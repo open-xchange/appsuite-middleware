@@ -233,7 +233,7 @@ public class Obfuscator implements ObfuscatorService {
         if (null != obfuscationKey) {
             try {
                 return Services.getService(CryptoService.class).encrypt(string, obfuscationKey);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Could not obfuscate string", e);
                 return string;
             }
@@ -242,7 +242,7 @@ public class Obfuscator implements ObfuscatorService {
         char[] key = getCharsFromBuffer();
         try {
             return Services.getService(CryptoService.class).encrypt(string, new String(key));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Could not obfuscate string", e);
             return string;
         } finally {
@@ -262,7 +262,7 @@ public class Obfuscator implements ObfuscatorService {
         if (null != obfuscationKey) {
             try {
                 return Services.getService(CryptoService.class).decrypt(string, obfuscationKey);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Could not obfuscate string", e);
                 return string;
             }
@@ -271,7 +271,7 @@ public class Obfuscator implements ObfuscatorService {
         char[] key = getCharsFromBuffer();
         try {
             return Services.getService(CryptoService.class).decrypt(string, new String(key));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Could not unobfuscate string", e);
             return string;
         } finally {

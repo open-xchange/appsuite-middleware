@@ -156,7 +156,7 @@ public class DelayPushQueue implements Runnable {
                         LOG.debug("Published delayed PushMsObject: {}", delayedPushMsObject);
                     }
                 }
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 LOG.error("", exc);
             }
         }

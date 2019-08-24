@@ -132,7 +132,7 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -149,7 +149,7 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
             if (!Tools.existsPrimaryKey(connnection, table, columns)) {
                 try {
                     Tools.dropPrimaryKey(connnection, table);
-                } catch (final Exception x) {
+                } catch (Exception x) {
                     // Ignore failed deletion
                 }
                 Tools.createPrimaryKey(connnection, table, columns, lengths);

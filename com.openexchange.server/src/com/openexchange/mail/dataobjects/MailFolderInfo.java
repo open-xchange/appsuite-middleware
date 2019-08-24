@@ -132,7 +132,7 @@ public class MailFolderInfo implements Serializable, Cloneable {
     public MailFolderInfo clone() {
         try {
             return (MailFolderInfo) super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError("Clone failed although Cloneable is implemented.");
         }
     }

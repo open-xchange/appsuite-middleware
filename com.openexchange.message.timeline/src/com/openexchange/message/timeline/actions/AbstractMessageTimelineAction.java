@@ -105,7 +105,7 @@ public abstract class AbstractMessageTimelineAction implements AJAXActionService
                 return performREST(new MessageTimelineRequest(requestData, session), method);
             }
             return perform(new MessageTimelineRequest(requestData, session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

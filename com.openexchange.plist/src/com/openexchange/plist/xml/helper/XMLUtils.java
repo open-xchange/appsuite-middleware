@@ -254,7 +254,7 @@ public final class XMLUtils {
         if (src instanceof DOMSource && ((DOMSource) src).getNode() instanceof Document) {
             try {
                 enc = ((Document) ((DOMSource) src).getNode()).getXmlEncoding();
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 // ignore - not DOM level 3
             }
         }
@@ -266,7 +266,7 @@ public final class XMLUtils {
         if (src instanceof DOMSource && ((DOMSource) src).getNode() instanceof Document) {
             try {
                 enc = ((Document) ((DOMSource) src).getNode()).getXmlEncoding();
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 // ignore - not DOM level 3
             }
         }
@@ -289,7 +289,7 @@ public final class XMLUtils {
             it.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, omitXmlDecl);
             it.setOutputProperty(OutputKeys.ENCODING, charset);
             it.transform(src, new StreamResult(os));
-        } catch (final TransformerException e) {
+        } catch (TransformerException e) {
             throw new RuntimeException("Failed to configure TRaX", e);
         }
     }
@@ -310,7 +310,7 @@ public final class XMLUtils {
             it.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, omitXmlDecl);
             it.setOutputProperty(OutputKeys.ENCODING, charset);
             it.transform(src, new StreamResult(os));
-        } catch (final TransformerException e) {
+        } catch (TransformerException e) {
             throw new RuntimeException("Failed to configure TRaX", e);
         }
     }
@@ -391,7 +391,7 @@ public final class XMLUtils {
             it.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             it.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             it.transform(new DOMSource(element), new StreamResult(writer));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

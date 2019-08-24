@@ -100,7 +100,7 @@ public class DeleteEmptySchemas extends DatabaseAbstraction {
                 System.out.println("Successfully deleted " + numberOfDeletedSchemas + " empty schemas from database " + (null == dbid ? dbname : dbid));
             }
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, null, e, parser);
         }
 

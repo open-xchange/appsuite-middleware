@@ -333,9 +333,9 @@ public class LoginServlet extends AJAXServlet {
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doRefreshSecret(req, resp);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     logAndSendException(resp, e);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
                 }
@@ -487,11 +487,11 @@ public class LoginServlet extends AJAXServlet {
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
-                } catch (final UndeclaredThrowableException e) {
+                } catch (UndeclaredThrowableException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -557,7 +557,7 @@ public class LoginServlet extends AJAXServlet {
                         LOG.info("There is no session associated with session identifier: {}", sessionId);
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("", e);
                     response.setException(e);
                 }
@@ -566,7 +566,7 @@ public class LoginServlet extends AJAXServlet {
                 resp.setStatus(HttpServletResponse.SC_OK);
                 try {
                     ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
                 }
@@ -659,11 +659,11 @@ public class LoginServlet extends AJAXServlet {
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
-                } catch (final UndeclaredThrowableException e) {
+                } catch (UndeclaredThrowableException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -690,7 +690,7 @@ public class LoginServlet extends AJAXServlet {
                     // Append "config/modules"
                     appendModules(session, json, req);
                     json.write(resp.getWriter());
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     log(RESPONSE_ERROR, e);
                     sendError(resp);
                 }
@@ -716,7 +716,7 @@ public class LoginServlet extends AJAXServlet {
             try {
                 errorPageTemplate = IOTools.getFileContents(templateFile);
                 LOG.info("Found an error page template at {}", templateFileLocation);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 LOG.error("Could not find an error page template at {}, using default.", templateFileLocation);
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
@@ -914,7 +914,7 @@ public class LoginServlet extends AJAXServlet {
                 final Setting setting = ConfigTree.getInstance().getSettingByPath(modules);
                 SettingStorage.getInstance(session).readValues(setting);
                 json.put(modules, convert2JS(setting));
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Modules could not be added to login JSON response", e);
             }
         }

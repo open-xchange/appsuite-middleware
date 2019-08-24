@@ -52,7 +52,7 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
 
         try {
             action.perform(req, res);
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, x.getStatus());
         }
 

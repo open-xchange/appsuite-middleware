@@ -95,7 +95,7 @@ public class Bug26317_StructureTest extends AbstractMailTest {
 
             // System.out.println(jsonPartObject.toString(2));
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

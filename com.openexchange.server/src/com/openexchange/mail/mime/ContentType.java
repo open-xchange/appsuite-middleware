@@ -551,20 +551,20 @@ public class ContentType extends ParameterizedHeader {
                                 try {
                                     commaPos = cts.indexOf(','); // Detect comma's real position
                                     parameterList = commaPos < cts.length() ? new ParameterList(cts.substring(commaPos + 1)) : new ParameterList();
-                                } catch (final RuntimeException e) {
+                                } catch (RuntimeException e) {
                                     throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
                                 }
                             }
                         } else {
                             try {
                                 parameterList = semicolonPos < cts.length() ? new ParameterList(cts.substring(semicolonPos + 1)) : new ParameterList();
-                            } catch (final RuntimeException e) {
+                            } catch (RuntimeException e) {
                                 throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
                             }
                         }
                     }
                     return;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (strict || !contentTypeRegexFallback()) {
                         throw e;
                     }

@@ -160,7 +160,7 @@ public final class AttachmentUtility {
             Attachment.ATTACHMENT_BASE.commit();
             rollback = false;
             return ids;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
@@ -246,7 +246,7 @@ public final class AttachmentUtility {
     public static void rollback() {
         try {
             Attachment.ATTACHMENT_BASE.rollback();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.debug("Rollback failed.", e);
         }
     }
@@ -257,7 +257,7 @@ public final class AttachmentUtility {
     public static void finish() {
         try {
             Attachment.ATTACHMENT_BASE.finish();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.debug("Finishing failed.", e);
         }
     }

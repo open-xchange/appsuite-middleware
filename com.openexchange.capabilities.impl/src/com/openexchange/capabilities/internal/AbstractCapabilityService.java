@@ -245,7 +245,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         try {
             return service.getCache(REGION_NAME_CONTEXT);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }
@@ -258,7 +258,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         try {
             return service.getCache(REGION_NAME_USER);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }
@@ -271,7 +271,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
         try {
             return service.getCache(REGION_NAME);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }
@@ -816,7 +816,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             } else if (!checker.isEnabled(cap, session)) {
                 return false;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
             putIntoCache.setValue(false);
             return false;
@@ -843,7 +843,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (null != optCache) {
                 try {
                     optCache.localClear();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
@@ -861,7 +861,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (null != optCache) {
                 try {
                     optCache.localClear();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
@@ -1117,9 +1117,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 set.add(rs.getString(1));
             } while (rs.next());
             return set;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw CapabilityExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1167,9 +1167,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 set.add(rs.getString(1));
             } while (rs.next());
             return set;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw CapabilityExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

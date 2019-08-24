@@ -154,17 +154,17 @@ public class SearchEngineTest {
             infostore.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
             infostore.commit();
             clean.add(metadata);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             try {
                 infostore.rollback();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 e.printStackTrace();
             }
             throw x;
         } finally {
             try {
                 infostore.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 e.printStackTrace();
             }
         }
@@ -176,7 +176,7 @@ public class SearchEngineTest {
         List<Integer> folderIDs = Collections.<Integer> singletonList(Integer.valueOf(folderId));
         try {
             searchEngine.search(session, "*", folderIDs, Collections.<Integer> emptyList(), metadata, metadata[0], InfostoreSearchEngine.ASC, 0, 10);
-        } catch (final Exception x) {
+        } catch (Exception x) {
             fail(x.getMessage());
             x.printStackTrace();
         }

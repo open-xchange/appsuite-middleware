@@ -88,7 +88,7 @@ public class CommandActivator extends HousekeepingActivator {
                     final CopyUserTaskService service = context.getService(reference);
                     commandInterpreter.println(service.getClass().toString());
                 }
-            } catch (final InvalidSyntaxException e) {
+            } catch (InvalidSyntaxException e) {
                 commandInterpreter.println("Error: " + e.getMessage());
             }
         }

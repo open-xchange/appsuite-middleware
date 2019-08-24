@@ -125,7 +125,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         }
         try {
             result = actionService.perform(request, session);
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw (OXException) cause;

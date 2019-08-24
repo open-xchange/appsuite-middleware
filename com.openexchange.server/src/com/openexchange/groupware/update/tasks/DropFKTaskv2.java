@@ -108,9 +108,9 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -169,9 +169,9 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 com.openexchange.tools.update.Tools.modifyColumns(con, tableName, new Column(colName, "VARCHAR("+newSize+")"));
                 return true;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rsColumns);
@@ -204,7 +204,7 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
             } finally {
                 Databases.closeSQLStuff(null, stmt);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
         return modified;

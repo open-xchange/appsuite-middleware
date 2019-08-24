@@ -109,7 +109,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
                 }
                 element = null;
             }
-        } catch (final OXException x) {
+        } catch (OXException x) {
             if (null == errors) {
                 LOG.error("", x);
             } else {

@@ -111,7 +111,7 @@ public class DefaultMessagingAccount implements MessagingAccount, ServiceAware {
             }
             try {
                 messagingService = registry.getMessagingService(serviceId, -1, -1);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 messagingService = null;
             }
             if (null != messagingService) {

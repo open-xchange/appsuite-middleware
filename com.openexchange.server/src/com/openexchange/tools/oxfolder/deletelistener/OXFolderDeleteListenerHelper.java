@@ -91,9 +91,9 @@ public final class OXFolderDeleteListenerHelper {
              * Check group permissions
              */
             checkGroupPermissions(ctx.getContextId(), writeCon);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
@@ -106,7 +106,7 @@ public final class OXFolderDeleteListenerHelper {
         CorruptPermission[] corruptPermissions = null;
         try {
             corruptPermissions = DetectCorruptPermissions.detectCorruptUserPermissions(cid, writeCon);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw e;
         }
@@ -124,7 +124,7 @@ public final class OXFolderDeleteListenerHelper {
                 if (performTransaction) {
                     writeCon.commit();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
                 if (performTransaction) {
                     writeCon.rollback();
@@ -154,7 +154,7 @@ public final class OXFolderDeleteListenerHelper {
         CorruptPermission[] corruptPermissions = null;
         try {
             corruptPermissions = DetectCorruptPermissions.detectCorruptGroupPermissions(cid, writeCon);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw e;
         }
@@ -172,7 +172,7 @@ public final class OXFolderDeleteListenerHelper {
                 if (performTransaction) {
                     writeCon.commit();
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
                 if (performTransaction) {
                     writeCon.rollback();

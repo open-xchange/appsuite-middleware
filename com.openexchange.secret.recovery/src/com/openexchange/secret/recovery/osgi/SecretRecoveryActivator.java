@@ -157,7 +157,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
                         for (final SecretMigrator migrator : secretMigrators) {
                             migrator.migrate(oldSecret, newSecret, serverSession);
                         }
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         log.warn("Password change event could not be handled.", e);
                     }
                 }

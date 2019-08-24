@@ -82,7 +82,7 @@ public final class MailCharsetDetectorTest extends AbstractMailTest {
             charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line \u00f6 \u00e4 \u00fc \u00df".getBytes(usedCharset)));
             assertTrue(usedCharset + " not detected: " + charset, usedCharset.equalsIgnoreCase(charset));
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

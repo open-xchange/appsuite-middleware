@@ -76,7 +76,7 @@ public class MailAccountGetParser extends AbstractAJAXParser<MailAccountGetRespo
         final MailAccountDescription account = new MailAccountDescription();
         try {
             DefaultMailAccountParser.getInstance().parse(account, (JSONObject) response.getData(), new LinkedList<OXException>());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
         resp.setDescription(account);

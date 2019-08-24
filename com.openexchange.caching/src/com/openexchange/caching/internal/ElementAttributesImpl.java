@@ -190,7 +190,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
             attr.lastAccessTime = attr.createTime;
             attr.eventHandlers = (ArrayList<ElementEventHandler>) eventHandlers.clone();
             return attr;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             /*
              * Cannot occur since we are cloneable
              */

@@ -167,7 +167,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
             rollback = 1;
             propagateDisplayNameModification(loadedContext, userId, displayName, connection);
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -218,7 +218,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
             updateLastModified(context, connection, lastModified);
             clearFolderCache(context, defaultInfostoreFolderId);
             
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -240,7 +240,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
         try {
             OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, context.getMailadmin(), connection, context);
             clearFolderCache(context, FolderObject.SYSTEM_SHARED_FOLDER_ID);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }

@@ -113,7 +113,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             doAuthHeaderLogin(req, resp);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");

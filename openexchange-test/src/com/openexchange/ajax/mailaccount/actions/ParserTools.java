@@ -89,7 +89,7 @@ public class ParserTools {
                 accounts.add(desc);
             }
             return accounts;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
     }

@@ -194,7 +194,7 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
                         final ContentType tmp = new ContentType(preferredContentType);
                         tmp.setBaseType(contentTypeByFileName);
                         preferredContentType = tmp.toString();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         preferredContentType = contentTypeByFileName;
                     }
                 }
@@ -291,7 +291,7 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
         try {
             resp.setContentType(new ContentType(contentType).getBaseType());
             return true;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
             resp.setContentType(fallbackContentType);
         }

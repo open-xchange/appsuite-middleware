@@ -126,10 +126,10 @@ public class CheckSizeSwitch {
             final int size = DBUtils.getColumnSize(con, tuple[0], tuple[1]);
             SIZES.put(field, I(size));
             return size;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             return 0;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("",  e);
             return 0;
         } finally {

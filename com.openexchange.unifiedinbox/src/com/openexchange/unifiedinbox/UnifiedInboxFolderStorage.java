@@ -201,7 +201,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                                 }
                             }
                             return null;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             getLogger().debug("", e);
                             return null;
                         } finally {
@@ -218,10 +218,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 LOG.debug("Expunging folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
                 // Return
                 return;
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -309,7 +309,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final MailMessage[] unreadMessages = messageStorage.getUnreadMessages(fn, MailSortField.RECEIVED_DATE, OrderDirection.ASC, fields, -1);
                             final int unreadCount = unreadMessages.length;
                             return new int[] { count, unreadCount };
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             e.setCategory(Category.CATEGORY_WARNING);
                             access.addWarnings(Collections.singleton(e));
                             getLogger().debug("", e);
@@ -332,10 +332,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
                 // Return
                 return new int[] { count, unreadCount };
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -408,7 +408,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final MailField[] fields = new MailField[] { MailField.ID };
                             final int count = messageStorage.searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, fields).length;
                             return Integer.valueOf(count);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             getLogger().debug("", e);
                             return Integer.valueOf(0);
                         } finally {
@@ -426,10 +426,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
                 // Return
                 return count;
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -488,7 +488,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final SearchTerm<?> term = new FlagTerm(MailMessage.FLAG_RECENT, true);
                             final int count = mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, term, fields).length;
                             return Integer.valueOf(count);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             getLogger().debug("", e);
                             return Integer.valueOf(0);
                         } finally {
@@ -507,10 +507,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
                 // Return
                 return count;
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -569,7 +569,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             final MailField[] fields = new MailField[] { MailField.ID };
                             final MailMessage[] unreadMessages = mailAccess.getMessageStorage().getUnreadMessages(fn, MailSortField.RECEIVED_DATE, OrderDirection.ASC, fields, -1);
                             return Integer.valueOf(unreadMessages.length);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             getLogger().debug("", e);
                             return Integer.valueOf(0);
                         } finally {
@@ -588,10 +588,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
 
                 // Return
                 return count;
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -763,10 +763,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             names[3] = getLocalizedName(UnifiedInboxAccess.SPAM);
             names[4] = getLocalizedName(UnifiedInboxAccess.TRASH);
             return UnifiedInboxFolderConverter.mergeAccountDefaultFolders(list, FULLNAMES, names);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }
@@ -814,10 +814,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             LOG.debug("Retrieving root's subfolders took {}msec.", L(completionService.getDuration()));
             // Return them
             return retval;
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }
@@ -864,7 +864,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                         mailFolder.setDefaultFolder(false);
                         mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         e.setCategory(Category.CATEGORY_WARNING);
                         access.addWarnings(Collections.singleton(e));
                         getLogger().debug("", e);
@@ -891,10 +891,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
             Collections.sort(folders, new MailFolderNameComparator(getLocale()));
             // Return as array
             return folders.toArray(new MailFolder[folders.size()]);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
         }
     }
@@ -967,9 +967,9 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                             }
                             // Clear folder
                             mailAccess.getFolderStorage().clearFolder(fn, hardDelete);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             getLogger().warn("Couldn't clear folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             getLogger().warn("Couldn't clear folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
                         } finally {
                             closeSafe(mailAccess);
@@ -984,10 +984,10 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     completionService.take().get();
                 }
                 LOG.debug("Clearing messages from folder \"{}\" took {}msec.", fullName, Long.toString(completionService.getDuration()));
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
             // Leave...

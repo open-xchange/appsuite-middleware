@@ -91,7 +91,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         if (null != blockSizeStr) {
             try {
                 return Integer.parseInt(blockSizeStr.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Block Size: Invalid value.", e);
                 return IMAPProperties.getInstance().getBlockSize();
             }
@@ -102,7 +102,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             if (null != blockSizeStr) {
                 try {
                     return Integer.parseInt(blockSizeStr.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("Block Size: Invalid value.", e);
                     return IMAPProperties.getInstance().getBlockSize();
                 }
@@ -118,7 +118,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         if (null != tmp) {
             try {
                 return Integer.parseInt(tmp.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("Max. Number of connections: Invalid value.", e);
                 return IMAPProperties.getInstance().getMaxNumConnection();
             }
@@ -129,7 +129,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             if (null != tmp) {
                 try {
                     return Integer.parseInt(tmp.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("Max. Number of connections: Invalid value.", e);
                     return IMAPProperties.getInstance().getMaxNumConnection();
                 }
@@ -174,7 +174,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         if (null != tmp) {
             try {
                 return Integer.parseInt(tmp.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("IMAP Connection Timeout: Invalid value.", e);
                 return IMAPProperties.getInstance().getImapConnectionTimeout();
             }
@@ -185,7 +185,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             if (null != tmp) {
                 try {
                     return Integer.parseInt(tmp.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("IMAP Connection Timeout: Invalid value.", e);
                     return IMAPProperties.getInstance().getImapConnectionTimeout();
                 }
@@ -201,7 +201,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         if (null != tmp) {
             try {
                 return Integer.parseInt(tmp.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("IMAP Temporary Down: Invalid value.", e);
                 return IMAPProperties.getInstance().getImapTemporaryDown();
             }
@@ -212,7 +212,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             if (null != tmp) {
                 try {
                     return Integer.parseInt(tmp.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("IMAP Temporary Down: Invalid value.", e);
                     return IMAPProperties.getInstance().getImapTemporaryDown();
                 }
@@ -228,7 +228,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         if (null != tmp) {
             try {
                 return Integer.parseInt(tmp.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("IMAP Failed Auth Timeout: Invalid value.", e);
                 return IMAPProperties.getInstance().getImapFailedAuthTimeout();
             }
@@ -239,7 +239,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             if (null != tmp) {
                 try {
                     return Integer.parseInt(tmp.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("IMAP Failed Auth Timeout: Invalid value.", e);
                     return IMAPProperties.getInstance().getImapFailedAuthTimeout();
                 }
@@ -255,7 +255,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         if (null != tmp) {
             try {
                 return Integer.parseInt(tmp.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOG.error("IMAP Timeout: Invalid value.", e);
                 return IMAPProperties.getInstance().getImapTimeout();
             }
@@ -266,7 +266,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             if (null != tmp) {
                 try {
                     return Integer.parseInt(tmp.trim());
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     LOG.error("IMAP Timeout: Invalid value.", e);
                     return IMAPProperties.getInstance().getImapTimeout();
                 }

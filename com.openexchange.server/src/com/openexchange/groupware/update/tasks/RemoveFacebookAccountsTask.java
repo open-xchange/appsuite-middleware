@@ -161,7 +161,7 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
             } while (rs.next());
 
             return dataList;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw createSQLError(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -189,7 +189,7 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
             stmt.setInt(4, data[0]);
             stmt.executeUpdate();
             stmt.close();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw createSQLError(e);
         } finally {
             Databases.closeSQLStuff(stmt);

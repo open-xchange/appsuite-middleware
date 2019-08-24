@@ -123,7 +123,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
             try {
                 pop3Timeout = Integer.parseInt(pop3TimeoutStr);
                 logBuilder.append("\tPOP3 Timeout: ").append(pop3Timeout).append('\n');
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 pop3Timeout = 0;
                 logBuilder.append("\tPOP3 Timeout: Invalid value \"").append(pop3TimeoutStr).append("\". Setting to fallback: ").append(
                     pop3Timeout).append('\n');
@@ -135,7 +135,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
             try {
                 pop3ConnectionTimeout = Integer.parseInt(pop3ConTimeoutStr);
                 logBuilder.append("\tPOP3 Connection Timeout: ").append(pop3ConnectionTimeout).append('\n');
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 pop3ConnectionTimeout = 0;
                 logBuilder.append("\tPOP3 Connection Timeout: Invalid value \"").append(pop3ConTimeoutStr).append(
                     "\". Setting to fallback: ").append(pop3ConnectionTimeout).append('\n');
@@ -147,7 +147,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
             try {
                 pop3TemporaryDown = Integer.parseInt(pop3TempDownStr);
                 logBuilder.append("\tPOP3 Temporary Down: ").append(pop3TemporaryDown).append('\n');
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 pop3TemporaryDown = 0;
                 logBuilder.append("\tPOP3 Temporary Down: Invalid value \"").append(pop3TempDownStr).append("\". Setting to fallback: ").append(
                     pop3TemporaryDown).append('\n');
@@ -165,7 +165,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
                 } else {
                     logBuilder.append("\tPOP3 Block Size: ").append(pop3BlockSize).append('\n');
                 }
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 pop3BlockSize = 100;
                 logBuilder.append("\tPOP3 Block Size: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
                     pop3BlockSize).append('\n');
@@ -177,7 +177,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
             try {
                 pop3ConnectionIdleTime = Integer.parseInt(tmp);
                 logBuilder.append("\tPOP3 Connection Idle Time: ").append(pop3ConnectionIdleTime).append('\n');
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 pop3ConnectionIdleTime = 300000;
                 logBuilder.append("\tPOP3 Connection Idle Time: Invalid value \"").append(tmp).append("\". Setting to fallback: ").append(
                     pop3ConnectionIdleTime).append('\n');

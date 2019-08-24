@@ -116,9 +116,9 @@ public class ServletRequestAdapter implements SimpleRequest {
 			final String body =  new String(baos.toByteArray(), Charsets.forName(characterEncoding));
 
 			return this.body = new JSONObject("{\"data\": "+body+'}').get("data");
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			return null;
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			return null;
 		}
 	}

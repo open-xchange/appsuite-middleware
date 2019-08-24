@@ -144,7 +144,7 @@ public class AvailableTimeZones implements PreferencesItemService {
 
                     setting.setSingleValue(json);
 
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
             }

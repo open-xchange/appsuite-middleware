@@ -110,7 +110,7 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
             }
             final FileStorageAccount account = CACHE.getAccount(id, session);
             return null == account ? null : new RdbFileStorageAccountManager(account.getFileStorageService());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Unsupported account identifier
             return null;
         }

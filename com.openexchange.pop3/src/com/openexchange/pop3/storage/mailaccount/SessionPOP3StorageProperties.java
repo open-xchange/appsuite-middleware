@@ -87,7 +87,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         try {
             try {
                 cached = (SessionPOP3StorageProperties) session.getParameter(key);
-            } catch (final ClassCastException e) {
+            } catch (ClassCastException e) {
                 cached = null;
             }
             if (null == cached) {

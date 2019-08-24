@@ -52,7 +52,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -96,7 +96,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -191,7 +191,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -234,7 +234,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -270,7 +270,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(HttpServletResponse.SC_PRECONDITION_FAILED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -301,7 +301,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(Protocol.SC_LOCKED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -315,7 +315,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(Protocol.SC_LOCKED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }
@@ -351,7 +351,7 @@ public class IfTest extends ActionTestCase {
         try {
             action.perform(req, res);
             fail("Expected Precondition Failed");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             assertEquals(Protocol.SC_LOCKED, x.getStatus());
             assertFalse(mockAction.wasActivated());
         }

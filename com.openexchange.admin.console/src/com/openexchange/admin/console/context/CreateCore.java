@@ -132,7 +132,7 @@ public abstract class CreateCore extends ContextAbstraction {
 
                 // Dynamic Options
                 applyDynamicOptionsToContext(parser, ctx);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
@@ -146,13 +146,13 @@ public abstract class CreateCore extends ContextAbstraction {
             } else {
                 ctxid = maincall(parser, ctx, usr, auth, schemaSelectStrategy).getId();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors((null != ctxid) ? String.valueOf(ctxid) : null, null, e, parser);
         }
 
         try {
             displayCreatedMessage((null != ctxid) ? String.valueOf(ctxid) : null, null, parser);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }
@@ -203,19 +203,19 @@ public abstract class CreateCore extends ContextAbstraction {
                             }
                         }
                         System.out.println("Context " + createdCtx.getId() + " successfully created");
-                    } catch (final OXConsolePluginException e1) {
+                    } catch (OXConsolePluginException e1) {
                         System.err.println("Failed to create context: Error while processing extension options: " + e1.getClass().getSimpleName() + ": " + e1.getMessage());
-                    } catch (final StorageException e) {
+                    } catch (StorageException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final RemoteException e) {
+                    } catch (RemoteException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final InvalidCredentialsException e) {
+                    } catch (InvalidCredentialsException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final InvalidDataException e) {
+                    } catch (InvalidDataException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final ContextExistsException e) {
+                    } catch (ContextExistsException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
-                    } catch (final ParseException e) {
+                    } catch (ParseException e) {
                         System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
                     }
                 } catch (ParseException e2) {
@@ -228,7 +228,7 @@ public abstract class CreateCore extends ContextAbstraction {
         } finally {
             try {
                 reader.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

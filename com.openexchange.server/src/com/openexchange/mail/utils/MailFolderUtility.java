@@ -148,7 +148,7 @@ public final class MailFolderUtility {
         final int accountId;
         try {
             accountId = (index == LEN ? MailAccount.DEFAULT_ID : Integer.parseInt(fullnameArgument.substring(LEN, index)));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Mail account identifier is not a number: " + fullnameArgument, e);
         }
         if (index >= len) {

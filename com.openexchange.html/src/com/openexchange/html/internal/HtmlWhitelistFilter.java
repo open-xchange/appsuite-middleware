@@ -235,7 +235,7 @@ public final class HtmlWhitelistFilter {
                 tmp.setLength(2);
                 tmp.append(Integer.parseInt(m.group(1), 16)).append(';');
                 mr.appendLiteralReplacement(builder, tmp.toString());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 tmp.setLength(0);
                 tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
                 mr.appendLiteralReplacement(builder, tmp.toString());
@@ -565,7 +565,7 @@ public final class HtmlWhitelistFilter {
                                 }
                             }
                             mapStr = sb.toString();
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             LOG.warn("Using default white list", e);
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {

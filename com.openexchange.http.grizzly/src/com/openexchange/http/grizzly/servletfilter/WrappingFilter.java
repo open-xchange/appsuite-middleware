@@ -99,7 +99,7 @@ public class WrappingFilter implements Filter {
         String fbHost;
         try {
             fbHost = InetAddress.getLocalHost().getHostAddress();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             fbHost = "127.0.0.1";
         }
         LOCAL_HOST = fbHost;

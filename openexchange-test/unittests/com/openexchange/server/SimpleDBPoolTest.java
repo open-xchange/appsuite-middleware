@@ -34,7 +34,7 @@ public class SimpleDBPoolTest {
         for (int a = 0; a < con.length; a++) {
             try {
                 con[a] = DBPool.pickup(context);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -42,7 +42,7 @@ public class SimpleDBPoolTest {
             try {
                 final Connection tc = con[a];
                 DBPool.push(context, tc);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -61,7 +61,7 @@ public class SimpleDBPoolTest {
                 con[a] = DBPool.pickup(context);
                 con[a].close();
                 con[a] = null;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -70,7 +70,7 @@ public class SimpleDBPoolTest {
                 Connection tc = con[a];
                 DBPool.push(context, tc);
                 tc = null;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -78,7 +78,7 @@ public class SimpleDBPoolTest {
         for (int a = 0; a < con.length; a++) {
             try {
                 assertTrue(con != null);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

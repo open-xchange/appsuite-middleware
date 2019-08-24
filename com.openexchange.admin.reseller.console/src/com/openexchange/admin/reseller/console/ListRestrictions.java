@@ -101,7 +101,7 @@ public class ListRestrictions extends ResellerAbstraction {
             final OXResellerInterface rsi = getResellerInterface();
 
             res = OXResellerTools.array2HashSet(rsi.getAvailableRestrictions(auth));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }
@@ -112,10 +112,10 @@ public class ListRestrictions extends ResellerAbstraction {
             } else {
                 sysoutOutput(res);
             }
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             printError(null, null, "Invalid data : " + e.getMessage(), parser);
             sysexit(1);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
             sysexit(1);
         }

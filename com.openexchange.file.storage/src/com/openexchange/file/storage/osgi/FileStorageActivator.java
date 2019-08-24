@@ -112,7 +112,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
             registerService(FileStorageAccountManagerLookupService.class, lookupService);
             registerService(QuotaProvider.class, new FileStorageQuotaProvider(registry));
             registerService(Reloadable.class, FileStorageConfigReloadable.getInstance());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Starting bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;
         }
@@ -142,7 +142,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
             }
             Services.setServices(null);
             super.stopBundle();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;
         }

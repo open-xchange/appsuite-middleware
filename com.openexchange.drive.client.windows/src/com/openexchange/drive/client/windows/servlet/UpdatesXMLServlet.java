@@ -134,7 +134,7 @@ public class UpdatesXMLServlet extends OXServlet {
                 resp.setContentType("text/plain");
                 return;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!TemplateErrorMessage.UnderlyingException.equals(e)) {
                 LOG.error(e.getMessage(), e);
             }
@@ -169,7 +169,7 @@ public class UpdatesXMLServlet extends OXServlet {
         removeCookie(req, resp);
         try {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
     }

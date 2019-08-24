@@ -131,7 +131,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setString(index++, device.getHashedSharedSecret());
             statement.setInt(index++, device.getSecretLength());
             statement.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -155,7 +155,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -180,7 +180,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
             return createDevicesFrom(statement.executeQuery());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
@@ -207,7 +207,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
                 return Optional.of(createDeviceFrom(result));
             }
             return Optional.empty();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(result, statement);
@@ -232,7 +232,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setString(index++, deviceId);
             rows = statement.executeUpdate();
             return rows > 0 ? true : false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);

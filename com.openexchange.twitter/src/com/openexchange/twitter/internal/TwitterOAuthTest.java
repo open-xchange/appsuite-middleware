@@ -132,15 +132,15 @@ public class TwitterOAuthTest {
                     System.out.println("***** PIN  : " + pin);
 
                 }
-            } catch (final FailingHttpStatusCodeException e) {
+            } catch (FailingHttpStatusCodeException e) {
 
-            } catch (final MalformedURLException e) {
+            } catch (MalformedURLException e) {
 
-            } catch (final IOException e) {
+            } catch (IOException e) {
 
             }
 
-        } catch (final TwitterException e) {
+        } catch (TwitterException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

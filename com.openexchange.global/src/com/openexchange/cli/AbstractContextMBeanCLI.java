@@ -91,7 +91,7 @@ public abstract class AbstractContextMBeanCLI<R> extends AbstractMBeanCLI<R> {
             final String optionValue = cmd.getOptionValue('c');
             try {
                 contextId = Integer.parseInt(optionValue.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 System.err.println("Context identifier parameter is not a number: " + optionValue);
                 printHelp(options);
                 System.exit(1);
@@ -121,7 +121,7 @@ public abstract class AbstractContextMBeanCLI<R> extends AbstractMBeanCLI<R> {
         final String optionValue = cmd.getOptionValue('c');
         try {
             authenticator.doAuthentication(login, password, Integer.parseInt(optionValue.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             System.err.println("Context identifier parameter is not a number: ''" + optionValue + "''");
             System.exit(1);
         }

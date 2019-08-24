@@ -147,12 +147,12 @@ public class ReadFileFormat {
                             if (s.trim().startsWith("Click to edit") == false) {
                                 sb.append(s);
                             }
-                        } catch (final Exception ee) {
+                        } catch (Exception ee) {
                             System.out.println("error:" + ee);
                         }
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
                 return;
             }
@@ -202,7 +202,7 @@ public class ReadFileFormat {
 //                                    text = cell.getStringCellValue();
 //                                    break;
 //                                }
-//                            } catch (final Exception e) {
+//                            } catch (Exception e) {
 //                            }
 //                            if ((text != null) && (text.length() != 0)) {
 //                                result.append(text.trim());

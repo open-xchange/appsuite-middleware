@@ -279,7 +279,7 @@ public final class SMTPCapabilityCache {
                          */
                         s.setSoTimeout(timeout);
                     }
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     throw e;
                 }
                 final InputStream in = s.getInputStream();
@@ -330,7 +330,7 @@ public final class SMTPCapabilityCache {
                 if (s != null) {
                     try {
                         s.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         LOG.error("", e);
                     }
                 }

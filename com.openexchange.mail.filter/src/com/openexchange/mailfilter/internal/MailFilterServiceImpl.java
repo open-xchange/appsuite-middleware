@@ -210,7 +210,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             }
             try {
                 Integer.parseInt(file.getProperty(MailFilterProperty.connectionTimeout.getFQPropertyName()));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw MailFilterExceptionCode.PROPERTY_ERROR.create("Property " + MailFilterProperty.connectionTimeout.getFQPropertyName() + " is not an integer value", e);
             }
         } catch (IOException e) {

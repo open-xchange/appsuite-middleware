@@ -109,7 +109,7 @@ public final class GetAction implements AJAXActionService {
              * Return
              */
             return new AJAXRequestResult(obj);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }

@@ -359,7 +359,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
                 if (senderSource.equals("defaultSenderAddress")) {
                     try {
                         fromAddr = UserSettingMailStorage.getInstance().loadUserSettingMail(n.getIdentifier(), context).getSendAddr();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOGGER.debug("", e);
                         fromAddr = UserStorage.getInstance().getUser(n.getIdentifier(), context).getMail();
                     }

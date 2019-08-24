@@ -122,7 +122,7 @@ public class AggregatingContactTableService extends AbstractCreateTableImpl impl
             }
             stmt = con.prepareStatement(sqlCreate);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

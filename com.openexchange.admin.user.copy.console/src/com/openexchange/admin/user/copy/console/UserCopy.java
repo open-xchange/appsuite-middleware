@@ -121,7 +121,7 @@ public class UserCopy extends ObjectNamingAbstraction {
             final User result = rsi.copyUser(user, src, dest, auth);
             displaySuccessMessage(user, result, src.getId(), dest.getId(), parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
             sysexit(1);
         }

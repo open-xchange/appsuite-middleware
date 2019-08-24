@@ -131,7 +131,7 @@ public class QuotaFileStorageTest {
             final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
             quotaStorage.saveNewFile(bais);
             fail("Managed to exceed quota");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
         rmdir(tempFile);

@@ -110,7 +110,7 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
             final int id = oxautocid.generateContextId();
             ctx.setId(Integer.valueOf(id));
             return ctx;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new PluginException(e);
         }
     }

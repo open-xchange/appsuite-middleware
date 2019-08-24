@@ -115,7 +115,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         if(!INSTANCE.isPropertiesLoadInternal()) {
             try {
                 INSTANCE.loadPropertiesInternal();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 return def;
             }

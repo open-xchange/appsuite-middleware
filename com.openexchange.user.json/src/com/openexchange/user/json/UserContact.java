@@ -155,7 +155,7 @@ public class UserContact {
     	try {
         	ContactMapper.getInstance().serialize(contact, jsonObject, contactFields, timeZoneID, session);
         	UserMapper.getInstance().serialize(user, jsonObject, userFields, timeZoneID, session);
-    	} catch (final JSONException e) {
+    	} catch (JSONException e) {
     		throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
 		}
     	return jsonObject;
@@ -176,9 +176,9 @@ public class UserContact {
     		jsonObject = ContactMapper.getInstance().serialize(contact, contactFields, timeZoneID, session);
     		UserField[] userFields = UserMapper.getInstance().getAssignedFields(user);
         	UserMapper.getInstance().serialize(user, jsonObject, userFields, timeZoneID);
-    	} catch (final JSONException e) {
+    	} catch (JSONException e) {
     		throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-		} catch (final RuntimeException x) {
+		} catch (RuntimeException x) {
 			System.out.print(x.getMessage());
 		}
     	return jsonObject;

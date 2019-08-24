@@ -76,7 +76,7 @@ public final class ModifyThroughDependant implements TargetService {
         final Task task;
         try {
             task = stor.selectTask(ctx, con, targetId, ACTIVE);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (TaskExceptionCode.TASK_NOT_FOUND.equals(e)) {
                 return;
             }
@@ -92,7 +92,7 @@ public final class ModifyThroughDependant implements TargetService {
         final Task task;
         try {
             task = stor.selectTask(ctx, con, targetId, ACTIVE);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (TaskExceptionCode.TASK_NOT_FOUND.equals(e)) {
                 return;
             }

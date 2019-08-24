@@ -77,7 +77,7 @@ public class Activator extends HousekeepingActivator {
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             openTrackers();
             registerService(MessagingService.class, new RSSMessagingService(), null);
-        } catch (final Exception x) {
+        } catch (Exception x) {
             LOG.error("", x);
             throw x;
         }

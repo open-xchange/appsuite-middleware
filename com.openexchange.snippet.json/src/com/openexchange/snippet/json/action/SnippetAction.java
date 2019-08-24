@@ -135,9 +135,9 @@ public abstract class SnippetAction implements AJAXActionService {
                 return performREST(new SnippetRequest(requestData, session), method);
             }
             return perform(new SnippetRequest(requestData, session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }

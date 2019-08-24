@@ -120,7 +120,7 @@ public class WebserviceCollector implements ServiceListener {
             for (final ServiceReference<?> serviceReference : context.getAllServiceReferences(null, null)) {
                 add(serviceReference);
             }
-        } catch (final InvalidSyntaxException e) {
+        } catch (InvalidSyntaxException e) {
             // Impossible, no filter specified.
         }
 
@@ -283,7 +283,7 @@ public class WebserviceCollector implements ServiceListener {
         try {
             final Class<? extends Object> clazz = service.getClass();
             return (null == clazz) ? false : (null != clazz.getAnnotation(WebService.class));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }

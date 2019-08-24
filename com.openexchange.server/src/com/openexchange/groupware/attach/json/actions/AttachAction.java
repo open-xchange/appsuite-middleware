@@ -252,7 +252,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                         user,
                         userConfiguration);
                 ATTACHMENT_BASE.commit();
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 ATTACHMENT_BASE.rollback();
                 throw x;
             } finally {
@@ -260,9 +260,9 @@ public final class AttachAction extends AbstractAttachmentAction {
             }
 
             return new AJAXRequestResult(Integer.valueOf(attachment.getId()), new Date(ts), "int");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -301,7 +301,7 @@ public final class AttachAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.commit();
             rollback = false;
             return new AJAXRequestResult(arr, new Date(timestamp), "json");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {

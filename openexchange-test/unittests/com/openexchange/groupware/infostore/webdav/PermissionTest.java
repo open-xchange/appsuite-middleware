@@ -160,7 +160,7 @@ public class PermissionTest implements SessionHolder {
         try {
             resource.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
@@ -182,7 +182,7 @@ public class PermissionTest implements SessionHolder {
         try {
             collection.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                 x.printStackTrace();
             }
@@ -205,7 +205,7 @@ public class PermissionTest implements SessionHolder {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             resource.save();
             assertTrue(true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -225,7 +225,7 @@ public class PermissionTest implements SessionHolder {
             collection.setDisplayName("rename");
             collection.save();
             assertTrue(true);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -293,7 +293,7 @@ public class PermissionTest implements SessionHolder {
             resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             resource.save();
             fail("Could update document even without write permissions to it");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
@@ -308,7 +308,7 @@ public class PermissionTest implements SessionHolder {
             res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
             res.save();
             fail("Shouldn't be able to save in root folder");
-        } catch (final WebdavProtocolException x) {
+        } catch (WebdavProtocolException x) {
             if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
@@ -364,7 +364,7 @@ public class PermissionTest implements SessionHolder {
             final InputStream data = new ByteArrayInputStream(new byte[] { 1 });
             infostore.saveDocument(document, data, System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, getContext()));
             return document;
-        } catch (final Exception x) {
+        } catch (Exception x) {
             infostore.rollback();
             throw x;
         } finally {

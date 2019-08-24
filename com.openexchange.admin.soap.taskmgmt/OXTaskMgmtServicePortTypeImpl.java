@@ -56,17 +56,17 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             return taskMgmtInterface.getTaskResults(soap2Context(ctx), soap2Credentials(cred), id.intValue());
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
         } catch (final java.lang.InterruptedException e) {
             throw new InterruptedException_Exception(e.getMessage(), e);
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             throw new ExecutionException_Exception(e.getMessage(), e);
         }
     }
@@ -76,15 +76,15 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             taskMgmtInterface.flush(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final TaskManagerException e) {
+        } catch (TaskManagerException e) {
             throw new TaskManagerException_Exception(e.getMessage(), e);
         }
     }
@@ -94,13 +94,13 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             return taskMgmtInterface.getJobList(soap2Context(ctx), soap2Credentials(cred));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
         }
     }
@@ -110,15 +110,15 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         final OXTaskMgmtInterface taskMgmtInterface = getTaskMgmtInterface();
         try {
             taskMgmtInterface.deleteJob(soap2Context(parameters.ctx), soap2Credentials(parameters.auth), parameters.i.intValue());
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final TaskManagerException e) {
+        } catch (TaskManagerException e) {
             throw new TaskManagerException_Exception(e.getMessage(), e);
         }
     }

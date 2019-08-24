@@ -191,9 +191,9 @@ public final class TmpFileFileHolder implements IFileHolder {
                 out.write(buffer, 0, len);
             }
             out.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);
@@ -241,9 +241,9 @@ public final class TmpFileFileHolder implements IFileHolder {
     public InputStream getStream() throws OXException {
         try {
             return new FileInputStream(tmpFile);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

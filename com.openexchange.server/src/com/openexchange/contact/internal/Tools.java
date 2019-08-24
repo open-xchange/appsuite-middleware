@@ -525,7 +525,7 @@ public final class Tools {
 	public static int parse(final String id) throws OXException {
 		try {
 			return Integer.parseInt(id);
-		} catch (final NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id);
 		}
 	}

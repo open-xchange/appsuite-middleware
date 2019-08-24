@@ -150,7 +150,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
                         try {
                             genericConfStorageService.delete(writeCon, context, confId);
                             return true;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             genConfError = e;
                             return false;
                         }
@@ -168,9 +168,9 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -180,7 +180,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return Services.getService(clazz);
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

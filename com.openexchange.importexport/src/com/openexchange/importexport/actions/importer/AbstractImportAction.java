@@ -120,7 +120,7 @@ public abstract class AbstractImportAction implements AJAXActionService {
             if (null != ajaxRequestData) {
                 try {
                     ajaxRequestData.cleanUploads();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }

@@ -76,7 +76,7 @@ public class ContactStorageTest {
             for (final Contact contact : rememberedContacts) {
                 try {
                     this.getStorage().delete(getSession(), Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), new Date());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.error("error cleaning up contact", e);
                 }
             }

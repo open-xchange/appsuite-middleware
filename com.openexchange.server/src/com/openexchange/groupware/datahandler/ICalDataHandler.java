@@ -124,7 +124,7 @@ public abstract class ICalDataHandler implements DataHandler {
     protected static InputStreamCopy copyStream(final InputStream orig, final long size) throws OXException {
         try {
             return new InputStreamCopy(orig, "openexchange-ical-", (size <= 0 || size > LIMIT));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }

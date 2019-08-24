@@ -136,7 +136,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
                         if (userId <= 0 || contextId <= 0 || false == traceService.includeStackTraceOnError(userId, contextId)) {
                             dropStackTraceFor(t);
                         }
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         dropStackTraceFor(t);
                     }
                 } else {

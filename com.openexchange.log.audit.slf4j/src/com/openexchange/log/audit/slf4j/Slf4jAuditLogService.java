@@ -306,7 +306,7 @@ public class Slf4jAuditLogService implements AuditLogService, Runnable {
                     Slf4jLogEntry next;
                     try {
                         next = entries.take();
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         return;
                     }

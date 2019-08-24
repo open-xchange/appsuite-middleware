@@ -185,7 +185,7 @@ public class AJAXClient {
     public <T extends AbstractAJAXResponse> T executeSafe(final AJAXRequest<T> request) {
         try {
             return execute(request, -1);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // ignore
             return null;
         }

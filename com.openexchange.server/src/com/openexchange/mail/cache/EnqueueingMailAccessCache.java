@@ -267,7 +267,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             int capacity;
             try {
                 capacity = MailProviderRegistry.getMailProviderBySession(session, accountId).getProtocol().getMaxCount(mailAccess.getMailConfig().getServer(), MailAccount.DEFAULT_ID == accountId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 capacity = fallbackQueueCapacity;
             }
             final MailAccessQueue tmp = capacity > 0 ? (1 == capacity ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(capacity)) : new MailAccessQueueImpl(-1);
@@ -412,7 +412,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                         }
                     }
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 // A runtime exception
                 LOG.warn("Purge-expired run failed", e);
             }

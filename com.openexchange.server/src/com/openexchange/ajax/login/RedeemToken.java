@@ -155,7 +155,7 @@ public class RedeemToken implements LoginRequestHandler {
                     json.put("password", null == password ? JSONObject.NULL : password);
                 }
                 json.write(resp.getWriter());
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.info("", e);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }

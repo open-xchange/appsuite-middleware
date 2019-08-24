@@ -122,13 +122,13 @@ public final class ExtendedMimeMessage extends MimeMessage {
             final ContentType ct = getContentType0();
             try {
                 hasAttachment = Boolean.valueOf(deepAttachmentCheck(ct.getSubType()));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             }
@@ -221,7 +221,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 } else {
                     priority = parsePriority(getHeader(MessageHeaders.HDR_X_PRIORITY, null));
                 }
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.warn("", e);
                 priority = MailMessage.PRIORITY_NORMAL;
             }
@@ -234,7 +234,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
             final String[] tmp = priorityStr.split(" +");
             try {
                 return Integer.parseInt(tmp[0]);
-            } catch (final NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 LOG.debug("Strange X-Priority header: {}", tmp[0], nfe);
                 return MailMessage.PRIORITY_NORMAL;
             }
@@ -270,7 +270,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
         if (size == null) {
             try {
                 size = Integer.valueOf(super.getSize());
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.warn("", e);
                 size = Integer.valueOf(-1);
             }
@@ -291,13 +291,13 @@ public final class ExtendedMimeMessage extends MimeMessage {
         if (contentType == null) {
             try {
                 contentType = new ContentType(getHeader(MessageHeaders.HDR_CONTENT_TYPE, null));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.warn("", e);
                 contentType = new ContentType();
                 contentType.setPrimaryType("text");
                 contentType.setSubType("plain");
                 contentType.setCharsetParameter("us-ascii");
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("", e);
                 contentType = new ContentType();
                 contentType.setPrimaryType("text");

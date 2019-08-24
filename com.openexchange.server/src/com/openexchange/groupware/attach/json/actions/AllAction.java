@@ -109,9 +109,9 @@ public final class AllAction extends AbstractAttachmentAction {
             }
             final JSONValue jsonValue = all(session, folderId, attachedId, moduleId, columns, sort, order);
             return new AJAXRequestResult(jsonValue, "apiResponse");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final UnknownColumnException e) {
+        } catch (UnknownColumnException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -151,7 +151,7 @@ public final class AllAction extends AbstractAttachmentAction {
             }
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
             SearchIterators.close(iter);

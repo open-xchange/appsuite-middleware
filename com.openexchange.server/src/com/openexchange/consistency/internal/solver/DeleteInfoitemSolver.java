@@ -87,18 +87,18 @@ public class DeleteInfoitemSolver implements ProblemSolver {
                 if (numbers[1] == 1) {
                     LOG.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("{}", e.getMessage(), e);
                 try {
                     database.rollback();
                     return;
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.debug("{}", e1.getMessage(), e1);
                 }
             } finally {
                 try {
                     database.finish();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("{}", e.getMessage(), e);
                 }
             }

@@ -137,7 +137,7 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
         final Date receivedDate;
         try {
             receivedDate = msg.getReceivedDate();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(ReceivedDateTerm.class).warn("Error during search.", e);
             return false;
         }

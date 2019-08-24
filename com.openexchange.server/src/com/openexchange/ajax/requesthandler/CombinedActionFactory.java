@@ -133,7 +133,7 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
                 if (null != service) {
                     return service;
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Next
             }
         }

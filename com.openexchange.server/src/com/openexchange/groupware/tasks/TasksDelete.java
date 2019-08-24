@@ -124,7 +124,7 @@ public class TasksDelete implements DeleteListener {
             stmt.addBatch("DELETE FROM task WHERE cid=" + ctx.getContextId());
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -194,7 +194,7 @@ public class TasksDelete implements DeleteListener {
                 FolderObject folder = null;
                 try {
                     folder = Tools.getFolder(ctx, con, folderId);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     // Nothing to do.
                 }
                 final int taskId = folderAndTask[1];

@@ -259,7 +259,7 @@ public class DowngradeTest {
             final Task task = GetTask.load(ctx, folderId, objectId, StorageType.ACTIVE);
             final Participant[] parts = task.getParticipants();
             Assert.assertTrue("Task has participants.", parts.length == 0);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new AssertionFailedException(e);
         }
     }
@@ -269,7 +269,7 @@ public class DowngradeTest {
             final Task task = GetTask.load(ctx, folderId, objectId, StorageType.ACTIVE);
             final Participant[] parts = task.getParticipants();
             Assert.assertTrue("Task has no participants.", parts.length > 0);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new AssertionFailedException(e);
         }
     }
@@ -279,7 +279,7 @@ public class DowngradeTest {
             final TaskStorage stor = TaskStorage.getInstance();
             stor.selectTask(ctx, objectId, StorageType.ACTIVE);
             fail("Private task has not been removed on downgrade.");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Getting the exception is fine.
         }
     }

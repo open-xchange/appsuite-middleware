@@ -96,7 +96,7 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
                     }
                 }
                 grabbedAll = true;
-            } catch (final InvalidSyntaxException x) {
+            } catch (InvalidSyntaxException x) {
                 // IGNORE, we didn't specify a filter, so won't happen
             }
         }

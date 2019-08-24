@@ -274,7 +274,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
             if(con != null) {
                 try {
                     con.rollback();
-                } catch (final SQLException x) {
+                } catch (SQLException x) {
                     // IGNORE
                 }
                 dbService.backWritable(ctxId, con);

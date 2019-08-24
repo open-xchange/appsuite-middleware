@@ -96,7 +96,7 @@ public class ContactTemplateHelperFactory implements TemplateHelperFactory {
                 }
             }
             return new ContactHelper(map, user.getLocale(), tz, session.getContext(), services);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 	}

@@ -95,7 +95,7 @@ public final class QuotedPrintable {
                     sb.append('=').append(x);
                 }
             }
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             LOG.error("encode error: {}", exc, exc);
         }
 
@@ -126,7 +126,7 @@ public final class QuotedPrintable {
                     sb.append((char) b[a]);
                 }
             }
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             LOG.error("", exc);
         }
 

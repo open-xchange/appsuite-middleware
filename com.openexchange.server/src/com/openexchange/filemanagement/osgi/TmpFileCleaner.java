@@ -92,7 +92,7 @@ public final class TmpFileCleaner implements ServiceTrackerCustomizer<Configurat
                     for (File file : tmpFiles) {
                         try {
                             file.delete();
-                        } catch (final Exception x) {
+                        } catch (Exception x) {
                             // Ignore
                         }
                     }

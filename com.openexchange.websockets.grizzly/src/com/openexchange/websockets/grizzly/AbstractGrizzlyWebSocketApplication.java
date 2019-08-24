@@ -113,7 +113,7 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         String fbHost;
         try {
             fbHost = InetAddress.getLocalHost().getHostAddress();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             fbHost = "localhost";
         }
         LOCAL_HOST = fbHost;

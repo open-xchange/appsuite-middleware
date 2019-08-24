@@ -133,7 +133,7 @@ public final class TikaDocumentHandler {
             detector = new DefaultDetector();
             parser = new AutoDetectParser(detector);
             context.set(Parser.class, parser);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
@@ -201,7 +201,7 @@ public final class TikaDocumentHandler {
             final ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
             TEXT.process(stream, bout, this);
             return bout.toString(encoding);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(stream);
@@ -224,11 +224,11 @@ public final class TikaDocumentHandler {
                     getContentHandler(output, documentHandler),
                     documentHandler.metadata,
                     documentHandler.context);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final SAXException e) {
+            } catch (SAXException e) {
                 throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
-            } catch (final TikaException e) {
+            } catch (TikaException e) {
                 throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
             }
         }
@@ -245,7 +245,7 @@ public final class TikaDocumentHandler {
         protected ContentHandler getContentHandler(final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
                 return new BodyContentHandler(getOutputWriter(output, documentHandler.encoding));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
@@ -279,7 +279,7 @@ public final class TikaDocumentHandler {
         public void process(final InputStream stream, final OutputStream output, final TikaDocumentHandler documentHandler) throws OXException {
             try {
                 documentHandler.mediaType = documentHandler.detector.detect(stream, documentHandler.metadata);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }

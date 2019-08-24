@@ -271,7 +271,7 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
     public Object clone() {
         try {
             return super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

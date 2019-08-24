@@ -87,7 +87,7 @@ public abstract class LinkableState implements State {
         String hn;
         try {
             hn = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             hn = "localhost";
             uhe = e;
         }

@@ -179,7 +179,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 if (!ignoreFolder(id)) {
                     originFolders.put(I(id), folder.clone());
                 }
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
             }
         }
@@ -242,7 +242,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 final FolderObject folder = buildFolderFromResultSet(rs);
                 folderMap.put(I(folder.getObjectID()), new FolderEqualsWrapper(folder, "orig"));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -367,7 +367,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -395,9 +395,9 @@ public class FolderCopyTask implements CopyUserTaskService {
                     exchangeIds(folderTree, folder, context, uid, newId, idMapping);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
         }
     }
@@ -442,7 +442,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -476,7 +476,7 @@ public class FolderCopyTask implements CopyUserTaskService {
 
                 folderList.add(folder);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -509,7 +509,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                     if (newParentId != null) {
                         parentId = newParentId;
                     }
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // do nothing
                 }
 
@@ -549,7 +549,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);

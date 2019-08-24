@@ -143,7 +143,7 @@ public class NewTest {    // Success Case
         try {
             final AJAXRequestResult result = action.perform(request, session);
             fail("Should not swallow exceptions");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // SUCCESS
         }
 
@@ -178,7 +178,7 @@ public class NewTest {    // Success Case
         try {
             final AJAXRequestResult result = action.perform(request, session);
             fail("Should not swallow exceptions");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // SUCCESS
         }
 

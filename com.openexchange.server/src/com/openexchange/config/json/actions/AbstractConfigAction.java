@@ -108,9 +108,9 @@ public abstract class AbstractConfigAction implements AJAXActionService {
                 ajaxRequest.setTimeZone(getTimeZone(sTimeZone));
             }
             return perform(ajaxRequest);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw (OXException) cause;
@@ -140,7 +140,7 @@ public abstract class AbstractConfigAction implements AJAXActionService {
         try {
             final String characterEncoding = req.getCharacterEncoding();
             uri = AJAXUtility.decodeUrl(req.getRequestURI(), characterEncoding == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : characterEncoding);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
         }

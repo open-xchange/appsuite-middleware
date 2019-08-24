@@ -95,7 +95,7 @@ public class MobileConfigProperties {
         if (Integer.class.equals(clazz)) {
             try {
                 return (T) clazz.cast(Integer.valueOf(property));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
             }
         }
@@ -134,7 +134,7 @@ public class MobileConfigProperties {
         if (Integer.class.equals(clazz)) {
             try {
                 return (T) clazz.cast(Integer.valueOf(property));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
             }
         }

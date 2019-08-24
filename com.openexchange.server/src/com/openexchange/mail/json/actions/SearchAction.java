@@ -145,7 +145,7 @@ public final class SearchAction extends AbstractMailAction {
                             i = Integer.parseInt(s.substring(pos+1).trim());
                             end = i < 0 ? 0 : i;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
                     }
                     if (start >= end) {
@@ -192,9 +192,9 @@ public final class SearchAction extends AbstractMailAction {
             }
 
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

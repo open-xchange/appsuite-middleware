@@ -201,7 +201,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         public InputStream getInputStream() throws IOException {
             try {
                 return part.getInputStream();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw new IOException(e.getMessage(), e);
             }
         }
@@ -352,7 +352,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             return list;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1140,7 +1140,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         try {
             fileStorage.deleteFile(file);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore any regular exception
         }
     }

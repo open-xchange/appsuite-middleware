@@ -83,9 +83,9 @@ public class JsonCacheDeleteListener implements DeleteListener {
             stmt = writeCon.prepareStatement("DELETE FROM jsonCache WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -111,11 +111,11 @@ public class JsonCacheDeleteListener implements DeleteListener {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, userId);
             stmt.executeUpdate();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

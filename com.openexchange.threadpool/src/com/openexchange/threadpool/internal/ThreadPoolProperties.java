@@ -103,7 +103,7 @@ public final class ThreadPoolProperties {
                         if (corePoolSize < 0) {
                             corePoolSize = 3;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         corePoolSize = 3;
                     }
                 }
@@ -134,7 +134,7 @@ public final class ThreadPoolProperties {
                         if (maximumPoolSize < 0) {
                             maximumPoolSize = Integer.MAX_VALUE;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         maximumPoolSize = Integer.MAX_VALUE;
                     }
                 }
@@ -149,7 +149,7 @@ public final class ThreadPoolProperties {
                         if (keepAliveTime < 0) {
                             keepAliveTime = 60000L;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         keepAliveTime = 60000L;
                     }
                 }
@@ -164,7 +164,7 @@ public final class ThreadPoolProperties {
                         if (workQueueSize < 0) {
                             workQueueSize = 0;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         workQueueSize = 0;
                     }
                 }
@@ -191,7 +191,7 @@ public final class ThreadPoolProperties {
                 if (null != tmp) {
                     try {
                         blocking = Boolean.parseBoolean(tmp.trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         blocking = false;
                     }
                 }
@@ -214,7 +214,7 @@ public final class ThreadPoolProperties {
                         if (watcherMaxRunningTime < 0) {
                             watcherMaxRunningTime = 60000L;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         watcherMaxRunningTime = 60000L;
                     }
                 }
@@ -229,7 +229,7 @@ public final class ThreadPoolProperties {
                         if (watcherMinWaitTime < 0) {
                             watcherMinWaitTime = 20000L;
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         watcherMinWaitTime = 20000L;
                     }
                 }

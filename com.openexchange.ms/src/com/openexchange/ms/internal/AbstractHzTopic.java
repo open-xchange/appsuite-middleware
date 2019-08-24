@@ -99,7 +99,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
             public void run() {
                 try {
                     triggerPublish();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     log.warn("Failed to trigger publishing messages.", e);
                 }
             }

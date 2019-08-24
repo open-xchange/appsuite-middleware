@@ -101,11 +101,11 @@ public class WebdavPropfindAction extends AbstractAction {
 		Document requestBody = null;
 		try {
 			requestBody = req.getBodyAsDocument();
-		} catch (final JDOMException e1) {
+		} catch (JDOMException e1) {
 
 			forceAllProp = true; //Assume All Prop, if all else fails
 
-		} catch (final IOException e1) {
+		} catch (IOException e1) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(), HttpServletResponse.SC_BAD_REQUEST);
 		}
 
@@ -135,7 +135,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			res.setStatus(Protocol.SC_MULTISTATUS);
 			res.setContentType("text/xml; charset=UTF-8");
 			outputter.output(responseBody, res.getOutputStream());
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			LOG.debug("Client gone?", e);
 		}
 	}

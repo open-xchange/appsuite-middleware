@@ -177,7 +177,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         try {
             return getAttachmentLong(folder, parseUnsignedLong(mailId), sequenceId);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
@@ -211,7 +211,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         try {
             return getImageAttachmentLong(folder, parseUnsignedLong(mailId), contentId);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
@@ -283,7 +283,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         try {
             return getMessageLong(folder, parseUnsignedLong(mailId), markSeen);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }

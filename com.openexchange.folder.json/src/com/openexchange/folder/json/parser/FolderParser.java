@@ -123,7 +123,7 @@ public final class FolderParser {
                         throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentTypeString);
                     }
                     folder.setContentType(contentType);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw e;
                 }
             }
@@ -135,7 +135,7 @@ public final class FolderParser {
             if (folderJsonObject.hasAndNotNull(FolderField.SUBSCRIBED.getName())) {
                 try {
                     folder.setSubscribed(folderJsonObject.getInt(FolderField.SUBSCRIBED.getName()) > 0);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     /*
                      * Not an integer value
                      */
@@ -180,7 +180,7 @@ public final class FolderParser {
             folder.setProperties(parseProperties(folderJsonObject));
 
             return folder;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -201,7 +201,7 @@ public final class FolderParser {
                 perms.add(parsePermission(permissionsAsJSON.getJSONObject(i), timeZone));
             }
             return perms;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
         }
     }

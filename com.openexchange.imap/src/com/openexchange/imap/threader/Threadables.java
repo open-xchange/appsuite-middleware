@@ -330,9 +330,9 @@ public final class Threadables {
                         // Handle remaining responses
                         protocol.notifyResponseHandlers(r);
                         return mails;
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         throw new ProtocolException(e.getMessage(), e);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         throw new ProtocolException(e.getMessage(), e);
                     }
                 } else if (response.isBAD()) {
@@ -476,7 +476,7 @@ public final class Threadables {
                             }
                         }
                         return first;
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         throw new ProtocolException(e.getMessage(), e);
                     }
                 } else if (response.isBAD()) {

@@ -67,7 +67,7 @@ public abstract class TIntErrorAwareAbstractProcedure<E extends Exception> exten
     public final boolean execute(final int value) {
         try {
             return next(value);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             this.exception = valueOf(e);
             return false;
         }

@@ -138,9 +138,9 @@ public class Server implements Serializable, NameAndIdObject {
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");
             }
         }

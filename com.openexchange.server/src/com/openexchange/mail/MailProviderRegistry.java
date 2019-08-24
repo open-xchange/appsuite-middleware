@@ -123,7 +123,7 @@ public final class MailProviderRegistry {
         MailProvider provider;
         try {
             provider = mailSessionCache.getParameter(accountId, key);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             /*
              * Probably caused by bundle update(s)
              */
@@ -249,9 +249,9 @@ public final class MailProviderRegistry {
             provider.startUp();
             provider.setDeprecated(false);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             LOG.error("", t);
             return false;
         }
@@ -269,9 +269,9 @@ public final class MailProviderRegistry {
             try {
                 provider.setDeprecated(true);
                 provider.shutDown();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Mail connection implementation could not be shut down", e);
-            } catch (final RuntimeException t) {
+            } catch (RuntimeException t) {
                 LOG.error("Mail connection implementation could not be shut down", t);
             }
         }
@@ -288,9 +288,9 @@ public final class MailProviderRegistry {
                 all.setDeprecated(true);
                 all.shutDown();
                 ALL_PROVIDER.set(null);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Mail connection implementation could not be shut down", e);
-            } catch (final RuntimeException t) {
+            } catch (RuntimeException t) {
                 LOG.error("Mail connection implementation could not be shut down", t);
             }
         }
@@ -319,9 +319,9 @@ public final class MailProviderRegistry {
             try {
                 all.setDeprecated(true);
                 all.shutDown();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final RuntimeException t) {
+            } catch (RuntimeException t) {
                 LOG.error("", t);
             }
             return all;
@@ -340,9 +340,9 @@ public final class MailProviderRegistry {
             removed.setDeprecated(true);
             removed.shutDown();
             return removed;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final RuntimeException t) {
+        } catch (RuntimeException t) {
             LOG.error("", t);
             return removed;
         }
@@ -371,9 +371,9 @@ public final class MailProviderRegistry {
             try {
                 all.setDeprecated(true);
                 all.shutDown();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final RuntimeException t) {
+            } catch (RuntimeException t) {
                 LOG.error("", t);
             }
             return all;

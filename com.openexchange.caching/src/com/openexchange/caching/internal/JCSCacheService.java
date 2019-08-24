@@ -117,7 +117,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
         	if (null != c) {
         		c.dispose();
         	}
-        } catch (final CacheException e) {
+        } catch (CacheException e) {
         	LOG.error("", e);
         }
          */
@@ -144,7 +144,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                 }
             } catch (final org.apache.jcs.access.exception.CacheException e) {
                 throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
-            } catch (final NullPointerException npe) {
+            } catch (NullPointerException npe) {
                 /*
                  * Can't use JCS without a configuration file or to be more precise a configuration file which lacks a region of the specified
                  * name. It should fail more gracefully, but that's a minor concern in the eyes of JCS developer.

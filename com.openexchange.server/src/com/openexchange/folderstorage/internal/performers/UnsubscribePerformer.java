@@ -144,12 +144,12 @@ public final class UnsubscribePerformer extends AbstractPerformer {
                 }
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }

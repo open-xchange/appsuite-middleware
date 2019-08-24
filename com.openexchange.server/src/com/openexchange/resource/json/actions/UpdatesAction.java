@@ -93,7 +93,7 @@ public final class UpdatesAction extends AbstractResourceAction {
             ResourceService resService = services.getServiceSafe(ResourceService.class);
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.debug("Tried to find resources that were modified since {}", lastModified, exc);
         }
 

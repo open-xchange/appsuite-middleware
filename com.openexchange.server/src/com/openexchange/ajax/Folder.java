@@ -205,7 +205,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         Tools.disableCaching(resp);
         try {
             actionGet(req, resp);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("doGet", e);
             writeError(e.toString(), new JSONWriter(resp.getWriter()));
         }
@@ -217,7 +217,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("doPut", e);
             writeError(e.toString(), new JSONWriter(resp.getWriter()));
         }
@@ -234,7 +234,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             startResponse(jsonWriter);
             jsonWriter.value(JSONObject.NULL);
             endResponse(jsonWriter, null, error);
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             LOG.error("writeError", exc);
         }
     }
@@ -353,10 +353,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     jsonWriter.endArray();
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -388,11 +388,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(
                 actionGetSubfolders(session, ParamContainer.getInstance(req, resp)),
                 resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -603,7 +603,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             String creatorDisplayName;
                             try {
                                 creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                                     throw e;
                                 }
@@ -724,7 +724,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                         if (null != f) {
                                             try {
                                                 f.get();
-                                            } catch (final ExecutionException e) {
+                                            } catch (ExecutionException e) {
                                                 final Throwable t = e.getCause();
                                                 if (t instanceof OXException) {
                                                     if (null == warning) {
@@ -748,10 +748,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                             }
                                         }
                                     }
-                                } catch (final InterruptedException e) {
+                                } catch (InterruptedException e) {
                                     Thread.currentThread().interrupt();
                                     throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-                                } catch (final ExecutionException e) {
+                                } catch (ExecutionException e) {
                                     throw ThreadPools.launderThrowable(e, OXException.class);
                                 }
                                 /*
@@ -775,7 +775,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             folderWriter.writeOXFolderFieldsAsArray(columns, internalUsers, FolderObject.getFolderString(
                                 internalUsers.getObjectID(),
                                 locale), -1);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             // Internal users folder not visible to current user
                             if (e.isGeneric(Generic.NO_PERMISSION)) {
                                 LOG.debug("", e);
@@ -820,7 +820,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 }
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             if (e.getCode() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
                                 LOG.trace("", e);
                             } else {
@@ -846,7 +846,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 }
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             if (OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() == e.getCode() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
                                 LOG.trace("", e);
                             } else {
@@ -872,7 +872,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 }
                                 folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, locale);
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             if (e.getCode() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
                                 LOG.trace("", e);
                             } else {
@@ -896,7 +896,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 int sharedOwner;
                 try {
                     sharedOwner = Integer.parseInt(parentIdentifier.substring(2));
-                } catch (final NumberFormatException exc) {
+                } catch (NumberFormatException exc) {
                     throw getWrappingOXException(exc);
                 }
                 final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
@@ -981,7 +981,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             try {
                                 mailInterface.close(true);
                                 mailInterface = null;
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 LOG.error("", e);
                             }
                         }
@@ -1013,10 +1013,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1048,11 +1048,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(
                 actionGetPath(session, ParamContainer.getInstance(req, resp)),
                 resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -1209,7 +1209,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             try {
                                 mailInterface.close(true);
                                 mailInterface = null;
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 LOG.error("", e);
                             }
                         }
@@ -1276,10 +1276,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1311,11 +1311,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(
                 actionGetUpdatedFolders(session, ParamContainer.getInstance(req, resp)),
                 resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -1382,7 +1382,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 String creatorDisplayName;
                                 try {
                                     creatorDisplayName = us.getUser(fo.getCreatedBy(), ctx).getDisplayName();
-                                } catch (final OXException e) {
+                                } catch (OXException e) {
                                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                                         throw e;
                                     }
@@ -1609,7 +1609,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         for (int i = 0; i < accountSize; i++) {
                             try {
                                 completionFuture.take().get();
-                            } catch (final ExecutionException e) {
+                            } catch (ExecutionException e) {
                                 final Throwable t = e.getCause();
                                 if (t instanceof OXException) {
                                     if (null == warning) {
@@ -1632,10 +1632,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 }
                             }
                         }
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-                    } catch (final ExecutionException e) {
+                    } catch (ExecutionException e) {
                         throw ThreadPools.launderThrowable(e, OXException.class);
                     }
                     // Write arrays
@@ -1650,10 +1650,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
              * Set timestamp
              */
             lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1680,11 +1680,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(
                 actionGetFolder(session, ParamContainer.getInstance(req, resp)),
                 resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -1721,7 +1721,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 int userId = -1;
                 try {
                     userId = Integer.parseInt(folderIdentifier.substring(2));
-                } catch (final NumberFormatException exc) {
+                } catch (NumberFormatException exc) {
                     throw getWrappingOXException(exc);
                 }
                 final User user = UserStorage.getInstance().getUser(userId, ctx);
@@ -1751,7 +1751,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             if (mailInterface != null) {
                                 mailInterface.close(true);
                             }
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                     }
@@ -1780,10 +1780,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1807,11 +1807,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(actionPutUpdateFolder(session, getBody(req), ParamContainer.getInstance(
                 req,
                 resp)), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -1863,7 +1863,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     } finally {
                         try {
                             mailInterface.close(true);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                     }
@@ -1914,10 +1914,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -1941,11 +1941,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(actionPutInsertFolder(session, new JSONObject(getBody(req)), ParamContainer.getInstance(
                 req,
                 resp)), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -1994,7 +1994,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     } finally {
                         try {
                             mailInterface.close(true);
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("", e);
                         }
                     }
@@ -2021,10 +2021,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2048,11 +2048,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(actionPutDeleteFolder(session, getBody(req), ParamContainer.getInstance(
                 req,
                 resp)), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -2092,7 +2092,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         FolderObject delFolderObj;
                         try {
                             delFolderObj = access.getFolderObject(delFolderId);
-                        } catch (final OXException exc) {
+                        } catch (OXException exc) {
                             /*
                              * Folder could not be found and therefore need not to be deleted
                              */
@@ -2140,10 +2140,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     mailInterface = null;
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2168,11 +2168,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             ResponseWriter.write(actionPutClearFolder(session, getBody(req), ParamContainer.getInstance(
                 req,
                 resp)), resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             try {
                 ResponseWriter.writeException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]), new JSONWriter(
                     resp.getWriter()), localeFrom(session));
-            } catch (final JSONException jsonError) {
+            } catch (JSONException jsonError) {
                 throw new ServletException(e.getMessage(), jsonError);
             }
         }
@@ -2212,7 +2212,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         FolderObject delFolderObj;
                         try {
                             delFolderObj = access.getFolderObject(delFolderId);
-                        } catch (final OXException exc) {
+                        } catch (OXException exc) {
                             LOG.warn("", exc);
                             continue NextId;
                         }
@@ -2256,12 +2256,12 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     mailInterface = null;
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error("", wrapper);
             response.setException(wrapper);
@@ -2293,7 +2293,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             final OXFolderManager oxma = OXFolderManager.getInstance(session);
             oxma.cleanUpTestFolders(delids, session.getContext());
             dataObj = "OK";
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("actionPutRemoveTestFolder", e);
             error = e.toString();
         }
@@ -2326,7 +2326,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         for (int a = 0; a < sa.length; a++) {
             try {
                 intArray[a] = Integer.parseInt(sa[a]);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw OXFolderExceptionCode.BAD_PARAM_VALUE.create(e, sa[a], paramName);
             }
         }
@@ -2366,7 +2366,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 final int accountId = mailAccount.getId();
                 try {
                     mailAccess = MailAccess.getInstance(session, accountId);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     arrays[index] = null;
                     if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
                         logger.debug("", e);
@@ -2394,7 +2394,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
                 arrays[index] = ja;
                 return null;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 logger.error("", e);
                 arrays[index] = null;
                 throw e;
@@ -2443,11 +2443,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 access = service.getAccountAccess(accountId, session);
                 rootFolder = access.getRootFolder();
                 serviceId = service.getId();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 arrays[index] = null;
                 logger.error("", e);
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 arrays[index] = null;
                 logger.error("", e);
                 throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -2464,7 +2464,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
                 arrays[index] = ja;
                 return null;
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 logger.error("", e);
                 arrays[index] = null;
                 throw e;

@@ -145,7 +145,7 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
     protected void rollback() {
         try {
             Attachment.ATTACHMENT_BASE.rollback();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.debug("Rollback failed.", e);
         }
     }

@@ -263,11 +263,11 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
             });
             // Return first chunk with this thread
             return convert(chunk, loadingPhotoHandler, subscription, session);
-        } catch (final XingUnlinkedException e) {
+        } catch (XingUnlinkedException e) {
             throw XingExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final XingException e) {
+        } catch (XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -557,7 +557,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         if (null != optPhotoHandler) {
             try {
                 optPhotoHandler.handlePhoto(xingUser, oxContact, subscription, session);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not handle photo from XING contact {} ({}).", xingUser.getDisplayName(), xingUser.getId());
             }
         }

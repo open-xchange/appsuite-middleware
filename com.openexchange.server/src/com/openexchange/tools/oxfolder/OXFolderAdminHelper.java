@@ -134,7 +134,7 @@ public final class OXFolderAdminHelper {
         final int admin;
         try {
             admin = getContextAdminID(cid, readCon);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return false;
         }
@@ -156,7 +156,7 @@ public final class OXFolderAdminHelper {
                 foundPermissions = true;
             }
             return editable && foundPermissions;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -178,7 +178,7 @@ public final class OXFolderAdminHelper {
         final int admin;
         try {
             admin = getContextAdminID(cid, writeCon);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return;
         }
@@ -190,7 +190,7 @@ public final class OXFolderAdminHelper {
                 if (!checkFolderExistence(cid, id, writeCon)) {
                     createPublicFolder(id, cid, admin, writeCon, System.currentTimeMillis());
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
             PreparedStatement stmt = null;
@@ -275,10 +275,10 @@ public final class OXFolderAdminHelper {
                     if (FolderQueryCacheManager.isInitialized()) {
                         FolderQueryCacheManager.getInstance().invalidateContextQueries(cid);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
@@ -308,7 +308,7 @@ public final class OXFolderAdminHelper {
                     // updateGABWritePermission(cid, enable, writeCon);
                     return;
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
             /*
@@ -327,7 +327,7 @@ public final class OXFolderAdminHelper {
                     while (rs.next()) {
                         users.add(rs.getInt(pos));
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     Databases.closeSQLStuff(rs, stmt);
@@ -372,7 +372,7 @@ public final class OXFolderAdminHelper {
                 LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", I(userId), I(cid));
                 return (perms[0] == NO_PERMISSIONS);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
@@ -388,7 +388,7 @@ public final class OXFolderAdminHelper {
                 return rs.getInt(1) == NO_PERMISSIONS; // && rs.getInt(2) >= READ_FOLDER;
             }
             return true;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -430,7 +430,7 @@ public final class OXFolderAdminHelper {
                 if (!checkFolderExistence(cid, globalAddressBookId, writeCon)) {
                     createGlobalAddressBook(cid, admin, writeCon, System.currentTimeMillis());
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
@@ -446,7 +446,7 @@ public final class OXFolderAdminHelper {
                 // updateGABWritePermission(cid, enable, writeCon);
                 return;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
@@ -537,11 +537,11 @@ public final class OXFolderAdminHelper {
                             cache.removeFromGroup(cacheKey, sContextId);
                         }
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -565,7 +565,7 @@ public final class OXFolderAdminHelper {
         try {
             final int contextMalAdmin = getContextAdminID(cid, con);
             addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -577,7 +577,7 @@ public final class OXFolderAdminHelper {
                 throw OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT.create(Integer.valueOf(cid));
             }
             return retval;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -687,7 +687,7 @@ public final class OXFolderAdminHelper {
             ctx.setMailadmin(mailAdmin);
             try {
                 OXFolderSQL.updateLastModified(globalAddressBookId, creatingTime, mailAdmin, writeCon, ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Cannot occur
                 LOG.error("", e);
             }
@@ -1239,7 +1239,7 @@ public final class OXFolderAdminHelper {
                     writeCon.setAutoCommit(true);
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -1266,7 +1266,7 @@ public final class OXFolderAdminHelper {
             for (final int member : members) {
                 CacheFolderStorage.getInstance().clearCache(member, cid);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
             LOG.error("", e);
         }
@@ -1307,7 +1307,7 @@ public final class OXFolderAdminHelper {
                          */
                         try {
                             FolderCacheManager.getInstance().removeFolderObject(fuid, new ContextImpl(cid));
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.error("Folder could not be removed from cache", e);
                         }
                     }
@@ -1337,7 +1337,7 @@ public final class OXFolderAdminHelper {
         final PreparedStatement stmt;
         try {
             stmt = con.prepareStatement(SQL_SELECT_DISPLAY_NAME);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         ResultSet rs = null;
@@ -1349,7 +1349,7 @@ public final class OXFolderAdminHelper {
                 return rs.getString(1);
             }
             return null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1484,7 +1484,7 @@ public final class OXFolderAdminHelper {
              * TODO: Set standard special folders (projects, ...) located beneath system user folder
              */
             LOG.info("User {} successfully created in context {}", I(userId), I(cid));
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }

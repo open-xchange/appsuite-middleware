@@ -91,7 +91,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
         super();
         try {
             oxRes = OXResourceStorageInterface.getInstance();
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOGGER.error("", e);
             throw new RemoteException(e.getMessage());
         }
@@ -107,7 +107,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(res);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
                 LOGGER.error("", invalidDataException);
                 throw invalidDataException;
@@ -119,7 +119,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 LOGGER.error("", e1);
                 throw e1;
             }
@@ -166,19 +166,19 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                 if (resmail != null && resmail.trim().length() > 0 && !GenericChecks.isValidMailAddress(resmail)) {
                     throw new InvalidDataException("Invalid email address");
                 }
-            } catch (final InvalidDataException e1) {
+            } catch (InvalidDataException e1) {
                 LOGGER.error("", e1);
                 throw e1;
-            } catch (final StorageException e1) {
+            } catch (StorageException e1) {
                 LOGGER.error("", e1);
                 throw e1;
-            } catch (final DatabaseUpdateException e1) {
+            } catch (DatabaseUpdateException e1) {
                 LOGGER.error("", e1);
                 throw e1;
-            } catch (final NoSuchContextException e1) {
+            } catch (NoSuchContextException e1) {
                 LOGGER.error("", e1);
                 throw e1;
-            } catch (final NoSuchResourceException e1) {
+            } catch (NoSuchResourceException e1) {
                 LOGGER.error("", e1);
                 throw e1;
             }
@@ -194,7 +194,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                         try {
                             LOGGER.info("Calling change for plugin: {}", bundlename);
                             oxresource.change(ctx, res, auth);
-                        } catch (final PluginException e) {
+                        } catch (PluginException e) {
                             LOGGER.error("Error while calling change for plugin: {}", bundlename, e);
                             throw StorageException.wrapForRMI(e);
                         }
@@ -214,7 +214,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             try {
                 doNullCheck(res);
                 doNullCheck(res.getName());
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for create is null", e3);
                 throw e3;
             }
@@ -225,7 +225,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -264,7 +264,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                 if (resmail != null && !GenericChecks.isValidMailAddress(resmail)) {
                     throw new InvalidDataException("Invalid email address");
                 }
-            } catch (final InvalidDataException e2) {
+            } catch (InvalidDataException e2) {
                 LOGGER.error("", e2);
                 throw e2;
             } catch (EnforceableDataObjectException e) {
@@ -285,19 +285,19 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                             LOGGER.debug("Calling create for plugin: {}", bundlename);
                             oxresource.create(ctx, res, auth);
                             interfacelist.add(oxresource);
-                        } catch (final PluginException e) {
+                        } catch (PluginException e) {
                             LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
                             LOGGER.info("Now doing rollback for everything until now...");
                             for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
                                 try {
                                     oxresourceinterface.delete(ctx, res, auth);
-                                } catch (final PluginException e1) {
+                                } catch (PluginException e1) {
                                     LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
                                 }
                             }
                             try {
                                 oxRes.delete(ctx, res);
-                            } catch (final StorageException e1) {
+                            } catch (StorageException e1) {
                                 LOGGER.error("Error doing rollback for creating resource in database", e1);
                             }
                             throw StorageException.wrapForRMI(e);
@@ -319,7 +319,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(res);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for delete is null", e3);
                 throw e3;
             }
@@ -341,22 +341,22 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                 if (!tool.existsResource(ctx, res.getId().intValue())) {
                     throw new NoSuchResourceException("Resource with this id does not exist");
                 }
-            } catch (final StorageException e) {
+            } catch (StorageException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final InvalidCredentialsException e) {
+            } catch (InvalidCredentialsException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final DatabaseUpdateException e) {
+            } catch (DatabaseUpdateException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final NoSuchContextException e) {
+            } catch (NoSuchContextException e) {
                 LOGGER.error("", e);
                 throw e;
-            } catch (final NoSuchResourceException e) {
+            } catch (NoSuchResourceException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -372,7 +372,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                             LOGGER.info("Calling delete for plugin: {}", bundlename);
                             oxresource.delete(ctx, res, auth);
                             interfacelist.add(oxresource);
-                        } catch (final PluginException e) {
+                        } catch (PluginException e) {
                             LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
                             throw StorageException.wrapForRMI(e);
                         }
@@ -393,7 +393,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(res);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for get is null", e3);
                 throw e3;
             }
@@ -404,7 +404,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
 
             try {
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -451,7 +451,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck((Object[]) resources);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for getData is null", e3);
                 throw e3;
             }
@@ -487,7 +487,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                         resource.setId(I(tool.getResourceIDByResourcename(ctx, resource.getName())));
                     }
                 }
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }
@@ -527,7 +527,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
                 doNullCheck(pattern);
-            } catch (final InvalidDataException e3) {
+            } catch (InvalidDataException e3) {
                 LOGGER.error("One of the given arguments for list is null", e3);
                 throw e3;
             }
@@ -542,7 +542,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                 }
 
                 basicauth.doAuthentication(auth, ctx);
-            } catch (final InvalidDataException e) {
+            } catch (InvalidDataException e) {
                 LOGGER.error("", e);
                 throw e;
             }

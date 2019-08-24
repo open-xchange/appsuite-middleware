@@ -579,7 +579,7 @@ public final class MailAccountDescription implements Serializable {
         }
         try {
             return mailServerUrl = URITools.generateURI(mailSecure ? mailProtocol + 's' : mailProtocol, IDNA.toASCII(mailServer), mailPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             final StringBuilder sb = new StringBuilder(32);
             sb.append(mailProtocol);
             if (mailSecure) {
@@ -604,7 +604,7 @@ public final class MailAccountDescription implements Serializable {
         }
         try {
             setMailServer(URIParser.parse(IDNA.toASCII(mailServerURL), URIDefaults.IMAP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, mailServerURL);
             // TODO method needs to throw the following exception. But that needs a global changing of a mass of code. Doing fallback
             // instead now.
@@ -661,7 +661,7 @@ public final class MailAccountDescription implements Serializable {
         }
         try {
             setTransportServer(URIParser.parse(IDNA.toASCII(transportServerURL), URIDefaults.SMTP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, transportServerURL);
         }
     }
@@ -715,7 +715,7 @@ public final class MailAccountDescription implements Serializable {
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
             return transportUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);
             if (transportSecure) {
@@ -1266,7 +1266,7 @@ public final class MailAccountDescription implements Serializable {
         int port;
         try {
             port = Integer.parseInt(server.substring(pos + 1));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("Unable to parse port out of URL: {}. Using default port instead: {}", server, defaultPort, e);
             port = defaultPort;
         }

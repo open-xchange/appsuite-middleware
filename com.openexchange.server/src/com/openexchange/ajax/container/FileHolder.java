@@ -308,7 +308,7 @@ public class FileHolder implements IFileHolder {
         if (null != isClosure) {
             try {
                 return isClosure.newStream();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }

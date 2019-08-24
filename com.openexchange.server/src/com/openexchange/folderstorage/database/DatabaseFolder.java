@@ -305,7 +305,7 @@ public class DatabaseFolder extends AbstractFolder {
                 int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
                 return count < 0 ? super.getTotal() : count;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Ignore
             LOG.debug("", e);
         }

@@ -97,7 +97,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
         // Check for valid email address here:
         try {
             InternetAddressUtil.validateInternetAddress(stringParam, true);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
         }
         // And finally check of that forward address is allowed

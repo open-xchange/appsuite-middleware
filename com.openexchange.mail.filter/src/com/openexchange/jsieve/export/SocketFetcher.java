@@ -84,7 +84,7 @@ public final class SocketFetcher {
             ClassLoader cl = null;
             try {
                 cl = Thread.currentThread().getContextClassLoader();
-            } catch (final SecurityException ex) {
+            } catch (SecurityException ex) {
                 logger.error("", ex);
             }
             return cl;
@@ -155,7 +155,7 @@ public final class SocketFetcher {
         if (cl != null) {
             try {
                 clsSockFact = cl.loadClass(sfClass);
-            } catch (final ClassNotFoundException cex) {
+            } catch (ClassNotFoundException cex) {
                 LOG.error("", cex);
             }
         }

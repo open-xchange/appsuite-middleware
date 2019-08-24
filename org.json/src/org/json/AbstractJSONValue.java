@@ -139,7 +139,7 @@ abstract class AbstractJSONValue implements JSONValue {
         while (null == token) {
             try {
                 token = jParser.nextToken();
-            } catch (final JsonParseException e) {
+            } catch (JsonParseException e) {
                 if (!e.getMessage().startsWith("Unexpected character")) {
                     throw e;
                 }
@@ -198,12 +198,12 @@ abstract class AbstractJSONValue implements JSONValue {
                 } else {
                     jGenerator.writeEndArray(); // ]
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
             try {
                 jGenerator.flush();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -220,7 +220,7 @@ abstract class AbstractJSONValue implements JSONValue {
     protected static String directString(final int off, final int len, final char[] chars) {
         try {
             return new String(chars, off, len);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new String(chars, off, len);
         }
     }
@@ -260,7 +260,7 @@ abstract class AbstractJSONValue implements JSONValue {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
             write(writer);
             writer.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(writer);
@@ -284,7 +284,7 @@ abstract class AbstractJSONValue implements JSONValue {
             jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
             write(this, jGenerator);
             writer.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jGenerator);
@@ -307,7 +307,7 @@ abstract class AbstractJSONValue implements JSONValue {
                         writer = new OutputStreamWriter(pos, "UTF-8");
                         write(writer, asciiOnly);
                         writer.flush();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         pin.setException(e);
                     } finally {
                         close(writer, pos);
@@ -334,7 +334,7 @@ abstract class AbstractJSONValue implements JSONValue {
                 if (null != closeable) {
                     try {
                         closeable.close();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         // Ignore
                     }
                 }
@@ -372,7 +372,7 @@ abstract class AbstractJSONValue implements JSONValue {
                 final JSONBinary jsonBinary = (JSONBinary) v;
                 binary = jsonBinary.getBinary();
                 jGenerator.writeBinary(binary, (int) jsonBinary.length());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new JSONException(e);
             } finally {
                 close(binary);
@@ -381,7 +381,7 @@ abstract class AbstractJSONValue implements JSONValue {
             try {
                 final String s = ((JSONString) v).toJSONString();
                 jGenerator.writeString(s);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new JSONException(e);
             }
         } else if (v instanceof Reader) {
@@ -396,7 +396,7 @@ abstract class AbstractJSONValue implements JSONValue {
                 }
 
                 jGenerator.writeRaw('"'); // String end
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new JSONException(e);
             } finally {
                 close(reader);

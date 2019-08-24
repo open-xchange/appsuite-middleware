@@ -266,7 +266,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     private void openFolder(int desiredMode, IMAPFolder imapFolder, boolean recoverFromServerbug) throws MessagingException {
         try {
             imapFolder.open(desiredMode);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             if (recoverFromServerbug) {
                 Exception exception = e.getNextException();
                 if ((exception instanceof com.sun.mail.iap.CommandFailedException) && (ResponseCode.SERVERBUG == ((com.sun.mail.iap.CommandFailedException) exception).getKnownResponseCode())) {
@@ -320,7 +320,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
         try {
             closeIMAPFolder();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
 
@@ -341,7 +341,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
         try {
             closeIMAPFolder();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -368,9 +368,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             if (null != imapFolder) {
                 imapFolder.close(false);
             }
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             LOG.debug("Invoked close() on a closed folder", e);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         } finally {
             resetIMAPFolder();
@@ -381,7 +381,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         for (final IMAPFolder f : otherFolders) {
             try {
                 f.close(false);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -554,7 +554,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(retval, true, session, accountId))) {
                     throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
                 }
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
 
@@ -620,7 +620,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected static void clearCacheSafe(final IMAPFolder imapFolder) {
         try {
             clearCache(imapFolder);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
     }

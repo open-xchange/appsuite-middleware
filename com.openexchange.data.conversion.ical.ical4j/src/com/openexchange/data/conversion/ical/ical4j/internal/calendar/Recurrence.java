@@ -185,7 +185,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         try {
             final RRule rrule = new RRule(new Recur(recur.toString()));
             component.getProperties().add(rrule);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             throw new ConversionError(index, ConversionError.Code.CANT_CREATE_RRULE, e, recur.toString());
         }
     }

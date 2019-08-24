@@ -99,7 +99,7 @@ public class GetAccessCombinationName extends UserAbstraction {
             System.out.println(oxusr.getAccessCombinationName(ctx, usr, auth));
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(successtext, ctxid, e, parser);
         }
     }

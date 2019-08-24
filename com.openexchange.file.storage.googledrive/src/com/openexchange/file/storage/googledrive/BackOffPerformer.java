@@ -126,7 +126,7 @@ abstract class BackOffPerformer<T> {
     public T perform(@Nullable String identifier) throws OXException {
         try {
             return perform();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if (!isUserRateLimitExceeded(e)) {
                 // Otherwise throw exception
                 throw handleIOError(identifier, e);
@@ -141,7 +141,7 @@ abstract class BackOffPerformer<T> {
             long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             return perform(identifier);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

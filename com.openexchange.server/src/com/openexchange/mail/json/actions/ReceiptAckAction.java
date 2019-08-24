@@ -96,9 +96,9 @@ public final class ReceiptAckAction extends AbstractMailAction {
             final MailServletInterface mailInterface = getMailInterface(req);
             mailInterface.sendReceiptAck(folderPath, uid, fromAddr);
             return getJSONNullResult();
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

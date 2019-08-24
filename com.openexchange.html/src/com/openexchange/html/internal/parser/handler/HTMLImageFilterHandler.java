@@ -206,7 +206,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
         try {
             final URI uri = new URI(lcSrc);
             return (null == uri.getHost()) && uri.getPath().startsWith(PREFIX.get().getPrefix()+"image");
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             // Invalid image URI; return false
             return false;
         }

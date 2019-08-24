@@ -104,7 +104,7 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
         try {
             execute(con, UPDATE);
             execute(con, UPDATE_DEL);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {

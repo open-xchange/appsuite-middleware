@@ -122,7 +122,7 @@ public abstract class JSlobAction implements AJAXActionService {
                 return performREST(new JSlobRequest(requestData, session), method);
             }
             return perform(new JSlobRequest(requestData, session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

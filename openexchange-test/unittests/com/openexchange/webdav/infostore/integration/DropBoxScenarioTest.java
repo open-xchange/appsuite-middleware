@@ -69,7 +69,7 @@ public class DropBoxScenarioTest {
             switchUser(user1);
             createDropBox();
 
-        } catch (final Exception x) {
+        } catch (Exception x) {
             tearDown();
             throw x;
         }
@@ -96,13 +96,13 @@ public class DropBoxScenarioTest {
             assertEquals(-1, is.read());
             is.close();
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             fail(e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

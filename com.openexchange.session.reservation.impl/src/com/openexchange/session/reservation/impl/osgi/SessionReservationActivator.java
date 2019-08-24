@@ -135,9 +135,9 @@ public class SessionReservationActivator extends HousekeepingActivator implement
                             serviceImpl.setHzMapName(hzMapName);
                             serviceImpl.changeBackingMapToHz();
                             return hazelcastInstance;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             LOG.warn("Couldn't initialize distributed reservation map.", e);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             LOG.warn("Couldn't initialize distributed reservation map.", e);
                         }
                         context.ungetService(reference);

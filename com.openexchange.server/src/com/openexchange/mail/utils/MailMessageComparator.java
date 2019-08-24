@@ -212,7 +212,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
     public int compare(MailMessage msg1, MailMessage msg2) {
         try {
             return descendingDir ? fieldComparer.compareFieldsDesc(msg1, msg2) : fieldComparer.compareFields(msg1, msg2);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             LOG.error("", e);
             return 0;
         }

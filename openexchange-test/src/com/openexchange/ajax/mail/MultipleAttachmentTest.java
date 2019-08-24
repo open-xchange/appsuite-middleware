@@ -146,7 +146,7 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
             //assertTrue("Disposition is not set to 'attachment'", disp.startsWith("attachment"));
             assertTrue("'filename' parameter not found in Content-disposition", disp.indexOf("filename=") >= 0);
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         } finally {

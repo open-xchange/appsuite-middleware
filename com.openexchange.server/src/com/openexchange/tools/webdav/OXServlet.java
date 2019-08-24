@@ -329,11 +329,11 @@ public abstract class OXServlet extends WebDavServlet {
                 LOG.trace("Entering HTTP sub method. Session: {}", session);
             }
             super.service(req, resp);
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             throw e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             final ServletException se = new ServletException(e.getMessage(), e);
             throw se;
@@ -555,7 +555,7 @@ public abstract class OXServlet extends WebDavServlet {
                 if (customizer != null) {
                     loginRequest = customizer.modifyLogin(loginRequest);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.debug("", e);
                 addBasicAuthenticateHeader(resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
@@ -575,7 +575,7 @@ public abstract class OXServlet extends WebDavServlet {
                     session = addSession(loginRequest, properties);
                     resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                     addBasicAuthenticateHeader(resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
@@ -628,7 +628,7 @@ public abstract class OXServlet extends WebDavServlet {
     private static void removeSession(final String sessionID) {
         try {
             ServerServiceRegistry.getInstance().getService(SessiondService.class, true).removeSession(sessionID);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Ignore. Probably we're just about to shut down.
         }
     }

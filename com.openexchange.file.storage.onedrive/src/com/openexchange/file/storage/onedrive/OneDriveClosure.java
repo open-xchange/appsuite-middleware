@@ -99,7 +99,7 @@ public abstract class OneDriveClosure<R> {
                 return perform(resourceAccess, session);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

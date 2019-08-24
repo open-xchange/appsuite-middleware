@@ -140,7 +140,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         if (null != toClose) {
             try {
                 toClose.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -155,7 +155,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         if (null != toFlush) {
             try {
                 toFlush.flush();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -373,7 +373,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             if (value.length >= 2) {
                                 try {
                                     poolId = Integer.parseInt(value[1]);
-                                } catch (final NumberFormatException e) {
+                                } catch (NumberFormatException e) {
                                     throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
                                 }
                                 scheema = value[2];
@@ -674,14 +674,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             for (final String filename : fileNames) {
                 doNullCheck(filename);
             }
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             LOG.error("One of the arguments for restore is null", e);
             throw e;
         }
 
         try {
             basicauth.doAuthentication(auth);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             LOG.error("", e);
             throw e;
         }
@@ -729,28 +729,28 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             if (contextExists) {
                 try {
                     contextInterface.delete(ctx, auth);
-                } catch (final NoSuchContextException e) {
+                } catch (NoSuchContextException e) {
                     // As we check for the existence beforehand this exception should never occur. Nevertheless we will log this
                     LOG.error("FATAL", e);
                 }
             }
             return instance.restorectx(ctx, result, getConfigDbName(optConfigDbName));
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOG.error("", e);
             throw e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             throw new OXContextRestoreException(Code.IO_EXCEPTION, e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw new OXContextRestoreException(Code.DATABASE_OPERATION_ERROR, e, e.getMessage());
-        } catch (final OXContextRestoreException e) {
+        } catch (OXContextRestoreException e) {
             LOG.error("", e);
             throw e;
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             LOG.error("", e);
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw new OXContextRestoreException(Code.UNEXPECTED_ERROR, e, e.getMessage());
         }

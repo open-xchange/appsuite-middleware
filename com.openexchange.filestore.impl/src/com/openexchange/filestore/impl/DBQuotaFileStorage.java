@@ -569,7 +569,7 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
                 Long size = L(getFileSize(identifier));
                 deleted = fileStorage.deleteFile(identifier);
                 fileSizes.put(identifier, size);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                     throw e;
                 }
@@ -648,7 +648,7 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
             }
 
             return result.getLong(1);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
         } finally {
             Databases.closeSQLStuff(result, stmt);

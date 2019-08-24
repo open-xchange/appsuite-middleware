@@ -117,7 +117,7 @@ public class Activator extends DeferredActivator {
                 httpService.registerServlet(alias, new BlackWhiteListServlet(), null, null);
                 this.alias = alias;
                 logger.info("Black-/Whitelist Servlet registered.");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 logger.error("", e);
             }
         }

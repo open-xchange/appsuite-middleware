@@ -74,7 +74,7 @@ public class ConfigurableDBProvider implements DBProvider {
             }
             defaults.setProperty("useSSL", "false");
             return DriverManager.getConnection(url, defaults);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
         }
         return null;
     }
@@ -88,7 +88,7 @@ public class ConfigurableDBProvider implements DBProvider {
             if(!con.isClosed()) {
                 con.close();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
         }
     }
 

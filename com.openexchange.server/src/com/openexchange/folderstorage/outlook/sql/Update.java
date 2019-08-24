@@ -99,19 +99,19 @@ public final class Update {
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
         try {
             updateIds(cid, tree, user, newId, oldId, delim, con);
             con.commit(); // COMMIT
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con); // ROLLBACK
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -179,7 +179,7 @@ public final class Update {
                 }
                 stmt.executeBatch();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -203,7 +203,7 @@ public final class Update {
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
         try {
@@ -211,13 +211,13 @@ public final class Update {
                 Insert.insertFolder(cid, tree, user, folder, con);
             }
             con.commit(); // COMMIT
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con); // ROLLBACK
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -248,19 +248,19 @@ public final class Update {
         try {
             con = databaseService.getWritable(cid);
             con.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
         try {
             updateLastModified(cid, tree, user, folderId, lastModified, con);
             con.commit(); // COMMIT
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con); // ROLLBACK
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -292,7 +292,7 @@ public final class Update {
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -325,7 +325,7 @@ public final class Update {
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -358,7 +358,7 @@ public final class Update {
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -391,7 +391,7 @@ public final class Update {
             stmt.setInt(pos++, user);
             stmt.setString(pos, folderId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {

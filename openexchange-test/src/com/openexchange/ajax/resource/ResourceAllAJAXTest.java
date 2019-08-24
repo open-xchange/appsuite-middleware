@@ -105,7 +105,7 @@ public final class ResourceAllAJAXTest extends AbstractResourceTest {
         } finally {
             try {
                 deleteResource(id);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 System.err.println("Temporary created resource with ID " + id + " could not be deleted: " + e.getMessage());
             }
         }

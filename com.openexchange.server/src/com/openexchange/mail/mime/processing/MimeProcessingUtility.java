@@ -401,7 +401,7 @@ public final class MimeProcessingUtility {
             access.connect(false);
             final MailFolder folder = access.getFolderStorage().getFolder(fullName);
             return folder.isShared() ? folder.getOwner() : null;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Couldn't resolve owner for {}", fullName, e);
             return null;
         } finally {

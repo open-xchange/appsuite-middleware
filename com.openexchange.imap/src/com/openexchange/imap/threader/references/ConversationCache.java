@@ -153,7 +153,7 @@ public class ConversationCache {
                 md.update(longToByteArray(sentHighestModSeq));
             }
             return asHex(md.digest());
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             LOG.error("", e);
             throw new IllegalStateException(e);
         }
@@ -175,7 +175,7 @@ public class ConversationCache {
                 }
             }
             return asHex(md.digest());
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             LOG.error("", e);
             throw new IllegalStateException(e);
         }

@@ -121,7 +121,7 @@ public final class MailFolderTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -162,7 +162,7 @@ public final class MailFolderTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -364,7 +364,7 @@ public final class MailFolderTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -525,7 +525,7 @@ public final class MailFolderTest extends AbstractMailTest {
             Exception exc = null;
             try {
                 mailAccess.getFolderStorage().getFolder(fullname);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 exc = e;
             }
             assertTrue("Moved folder still exists", exc != null);
@@ -547,14 +547,14 @@ public final class MailFolderTest extends AbstractMailTest {
                 exc = null;
                 try {
                     mailAccess.getFolderStorage().moveFolder(fullname, newFullname);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     exc = e;
                 }
                 assertTrue("Move below root folder failed", exc == null);
                 exc = null;
                 try {
                     mailAccess.getFolderStorage().getFolder(fullname);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     exc = e;
                 }
                 assertTrue("Moved folder still exists", exc != null);
@@ -638,7 +638,7 @@ public final class MailFolderTest extends AbstractMailTest {
             Exception exc = null;
             try {
                 mailAccess.getFolderStorage().getFolder(fullname);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 exc = e;
             }
             assertTrue("Renamed folder still exists", exc != null);
@@ -709,7 +709,7 @@ public final class MailFolderTest extends AbstractMailTest {
                             final int tmp = numAppendix;
                             try {
                                 numAppendix = Math.max(numAppendix, Integer.parseInt(substr));
-                            } catch (final NumberFormatException e) {
+                            } catch (NumberFormatException e) {
                                 // ignore
                                 numAppendix = tmp;
                             }
@@ -726,7 +726,7 @@ public final class MailFolderTest extends AbstractMailTest {
             Exception exc = null;
             try {
                 mailAccess.getFolderStorage().getFolder(fullname);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 exc = e;
             }
             assertTrue("Deleted folder still exists", exc != null);
@@ -745,7 +745,7 @@ public final class MailFolderTest extends AbstractMailTest {
                             final String substr = trashedFolders[i].getName().substring(name.length());
                             try {
                                 found = (numAppendix == Integer.parseInt(substr));
-                            } catch (final NumberFormatException e) {
+                            } catch (NumberFormatException e) {
                                 // ignore
                             }
                         }

@@ -138,7 +138,7 @@ public class MessagingAccountParserTest {         @Test
             accountJSON.put("messagingService", "com.openexchange.twitter");
             final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
             fail("Should have failed with exception from message service lookup");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertSame(exception, x);
         }
     }

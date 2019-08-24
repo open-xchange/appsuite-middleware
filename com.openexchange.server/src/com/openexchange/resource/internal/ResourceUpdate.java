@@ -162,7 +162,7 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
     // try {
     // securityService.checkPermission(permissions == null ? null : permissions.toArray(new String[permissions
     // .size()]), PATH);
-    // } catch (final BundleAccessException e) {
+    // } catch (BundleAccessException e) {
     // throw new OXException(e);
     // }
     // }
@@ -232,13 +232,13 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
             con.setAutoCommit(false);
             update(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);

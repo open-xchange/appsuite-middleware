@@ -219,11 +219,11 @@ public abstract class AbstractSession implements Session {
     public void sign(final HttpRequestBase request) throws XingException {
         try {
             getSigner().sign(request);
-        } catch (final OAuthCommunicationException e) {
+        } catch (OAuthCommunicationException e) {
             throw new XingException(e);
-        } catch (final OAuthMessageSignerException e) {
+        } catch (OAuthMessageSignerException e) {
             throw new XingException(e);
-        } catch (final OAuthExpectationFailedException e) {
+        } catch (OAuthExpectationFailedException e) {
             throw new XingException(e);
         }
     }
@@ -320,7 +320,7 @@ public abstract class AbstractSession implements Session {
                 if (value != null && name.equalsIgnoreCase("timeout")) {
                     try {
                         timeout = Math.min(timeout, Long.parseLong(value) * 1000);
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         // Ignore
                     }
                 }
@@ -373,7 +373,7 @@ public abstract class AbstractSession implements Session {
                     if (contentLen < 0) {
                         return false;
                     }
-                } catch (final NumberFormatException ex) {
+                } catch (NumberFormatException ex) {
                     return false;
                 }
             }
@@ -429,7 +429,7 @@ public abstract class AbstractSession implements Session {
                         // neither "close" nor "keep-alive", use default policy
                     }
 
-                } catch (final ParseException px) {
+                } catch (ParseException px) {
                     // invalid connection header means no persistent connection
                     // we don't have logging in HttpCore, so the exception is
                     // lost

@@ -284,7 +284,7 @@ public final class UnifiedInboxFolderConverter {
                     LOG.debug("Missing folder \"{}\" in account {}", fullnames[i], I(accountId));
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return new int[0][];
         } finally {

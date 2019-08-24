@@ -106,7 +106,7 @@ public class SMIMEStructureTest2 extends AbstractMailTest {
 
             assertTrue("Missing S/MIME body text.", jsonMailObject.hasAndNotNull("smime_body_text"));
             assertTrue("Missing S/MIME body data.", jsonMailObject.hasAndNotNull("smime_body_data"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

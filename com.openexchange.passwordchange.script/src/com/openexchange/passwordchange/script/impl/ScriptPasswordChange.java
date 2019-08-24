@@ -179,10 +179,10 @@ public final class ScriptPasswordChange extends PasswordChangeService {
                         throw ServiceExceptionCode.IO_ERROR.create();
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("IO error while changing password for user {} in context {}\n", usern, cid, e);
             throw ServiceExceptionCode.IO_ERROR.create(e);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             LOG.error("Error while changing password for user {} in context {}\n", usern, cid, e);

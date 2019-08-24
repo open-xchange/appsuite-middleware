@@ -130,7 +130,7 @@ public final class EventQueue {
                         shutdownLock.unlock();
                     }
                 }
-            } catch (final Exception t) {
+            } catch (Exception t) {
                 LOG.error("", t);
             }
         }
@@ -340,7 +340,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactCreated(contact, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -349,7 +349,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactModified(contact, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -358,7 +358,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactDeleted(contact, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -380,7 +380,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskCreated(task, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -389,7 +389,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskModified(task, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -398,7 +398,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskDeleted(task, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -407,7 +407,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskAccepted(task, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -416,7 +416,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskDeclined(task, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -425,7 +425,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskTentativelyAccepted(task, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -447,7 +447,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderCreated(folderObject, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -456,7 +456,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderModified(folderObject, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -465,7 +465,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderDeleted(folderObject, session);
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -594,7 +594,7 @@ public final class EventQueue {
                     LOG.warn("Task did not clean event queues on shutdown.");
                 }
             }
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             LOG.error("", e);

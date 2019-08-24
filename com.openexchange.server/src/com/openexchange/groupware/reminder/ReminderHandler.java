@@ -118,7 +118,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             writeCon.commit();
             rollback = 2;
             return objectId;
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.INSERT_EXCEPTION.create(exc);
         } finally {
             if (rollback > 0) {
@@ -166,13 +166,13 @@ public class ReminderHandler implements ReminderSQLInterface {
             ps.executeUpdate();
 
             return objectId;
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.INSERT_EXCEPTION.create(exc);
         } finally {
             if (ps != null) {
                 try {
                     ps.close();
-                } catch (final SQLException exc) {
+                } catch (SQLException exc) {
                     LOG.warn("cannot close prepared statement", exc);
                 }
             }
@@ -242,7 +242,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             if (updateCount > 1) {
                 throw ReminderExceptionCode.TOO_MANY.create();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -302,9 +302,9 @@ public class ReminderHandler implements ReminderSQLInterface {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(reminder.getObjectId()), I(contextId));
             }
             TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, writeCon, reminder.getTargetId(), reminder.getUser());
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw ReminderExceptionCode.MANDATORY_FIELD_TARGET_ID.create(e, "can't parse number.");
         } finally {
             Databases.closeSQLStuff(ps);
@@ -323,7 +323,7 @@ public class ReminderHandler implements ReminderSQLInterface {
 
             writeCon.commit();
             rollback = 2;
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(exc);
         } finally {
             if (rollback > 0) {
@@ -354,9 +354,9 @@ public class ReminderHandler implements ReminderSQLInterface {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(targetId), I(contextId));
             }
             //            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId, userId);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.DELETE_EXCEPTION.create(e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             closeSQLStuff(stmt);
@@ -375,7 +375,7 @@ public class ReminderHandler implements ReminderSQLInterface {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -402,9 +402,9 @@ public class ReminderHandler implements ReminderSQLInterface {
                 throw ReminderExceptionCode.NOT_FOUND.create(I(targetId), I(contextId));
             }
             //            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         } finally {
             closeSQLStuff(stmt);
@@ -421,7 +421,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             }
 
             return true;
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             if (ReminderExceptionCode.NOT_FOUND.equals(exc)) {
                 return false;
             }
@@ -468,7 +468,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             stmt.setInt(pos++, userId);
             result = stmt.executeQuery();
             return result2Object(context, result, stmt, false);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.LOAD_EXCEPTION.create(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -532,7 +532,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             }
             result = stmt.executeQuery();
             return result2Object(result);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.LOAD_EXCEPTION.create(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -562,7 +562,7 @@ public class ReminderHandler implements ReminderSQLInterface {
                 reminder.setFolder(result.getInt(pos++));
                 reminder.setLastModified(new Date(result.getLong(pos++)));
                 retval.add(reminder);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 // Nothing to do here. Missed one reminder.
                 LOG.error("", e);
             }
@@ -597,7 +597,7 @@ public class ReminderHandler implements ReminderSQLInterface {
                 return reminderObj;
             }
             throw ReminderExceptionCode.NOT_FOUND.create(I(objectId), I(contextId));
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         } finally {
             Databases.closeSQLStuff(ps);
@@ -644,7 +644,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             ReminderSearchIterator iter = new ReminderSearchIterator(context, ps, rs, con);
             close = false;
             return iter;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (close) {
@@ -698,7 +698,7 @@ public class ReminderHandler implements ReminderSQLInterface {
             ReminderSearchIterator iter = new ReminderSearchIterator(context, ps, rs, readCon);
             close = false;
             return iter;
-        } catch (final SQLException exc) {
+        } catch (SQLException exc) {
             throw ReminderExceptionCode.SQL_ERROR.create(exc, exc.getMessage());
         } finally {
             if (close) {

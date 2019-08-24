@@ -108,7 +108,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrations.add(context.registerService(EventHandler.class, new ProxyEventHandler(), serviceProperties));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Failed start-up of bundle com.openexchange.proxy.servlet", e);
             throw e;
         }
@@ -131,7 +131,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
                 }
                 registrations = null;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.proxy.servlet", e);
             throw e;
         }

@@ -144,13 +144,13 @@ public class AttachmentCleaner implements TaskEventInterface, ContactEventInterf
                 null);
             ATTACHMENT_BASE.commit();
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             rollback(e);
         } finally {
             SearchIterators.close(iter);
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 log(e);
             }
         }

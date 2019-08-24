@@ -168,7 +168,7 @@ public class TimeSpanParser  implements StringParser {
         long timespan;
         try {
             timespan = parseTimespanToPrimitive(s);
-        } catch (final IllegalArgumentException x) {
+        } catch (IllegalArgumentException x) {
             return null;
         }
 

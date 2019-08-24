@@ -89,7 +89,7 @@ public class RequestTools {
                 return 0;
             }
             return intParam.intValue();
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, intParam);
         }
     }
@@ -102,7 +102,7 @@ public class RequestTools {
                 final int folder = object.getInt("folder");
                 final int id = object.getInt("id");
                 objectIdAndFolderId[i] = new int[] { id, folder };
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
@@ -206,9 +206,9 @@ public class RequestTools {
             }
             contact.setImage1(outputStream.toByteArray());
             contact.setImageContentType(null == mimeType ? checkedMimeType : mimeType);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "I/O error while reading uploaded contact image.");
         } finally {
             Streams.close(fis);
@@ -242,7 +242,7 @@ public class RequestTools {
             }
             contact.setImage1(bytes);
             contact.setImageContentType(contentType);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Error while applying contact image.");
         }
     }
@@ -275,7 +275,7 @@ public class RequestTools {
         try {
             final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(data);
             return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }

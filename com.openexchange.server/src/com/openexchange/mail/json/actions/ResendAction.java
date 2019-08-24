@@ -181,12 +181,12 @@ public final class ResendAction extends AbstractMailAction {
                 return sentMail;
             } catch (final javax.mail.MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 transport.close();
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

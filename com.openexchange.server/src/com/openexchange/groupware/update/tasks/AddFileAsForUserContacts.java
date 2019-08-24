@@ -95,7 +95,7 @@ public final class AddFileAsForUserContacts extends UpdateTaskAdapter {
             stmt = con.createStatement();
             stmt.executeUpdate("UPDATE prg_contacts SET field90=field01 WHERE userid IS NOT NULL AND field90 IS NULL");
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {

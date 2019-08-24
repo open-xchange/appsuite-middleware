@@ -178,7 +178,7 @@ public class AllTest {
         try {
             action.perform(requestData, session);
             fail("Should not swallow exceptions");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
 
@@ -196,7 +196,7 @@ public class AllTest {
         try {
             action.perform(requestData, session);
             fail("Should not swallow exceptions");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
     }

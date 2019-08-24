@@ -188,7 +188,7 @@ public final class PropertyWatcher implements FileListener {
         final InputStream fis;
         try {
             fis = new BufferedInputStream(new FileInputStream(file), 65536);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             LOG.debug("", e);
             /*
              * Obviously file does no more exist
@@ -210,7 +210,7 @@ public final class PropertyWatcher implements FileListener {
                 value = newValue;
                 notifyListeners(false);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         } finally {
             Streams.close(fis);

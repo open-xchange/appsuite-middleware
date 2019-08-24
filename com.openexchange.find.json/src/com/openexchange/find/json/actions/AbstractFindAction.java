@@ -89,7 +89,7 @@ public abstract class AbstractFindAction implements AJAXActionService, SearchSer
         final FindRequest searchRequest = new FindRequest(requestData, session, this);
         try {
             return doPerform(searchRequest);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
     }

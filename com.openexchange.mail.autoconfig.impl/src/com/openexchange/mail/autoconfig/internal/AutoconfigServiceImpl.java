@@ -95,7 +95,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         QuotedInternetAddress internetAddress;
         try {
             internetAddress = new QuotedInternetAddress(email);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw AutoconfigException.invalidMail(email);
         }
 
@@ -104,7 +104,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         try {
             mailLocalPart = getLocalPart(internetAddress);
             mailDomain = getDomain(internetAddress);
-        } catch (final ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             return null;
         }
 

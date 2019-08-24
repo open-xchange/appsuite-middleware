@@ -108,11 +108,11 @@ public final class MonitoringInit implements Initialization {
         GeneralMonitor generalMonitorBean = new GeneralMonitor(services);
         try {
             managementAgent.registerMBean(getObjectName(), generalMonitorBean);
-        } catch (final MalformedObjectNameException exc) {
+        } catch (MalformedObjectNameException exc) {
             LOG.error("", exc);
-        } catch (final NullPointerException exc) {
+        } catch (NullPointerException exc) {
             LOG.error("", exc);
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             LOG.error("", exc);
         }
         LOG.info("JMX Monitor applied");
@@ -134,11 +134,11 @@ public final class MonitoringInit implements Initialization {
         if (managementAgent != null) {
             try {
                 managementAgent.unregisterMBean(getObjectName());
-            } catch (final MalformedObjectNameException exc) {
+            } catch (MalformedObjectNameException exc) {
                 LOG.error("", exc);
-            } catch (final NullPointerException exc) {
+            } catch (NullPointerException exc) {
                 LOG.error("", exc);
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 LOG.error("", exc);
             }
             LOG.info("JMX Monitor removed");

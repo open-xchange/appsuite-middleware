@@ -371,7 +371,7 @@ public final class MailMessageParser {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
             throw MailExceptionCode.CONTENT_TOO_BIG.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("No content".equals(e.getMessage())) {
                 /*-
                  * Special JavaMail I/O error to indicate no content available from IMAP server.
@@ -382,7 +382,7 @@ public final class MailMessageParser {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
             throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MailExceptionCode.INVALID_MULTIPART_CONTENT.equals(e)) {
                 // Strange multipart...
                 final String mailId = mail.getMailId();
@@ -464,7 +464,7 @@ public final class MailMessageParser {
                 }
             } catch (InvalidMultipartException impe) {
                 throw impe;
-            } catch (final RuntimeException rte) {
+            } catch (RuntimeException rte) {
                 /*
                  * Parsing of multipart mail failed fatally; treat as empty plain-text mail
                  */
@@ -651,7 +651,7 @@ public final class MailMessageParser {
                         }
                         net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ContactConverter().convert(tnefMessage, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
                         mp = (Multipart) convertResult.getContent();
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         LOG.error("Invalid TNEF contact", e);
                         return;
                     }
@@ -669,7 +669,7 @@ public final class MailMessageParser {
                     try {
                         net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ReadReceiptConverter().convert(tnefMessage, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
                         mp = (Multipart) convertResult.getContent();
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         LOG.warn("Invalid TNEF read receipt", e);
                         return;
                     }
@@ -879,7 +879,7 @@ public final class MailMessageParser {
                         parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                     }
                 }
-            } catch (final IOException tnefExc) {
+            } catch (IOException tnefExc) {
                 LOG.warn("", tnefExc);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
@@ -888,7 +888,7 @@ public final class MailMessageParser {
                     stop = true;
                     return;
                 }
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 LOG.error("", e);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));

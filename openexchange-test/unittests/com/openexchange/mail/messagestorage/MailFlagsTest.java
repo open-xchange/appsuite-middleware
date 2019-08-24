@@ -72,7 +72,7 @@ public final class MailFlagsTest extends MessageStorageTest {
             final long currentTimeMillis = System.currentTimeMillis();
             final String[] nonexistingids = new String[] { String.valueOf(currentTimeMillis), String.valueOf(currentTimeMillis + 1) };
             mailAccess.getMessageStorage().updateMessageFlags("INBOX", nonexistingids, MailMessage.FLAG_SEEN, true);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             fail("No Exception should be thrown here but was " + e.getMessage());
         }
     }
@@ -91,7 +91,7 @@ public final class MailFlagsTest extends MessageStorageTest {
             mailAccess.getMessageStorage().updateMessageFlags("INBOX", mixednonexistingids, MailMessage.FLAG_ANSWERED, true);
             fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", fetchIds, FIELDS_ID_AND_FLAGS);
             assertTrue("Mail is not marked as \\Answered", fetchedMails[0].isAnswered());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             fail("No Exception should be thrown here but was " + e.getMessage());
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
@@ -104,13 +104,13 @@ public final class MailFlagsTest extends MessageStorageTest {
         try {
             try {
                 mailAccess.getMessageStorage().updateMessageFlags("MichGibtEsNicht1337", uids, MailMessage.FLAG_SEEN, true);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
             }
 
             try {
                 mailAccess.getMessageStorage().updateMessageFlags("MichGibtEsNicht1337", uids, MailMessage.FLAG_ANSWERED, true);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
             }
         } finally {

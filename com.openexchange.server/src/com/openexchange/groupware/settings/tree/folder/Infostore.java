@@ -145,7 +145,7 @@ public class Infostore implements PreferencesItemService {
                             accountAccess.close();
                         }
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("Infostore default folder could not be applied to user configuration.", e);
                 }
                 // All failed

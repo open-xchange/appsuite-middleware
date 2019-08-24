@@ -79,7 +79,7 @@ public class FolderTreeSelectionTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         try {
             Tools.checkAndAddColumns(con, "user_setting_server", new Column("folderTree", "INT4"));
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
     }

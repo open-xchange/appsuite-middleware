@@ -199,7 +199,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
             }
 
             return -1;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -221,7 +221,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
                     stmt.setBytes(pos, data);
                 }
             }
-        } catch (final SQLException | JSONException e) {
+        } catch (SQLException | JSONException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -261,7 +261,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
             }
             SortedSet<Feedback> sorted = sort(feedbacks.values());
             return createExportObject(sorted, configuration);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

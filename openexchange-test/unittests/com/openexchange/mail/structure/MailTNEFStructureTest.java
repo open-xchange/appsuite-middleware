@@ -98,7 +98,7 @@ public class MailTNEFStructureTest extends AbstractMailTest {
             final JSONObject headers = nestedMessage.getJSONObject("headers");
             final JSONObject ct = headers.getJSONObject("content-type");
             assertTrue("Should be a nested message, but isn't.", "message/rfc822".equalsIgnoreCase(ct.getString("type")));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

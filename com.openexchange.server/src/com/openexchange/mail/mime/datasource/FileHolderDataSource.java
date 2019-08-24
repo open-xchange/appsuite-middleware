@@ -87,7 +87,7 @@ public class FileHolderDataSource implements DataSource {
     public InputStream getInputStream() throws IOException {
         try {
             return fh.getStream();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 throw (IOException) cause;
@@ -113,7 +113,7 @@ public class FileHolderDataSource implements DataSource {
         if (null != tmp) {
             try {
                 tmp.close();
-            } catch (final Exception ignore) {
+            } catch (Exception ignore) {
                 // Ignore
             }
         }

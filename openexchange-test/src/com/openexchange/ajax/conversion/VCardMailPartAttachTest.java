@@ -139,7 +139,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                 mailFolderAndMailID = response.getFolderAndID();
                 try {
                     Long.parseLong(mailFolderAndMailID[1]);
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     int pos = mailFolderAndMailID[1].lastIndexOf('/');
                     if (pos == -1) {
                         pos = mailFolderAndMailID[1].lastIndexOf('.');
@@ -150,7 +150,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                     final String substr = mailFolderAndMailID[1].substring(pos + 1);
                     try {
                         Long.parseLong(substr);
-                    } catch (final NumberFormatException e1) {
+                    } catch (NumberFormatException e1) {
                         fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
                     }
                     mailFolderAndMailID[1] = substr;
@@ -184,7 +184,7 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
                     Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

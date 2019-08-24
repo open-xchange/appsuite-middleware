@@ -113,7 +113,7 @@ final class IMAPSessionStorage {
         final Set<IMAPUpdateableData> currentData;
         try {
             currentData = new HashSet<IMAPUpdateableData>(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
         final AccAndFN key = new AccAndFN(accountId, imapFolder.getFullName());
@@ -240,7 +240,7 @@ final class IMAPSessionStorage {
                 if (!newAndModified.isEmpty() || !deleted.isEmpty()) {
                     try {
                         MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, userId, contextId);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("", e);
                     }
                 }
@@ -248,7 +248,7 @@ final class IMAPSessionStorage {
                  * Return collected UIDs
                  */
                 return new long[][] { newAndModified.toArray(), deleted.toArray() };
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
         }

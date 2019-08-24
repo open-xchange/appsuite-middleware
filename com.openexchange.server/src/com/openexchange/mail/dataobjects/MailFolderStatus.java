@@ -195,7 +195,7 @@ public class MailFolderStatus implements Serializable, Cloneable {
     public MailFolderStatus clone() throws CloneNotSupportedException {
         try {
             return (MailFolderStatus) super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError("Clone failed although Cloneable is implemented.");
         }
     }

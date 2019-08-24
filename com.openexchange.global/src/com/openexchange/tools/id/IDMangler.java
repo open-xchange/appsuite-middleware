@@ -165,7 +165,7 @@ public class IDMangler {
     private static String encodeQP(final String string) {
         try {
             return Charsets.toAsciiString(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)));
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             // Cannot occur
             return string;
         }
@@ -174,7 +174,7 @@ public class IDMangler {
     private static String decodeQP(final String string) {
         try {
             return new String(QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(string)), com.openexchange.java.Charsets.UTF_8);
-        } catch (final DecoderException e) {
+        } catch (DecoderException e) {
             return string;
         }
     }

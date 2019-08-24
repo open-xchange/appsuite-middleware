@@ -105,7 +105,7 @@ public final class GetStructureAction extends AbstractMailAction {
                     long l = -1;
                     try {
                         l = Long.parseLong(tmp.trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         l = -1;
                     }
                     maxSize = l;
@@ -148,13 +148,13 @@ public final class GetStructureAction extends AbstractMailAction {
                     if (memorizeAddresses) {
                         triggerContactCollector(session, mail, true, false);
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             }
             data = new AJAXRequestResult(MessageWriter.writeStructure(mailInterface.getAccountID(), mail, maxSize), "json");
             return data;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
@@ -163,14 +163,14 @@ public final class GetStructureAction extends AbstractMailAction {
                     if ("undefined".equalsIgnoreCase(uid)) {
                         throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
                     }
-                } catch (final Exception x) {
+                } catch (Exception x) {
                     // ignore
                 }
             } else {
                 LOG.error("", e);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

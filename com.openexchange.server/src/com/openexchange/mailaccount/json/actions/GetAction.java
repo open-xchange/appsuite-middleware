@@ -128,7 +128,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
             }
 
             return new AJAXRequestResult(jsonAccount);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

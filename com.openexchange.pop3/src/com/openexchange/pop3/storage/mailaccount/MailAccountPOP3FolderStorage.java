@@ -165,7 +165,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
                     } else {
                         try {
                             this.ctx = ctx = POP3ServiceRegistry.getServiceRegistry().getService(ContextService.class, true).getContext(session.getContextId());
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             throw e;
                         }
                     }
@@ -302,7 +302,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
                         final UserSettingMail usm =
                             UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), getContext());
                         isSpamOptionEnabled = usm.isSpamOptionEnabled();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         throw e;
                     }
                     /*
@@ -351,9 +351,9 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
             };
             try {
                 performSynchronized(task, session);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
@@ -380,7 +380,7 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
         String fn;
         try {
             fn = delegatee.createFolder(description);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*-
              * Expect creation failed because already existent
              *

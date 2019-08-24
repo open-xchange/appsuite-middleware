@@ -83,7 +83,7 @@ public class MailFilterActionTest extends MailFilterAction {
         try {
             SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Assert.assertTrue(MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.equals(e));
         }
     }
@@ -107,7 +107,7 @@ public class MailFilterActionTest extends MailFilterAction {
         try {
             SieveHandlerFactory.getRightPassword(config, creds);
             Assert.fail("No exception thrown");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Assert.assertTrue(MailFilterExceptionCode.NO_MASTERPASSWORD_SET.equals(e));
         }
     }

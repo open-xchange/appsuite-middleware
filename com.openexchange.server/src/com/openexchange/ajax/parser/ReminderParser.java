@@ -83,7 +83,7 @@ public class ReminderParser extends DataParser {
         throws OXException {
         try {
             parseElementReminder(reminder, json);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e,
                 json.toString());
         }

@@ -2494,7 +2494,7 @@ public class User {
         if (matcher.matches() && null != matcher.group(4)) {
             try {
                 port = Integer.parseInt(matcher.group(4));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 port = 25;
             }
         }

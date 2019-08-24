@@ -115,7 +115,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
     public MailAccount getRawMailAccount(int id, int userId, int cid) throws OXException {
         try {
             return storageService.getRawMailAccount(id, userId, cid);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -148,7 +148,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
         try {
             return storageService.getMailAccount(id, user, cid);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -161,7 +161,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
     public MailAccount getMailAccount(int id, int user, int cid, Connection con) throws OXException {
         try {
             return storageService.getMailAccount(id, user, cid, con);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -174,7 +174,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
     public TransportAccount[] getUserTransportAccounts(final int user, final int cid) throws OXException {
         try {
             return storageService.getUserTransportAccounts(user, cid);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -187,7 +187,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
     public TransportAccount[] getUserTransportAccounts(final int user, final int cid, final Connection con) throws OXException {
         try {
             return storageService.getUserTransportAccounts(user, cid, con);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -200,7 +200,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws OXException {
         try {
             return storageService.getUserMailAccounts(user, cid);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }
@@ -213,7 +213,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
     public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws OXException {
         try {
             return storageService.getUserMailAccounts(user, cid, con);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!isURIError(e)) {
                 throw e;
             }

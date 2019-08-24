@@ -124,40 +124,40 @@ public class Restore extends BasicCommandlineOptions {
             printError("Unable to parse the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNABLE_TO_PARSE);
-        } catch (final CLIIllegalOptionValueException e) {
+        } catch (CLIIllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final CLIUnknownOptionException e) {
+        } catch (CLIUnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
+        } catch (MissingOptionException e) {
             printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
+        } catch (NotBoundException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final OXContextRestoreException e) {
+        } catch (OXContextRestoreException e) {
             printServerException(e, parser);
             sysexit(1);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             printServerException(e, parser);
             sysexit(1);
         }

@@ -108,7 +108,7 @@ public final class MailFolderType implements FolderType {
         if (index != LEN) {
             try {
                 Integer.parseInt(folderId.substring(LEN, index));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
                 LOG.warn("Ignoring invalid folder identifier", err);
@@ -139,7 +139,7 @@ public final class MailFolderType implements FolderType {
         if (index != LEN) {
             try {
                 Integer.parseInt(folderId.substring(LEN, index));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
                 LOG.error("", err);

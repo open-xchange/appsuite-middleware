@@ -89,7 +89,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
 
             // System.out.println(jo);
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

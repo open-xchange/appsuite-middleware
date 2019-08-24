@@ -83,7 +83,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
                     path.add(Integer.valueOf(folder.getObjectID()));
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new OXException(e);
         }
         Collections.reverse(path);
@@ -119,7 +119,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 MODE = new NORMAL_MODE();
                 return MODE.getFolder(folderid, ctx);
             }

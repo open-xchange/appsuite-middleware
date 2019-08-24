@@ -121,7 +121,7 @@ public final class SnippetUtils {
             }
 
             return retval;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
             return content;
         }

@@ -142,7 +142,7 @@ public final class PUTAction extends AbstractConfigAction {
                 }
             }
             return ignorees;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return Collections.emptySet();
         }
     }
@@ -236,7 +236,7 @@ public final class PUTAction extends AbstractConfigAction {
                     Setting sub;
                     try {
                         sub = ConfigTree.getSettingByPath(setting, new String[] { key });
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         if (!SettingExceptionCodes.UNKNOWN_PATH.equals(e) && (path.indexOf("/io.ox/") < 0)) {
                             throw e;
                         }
@@ -247,7 +247,7 @@ public final class PUTAction extends AbstractConfigAction {
                     try {
                         // Catch single exceptions if GUI writes not writable fields.
                         saveSettingWithSubs(storage, sub);
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         exc = e;
                     }
                 }

@@ -148,7 +148,7 @@ public class JobInfoResponseRenderer implements ResponseRenderer {
                 jResponse.write(writer, false);
                 // Successfully written...
                 return true;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 if (e.getCause() instanceof IOException) {
                     /*
                      * Throw proper I/O error since a serious socket error could been occurred which prevents further communication. Just

@@ -97,7 +97,7 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -114,7 +114,7 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
         try {
             stmt = con.createStatement();
             stmt.execute("UPDATE user_configuration SET permissions=permissions|(1<<21)");
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);

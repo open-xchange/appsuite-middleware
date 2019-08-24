@@ -71,7 +71,7 @@ public class DetachTest extends FileActionTest {
         try {
             action.handle(request());
             fail("Expected Exception due to missing parameters");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }

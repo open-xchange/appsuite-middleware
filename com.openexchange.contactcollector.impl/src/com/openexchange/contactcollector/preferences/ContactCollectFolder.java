@@ -109,7 +109,7 @@ public class ContactCollectFolder implements PreferencesItemService {
                     } else {
                         value = Integer.valueOf(singleValue.toString());
                     }
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue(), "contactCollectFolder");
                 }
                 if (null == value || !value.equals(getPrevValue(session))) {

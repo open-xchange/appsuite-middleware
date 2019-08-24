@@ -129,7 +129,7 @@ public class ICal4JParser implements ICalParser {
     public ParseResult<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseTasks(Streams.newByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             LOG.error("", e);
         }
         return DefaultParseResult.emptyParseResult();
@@ -170,7 +170,7 @@ public class ICal4JParser implements ICalParser {
             }
 
             return DefaultParseResult.<Task> builder().importedObjects(tasks).truncationInfo(truncationInfo).build();
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             // IGNORE
         } finally {
             closeSafe(reader);
@@ -311,13 +311,13 @@ public class ICal4JParser implements ICalParser {
                 LOG.warn(composeErrorMessage(e, chunkedReader.getString()), e);
                 throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if (null == exceptions) {
                 LOG.error("", e);
             } else {
                 exceptions.add(e);
             }
-        } catch (final ParserException e) {
+        } catch (ParserException e) {
             LOG.warn("", e);
             throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
         }
@@ -417,7 +417,7 @@ public class ICal4JParser implements ICalParser {
             synchronized (UTC_PROPERTY) {
                 return UTC_PROPERTY.format(d);
             }
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             return s;
         }
 	}

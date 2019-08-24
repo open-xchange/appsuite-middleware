@@ -156,11 +156,11 @@ public class SpamAssassin {
                 return true;
             }
             return false;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             LOG.error("", e);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             LOG.error("", e);
@@ -193,9 +193,9 @@ public class SpamAssassin {
     private static final void trainMessage(final Message msg, final boolean isSpam) {
         try {
             new TrainMessageThread(getRawMessageInputStream(msg), isSpam).start();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             LOG.error("", e);
         }
     }
@@ -248,9 +248,9 @@ public class SpamAssassin {
                  */
                 final String res = cmdExec.getOutputString();
                 LOG.info("{}{}{}", STR_SPAMASSASSIN, isSpam ? STR_SPAM : STR_HAM, res);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error(ERR_PREFIX, e);
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
                 LOG.error(ERR_PREFIX, e);

@@ -122,7 +122,7 @@ public class MoveTest extends AbstractAJAXSession {
                     request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete");
                     getClient().execute(request);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -133,7 +133,7 @@ public class MoveTest extends AbstractAJAXSession {
                     request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete");
                     getClient().execute(request);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -188,7 +188,7 @@ public class MoveTest extends AbstractAJAXSession {
                     request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete");
                     getClient().execute(request);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -199,7 +199,7 @@ public class MoveTest extends AbstractAJAXSession {
                     request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete");
                     getClient().execute(request);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

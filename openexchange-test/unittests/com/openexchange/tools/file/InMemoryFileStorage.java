@@ -106,7 +106,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
                     bytes.add(B(buffer[i]));
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new OXException(e);
         }
 

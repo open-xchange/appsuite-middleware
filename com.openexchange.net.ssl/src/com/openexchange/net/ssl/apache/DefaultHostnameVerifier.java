@@ -78,7 +78,7 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
             final X509Certificate x509 = (X509Certificate) certs[0];
             verify(host, x509);
             return true;
-        } catch (final SSLException ex) {
+        } catch (SSLException ex) {
             LOG.debug(ex.getMessage(), ex);
             return false;
         }
@@ -239,7 +239,7 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
         Collection<List<?>> c = null;
         try {
             c = cert.getSubjectAlternativeNames();
-        } catch (final CertificateParsingException ignore) {
+        } catch (CertificateParsingException ignore) {
             LOG.trace("", ignore);
         }
         List<String> subjectAltList = null;
@@ -269,7 +269,7 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
         try {
             final InetAddress inetAddress = InetAddress.getByName(hostname);
             return inetAddress.getHostAddress();
-        } catch (final UnknownHostException unexpected) { // Should not happen, because we check for IPv6 address above
+        } catch (UnknownHostException unexpected) { // Should not happen, because we check for IPv6 address above
             LOG.trace("", unexpected);
             return hostname;
         }

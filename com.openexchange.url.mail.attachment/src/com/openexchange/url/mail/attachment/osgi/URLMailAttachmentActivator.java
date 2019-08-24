@@ -86,7 +86,7 @@ public final class URLMailAttachmentActivator extends HousekeepingActivator {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put("identifier", name);
             registerService(DataSource.class, new URLMailAttachmentDataSource(this), props);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("starting bundle failed: {}", name, e);
             throw e;
         }
@@ -97,7 +97,7 @@ public final class URLMailAttachmentActivator extends HousekeepingActivator {
         LOG.info("stopping bundle: {}", name);
         try {
             super.stopBundle();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("stopping bundle failed: {}", name, e);
             throw e;
         }

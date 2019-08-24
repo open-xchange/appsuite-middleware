@@ -352,7 +352,7 @@ public class JSONObject extends AbstractJSONValue {
                 final Field field = c.getField(name);
                 final Object value = field.get(object);
                 this.put(name, value);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 /* forget about it */
             }
         }
@@ -437,9 +437,9 @@ public class JSONObject extends AbstractJSONValue {
                     }
                 }
             }
-        } catch (final ClassCastException unused) {
+        } catch (ClassCastException unused) {
             return false;
-        } catch (final NullPointerException unused) {
+        } catch (NullPointerException unused) {
             return false;
         }
         return true;
@@ -659,7 +659,7 @@ public class JSONObject extends AbstractJSONValue {
         final Object o = get(key);
         try {
             return o instanceof Number ? ((Number) o).doubleValue() : Double.parseDouble((String) o);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new JSONException("JSONObject[" + quote(key) + "] is not a number.", e);
         }
     }
@@ -993,7 +993,7 @@ public class JSONObject extends AbstractJSONValue {
         try {
             final Object o = opt(key);
             return o instanceof Number ? ((Number) o).doubleValue() : new Double((String) o).doubleValue();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
@@ -1020,7 +1020,7 @@ public class JSONObject extends AbstractJSONValue {
     public int optInt(final String key, final int defaultValue) {
         try {
             return getInt(key);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
@@ -1091,7 +1091,7 @@ public class JSONObject extends AbstractJSONValue {
     public long optLong(final String key, final long defaultValue) {
         try {
             return getLong(key);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return defaultValue;
         }
     }
@@ -1413,7 +1413,7 @@ public class JSONObject extends AbstractJSONValue {
                     // JSON object modified while trying to generate string. Retry...
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             final Logger logger = JSONObject.LOGGER.get();
             if (null != logger) {
                 logger.logp(Level.SEVERE, JSONObject.class.getName(), "toString()", e.getMessage(), e);
@@ -1461,7 +1461,7 @@ public class JSONObject extends AbstractJSONValue {
             jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
             write(this, jGenerator);
             return writer.toString();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jGenerator);
@@ -1488,7 +1488,7 @@ public class JSONObject extends AbstractJSONValue {
             String o;
             try {
                 o = ((JSONString) value).toJSONString();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new JSONException(e);
             }
             if (o != null) {
@@ -1528,7 +1528,7 @@ public class JSONObject extends AbstractJSONValue {
                     return result;
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             /* forget about it */
         }
         if (value instanceof Number) {
@@ -1562,7 +1562,7 @@ public class JSONObject extends AbstractJSONValue {
             jGenerator.setPrettyPrinter(STANDARD_MINIMAL_PRETTY_PRINTER);
             write(this, jGenerator);
             return writer;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jGenerator);
@@ -1620,7 +1620,7 @@ public class JSONObject extends AbstractJSONValue {
                 return JSONArray.parse(jParser, null);
             }
             throw new JSONException("Neither a JSONObject nor a JSONArray");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jParser);
@@ -1648,7 +1648,7 @@ public class JSONObject extends AbstractJSONValue {
                 }
             }
             return parse(jParser, optObject);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         } finally {
             close(jParser);
@@ -1696,7 +1696,7 @@ public class JSONObject extends AbstractJSONValue {
                 case VALUE_NUMBER_FLOAT:
                     try {
                         jo.put(fieldName, jParser.getDecimalValue());
-                    } catch (final RuntimeException e) {
+                    } catch (RuntimeException e) {
                         final String text = jParser.getText();
                         if (!"NaN".equals(text)) {
                             throw new JSONException("JSON parsing failed. Could not convert \"" + text + "\" to a big decimal number.", e);
@@ -1707,11 +1707,11 @@ public class JSONObject extends AbstractJSONValue {
                 case VALUE_NUMBER_INT:
                     try {
                         jo.put(fieldName, jParser.getIntValue());
-                    } catch (final JsonParseException e) {
+                    } catch (JsonParseException e) {
                         // Outside of range of Java int
                         try {
                             jo.put(fieldName, jParser.getLongValue());
-                        } catch (final JsonParseException pe) {
+                        } catch (JsonParseException pe) {
                             // Outside of range of Java long
                             // Fallback: Treat number as double, so we don't lose
                             // too much precision (#44850)
@@ -1754,7 +1754,7 @@ public class JSONObject extends AbstractJSONValue {
                 current = jParser.nextToken();
             }
             return jo;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new JSONException(e);
         }
     }

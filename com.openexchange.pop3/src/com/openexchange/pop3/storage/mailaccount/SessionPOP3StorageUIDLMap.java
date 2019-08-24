@@ -92,7 +92,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         try {
             try {
                 cached = (SessionPOP3StorageUIDLMap) session.getParameter(key);
-            } catch (final ClassCastException e) {
+            } catch (ClassCastException e) {
                 cached = null;
             }
             if (null == cached) {

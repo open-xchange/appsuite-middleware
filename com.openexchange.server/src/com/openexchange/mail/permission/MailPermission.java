@@ -114,17 +114,17 @@ public abstract class MailPermission extends OCLPermission {
          */
         try {
             return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance();
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
-        } catch (final NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
-        } catch (final InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             throw MailExceptionCode.INSTANTIATION_PROBLEM.create(e, clazz.getName());
         }
     }

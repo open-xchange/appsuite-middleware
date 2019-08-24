@@ -154,7 +154,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
                 if (null != client) {
                     try {
                         client.logout();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

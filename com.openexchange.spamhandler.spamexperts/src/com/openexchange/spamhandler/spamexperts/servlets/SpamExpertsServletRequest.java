@@ -302,7 +302,7 @@ public final class SpamExpertsServletRequest {
             URIBuilder builder = new URIBuilder();
             builder.setScheme(baseUri.getScheme()).setHost(baseUri.getHost()).setPort(baseUri.getPort()).setPath(null == optPath ? baseUri.getPath() : optPath).setQuery(null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"));
             return builder.build();
-        } catch (final URISyntaxException x) {
+        } catch (URISyntaxException x) {
             throw new IllegalArgumentException("Failed to build URI", x);
         }
     }

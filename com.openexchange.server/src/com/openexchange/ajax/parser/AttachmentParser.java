@@ -92,7 +92,7 @@ public class AttachmentParser {
             int id = -1;
             try {
                 id = Integer.parseInt(idString);
-            } catch (final NumberFormatException x) {
+            } catch (NumberFormatException x) {
                 throw new UnknownColumnException(idString);
             }
             final AttachmentField f = AttachmentField.get(id);

@@ -91,23 +91,23 @@ public class OXTestToolkit {
             while (expected.read(buff) > 0) {
                 try {
                     actual.read(buff2);
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     fail(message + ": 'actual' stream was shorter than 'expected' stream.");
                 }
                 crcActual.update(buff);
                 crcExpected.update(buff2);
             }
             assertEquals(message + ":'actual' stream was longer than 'expected' stream.", -1, actual.read(buff2));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             fail(message + ": Could not read from 'expected' stream.");
         } finally {
             try {
                 actual.close();
-            } catch (final IOException e) {
+            } catch (IOException e) {
             }
             try {
                 expected.close();
-            } catch (final IOException e) {
+            } catch (IOException e) {
             }
         }
         assertEquals(message + ": Both streams should have the same checksum", crcExpected.getValue(), crcActual.getValue());

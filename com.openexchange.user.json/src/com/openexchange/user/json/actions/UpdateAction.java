@@ -188,7 +188,7 @@ public final class UpdateAction extends AbstractUserAction {
              * Return contact last-modified from server
              */
             return new AJAXRequestResult(new JSONObject(0), parsedUserContact.getLastModified());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 

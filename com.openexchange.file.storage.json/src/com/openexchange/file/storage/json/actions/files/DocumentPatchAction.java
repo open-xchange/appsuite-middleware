@@ -134,7 +134,7 @@ public class DocumentPatchAction extends AbstractFileAction {
              * Return empty result
              */
             return new AJAXRequestResult(JSONObject.NULL, "json");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             while (!closeables.isEmpty()) {
@@ -158,7 +158,7 @@ public class DocumentPatchAction extends AbstractFileAction {
         if (null != file) {
             try {
                 file.delete();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -176,9 +176,9 @@ public class DocumentPatchAction extends AbstractFileAction {
             java.io.File tmpFile = java.io.File.createTempFile("open-xchange-dpa-", ".tmp", directory);
             tmpFile.deleteOnExit();
             return tmpFile;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

@@ -170,7 +170,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
             cachedParsedFlags = null;
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -207,7 +207,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
             cachedParsedFlags = null;
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
@@ -255,7 +255,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
             cachedParsedFlags = null;
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }

@@ -124,7 +124,7 @@ public final class ContactDeleteListener implements DeleteListener {
             stmt.addBatch("DELETE FROM prg_contacts WHERE cid=" + ctx.getContextId());
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -200,7 +200,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 stmt.executeBatch();
                 Databases.closeSQLStuff(rs, stmt);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

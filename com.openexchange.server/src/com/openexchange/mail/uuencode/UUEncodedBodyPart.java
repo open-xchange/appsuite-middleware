@@ -118,12 +118,12 @@ public class UUEncodedBodyPart {
                 headerIndex = beginIndex;
                 endIndex = sSearch.indexOf(END, beginIndex);
                 return true;
-            } catch (final NoSuchElementException nsee) {
+            } catch (NoSuchElementException nsee) {
                 /*
                  * there are no more tokens in this tokenizer's string
                  */
                 LOG.error("", nsee);
-            } catch (final NumberFormatException nfe) {
+            } catch (NumberFormatException nfe) {
                 /*
                  * possibleFileSize was non-numeric
                  */

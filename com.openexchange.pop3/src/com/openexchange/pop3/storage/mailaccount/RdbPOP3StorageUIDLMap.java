@@ -106,7 +106,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -148,7 +148,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                     insertOnDuplicateUpdate(uidl, fullnameUIDPairs[i], con);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -172,7 +172,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.executeUpdate();
         } catch (final DataTruncation e) {
             throw POP3ExceptionCode.UIDL_TOO_BIG.create(e, uidl);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -193,7 +193,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setString(pos, uidl);
             rs = stmt.executeQuery();
             return rs.next() ? new FullnameUIDPair(rs.getString(1), rs.getString(2)) : null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -216,7 +216,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setString(pos, fullnameUIDPair.getMailId());
             rs = stmt.executeQuery();
             return rs.next() ? rs.getString(1) : null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -263,7 +263,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 m.put(rs.getString(1), new FullnameUIDPair(rs.getString(2), rs.getString(3)));
             } while (rs.next());
             return m;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -288,7 +288,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -311,7 +311,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);

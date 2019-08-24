@@ -96,7 +96,7 @@ public final class POP3Prober {
                 return null;
             }
             return uids;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             warnings.add(e);
             return null;
         }
@@ -116,7 +116,7 @@ public final class POP3Prober {
         }
         try {
             return protocol.uidl(new String[1]);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             warnings.add(e);
             return false;
         }
@@ -136,7 +136,7 @@ public final class POP3Prober {
         }
         try {
             return (null != protocol.top(1, 1));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             warnings.add(e);
             return false;
         }

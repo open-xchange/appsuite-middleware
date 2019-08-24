@@ -156,7 +156,7 @@ public class RdbTaskStorage extends TaskStorage {
             if (sanityCheck && 1 != count) {
                 throw TaskExceptionCode.MODIFIED.create();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(null, stmt);
@@ -296,7 +296,7 @@ public class RdbTaskStorage extends TaskStorage {
             }
             result = stmt.executeQuery();
             return result.next() ? result.getInt(1) : 0;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(result, stmt);
@@ -340,7 +340,7 @@ public class RdbTaskStorage extends TaskStorage {
             throw parseTruncated(con, e, task, type);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(null, stmt);
@@ -400,7 +400,7 @@ public class RdbTaskStorage extends TaskStorage {
             } else {
                 exists = false;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(result, stmt);
@@ -435,7 +435,7 @@ public class RdbTaskStorage extends TaskStorage {
                 }
                 task.setObjectID(taskId);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(result, stmt);
@@ -490,7 +490,7 @@ public class RdbTaskStorage extends TaskStorage {
             throw parseTruncated(con, e, task, type);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(null, stmt);
@@ -523,7 +523,7 @@ public class RdbTaskStorage extends TaskStorage {
             int tmp2 = -1;
             try {
                 tmp2 = DBUtils.getColumnSize(con, SQL.TASK_TABLES.get(type), mapper.getDBColumnName());
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
                 tmp2 = -1;
             }
@@ -583,7 +583,7 @@ public class RdbTaskStorage extends TaskStorage {
                 throw TaskExceptionCode.NO_COUNT_RESULT.create();
             }
             return result.getInt(1) > 0;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             Databases.closeSQLStuff(result, stmt);

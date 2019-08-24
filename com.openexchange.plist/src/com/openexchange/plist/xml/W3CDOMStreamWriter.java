@@ -306,7 +306,7 @@ public class W3CDOMStreamWriter implements XMLStreamWriter {
     public void writeStartDocument(final String version) throws XMLStreamException {
         try {
             document.setXmlVersion(version);
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             //ignore - likely not DOM level 3
         }
     }
@@ -315,7 +315,7 @@ public class W3CDOMStreamWriter implements XMLStreamWriter {
     public void writeStartDocument(final String encoding, final String version) throws XMLStreamException {
         try {
             document.setXmlVersion(version);
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             //ignore - likely not DOM level 3
         }
     }
@@ -380,7 +380,7 @@ public class W3CDOMStreamWriter implements XMLStreamWriter {
         }
         try {
             return StaxUtils.toString(document);
-        } catch (final XMLStreamException e) {
+        } catch (XMLStreamException e) {
             return super.toString();
         } catch (final Throwable t) {
             t.printStackTrace();

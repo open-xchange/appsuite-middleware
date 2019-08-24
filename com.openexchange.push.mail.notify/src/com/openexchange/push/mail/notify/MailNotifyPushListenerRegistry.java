@@ -128,7 +128,7 @@ public final class MailNotifyPushListenerRegistry {
             public void run() {
                 try {
                     triggerDueNotifications();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     log.warn("Failed to trigger notifications.", e);
                 }
             }

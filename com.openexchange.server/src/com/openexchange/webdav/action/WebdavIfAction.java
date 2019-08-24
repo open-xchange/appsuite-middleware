@@ -120,7 +120,7 @@ public class WebdavIfAction extends AbstractAction {
 			if(checkDestinationLocks || req.getResource().isLockNull()) {
 				checkDestinationLocks(ifHeader, req);
 			}
-		} catch (final IfHeaderParseException e) {
+		} catch (IfHeaderParseException e) {
 			LOG.trace("", e);
 		}
 

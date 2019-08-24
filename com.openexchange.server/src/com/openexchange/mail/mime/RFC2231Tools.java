@@ -232,7 +232,7 @@ public final class RFC2231Tools {
             }
             out.flip();
             return out.toString();
-        } catch (final CharacterCodingException e) {
+        } catch (CharacterCodingException e) {
             /*
              * Cannot occur
              */
@@ -298,7 +298,7 @@ public final class RFC2231Tools {
                     retval.append(c);
                 }
             }
-        } catch (final UnsupportedCharsetException e) {
+        } catch (UnsupportedCharsetException e) {
             /*
              * Cannot occur
              */

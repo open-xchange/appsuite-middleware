@@ -82,7 +82,7 @@ public final class VCardImportParser extends AbstractUploadParser<VCardImportRes
             for (int i = 0; i < array.length(); i++) {
                 try {
                     tmp.add(ResponseParser.parse(array.getJSONObject(i)));
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     if (isFailOnError()) {
                         fail(e.getMessage());
                     }

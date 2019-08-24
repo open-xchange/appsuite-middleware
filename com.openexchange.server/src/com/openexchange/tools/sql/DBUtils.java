@@ -111,7 +111,7 @@ public final class DBUtils {
         if (result != null) {
             try {
                 result.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -128,7 +128,7 @@ public final class DBUtils {
         if (null != stmt) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -180,7 +180,7 @@ public final class DBUtils {
         if (rs != null) {
             try {
                 rs.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -190,7 +190,7 @@ public final class DBUtils {
         if (stmt != null) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -212,7 +212,7 @@ public final class DBUtils {
         }
         try {
             return stmt.toString();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             return query;
         }
     }
@@ -250,7 +250,7 @@ public final class DBUtils {
         }
         try {
             con.rollback();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -268,7 +268,7 @@ public final class DBUtils {
         }
         try {
             con.setAutoCommit(true);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }

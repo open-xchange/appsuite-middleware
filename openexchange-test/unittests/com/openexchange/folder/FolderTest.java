@@ -137,7 +137,7 @@ public class FolderTest {
             // null, System.currentTimeMillis());
             final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
             assertTrue(tmp == null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         } finally {
@@ -151,7 +151,7 @@ public class FolderTest {
                     // session.getUserConfiguration(), true,
                     // session.getContext(), null, null,
                     // System.currentTimeMillis());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     LOG.error("", e);
                 }
             }
@@ -179,7 +179,7 @@ public class FolderTest {
             Exception exc = null;
             try {
                 oxma.createFolder(fo, true, System.currentTimeMillis());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 exc = e;
             }
             assertTrue(exc != null);
@@ -187,7 +187,7 @@ public class FolderTest {
                 oxma.deleteFolder(fo, true, System.currentTimeMillis());
                 fail("Exception expected!");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -227,7 +227,7 @@ public class FolderTest {
                 // fuid = oxfa.createFolder(fo, userId, groups,
                 // session.getUserConfiguration(), true, true,
                 // session.getContext(), null, null, true, true);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 exc = e;
             }
             assertTrue(exc != null);
@@ -238,7 +238,7 @@ public class FolderTest {
                 // null, null, System.currentTimeMillis());
                 fail("Exception expected!");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -274,7 +274,7 @@ public class FolderTest {
                 // fuid = oxfa.createFolder(fo, userId, groups,
                 // session.getUserConfiguration(), true, true,
                 // session.getContext(), null, null, true, true);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 exc = e;
             }
             assertTrue(exc != null);
@@ -285,7 +285,7 @@ public class FolderTest {
                 // null, null, System.currentTimeMillis());
                 fail("Exception expected!");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -320,7 +320,7 @@ public class FolderTest {
                 // fuid = oxfa.createFolder(fo, userId, groups,
                 // session.getUserConfiguration(), true, true,
                 // session.getContext(), null, null, true, true);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 exc = e;
             }
             assertTrue(exc != null);
@@ -331,7 +331,7 @@ public class FolderTest {
                 // null, null, System.currentTimeMillis());
                 fail("Exception expected!");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -385,7 +385,7 @@ public class FolderTest {
                 // fuid = oxfa.createFolder(fo, userId, groups,
                 // session.getUserConfiguration(), true, true,
                 // session.getContext(), null, null, true, true);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 exc = e;
             }
             assertTrue(exc != null);
@@ -396,7 +396,7 @@ public class FolderTest {
                 // null, null, System.currentTimeMillis());
                 fail("Exception expected!");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -459,7 +459,7 @@ public class FolderTest {
                 final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
                 assertTrue(tmp == null);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -525,7 +525,7 @@ public class FolderTest {
                 final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
                 assertTrue(tmp == null);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -592,7 +592,7 @@ public class FolderTest {
                 final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
                 assertTrue(tmp == null);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -683,7 +683,7 @@ public class FolderTest {
                 final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
                 assertTrue(tmp == null);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -800,7 +800,7 @@ public class FolderTest {
                     // oxfa.deleteFolder(fuid, userId, groups,
                     // session.getUserConfiguration(), true,
                     // session.getContext(), null, null, lastModified);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
@@ -821,7 +821,7 @@ public class FolderTest {
                     // System.currentTimeMillis());
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -871,7 +871,7 @@ public class FolderTest {
                     // fuid = oxfa.createFolder(fo, userId, groups,
                     // session.getUserConfiguration(), true, true,
                     // session.getContext(), null, null, true, true);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     if (fuid > 0) {
                         oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
                     }
@@ -892,7 +892,7 @@ public class FolderTest {
                     fo = oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                     // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                     // System.currentTimeMillis(), null, null);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     exc = e;
                 }
                 assertTrue(exc != null);
@@ -912,7 +912,7 @@ public class FolderTest {
                     // System.currentTimeMillis());
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -960,7 +960,7 @@ public class FolderTest {
                     fo = oxfa.updateFolder(fo, true, false, System.currentTimeMillis());
                     // fo = oxfa.updateMoveRenameFolder(fo, session, true,
                     // System.currentTimeMillis(), null, null);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     exc = e;
                 }
                 assertTrue(exc != null);
@@ -980,7 +980,7 @@ public class FolderTest {
                     // System.currentTimeMillis());
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -1041,7 +1041,7 @@ public class FolderTest {
                  */
                 try {
                     OXFolderManager.getInstance(session).clearFolder(fo, true, System.currentTimeMillis());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     fail(e.getMessage());
                 }
                 assertTrue(true);
@@ -1054,7 +1054,7 @@ public class FolderTest {
                     oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -1111,7 +1111,7 @@ public class FolderTest {
                     it = null;
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -1149,7 +1149,7 @@ public class FolderTest {
                 uc0.setCalendar(true);
                 saveUserConfiguration(uc0);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

@@ -140,7 +140,7 @@ public class UserModuleAccess implements Serializable, Cloneable {
     public UserModuleAccess clone() {
         try {
             return (UserModuleAccess) super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError("CloneNotSupportedException although Colenable is implemented");
         }
     }
@@ -524,9 +524,9 @@ public class UserModuleAccess implements Serializable, Cloneable {
                     ret.append(ob);
                     ret.append("\n");
                 }
-            } catch (final IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 ret.append("IllegalArgument\n");
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 ret.append("IllegalAccessException\n");
             }
         }

@@ -88,9 +88,9 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
             public void added(final ServiceReference<HttpService> ref, final HttpService service) {
                 try {
                     service.registerServlet("/jslob", new JSlobRestServlet(dispatcherPrefixService.getPrefix()), null, null);
-                } catch (final ServletException e) {
+                } catch (ServletException e) {
                     log.error("Servlet registration failed: {}", JSlobRestServlet.class.getName(), e);
-                } catch (final NamespaceException e) {
+                } catch (NamespaceException e) {
                     log.error("Servlet registration failed: {}", JSlobRestServlet.class.getName(), e);
                 }
             }

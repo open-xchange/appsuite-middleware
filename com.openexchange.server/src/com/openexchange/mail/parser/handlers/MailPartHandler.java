@@ -141,7 +141,7 @@ public final class MailPartHandler implements MailMessageHandler {
         public InputStream getInputStream() throws OXException {
             try {
                 return getDataSource().getInputStream();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -383,7 +383,7 @@ public final class MailPartHandler implements MailMessageHandler {
                 nestedMail = MimeMessageConverter.convertMessage(new MimeMessage(
                     MimeDefaultSession.getDefaultSession(),
                     (InputStream) content));
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {

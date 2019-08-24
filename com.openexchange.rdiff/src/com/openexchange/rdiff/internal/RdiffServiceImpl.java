@@ -85,9 +85,9 @@ public final class RdiffServiceImpl implements RdiffService {
     public void createSignatures(final InputStream sourceIn, final OutputStream signatureOut) throws OXException {
         try {
             rdiff.makeSignatures(sourceIn, signatureOut);
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw RdiffExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(sourceIn);
@@ -105,9 +105,9 @@ public final class RdiffServiceImpl implements RdiffService {
                 throw RdiffExceptionCodes.ERROR.create("Stream is empty.");
             }
             return toChecksums(signatures);
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw RdiffExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(sourceIn);
@@ -118,7 +118,7 @@ public final class RdiffServiceImpl implements RdiffService {
     public List<ChecksumPair> readSignatures(final InputStream signatureIn) throws OXException {
         try {
             return toChecksums(rdiff.readSignatures(signatureIn));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(signatureIn);
@@ -129,9 +129,9 @@ public final class RdiffServiceImpl implements RdiffService {
     public void createDeltas(final List<ChecksumPair> sums, final InputStream baseIn, final OutputStream deltaOut) throws OXException {
         try {
             rdiff.makeDeltas(toMetastaticChecksums(sums), baseIn, deltaOut);
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw RdiffExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(baseIn);
@@ -144,9 +144,9 @@ public final class RdiffServiceImpl implements RdiffService {
     public List<Delta> createDeltas(final List<ChecksumPair> sums, final InputStream baseIn) throws OXException {
         try {
             return toDeltas(rdiff.makeDeltas(toMetastaticChecksums(sums), baseIn));
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw RdiffExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(baseIn);
@@ -157,7 +157,7 @@ public final class RdiffServiceImpl implements RdiffService {
     public void writeSignatures(final List<ChecksumPair> sigs, final OutputStream out) throws OXException {
         try {
             rdiff.writeSignatures(toMetastaticChecksums(sigs), out);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.flush(out);
@@ -170,7 +170,7 @@ public final class RdiffServiceImpl implements RdiffService {
         try {
             rdiff.rebuildFile(baseFile, deltaIn, patchOut);
             patchOut.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(deltaIn);

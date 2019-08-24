@@ -189,7 +189,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
                 }
             }
             return map;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw TokenLoginExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(reader);
@@ -211,12 +211,12 @@ public class TokenLoginServiceImpl implements TokenLoginService {
                     try {
                         final Integer i = Integer.valueOf(value);
                         params.put(param.substring(0, pos).trim(), i);
-                    } catch (final NumberFormatException nfe1) {
+                    } catch (NumberFormatException nfe1) {
                         // Try parse to long
                         try {
                             final Long l = Long.valueOf(value);
                             params.put(param.substring(0, pos).trim(), l);
-                        } catch (final NumberFormatException nfe2) {
+                        } catch (NumberFormatException nfe2) {
                             // Assume String value
                             params.put(param.substring(0, pos).trim(), value);
                         }

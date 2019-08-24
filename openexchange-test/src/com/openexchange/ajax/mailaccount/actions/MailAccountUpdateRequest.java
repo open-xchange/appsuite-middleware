@@ -104,7 +104,7 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
             }
 
             return incrementalUpdate;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new JSONException(e);
         }
     }

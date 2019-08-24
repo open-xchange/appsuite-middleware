@@ -93,7 +93,7 @@ final class COPYUIDResponse {
              */
             try {
                 retval[index] = destArr[in];
-            } catch (final ArrayIndexOutOfBoundsException e) {
+            } catch (ArrayIndexOutOfBoundsException e) {
                 logger.error("A COPYUID's source UID could not be found in given source UIDs", e);
             }
         }

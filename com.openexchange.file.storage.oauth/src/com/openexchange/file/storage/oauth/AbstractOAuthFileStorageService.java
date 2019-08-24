@@ -172,7 +172,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
         try {
             return newInstanceFor(compositeAccountManager.getAccountManagerFor(getId()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("{}", e.getMessage(), e);
             return getAccountManager0();
         }

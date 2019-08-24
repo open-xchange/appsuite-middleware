@@ -93,7 +93,7 @@ public final class Task2Links {
             final TaskStorage storage = TaskStorage.getInstance();
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folders = FolderStorage.getInstance().selectFolder(ctx, taskId, StorageType.ACTIVE);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return false;
         }
@@ -114,7 +114,7 @@ public final class Task2Links {
             final TaskStorage storage = TaskStorage.getInstance();
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folder = FolderStorage.getInstance().selectFolderById(ctx, taskId, folderId, StorageType.ACTIVE);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return false;
         }
@@ -125,7 +125,7 @@ public final class Task2Links {
         final FolderObject folder2;
         try {
             folder2 = Tools.getFolder(ctx, folder.getIdentifier());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return false;
         }
@@ -133,7 +133,7 @@ public final class Task2Links {
             Permission.isFolderVisible(ctx, user, permissionBits, folder2);
             Permission.canReadInFolder(ctx, user, permissionBits, folder2, task);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }

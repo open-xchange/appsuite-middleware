@@ -138,7 +138,7 @@ public class GABRestorerCLT extends AbstractRmiCLI<Void> {
             final String optionValue = cmd.getOptionValue('c');
             try {
                 contextId = Integer.parseInt(optionValue.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 System.err.println("Context parameter is not a number: " + optionValue);
                 printHelp();
                 System.exit(1);

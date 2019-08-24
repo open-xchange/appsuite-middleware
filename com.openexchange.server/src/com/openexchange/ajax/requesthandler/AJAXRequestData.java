@@ -828,7 +828,7 @@ public class AJAXRequestData {
         }
         try {
             return Integer.parseInt(value.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, value);
         }
     }
@@ -953,7 +953,7 @@ public class AJAXRequestData {
         for (int i = 0; i < sa.length; i++) {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
             }
         }
@@ -1027,7 +1027,7 @@ public class AJAXRequestData {
                 return (T) Long.valueOf(value);
             }
             throw ServiceExceptionCode.absentService(StringParser.class);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             /*
              * Auto-unboxing may lead to NullPointerExceptions or NumberFormatExceptions if e.g. null or "Hello" should be coerced to an
              * integer value. Handle RuntimeException here to cover all possible non-declarable exceptions.
@@ -1977,7 +1977,7 @@ public class AJAXRequestData {
         }
         try {
             return (V) properties.get(name);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOGGER.trace("", e);
             return null;
         }

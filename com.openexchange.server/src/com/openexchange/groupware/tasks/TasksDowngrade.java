@@ -98,14 +98,14 @@ public class TasksDowngrade implements DowngradeListener {
             // - All tasks in public folders that can be only edited by this user.
             try {
                 removeTasks(session, ctx, permissionBits.getUserId(), con);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         } else if (!permissionBits.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
                 removeDelegations(session, ctx, permissionBits.getUserId(), permissionBits, con);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -294,7 +294,7 @@ public class TasksDowngrade implements DowngradeListener {
                     update.sentEvent(session);
                     try {
                         update.updateReminder();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         LOG.error("Problem while updating reminder for a task.",
                             e);
                     }

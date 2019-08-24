@@ -189,11 +189,11 @@ public class PushRequest {
             default:
                 throw PushUDPExceptionCode.INVALID_TYPE.create(null, Integer.valueOf(type));
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("PushRequest", e);
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             LOG.error("PushRequest: Remote host registration failed", e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("PushRequest", e);
         }
     }
@@ -239,7 +239,7 @@ public class PushRequest {
     private int parseMagic(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.MAGIC_NAN.create(e, s[pos]);
         }
@@ -248,7 +248,7 @@ public class PushRequest {
     private int parseType(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.TYPE_NAN.create(e, s[pos]);
         }
@@ -257,7 +257,7 @@ public class PushRequest {
     private int parseLength(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.LENGTH_NAN.create(e, s[pos]);
         }
@@ -266,7 +266,7 @@ public class PushRequest {
     private int parseUserId(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.USER_ID_NAN.create(e, s[pos]);
         }
@@ -275,7 +275,7 @@ public class PushRequest {
     private int parseContextId(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.CONTEXT_ID_NAN.create(e, s[pos]);
         }
@@ -284,7 +284,7 @@ public class PushRequest {
     private int parseFolderId(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.FOLDER_ID_NAN.create(e, s[pos]);
         }
@@ -293,7 +293,7 @@ public class PushRequest {
     private int parseModule(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.MODULE_NAN.create(e, s[pos]);
         }
@@ -302,7 +302,7 @@ public class PushRequest {
     private int parsePort(final String[] s, final int pos) throws OXException {
         try {
             return parseInt(s, pos);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             // Not a number...
             throw PushUDPExceptionCode.PORT_NAN.create(e, s[pos]);
         }
@@ -344,7 +344,7 @@ public class PushRequest {
             for (int a = 0; a < i.length; a++) {
                 i[a] = Integer.parseInt(tmp[a]);
             }
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw PushUDPExceptionCode.INVALID_USER_IDS.create(e, Arrays.toString(tmp));
         }
 

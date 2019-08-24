@@ -104,7 +104,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
                 context.ungetService(reference);
                 return null;
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             context.ungetService(reference);
             return null;
@@ -130,7 +130,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
 
                 MailProviderRegistry.unregisterMailProvider(provider);
                 LOG.info("Mail provider for protocol '{}' successfully unregistered", provider.getProtocol());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             } finally {
                 context.ungetService(reference);

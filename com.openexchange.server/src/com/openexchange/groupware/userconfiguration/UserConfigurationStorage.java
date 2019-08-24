@@ -151,7 +151,7 @@ public abstract class UserConfigurationStorage {
     public final UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return null;
         }

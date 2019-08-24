@@ -267,7 +267,7 @@ public class DefaultMessagingPermission implements MessagingPermission {
     public Object clone() {
         try {
             return super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
     }

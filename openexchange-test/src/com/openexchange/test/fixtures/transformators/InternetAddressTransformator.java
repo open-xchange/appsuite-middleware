@@ -121,7 +121,7 @@ public class InternetAddressTransformator implements Transformator {
     private InternetAddress getAddress(final String address) throws OXException {
         try {
             return InternetAddress.parse(address)[0];
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw OXException.general("Unable to parse e-mail address from " + address);
         }
     }
@@ -149,9 +149,9 @@ public class InternetAddressTransformator implements Transformator {
                             } else {
                                 addresses.add(new InternetAddress(entry.getEmailaddress()));
                             }
-                        } catch (final AddressException e) {
+                        } catch (AddressException e) {
                             throw new OXException(e);
-                        } catch (final UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             throw new OXException(e);
                         }
                     }
@@ -179,9 +179,9 @@ public class InternetAddressTransformator implements Transformator {
                         addresses.add(new InternetAddress(contact.getEmail3()));
                     }
                 }
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 throw new OXException(e);
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 e.printStackTrace();
             }
         }

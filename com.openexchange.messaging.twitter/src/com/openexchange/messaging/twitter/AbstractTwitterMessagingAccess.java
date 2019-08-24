@@ -163,7 +163,7 @@ public abstract class AbstractTwitterMessagingAccess {
                     tmp = newTwitterAccess;
                     testOAuthTwitterAccess(tmp);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw e;
             }
         }
@@ -179,7 +179,7 @@ public abstract class AbstractTwitterMessagingAccess {
             paging.setCount(1);
             newTwitterAccess.getFriendsTimeline(paging);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractTwitterMessagingAccess.class);
             logger.debug("", e);
             return false;
@@ -197,7 +197,7 @@ public abstract class AbstractTwitterMessagingAccess {
             paging.count(1);
             twitterAccess.getFriendsTimeline(paging);
             return true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }

@@ -223,7 +223,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
             if(order == OrderDirection.DESC) {
                 Collections.reverse(messages);
             }
-        } catch (final RuntimeException x) {
+        } catch (RuntimeException x) {
             final Throwable cause = x.getCause();
             if(OXException.class.isInstance(cause)) {
                 throw (OXException) cause;
@@ -259,7 +259,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
 
         try {
             return feed = new FeedAdapter(retrieveFeed(new URL(url)), "", session);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }

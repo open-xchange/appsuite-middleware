@@ -93,11 +93,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             ObjectName rateLimiterObjectName = getObjectName(RateLimiterMBean.NAME, true);
             managementService.registerMBean(rateLimiterObjectName, new RateLimiterMBeanImpl());
             this.rateLimiterObjectName = rateLimiterObjectName;
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         }
         new ReportingInit(managementService).start();
@@ -115,11 +115,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             if (null != rateLimiterObjectName) {
                 managementService.unregisterMBean(rateLimiterObjectName);
             }
-        } catch (final MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } finally {
             this.rateLimiterObjectName = null;

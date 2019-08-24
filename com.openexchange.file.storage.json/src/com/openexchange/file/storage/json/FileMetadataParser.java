@@ -98,7 +98,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         		purged.remove("last_modified");
         	}
         	File.Field.inject(jsonHandler, file, purged);
-        } catch (final RuntimeException x) {
+        } catch (RuntimeException x) {
             Throwable cause = x.getCause();
             if(cause != null) {
                 if (OXException.class.isInstance(cause)) {
@@ -136,7 +136,7 @@ public class FileMetadataParser implements FileMetadataParserService{
                 value = process(field, value);
 
                 field.doSwitch(set, md, value);
-            } catch (final JSONException x) {
+            } catch (JSONException x) {
                 throw new RuntimeException(x);
             } catch (OXException x) {
                 throw new RuntimeException(x);

@@ -157,7 +157,7 @@ public final class ContactImageDataSource implements ImageDataSource {
             }
             try {
                 folder = Integer.parseInt(val);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[0], val);
             }
         }
@@ -169,7 +169,7 @@ public final class ContactImageDataSource implements ImageDataSource {
             }
             try {
                 contactId = Integer.parseInt(val);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[1], val);
             }
         }

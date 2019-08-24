@@ -112,7 +112,7 @@ public class ResellerServiceImpl implements ResellerService {
                 throw ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.create(Integer.valueOf(cid));
             }
             return getData(new ResellerAdmin[] { ResellerAdmin.builder().id(rs.getInt(1)).build() })[0];
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
             throw new OXException(e);
         } finally {

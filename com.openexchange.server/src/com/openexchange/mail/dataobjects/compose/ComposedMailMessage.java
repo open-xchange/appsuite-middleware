@@ -316,7 +316,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                     }
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }

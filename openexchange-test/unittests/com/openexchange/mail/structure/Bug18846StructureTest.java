@@ -110,7 +110,7 @@ public class Bug18846StructureTest extends AbstractMailTest {
                 final String contentType = nestedNestedMail.getJSONObject("headers").getJSONObject("content-type").getString("type");
                 assertEquals("Unexpected Content-Type: " + contentType, "text/plain", contentType);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

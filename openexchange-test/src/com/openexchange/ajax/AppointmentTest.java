@@ -113,7 +113,7 @@ public class AppointmentTest extends AbstractAJAXSession {
             startTime = c.getTimeInMillis();
             startTime += timeZone.getOffset(startTime);
             endTime = startTime + 3600000;
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             fail(ex.getMessage());
         }
     }

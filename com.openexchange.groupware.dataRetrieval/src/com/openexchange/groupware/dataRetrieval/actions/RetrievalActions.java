@@ -152,7 +152,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
                 json.put("url", uri);
                 return json;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
             }
         }

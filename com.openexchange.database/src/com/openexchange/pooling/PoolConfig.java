@@ -227,7 +227,7 @@ public class PoolConfig implements Cloneable {
     public PoolConfig clone() {
         try {
             return (PoolConfig) super.clone();
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             // Will not appear!
             throw new Error("Assertion failed!", e);
         }

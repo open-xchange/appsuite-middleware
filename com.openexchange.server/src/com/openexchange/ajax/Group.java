@@ -88,7 +88,7 @@ public class Group extends DataServlet {
 
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (final JSONException e) {
+			} catch (JSONException e) {
 				LOG.error("", e);
 	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse, session);
@@ -99,10 +99,10 @@ public class Group extends DataServlet {
 			response.setTimestamp(groupRequest.getTimestamp());
 			response.setData(responseObj);
 			//response.setData(new JSONObject(sw.toString()));
-		} catch (final OXException e) {
+		} catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);
@@ -123,7 +123,7 @@ public class Group extends DataServlet {
 
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (final JSONException e) {
+			} catch (JSONException e) {
 				LOG.error("", e);
 	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse, session);
@@ -155,10 +155,10 @@ public class Group extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 			}
-		} catch (final OXException e) {
+		} catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             LOG.error("", oje);
             response.setException(oje);

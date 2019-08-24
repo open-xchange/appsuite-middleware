@@ -107,7 +107,7 @@ public abstract class ServiceHolder<S> {
                         iter.remove();
                     }
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
             }
         }
@@ -134,9 +134,9 @@ public abstract class ServiceHolder<S> {
             Object result;
             try {
                 result = m.invoke(delegate, args);
-            } catch (final InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 throw e.getTargetException();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("unexpected invocation exception: " + e.getMessage());
             }
             return result;
@@ -326,7 +326,7 @@ public abstract class ServiceHolder<S> {
                         while (countActive.get() > 0) {
                             countActive.wait();
                         }
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         LOG.error("", e);
                     } finally {

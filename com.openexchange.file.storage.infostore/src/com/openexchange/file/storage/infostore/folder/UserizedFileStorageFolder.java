@@ -167,7 +167,7 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
                 permission.getWritePermission(),
                 permission.getDeletePermission());
                 return (oclPerm);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

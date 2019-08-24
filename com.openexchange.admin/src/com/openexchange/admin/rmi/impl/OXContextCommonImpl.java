@@ -97,9 +97,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
                 }
             }
-        } catch (final EnforceableDataObjectException e) {
+        } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
-        } catch (final PluginException e) {
+        } catch (PluginException e) {
             throw StorageException.wrapForRMI(e);
         }
 
@@ -107,7 +107,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             if (!admin_user.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());
             }
-        } catch (final EnforceableDataObjectException e) {
+        } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
 
@@ -123,7 +123,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try {
             doNullCheck(ctx, admin_user);
-        } catch (final InvalidDataException e1) {
+        } catch (InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
@@ -174,10 +174,10 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 retval.setName(String.valueOf(retval.getId()));
             }
             return retval;
-        } catch (final ContextExistsException e) {
+        } catch (ContextExistsException e) {
             LOGGER.error("", e);
             throw e;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             LOGGER.error("", e);
             throw e;
         } catch (StorageException e) {

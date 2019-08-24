@@ -98,7 +98,7 @@ public class ActionSMS implements ActionService {
 			to_formatted = smssend.checkAndFormatRecipient(to);
 			smssend.setSMSNumber(to_formatted);
 
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			LOG.error("Invalid recipient detected. SMS to recipient {} (unformatted nr:{}) could not be send for user {} in context {}", to_formatted, to, I(userid), I(cid), e);
 			provisioningResponse.setMessage("Invalid recipient number detected.");
 			provisioningResponse.setSuccess(false);
@@ -127,11 +127,11 @@ public class ActionSMS implements ActionService {
 				provisioningResponse.setSuccess(false);
 				LOG.error("API error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid));
 			}
-		} catch (final MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid), e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
-		} catch (final XmlRpcException e) {
+		} catch (XmlRpcException e) {
 			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid),e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
@@ -150,7 +150,7 @@ public class ActionSMS implements ActionService {
                 throw ServiceExceptionCode.absentService(ConfigurationService.class);
             }
 			retval = configservice.getProperty(key);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			LOG.error("value for key {} was not found for ACTIONSMS configuration", key);
 		}
 		return retval;

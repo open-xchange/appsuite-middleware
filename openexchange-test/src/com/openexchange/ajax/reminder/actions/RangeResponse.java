@@ -89,7 +89,7 @@ public class RangeResponse extends AbstractAJAXResponse {
                     final ReminderObject reminder = new ReminderObject();
                     parser.parse(reminder, jremind);
                     reminders.add(reminder);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw OXJSONExceptionCodes.JSON_READ_ERROR.create(array.toString());
                 }
             }

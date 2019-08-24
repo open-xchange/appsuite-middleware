@@ -112,7 +112,7 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
         if (hasImage) {
             try {
                 stringifiedJSON = convert(contactData, userData).toString();
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw new IllegalArgumentException(e);
             }
         }

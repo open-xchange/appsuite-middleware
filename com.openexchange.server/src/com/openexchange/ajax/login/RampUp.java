@@ -123,7 +123,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
             } else {
                 ((JSONObject) response.getData()).write(resp.getWriter());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LoginServlet.sendError(resp);
         }
     }

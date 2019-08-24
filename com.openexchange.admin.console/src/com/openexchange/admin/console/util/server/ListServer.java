@@ -92,7 +92,7 @@ public class ListServer extends ServerAbstraction {
             }
 
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, null, e, parser);
         }
     }

@@ -116,7 +116,7 @@ public class MessagesServlet extends MultipleAdapterServletNew {
                 }
 
 
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new ServletException(e);
             }
 

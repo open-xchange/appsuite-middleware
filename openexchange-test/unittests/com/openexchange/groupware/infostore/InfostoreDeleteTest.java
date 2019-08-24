@@ -79,7 +79,7 @@ public class InfostoreDeleteTest {
             database.saveDocumentMetadata(metadata, Long.MAX_VALUE, session);
             database.commit();
             return metadata;
-        } catch (final Exception x) {
+        } catch (Exception x) {
             database.rollback();
             throw x;
         } finally {

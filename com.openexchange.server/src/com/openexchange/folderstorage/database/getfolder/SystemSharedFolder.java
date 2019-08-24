@@ -140,7 +140,7 @@ public final class SystemSharedFolder {
                     userPerm,
                     null,
                     con);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
         try {
@@ -183,7 +183,7 @@ public final class SystemSharedFolder {
                         userPerm,
                         null,
                         con)).asQueue();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             }
             /*
@@ -199,7 +199,7 @@ public final class SystemSharedFolder {
                 String creatorDisplayName;
                 try {
                     creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                         throw e;
                     }

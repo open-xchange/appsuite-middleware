@@ -101,7 +101,7 @@ public class CalendarAddConfirmPerOccurrenceTask extends UpdateTaskAdapter {
 
             connection.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {

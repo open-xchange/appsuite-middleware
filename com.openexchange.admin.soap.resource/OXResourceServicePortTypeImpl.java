@@ -62,19 +62,19 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         final OXResourceInterface resourceInterface = getResourceInterface();
         try {
             resourceInterface.change(soap2Context(parameters.ctx), soap2Resource(parameters.res), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new NoSuchContextException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
-        } catch (final NoSuchResourceException e) {
+        } catch (NoSuchResourceException e) {
             throw new NoSuchResourceException_Exception(e.getMessage(), e);
         }
     }
@@ -93,17 +93,17 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
                 list.add(resource2Soap(resources[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new NoSuchContextException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
         }
     }
@@ -113,19 +113,19 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         final OXResourceInterface resourceInterface = getResourceInterface();
         try {
             resourceInterface.delete(soap2Context(parameters.ctx), soap2Resource(parameters.res), soap2Credentials(parameters.auth));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new NoSuchContextException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
-        } catch (final NoSuchResourceException e) {
+        } catch (NoSuchResourceException e) {
             throw new NoSuchResourceException_Exception(e.getMessage(), e);
         }
     }
@@ -147,19 +147,19 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
                 ret.add(resource2Soap(retResources[i]));
             }
             return ret;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new NoSuchContextException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
-        } catch (final NoSuchResourceException e) {
+        } catch (NoSuchResourceException e) {
             throw new NoSuchResourceException_Exception(e.getMessage(), e);
         }
     }
@@ -169,17 +169,17 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         final OXResourceInterface resourceInterface = getResourceInterface();
         try {
             return resource2Soap(resourceInterface.create(soap2Context(ctx), soap2Resource(res), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new NoSuchContextException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
         }
     }
@@ -198,17 +198,17 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
                 list.add(resource2Soap(resources[i]));
             }
             return list;
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new NoSuchContextException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
         }
     }
@@ -218,19 +218,19 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
         final OXResourceInterface resourceInterface = getResourceInterface();
         try {
             return resource2Soap(resourceInterface.getData(soap2Context(ctx), soap2Resource(res), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             throw new InvalidCredentialsException_Exception(e.getMessage(), e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             throw new NoSuchContextException_Exception(e.getMessage(), e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             throw new StorageException_Exception(e.getMessage(), e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
-        } catch (final NoSuchResourceException e) {
+        } catch (NoSuchResourceException e) {
             throw new NoSuchResourceException_Exception(e.getMessage(), e);
         }
     }

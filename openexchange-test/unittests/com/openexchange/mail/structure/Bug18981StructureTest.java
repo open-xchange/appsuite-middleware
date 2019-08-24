@@ -99,7 +99,7 @@ public class Bug18981StructureTest extends AbstractMailTest {
             assertTrue("Found more than one \"To\" header: " + headers.get("to"), 1 == headers.getJSONArray("to").length());
             assertTrue("Found more than one \"Cc\" header: " + headers.get("cc"), 1 == headers.getJSONArray("cc").length());
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

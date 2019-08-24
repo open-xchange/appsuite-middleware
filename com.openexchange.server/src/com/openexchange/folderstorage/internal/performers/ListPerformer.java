@@ -205,12 +205,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 fs.commitTransaction(storageParameters);
             }
             return ret;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
             }
@@ -271,7 +271,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
 
             return logAndReturn(treeId, parentId, loadFolders(treeId, subfolderIds, all, checkOnly));
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -594,12 +594,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(newParameters);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(newParameters);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(newParameters);
             }
@@ -619,7 +619,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             if (!warnings.isEmpty()) {
                 addWarning(warnings.iterator().next());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (DispatcherServlet.ignore(e)) {
                 LOG.debug("Batch loading of folders failed. Fall-back to one-by-one loading.", e);
             } else {
@@ -640,7 +640,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             Folder subfolder = null;
             try {
                 subfolder = folderStorage.getFolder(treeId, id, newParameters);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (DispatcherServlet.ignore(e)) {
                     LOG.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
                 } else {

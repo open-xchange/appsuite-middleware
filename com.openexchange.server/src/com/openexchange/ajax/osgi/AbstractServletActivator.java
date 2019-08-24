@@ -100,10 +100,10 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
             httpService.registerServlet(alias, servlet, params, null);
             servlets.offer(alias);
             return true;
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
             logger.error("", e);
-        } catch (final NamespaceException e) {
+        } catch (NamespaceException e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
             logger.error("", e);
         }
@@ -125,7 +125,7 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
             for (String alias : servlets) {
                 try {
                     httpService.unregister(alias);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
                     logger.warn("Failed to unregister servlet alias: {}", alias, e);
                 }

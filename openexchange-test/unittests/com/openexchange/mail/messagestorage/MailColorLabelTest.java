@@ -106,7 +106,7 @@ public final class MailColorLabelTest extends MessageStorageTest {
             for (int i = 0; i < 11; i++) {
                 try {
                     mailAccess.getMessageStorage().updateMessageColorLabel("MichGibtEsNicht1337", uids, i);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     assertTrue("Wrong Exception is thrown.", e.getErrorCode().endsWith("-1002"));
                 }
             }

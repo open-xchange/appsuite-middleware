@@ -744,13 +744,13 @@ public final class HtmlProcessing {
     public static Document createDOMDocument(final String string) {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(string)));
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             LOG.error("", e);
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             LOG.error("", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
         return null;
@@ -804,10 +804,10 @@ public final class HtmlProcessing {
             final AllocatingStringWriter sw = new AllocatingStringWriter();
             serializer.transform(new DOMSource(node), new StreamResult(sw));
             return sw.toString();
-        } catch (final TransformerException e) {
+        } catch (TransformerException e) {
             LOG.error("", e);
             return fallback;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             return fallback;
         }
@@ -931,7 +931,7 @@ public final class HtmlProcessing {
                 if (offset > 0) {
                     try {
                         offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
-                    } catch (final StringIndexOutOfBoundsException e) {
+                    } catch (StringIndexOutOfBoundsException e) {
                         LOG.trace("", e);
                     }
                     line = line.substring(offset);
@@ -1115,7 +1115,7 @@ public final class HtmlProcessing {
             }
             imgReplacer.appendTail(sb);
             reval = sb.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Unable to filter cid background images: {}", e.getMessage());
         }
         return reval;
@@ -1147,7 +1147,7 @@ public final class HtmlProcessing {
             }
             imgReplacer.appendTail(sb);
             reval = sb.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Unable to filter cid background images: {}", e.getMessage());
         }
         return reval;
@@ -1207,7 +1207,7 @@ public final class HtmlProcessing {
             }
             imgReplacer.appendTail(sb);
             reval = sb.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Unable to filter cid Images: {}", e.getMessage());
         }
         return reval;
@@ -1250,7 +1250,7 @@ public final class HtmlProcessing {
     public static String urlEncodeSafe(final String text, final String charset) {
         try {
             return URLEncoder.encode(text, charset);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("", e);
             return text;
         }
@@ -1265,9 +1265,9 @@ public final class HtmlProcessing {
             writer = new BufferedWriter(new FileWriter(fileName));
             writer.write(content);
             writer.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
         } finally {
             Streams.close(writer);

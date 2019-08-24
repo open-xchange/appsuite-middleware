@@ -100,7 +100,7 @@ public class Enabled implements PreferencesItemService {
                     } else {
                         setting.setSingleValue(Boolean.TRUE);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw e;
                 }
             }

@@ -123,7 +123,7 @@ public final class DeleteAction extends AbstractFolderAction {
             } else {
                 try {
                     timestamp = new Date(Long.parseLong(timestampStr));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("timestamp", timestampStr);
                 }
             }
@@ -176,7 +176,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     if (null != warnings && !warnings.isEmpty()) {
                         throw warnings.iterator().next();
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     e.setCategory(Category.CATEGORY_ERROR);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
                     foldersWithError.put(folderId, e);
@@ -226,7 +226,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     } else {
                         trashResults.add((TrashResult) response.getResponse());
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
                     log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
                     e.setCategory(Category.CATEGORY_WARNING);

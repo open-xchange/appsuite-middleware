@@ -132,9 +132,9 @@ public class ApplyMailFilterAction extends AbstractMailFilterAction {
             String folder = request.getParameter(FOLDER);
             String stringRule = mailFilterService.convertToString(credentials,rule);
             return applyRule(session, stringRule, Strings.isEmpty(folder) ? "INBOX" : folder);
-        } catch (final SieveException e) {
+        } catch (SieveException e) {
             throw MailFilterExceptionCode.handleSieveException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }

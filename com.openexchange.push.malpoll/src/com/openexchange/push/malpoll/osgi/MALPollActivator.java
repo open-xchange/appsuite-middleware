@@ -178,7 +178,7 @@ public final class MALPollActivator extends HousekeepingActivator {
                 if (null != tmp) {
                     try {
                         period = Long.parseLong(tmp.trim());
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         LOG.error("Unable to parse com.openexchange.push.malpoll.period: {}. Using default 300000 (5 Minutes) instead.",
                             tmp);
                         period = 300000L;
@@ -223,7 +223,7 @@ public final class MALPollActivator extends HousekeepingActivator {
             registerService(PushManagerService.class, new MALPollPushManagerService(), null);
             registerService(MailAccountDeleteListener.class, new MALPollMailAccountDeleteListener(), null);
             registerService(DeleteListener.class, new MALPollDeleteListener(), null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -255,7 +255,7 @@ public final class MALPollActivator extends HousekeepingActivator {
             folder = null;
             period = 300000L;
             super.stopBundle();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }
@@ -296,7 +296,7 @@ public final class MALPollActivator extends HousekeepingActivator {
                      */
                     try {
                         l.checkNewMail();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         log.error("", e);
                     }
                 }
@@ -317,7 +317,7 @@ public final class MALPollActivator extends HousekeepingActivator {
                         }
                     }
                     log.debug("Global run for checking new mails done.");
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     log.error("", e);
                 }
             }

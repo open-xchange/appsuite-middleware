@@ -83,7 +83,7 @@ public final class IOUtils {
         if (null != closeable) {
             try {
                 closeable.close();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
             }
         }

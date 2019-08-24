@@ -76,7 +76,7 @@ public final class CommandParserJSONUtil {
     public static final String getString(JSONObject jsonObject, String key, String commandName) throws OXException {
         try {
             return jsonObject.getString(key);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading command '" + commandName + "'. The parameter '" + key + "' is missing: " + e.getMessage());
         }
     }
@@ -93,7 +93,7 @@ public final class CommandParserJSONUtil {
     public static JSONArray getJSONArray(final JSONObject jobj, final String key, final String commandName) throws OXException {
         try {
             return jobj.getJSONArray(key);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading command " + commandName + ". The parameter '" + key + "' is missing: : " + e.getMessage());
         }
     }

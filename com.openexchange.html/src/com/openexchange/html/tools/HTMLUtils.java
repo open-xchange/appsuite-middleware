@@ -99,9 +99,9 @@ public final class HTMLUtils {
     public static String decodeUrl(final String s, final String charset) {
         try {
             return com.openexchange.java.Strings.isEmpty(s) ? s : (com.openexchange.java.Strings.isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
-        } catch (final DecoderException e) {
+        } catch (DecoderException e) {
             return s;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             return s;
         }
     }

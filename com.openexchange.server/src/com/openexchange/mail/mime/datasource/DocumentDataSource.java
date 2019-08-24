@@ -98,7 +98,7 @@ public final class DocumentDataSource implements DataSource {
         try {
             fileAccess = fileAccess(session);
             return fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 throw (IOException) cause;
@@ -128,7 +128,7 @@ public final class DocumentDataSource implements DataSource {
         if (fileAccess != null) {
             try {
                 fileAccess.finish();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // IGNORE
             }
         }

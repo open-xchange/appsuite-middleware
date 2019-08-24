@@ -332,7 +332,7 @@ public final class MemorizerWorker {
                 return;
             }
             ctx = contextService.getContext(session.getContextId());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
@@ -361,7 +361,7 @@ public final class MemorizerWorker {
                 aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx), ctx, aliasStorage);
             }
             addresses.removeAll(aliases);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
@@ -394,7 +394,7 @@ public final class MemorizerWorker {
             }
 
             userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
@@ -569,7 +569,7 @@ public final class MemorizerWorker {
     static boolean isEnabled(final Session session) {
         try {
             return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         }
         return false;
@@ -579,7 +579,7 @@ public final class MemorizerWorker {
         try {
             final Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(session.getContextId(), session.getUserId());
             return null == folder ? 0 : folder.intValue();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return 0;
         }

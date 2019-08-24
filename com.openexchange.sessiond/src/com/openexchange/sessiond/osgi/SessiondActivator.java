@@ -377,7 +377,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
                 };
                 registerService(EventHandler.class, passwordChangeEventHandler, serviceProperties);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("SessiondActivator: start: ", e);
             // Try to stop what already has been started.
             SessiondInit.getInstance().stop();
@@ -405,7 +405,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             SessiondInit.getInstance().stop();
             // Clear service registry
             Services.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("SessiondActivator: stop", e);
             throw e;
         }

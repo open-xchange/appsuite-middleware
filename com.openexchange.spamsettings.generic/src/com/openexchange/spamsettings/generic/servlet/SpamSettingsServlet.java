@@ -107,10 +107,10 @@ public final class SpamSettingsServlet extends PermissionServlet {
                 result.put("value", getValue(session, service));
                 response.setData(result);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", e);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         }
@@ -120,7 +120,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
          */
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
     }
@@ -151,10 +151,10 @@ public final class SpamSettingsServlet extends PermissionServlet {
                 spamSettingService.writeSettings(getSessionObject(req), settings);
                 obj.put("message", "Settings written");
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
             response.setException(OXJSONExceptionCodes.JSON_READ_ERROR.create(e));
         }
@@ -166,7 +166,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
          */
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
     }

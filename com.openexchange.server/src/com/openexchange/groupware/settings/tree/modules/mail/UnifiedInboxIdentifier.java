@@ -109,7 +109,7 @@ public class UnifiedInboxIdentifier implements PreferencesItemService {
                     } else {
                         setting.setSingleValue(null);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.warn("", e);
                     setting.setSingleValue(null);
                     return;

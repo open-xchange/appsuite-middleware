@@ -193,7 +193,7 @@ public class JSONCoercion {
                     jsonObject.put(entry.getKey(), coerceToJSON(entry.getValue()));
                 }
                 return jsonObject;
-            } catch (final ClassCastException e) {
+            } catch (ClassCastException e) {
                 throw new JSONException("Value cannot be coerced to JSON,", e);
             }
         }

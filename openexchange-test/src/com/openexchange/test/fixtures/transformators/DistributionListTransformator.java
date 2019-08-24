@@ -144,7 +144,7 @@ public class DistributionListTransformator implements Transformator {
                 throw OXException.general("unable to parse custom distributionlist entry from " + fixtureEntry);
             }
             address = addresses[0];
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw OXException.general("unable to parse custom distributionlist entry from " + fixtureEntry + ": " + e.getMessage());
         }
         return new DistributionListEntryObject(address.getPersonal(), IDNA.toIDN(address.getAddress()), DistributionListEntryObject.INDEPENDENT);

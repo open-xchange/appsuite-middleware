@@ -276,7 +276,7 @@ public final class SearchAction extends AbstractUserAction {
             }
 
             return i;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
@@ -318,7 +318,7 @@ public final class SearchAction extends AbstractUserAction {
             }
 
             return d;
-        } catch (final NumberFormatException exc) {
+        } catch (NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }

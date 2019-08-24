@@ -311,7 +311,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
                 if (Strings.isNotEmpty(value)) {
                     try {
                         new QuotedInternetAddress(value).validate();
-                    } catch (final AddressException x) {
+                    } catch (AddressException x) {
                         contact.setEmail1("");
                         if (null != errors) {
                             errors.add(e);
@@ -324,7 +324,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
                 if (Strings.isNotEmpty(value)) {
                     try {
                         new QuotedInternetAddress(value).validate();
-                    } catch (final AddressException x) {
+                    } catch (AddressException x) {
                         contact.setEmail2("");
                         if (null != errors) {
                             errors.add(e);
@@ -337,7 +337,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
                 if (Strings.isNotEmpty(value)) {
                     try {
                         new QuotedInternetAddress(value).validate();
-                    } catch (final AddressException x) {
+                    } catch (AddressException x) {
                         contact.setEmail3("");
                         if (null != errors) {
                             errors.add(e);

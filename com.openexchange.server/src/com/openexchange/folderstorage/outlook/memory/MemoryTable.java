@@ -96,7 +96,7 @@ public final class MemoryTable {
     public static MemoryTable optMemoryTableFor(final Session session) {
         try {
             return getMemoryTableFor(session, false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Cannot occur
             return null;
         }
@@ -332,9 +332,9 @@ public final class MemoryTable {
                 // Finally add folder to memory tree
                 memoryTree.getCrud().put(memoryFolder);
             } while (rs.next());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -433,9 +433,9 @@ public final class MemoryTable {
              */
             treeMap.put(treeId, memoryTree);
             return memoryTree;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -534,9 +534,9 @@ public final class MemoryTable {
             // Finally add folder to memory tree
             memoryTree.getCrud().put(memoryFolder);
             return memoryFolder;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -561,9 +561,9 @@ public final class MemoryTable {
                 list.add(new MemoryPermission(rs));
             } while (rs.next());
             memoryFolder.setPermissions(list.toArray(new Permission[list.size()]));
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);

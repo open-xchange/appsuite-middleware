@@ -92,7 +92,7 @@ public class DeleteReason extends ReasonAbstraction {
 
             displayDeletedMessage(reason_id, null, parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(reason_id, null, e, parser);
         }
     }

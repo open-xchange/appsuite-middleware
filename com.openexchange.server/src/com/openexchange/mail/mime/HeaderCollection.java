@@ -254,7 +254,7 @@ public class HeaderCollection implements Serializable {
                 buffer.write(i);
             }
             load(new String(buffer.toByteArray(), Charsets.ISO_8859_1));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -931,7 +931,7 @@ public class HeaderCollection implements Serializable {
             final String detectCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
             final String unicodeVal = MessageUtility.readStream(new UnsynchronizedByteArrayInputStream(bytes), detectCharset);
             return MimeUtility.encodeWord(unicodeVal, "UTF-8", "Q");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Cannot occur
             return value;
         }
@@ -1006,7 +1006,7 @@ public class HeaderCollection implements Serializable {
 
             log2.info(Boolean.toString(hc.equals(hc2)));
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log2.error("", e);
         }
     }

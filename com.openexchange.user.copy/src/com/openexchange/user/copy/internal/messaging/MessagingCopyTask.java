@@ -137,7 +137,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
                 setAccountIdsForMessagingAccounts(accounts, accountMapping);
                 writeMessagingAccountsToDB(accounts, dstCon, i(dstCtxId), i(dstUsrId));
             }
-        }  catch (final SQLException e) {
+        }  catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
 
@@ -155,7 +155,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
                         if (newId != null) {
                             attribute.setValue(String.valueOf(newId));
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         // Skip this one
                     }
 
@@ -181,7 +181,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
                 final int newConfigId = IDGenerator.getId(context, Types.GENERIC_CONFIGURATION);
                 account.setConfId(newConfigId);
                 account.setId(newConfigId);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
         }
@@ -207,7 +207,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
 
                 accounts.add(account);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -236,7 +236,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);

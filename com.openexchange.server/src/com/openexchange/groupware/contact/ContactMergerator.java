@@ -104,11 +104,11 @@ public class ContactMergerator implements SearchIterator<Contact>{
                 Collections.sort(iterators, new TopMostComparator(comparator));
             }
             next = this.iterators.get(0).currentOrNext();
-        } catch (final ExceptionTransporter transporter) {
+        } catch (ExceptionTransporter transporter) {
             this.e = transporter.e;
-        } catch (final SearchIteratorException e) {
+        } catch (SearchIteratorException e) {
             this.e = e;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             this.oxe = e;
         } finally {
             if(this.iterators.get(0).hasNext()) {
@@ -211,7 +211,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
                 final Contact v1 = o1.currentOrNext();
                 final Contact v2 = o2.currentOrNext();
                 return contactComparator.compare(v1, v2);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new ExceptionTransporter(e);
             }
         }

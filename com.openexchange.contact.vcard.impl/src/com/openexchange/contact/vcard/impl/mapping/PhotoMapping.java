@@ -117,7 +117,7 @@ public class PhotoMapping extends AbstractMapping {
             InetAddress localHost = InetAddress.getLocalHost();
             localHostName = localHost.getCanonicalHostName();
             localHostAddress = localHost.getHostAddress();
-        } catch (final UnknownHostException e) {
+        } catch (UnknownHostException e) {
             localHostName = "localhost";
             localHostAddress = "127.0.0.1";
         }

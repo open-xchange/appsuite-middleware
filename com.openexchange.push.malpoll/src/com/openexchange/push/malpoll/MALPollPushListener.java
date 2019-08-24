@@ -309,7 +309,7 @@ public final class MALPollPushListener implements PushListener {
             final Set<String> fetchedUids;
             try {
                 fetchedUids = gatherUIDs(mailService);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                     LOG.debug("", e);
                     /*

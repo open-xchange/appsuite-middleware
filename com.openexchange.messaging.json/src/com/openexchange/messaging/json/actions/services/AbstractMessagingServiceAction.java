@@ -84,7 +84,7 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             return doIt(requestData, session);
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw MessagingExceptionCodes.JSON_ERROR.create(x, x.getMessage());
         }
     }

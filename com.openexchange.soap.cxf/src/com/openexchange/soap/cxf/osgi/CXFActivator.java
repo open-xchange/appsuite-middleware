@@ -124,7 +124,7 @@ public class CXFActivator extends HousekeepingActivator {
                                     httpService.unregister(servletAlias);
                                     alias3 = null;
                                 }
-                            } catch (final Exception e) {
+                            } catch (Exception e) {
                                 // Ignore
                             }
                         }
@@ -132,7 +132,7 @@ public class CXFActivator extends HousekeepingActivator {
                         if (null != collector) {
                             try {
                                 collector.close();
-                            } catch (final Exception e) {
+                            } catch (Exception e) {
                                 // Ignore
                             }
                             this.collector = null;
@@ -235,11 +235,11 @@ public class CXFActivator extends HousekeepingActivator {
                              * Return tracked HTTP service
                              */
                             return httpService;
-                        } catch (final ServletException e) {
+                        } catch (ServletException e) {
                             log.error("Couldn't register CXF Servlet", e);
-                        } catch (final NamespaceException e) {
+                        } catch (NamespaceException e) {
                             log.error("Couldn't register CXF Servlet", e);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             if (servletRegistered) {
                                 try {
                                     httpService.unregister(alias);
@@ -249,7 +249,7 @@ public class CXFActivator extends HousekeepingActivator {
                                         httpService.unregister(servletAlias);
                                         alias3 = null;
                                     }
-                                } catch (final Exception e1) {
+                                } catch (Exception e1) {
                                     // Ignore
                                 }
                             }
@@ -258,7 +258,7 @@ public class CXFActivator extends HousekeepingActivator {
                                 if (null != collector) {
                                     try {
                                         collector.close();
-                                    } catch (final Exception e1) {
+                                    } catch (Exception e1) {
                                         // Ignore
                                     }
                                     this.collector = null;
@@ -272,7 +272,7 @@ public class CXFActivator extends HousekeepingActivator {
                 };
                 track(HttpService.class, trackerCustomizer);
                 openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("", e);
             throw e;
         }

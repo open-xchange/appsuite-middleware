@@ -77,7 +77,7 @@ public class GetSubscriptionAction extends AbstractSubscribeAction {
         final int id;
         try {
             id = parameters.getInt("id");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             if (!parameters.hasAndNotNull("id")) {
                 throw e;
             }

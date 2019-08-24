@@ -167,7 +167,7 @@ public abstract class AbstractDocumentListAction extends AbstractInfostoreAction
                     throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create();
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             Databases.closeSQLStuff(rs, stmt);

@@ -212,7 +212,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     convertMultiple4List(mails, requestData, result, session);
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -660,7 +660,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         int ttlMillis;
         try {
             ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             ttlMillis = -1;
         }
         tmp = paramContainer.getStringParam("embedded");
@@ -764,7 +764,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                                                             .setHandleNestedMessageAsAttachment(handleNestedMessageAsAttachment)
                                                             .build();
             jMail = MessageWriter.writeMailMessage(params);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (DisplayMode.DOCUMENT.isIncluded(displayMode)) {
                 HttpServletResponse resp = paramContainer.getHttpServletResponse();
                 if (resp != null) {
@@ -791,7 +791,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         if (mail.containsPrevSeen()) {
             try {
                 jMail.put("unseen", wasUnseen);
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.warn("Couldn't set \"unseen\" field in JSON mail representation.", e);
             }
         }

@@ -154,7 +154,7 @@ public final class RootSubfoldersEnabledCache {
 
             boolean namespacePerUser =  IMAPProperties.getInstance().isNamespacePerUser(session.getUserId(), session.getContextId());
             return isRootSubfoldersEnabled0(getKeyFor(imapStore, imapConfig, namespacePerUser), imapConfig, (DefaultFolder) imapStore.getDefaultFolder(), namespacePerUser);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig);
         }
     }
@@ -184,7 +184,7 @@ public final class RootSubfoldersEnabledCache {
                 // Root level is signaled as personal namespace, thus creating folder there SHOULD be possible...
                 return true;
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig);
         }
 

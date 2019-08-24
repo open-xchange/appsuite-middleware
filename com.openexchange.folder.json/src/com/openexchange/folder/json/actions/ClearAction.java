@@ -112,7 +112,7 @@ public final class ClearAction extends AbstractFolderAction {
             final String folderId = jsonArray.getString(i);
             try {
                 folderService.clearFolder(treeId, folderId, session);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ClearAction.class);
                 log.error("", e);
                 responseArray.put(folderId);

@@ -113,7 +113,7 @@ public class AllActionTest {
             final AJAXRequestResult result = action.perform(null, new SimServerSession(new SimContext(1), new SimUser(), null));
             fail("Should not swallow exceptions");
             assertNull(result);
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // Success
         }
     }

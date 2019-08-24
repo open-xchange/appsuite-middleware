@@ -2900,7 +2900,7 @@ public class SMTPTransport extends Transport {
         if (null != toFlush) {
             try {
                 toFlush.flush();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }

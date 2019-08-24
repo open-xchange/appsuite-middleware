@@ -178,9 +178,9 @@ public final class MessageUtility {
             tmp = p.getInputStream();
             tmp.read();
             return p.getInputStream();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             return getPartRawInputStream(p);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             return getPartRawInputStream(p);
         } finally {
             Streams.close(tmp);
@@ -194,14 +194,14 @@ public final class MessageUtility {
         if (p instanceof MimeBodyPart) {
             try {
                 return ((MimeBodyPart) p).getRawInputStream();
-            } catch (final MessagingException e1) {
+            } catch (MessagingException e1) {
                 return null;
             }
         }
         if (p instanceof MimeMessage) {
             try {
                 return ((MimeMessage) p).getRawInputStream();
-            } catch (final MessagingException e1) {
+            } catch (MessagingException e1) {
                 return null;
             }
         }
@@ -250,15 +250,15 @@ public final class MessageUtility {
                 public InputStream getInputStream() throws IOException {
                     try {
                         return p.getInputStream();
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         throw new IOException(e.getMessage(), e);
                     }
                 }
             };
             return readStream(streamProvider, charset);
-        } catch (final MaxBytesExceededIOException e) {
+        } catch (MaxBytesExceededIOException e) {
             throw new MaxBytesExceededMessagingException(e.getMessage(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof MessagingException) {
                 throw (MessagingException) cause;
@@ -274,7 +274,7 @@ public final class MessageUtility {
                     public InputStream getInputStream() throws IOException {
                         try {
                             return ((MimeBodyPart) p).getRawInputStream();
-                        } catch (final MessagingException e) {
+                        } catch (MessagingException e) {
                             throw new IOException(e.getMessage(), e);
                         }
                     }
@@ -286,7 +286,7 @@ public final class MessageUtility {
                     public InputStream getInputStream() throws IOException {
                         try {
                             return ((MimeMessage) p).getRawInputStream();
-                        } catch (final MessagingException e) {
+                        } catch (MessagingException e) {
                             throw new IOException(e.getMessage(), e);
                         }
                     }
@@ -299,7 +299,7 @@ public final class MessageUtility {
             }
             try {
                 return readStream(streamProvider, charset);
-            } catch (final IOException e1) {
+            } catch (IOException e1) {
                 LOG.error("", e1);
                 return STR_EMPTY;
             }
@@ -337,14 +337,14 @@ public final class MessageUtility {
             public InputStream getInputStream() throws IOException {
                 try {
                     return mailPart.getInputStream();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     throw new IOException(e.getMessage(), e);
                 }
             }
         };
         try {
             return readStream(streamProvider, charset, errorOnNoContent, maxSize);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 throw (OXException) cause;
@@ -714,7 +714,7 @@ public final class MessageUtility {
 
             try {
                 return tmp.toString(charset);
-            } catch (final UnsupportedCharsetException e) {
+            } catch (UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"{}\"", charset, e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
                 final byte[] bytes = tmp.toByteArray();
@@ -727,7 +727,7 @@ public final class MessageUtility {
                 }
                 throw error;
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if (!errorOnNoContent && "No content".equals(e.getMessage())) {
                 /*-
                  * Special JavaMail I/O error to indicate no content available from IMAP server.
@@ -907,7 +907,7 @@ public final class MessageUtility {
             }
 
             return out.toByteArray();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("No content".equals(e.getMessage())) {
                 /*-
                  * Special JavaMail I/O error to indicate no content available from IMAP server.
@@ -988,7 +988,7 @@ public final class MessageUtility {
                     try {
                         f = DataHandler.class.getDeclaredField("dataContentHandler");
                         f.setAccessible(true);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         f = null;
                     }
                     dataContentHandlerField = f;
@@ -1008,7 +1008,7 @@ public final class MessageUtility {
                     try {
                         f = DataHandler.class.getDeclaredField("object");
                         f.setAccessible(true);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         f = null;
                     }
                     objectField = f;
@@ -1028,7 +1028,7 @@ public final class MessageUtility {
                     try {
                         f = DataHandler.class.getDeclaredField("objectMimeType");
                         f.setAccessible(true);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         f = null;
                     }
                     objectMimeTypeField = f;
@@ -1044,15 +1044,15 @@ public final class MessageUtility {
                 throw new NoSuchFieldException(name);
             }
             field.set(obj, value);
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw new MessagingException(e.getMessage(), e);
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new MessagingException(e.getMessage(), e);
-        } catch (final NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             throw new MessagingException(e.getMessage(), e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw new MessagingException(e.getMessage(), e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new MessagingException(e.getMessage(), e);
         }
     }
@@ -1196,9 +1196,9 @@ public final class MessageUtility {
             // No object DCH for MIME type
             try {
                 part.setDataHandler(new DataHandler(new MessageDataSource(text, objectMimeType)));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 throw new MessagingException("Unsupported encoding", e);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new MessagingException("Invalid MIME type", e);
             }
         } else {

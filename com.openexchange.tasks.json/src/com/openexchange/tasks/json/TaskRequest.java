@@ -128,7 +128,7 @@ public class TaskRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -147,7 +147,7 @@ public class TaskRequest {
         }
         try {
             return Integer.parseInt(parameter.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -161,7 +161,7 @@ public class TaskRequest {
         }
         try {
             return new Date(Long.parseLong(parameter.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }
@@ -173,7 +173,7 @@ public class TaskRequest {
         }
         try {
             return new Date(Long.parseLong(parameter.trim()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
         }
     }

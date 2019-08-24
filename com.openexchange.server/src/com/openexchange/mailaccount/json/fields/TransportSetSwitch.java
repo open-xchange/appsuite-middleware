@@ -197,7 +197,7 @@ public class TransportSetSwitch implements AttributeSwitch {
     public Object transportPort() {
         try {
             desc.setTransportPort(Integer.parseInt(value.toString()));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.debug("Transport port is not a number: {}. Setting to fallback port 25.", value,
                 e);
             desc.setTransportPort(25);

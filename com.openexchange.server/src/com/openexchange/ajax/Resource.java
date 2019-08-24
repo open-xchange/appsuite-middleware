@@ -87,7 +87,7 @@ public class Resource extends DataServlet {
 			JSONObject jsonObj = null;
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (final JSONException e) {
+			} catch (JSONException e) {
 				LOG.error("", e);
 				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 				writeResponse(response, httpServletResponse, session);
@@ -98,10 +98,10 @@ public class Resource extends DataServlet {
 			final Object responseObj = resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
 			response.setData(responseObj);
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			LOG.error(_doGet, e);
 			response.setException(e);
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 			LOG.error("", oje);
 			response.setException(oje);
@@ -124,7 +124,7 @@ public class Resource extends DataServlet {
 				JSONArray jData = null;
 				try {
 					jData = new JSONArray(data);
-				} catch (final JSONException e) {
+				} catch (JSONException e) {
 					final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
 					response.setException(exc);
 					writeResponse(response, httpServletResponse, session);
@@ -134,7 +134,7 @@ public class Resource extends DataServlet {
 				JSONObject jsonObj = null;
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
-				} catch (final JSONException e) {
+				} catch (JSONException e) {
 					LOG.error(_doPut, e);
 					response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 					writeResponse(response, httpServletResponse, session);
@@ -153,7 +153,7 @@ public class Resource extends DataServlet {
 				try {
 					jData = new JSONObject(data);
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
-				} catch (final JSONException e) {
+				} catch (JSONException e) {
 					LOG.error(_doPut, e);
 					response.setException(OXJSONExceptionCodes.JSON_READ_ERROR.create(e));
 					writeResponse(response, httpServletResponse, session);
@@ -167,10 +167,10 @@ public class Resource extends DataServlet {
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
 			}
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			LOG.error(_doPut, e);
 			response.setException(e);
-		} catch (final JSONException e) {
+		} catch (JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
 			LOG.error("", oje);
 			response.setException(oje);

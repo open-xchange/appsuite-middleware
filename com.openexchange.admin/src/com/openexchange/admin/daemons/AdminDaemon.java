@@ -374,9 +374,9 @@ public class AdminDaemon implements AdminDaemonService {
             properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXUtilInterface.RMI_NAME);
             services.add(context.registerService(Remote.class, oxutil_v2, properties));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             LOG.error("Error creating RMI registry!", e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOG.error("Error while creating one instance for RMI interface", e);
         }
     }
@@ -428,7 +428,7 @@ public class AdminDaemon implements AdminDaemonService {
                             }
                             try {
                                 return clazz.cast(obj);
-                            } catch (final ClassCastException e) {
+                            } catch (ClassCastException e) {
                                 LOG.error("Service {}({}) in bundle {} cannot be cast to an instance of {}", serviceName, ((null != obj) ? obj.getClass().getName() : "null"), bundleSymbolicName, clazz.getName());
                                 return null;
                             }

@@ -126,11 +126,11 @@ public final class MailReloadable implements Reloadable {
                 try {
                     final Cache cache = cacheService.getCache("Capabilities");
                     cache.clear();
-                } catch (final Exception x) {
+                } catch (Exception x) {
                     // Ignore
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.warn("Failed to reload mail properties", e);
         }
 

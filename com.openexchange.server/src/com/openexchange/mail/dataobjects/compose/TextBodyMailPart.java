@@ -263,7 +263,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
     public InputStream getInputStream() throws OXException {
         try {
             return getDataSource().getInputStream();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

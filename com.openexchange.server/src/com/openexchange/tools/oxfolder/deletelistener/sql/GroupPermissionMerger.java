@@ -95,7 +95,7 @@ public final class GroupPermissionMerger {
             final Permission merged;
             try {
                 merged = MergerUtility.getMergedPermission(corruptPermission.permission_id, admin, corruptPermission.fuid, corruptPermission.cid, con, delete);
-            } catch (final IllegalStateException e) {
+            } catch (IllegalStateException e) {
                 // Strange. Previously detected corrupt group permission does no more exist.
                 continue Next;
             }

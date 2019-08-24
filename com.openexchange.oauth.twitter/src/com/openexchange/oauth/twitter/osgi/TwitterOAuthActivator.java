@@ -82,7 +82,7 @@ public final class TwitterOAuthActivator extends AbstractOAuthActivator {
             super.stopBundle();
             //Clear service registry
             TwitterOAuthServiceRegistry.setServiceLookup(null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error("", e);
             throw e;
         }

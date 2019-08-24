@@ -95,7 +95,7 @@ public final class GenericProperty implements Decrypter {
         // Decrypt mail account's password using session password
         try {
             return MailPasswordUtil.decrypt(encrypted, session.getPassword());
-        } catch (final GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED.create(e, login, server, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
     }

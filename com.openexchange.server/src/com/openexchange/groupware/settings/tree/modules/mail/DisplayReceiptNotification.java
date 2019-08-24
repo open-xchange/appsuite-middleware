@@ -120,7 +120,7 @@ public class DisplayReceiptNotification implements PreferencesItemService {
                                 usm.setDisplayReceiptNotification(displayReceiptNotification);
                                 storage.saveUserSettingMail(usm, user.getId(), ctx);
                             }
-                        } catch (final NumberFormatException e) {
+                        } catch (NumberFormatException e) {
                             throw SettingExceptionCodes.JSON_READ_ERROR.create(e);
                         }
                     }

@@ -99,7 +99,7 @@ public final class ParallelsOpenApiServletRequest  {
     public ParallelsOpenApiServletRequest(final Session sessionObj, final Context ctx)	throws OXException, ServiceException {
         try {
             this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             throw new OXException(e);
         }
@@ -161,13 +161,13 @@ public final class ParallelsOpenApiServletRequest  {
             rpcargs.put("login", this.user.getLoginInfo());
             final Map<?, ?> response = (HashMap<?, ?>) getRpcClient().execute(method,new Object[]{rpcargs});
             checkXMLRpcResponseForError(response);
-        } catch (final XmlRpcException e) {
+        } catch (XmlRpcException e) {
             LOG.error("xml-rpc error detected while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOG.error("IO error occured while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final ServiceException e) {
+        } catch (ServiceException e) {
             LOG.error("internal configuration error occured");
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(e.getMessage());
         }finally{
@@ -217,13 +217,13 @@ public final class ParallelsOpenApiServletRequest  {
             LOG.debug("Got the following items from openapi for list \"{}\" {}", list, retval);
             json_response.put("items", retval);
             return json_response;
-        } catch (final XmlRpcException e) {
+        } catch (XmlRpcException e) {
             LOG.error("xml-rpc error detected while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             LOG.error("IO error occured while communicating with openapi interface");
             throw ParallelsOpenApiServletExceptionCodes.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final ServiceException e) {
+        } catch (ServiceException e) {
             LOG.error("internal configuration error occured");
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(e.getMessage());
         }finally{

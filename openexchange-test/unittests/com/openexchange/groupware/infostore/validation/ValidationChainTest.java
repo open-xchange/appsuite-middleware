@@ -24,7 +24,7 @@ public class ValidationChainTest {
         try {
             validators.validate(null, null, null, null);
             fail("No Exception thrown");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertNotNull("The display argument of the exception is null", x.getDisplayArgs()[0]);
             assertEquals("TestValidation2: (title) sucks\nTestValidation3: (title, description) stinks\n", (String) x.getDisplayArgs()[0]);
         }

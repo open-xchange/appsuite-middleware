@@ -94,7 +94,7 @@ public final class CacheClearerOnContextDelete extends ContextDelete {
             try {
                 final Cache cache = cacheService.getCache(cacheName);
                 cache.clear();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 logger.warn("Clearing cache \"{}\" failed.", cacheName, e);
             }
         }

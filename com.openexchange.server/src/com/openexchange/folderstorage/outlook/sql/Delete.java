@@ -102,7 +102,7 @@ public final class Delete {
             hardDeleteFolder(cid, tree, user, folderId, global, recursive, con);
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -230,13 +230,13 @@ public final class Delete {
             final boolean ret = deleteFolder(cid, tree, user, folderId, global, backup, con);
             con.commit(); // COMMIT
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con); // ROLLBACK
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {

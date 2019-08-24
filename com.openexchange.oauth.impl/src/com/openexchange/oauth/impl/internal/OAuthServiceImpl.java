@@ -232,7 +232,7 @@ public class OAuthServiceImpl implements OAuthService {
             return new OAuthInteractionImpl(requestToken, authURL, interactionType);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -355,7 +355,7 @@ public class OAuthServiceImpl implements OAuthService {
                 oauthAccountStorage.updateAccount(session, existingAccount);
             }
             return account;
-        } catch (final OXException x) {
+        } catch (OXException x) {
             if (ExceptionUtils.isEitherOf(x, SSLHandshakeException.class)) {
                 String url = (String) arguments.get(OAuthConstants.ARGUMENT_AUTH_URL);
                 if (Strings.isNotEmpty(url)) {
@@ -631,7 +631,7 @@ public class OAuthServiceImpl implements OAuthService {
             }
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

@@ -304,7 +304,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                                         task.call();
                                         ran = true;
                                         task.afterExecute(null);
-                                    } catch (final Exception ex) {
+                                    } catch (Exception ex) {
                                         if (!ran) {
                                             task.afterExecute(ex);
                                         }
@@ -342,9 +342,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             } else {
                 result.setResultObject(previewDocument, getOutputFormat());
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(fileHolder);
@@ -398,7 +398,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
         try {
             return new ContentType(contentType).getBaseType();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return contentType;
         }
     }

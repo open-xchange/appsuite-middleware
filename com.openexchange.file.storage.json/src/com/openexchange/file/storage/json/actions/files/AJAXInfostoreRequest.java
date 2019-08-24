@@ -435,7 +435,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
         try {
             return queryObject.getString("pattern");
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
     }
@@ -524,7 +524,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     UploadSizeValidation.checkSize(uploadFile.getSize());
                     java.io.File tmpFile = uploadFile.getTmpFile();
                     return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
-                } catch (final FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
             }
@@ -549,7 +549,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                         UploadSizeValidation.checkSize(uploadFile.getSize());
                         java.io.File tmpFile = uploadFile.getTmpFile();
                         return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
-                    } catch (final FileNotFoundException fnfe) {
+                    } catch (FileNotFoundException fnfe) {
                         throw AjaxExceptionCodes.IO_ERROR.create(fnfe, fnfe.getMessage());
                     }
                 }
@@ -588,7 +588,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public InputStream getUploadStream() throws OXException {
         try {
             return data.getUploadStream();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -614,7 +614,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             for (int i = 0; i < versions.length; i++) {
                 versions[i] = body.getString(i);
             }
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
         return versions;
@@ -799,7 +799,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             this.folderMapping = folderMapping;
             this.versionMapping = versionMapping;
             return true;
-        } catch (final JSONException x) {
+        } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
 

@@ -344,7 +344,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             throw handleNotActiveException(e);
         } catch (HazelcastException e) {
             throw handleHazelcastException(e, SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
             }
@@ -598,7 +598,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return new ArrayList<Session>(sessions().values());
         } catch (HazelcastInstanceNotActiveException e) {
             inactive.set(true);
-        } catch (final HazelcastException e) {
+        } catch (HazelcastException e) {
             LOG.debug("", e);
         } catch (OXException e) {
             LOG.debug("", e);
@@ -643,7 +643,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         } catch (HazelcastException e) {
             LOG.debug("", e);
             throw handleHazelcastException(e, SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 LOG.debug("", e);
 
@@ -672,7 +672,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         } catch (HazelcastException e) {
             LOG.debug("", e);
             throw handleHazelcastException(e, SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 LOG.debug("", e);
                 throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
@@ -783,7 +783,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 }
             } catch (HazelcastInstanceNotActiveException e) {
                 throw handleNotActiveException(e);
-            } catch (final HazelcastException e) {
+            } catch (HazelcastException e) {
                 LOG.debug("", e);
                 throw handleHazelcastException(e, SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
             }
@@ -803,7 +803,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return null != sessionIDs ? sessionIDs.size() : 0;
         } catch (HazelcastInstanceNotActiveException e) {
             throw handleNotActiveException(e);
-        } catch (final HazelcastException e) {
+        } catch (HazelcastException e) {
             LOG.debug("", e);
             throw handleHazelcastException(e, SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
         }

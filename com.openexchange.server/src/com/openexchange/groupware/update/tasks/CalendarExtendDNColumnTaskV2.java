@@ -147,7 +147,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
                     }
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw wrapSQLException(e);
         } finally {
             Databases.closeSQLStuff(rs);
@@ -159,7 +159,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         try {
             stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_MODIFY, "#TABLE#", tableName));
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw wrapSQLException(e);
         } finally {
             Databases.closeSQLStuff(stmt);

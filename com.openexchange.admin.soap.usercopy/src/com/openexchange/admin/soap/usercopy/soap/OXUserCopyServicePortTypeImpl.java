@@ -77,43 +77,43 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
         final OXUserCopyInterface userCopyInterface = getUserCopyInterface();
         try {
             return user2Soap(userCopyInterface.copyUser(soap2User(user), soap2Context(src), soap2Context(dest), soap2Credentials(auth)));
-        } catch (final RemoteException e) {
+        } catch (RemoteException e) {
             com.openexchange.admin.soap.usercopy.soap.RemoteException fd = new com.openexchange.admin.soap.usercopy.soap.RemoteException();
             com.openexchange.admin.soap.usercopy.rmi.RemoteException value = new com.openexchange.admin.soap.usercopy.rmi.RemoteException();
             value.setMessage(e.getMessage());
             fd.setRemoteException(value);
             throw new RemoteException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             com.openexchange.admin.soap.usercopy.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.usercopy.soap.InvalidCredentialsException();
             com.openexchange.admin.soap.usercopy.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.usercopy.exceptions.InvalidCredentialsException();
             fd.setInvalidCredentialsException(value);
             throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             com.openexchange.admin.soap.usercopy.soap.NoSuchContextException fd = new com.openexchange.admin.soap.usercopy.soap.NoSuchContextException();
             com.openexchange.admin.soap.usercopy.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.usercopy.exceptions.NoSuchContextException();
             fd.setNoSuchContextException(value);
             throw new NoSuchContextException_Exception(e.getMessage(), fd, e);
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             com.openexchange.admin.soap.usercopy.soap.StorageException fd = new com.openexchange.admin.soap.usercopy.soap.StorageException();
             com.openexchange.admin.soap.usercopy.exceptions.StorageException value = new com.openexchange.admin.soap.usercopy.exceptions.StorageException();
             fd.setStorageException(value);
             throw new StorageException_Exception(e.getMessage(), fd, e);
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             com.openexchange.admin.soap.usercopy.soap.InvalidDataException fd = new com.openexchange.admin.soap.usercopy.soap.InvalidDataException();
             com.openexchange.admin.soap.usercopy.exceptions.InvalidDataException value = new com.openexchange.admin.soap.usercopy.exceptions.InvalidDataException();
             fd.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), fd, e);
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             com.openexchange.admin.soap.usercopy.soap.DatabaseUpdateException fd = new com.openexchange.admin.soap.usercopy.soap.DatabaseUpdateException();
             com.openexchange.admin.soap.usercopy.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.usercopy.exceptions.DatabaseUpdateException();
             fd.setDatabaseUpdateException(value);
             throw new DatabaseUpdateException_Exception(e.getMessage(), fd, e);
-        } catch (final NoSuchUserException e) {
+        } catch (NoSuchUserException e) {
             com.openexchange.admin.soap.usercopy.soap.NoSuchUserException fd = new com.openexchange.admin.soap.usercopy.soap.NoSuchUserException();
             com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException value = new com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException();
             fd.setNoSuchUserException(value);
             throw new NoSuchUserException_Exception(e.getMessage(), fd, e);
-        } catch (final UserExistsException e) {
+        } catch (UserExistsException e) {
             com.openexchange.admin.soap.usercopy.soap.UserExistsException fd = new com.openexchange.admin.soap.usercopy.soap.UserExistsException();
             com.openexchange.admin.soap.usercopy.exceptions.UserExistsException value = new com.openexchange.admin.soap.usercopy.exceptions.UserExistsException();
             fd.setUserExistsException(value);
@@ -341,7 +341,7 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
                     final int port = i.intValue();
                     final URI newUri = new URI(defaults.getSSLPort() == port ? defaults.getSSLProtocol() : defaults.getProtocol(), null, uri.getHost(), port, null, null, null);
                     user.setImapServer(newUri.toString());
-                } catch (final URISyntaxException e) {
+                } catch (URISyntaxException e) {
                     final Logger logger = org.slf4j.LoggerFactory.getLogger(OXUserCopyServicePortTypeImpl.class);
                     logger.warn("The IMAP URL {} is invalid: {}", s, e.getMessage());
 
@@ -835,7 +835,7 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
                 final GregorianCalendar c = new GregorianCalendar();
                 c.setTime(d);
                 soapUser.setAnniversary(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-            } catch (final DatatypeConfigurationException e) {
+            } catch (DatatypeConfigurationException e) {
                 soapUser.setAnniversary(null);
             }
         }
@@ -848,7 +848,7 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
                 final GregorianCalendar c = new GregorianCalendar();
                 c.setTime(d);
                 soapUser.setBirthday(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-            } catch (final DatatypeConfigurationException e) {
+            } catch (DatatypeConfigurationException e) {
                 soapUser.setBirthday(null);
             }
         }

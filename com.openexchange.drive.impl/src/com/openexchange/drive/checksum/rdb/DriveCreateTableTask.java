@@ -93,7 +93,7 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
                     }
                     statement = writeCon.prepareStatement(createStmts[i]);
                     statement.executeUpdate();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 } finally {
                     closeSQLStuff(statement);
@@ -102,11 +102,11 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
 
             writeCon.commit(); // COMMIT
             rollback = 2;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {

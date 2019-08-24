@@ -273,7 +273,7 @@ public class LocalFileStorage extends DefaultFileStorage {
                 final int val = Integer.parseInt(tokens[i], 16);
                 parts[i] = val;
                 sum += val;
-            } catch (final NumberFormatException n) {
+            } catch (NumberFormatException n) {
                 throw FileStorageCodes.NO_NUMBER.create(n);
             }
         }
@@ -386,7 +386,7 @@ public class LocalFileStorage extends DefaultFileStorage {
             }
             try {
                 save(nextentry, input);
-            } catch (final OXException ie) {
+            } catch (OXException ie) {
                 delete(new String[] { nextentry });
                 lock(LOCK_TIMEOUT);
                 try {
@@ -539,7 +539,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         while (tokenizer.hasMoreTokens()) {
             try {
                 entry[actualDepth++] = Integer.parseInt(tokenizer.nextToken(), 16);
-            } catch (final NumberFormatException n) {
+            } catch (NumberFormatException n) {
                 throw FileStorageCodes.NO_NUMBER.create(n);
             }
         }
@@ -639,7 +639,7 @@ public class LocalFileStorage extends DefaultFileStorage {
                 fos.write(buf, 0, read);
             }
             fos.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(fos);
@@ -669,7 +669,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         do {
             try {
                 created = lock.createNewFile();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 // Try again to create the file.
                 ioe = e;
                 LOG.debug("", e);
@@ -677,7 +677,7 @@ public class LocalFileStorage extends DefaultFileStorage {
             if (!created) {
                 try {
                     Thread.sleep(RELOCK_TIME);
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Should not be interrupted.
                     // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                     Thread.currentThread().interrupt();
@@ -716,7 +716,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     protected State loadState() throws OXException {
         try {
             return new State(load(STATEFILENAME));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             delete(new String[] { STATEFILENAME });
             throw e;
         }
@@ -733,7 +733,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         try {
             in = state.saveState();
             save(STATEFILENAME, in);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             delete(new String[] { STATEFILENAME });
             throw e;
         } finally {
@@ -755,7 +755,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         }
         try {
             return new FileInputStream(new File(storage, name));
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }

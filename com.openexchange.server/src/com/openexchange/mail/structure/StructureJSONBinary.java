@@ -98,7 +98,7 @@ public final class StructureJSONBinary implements JSONBinary {
                 final ThresholdFileHolder tfh = new ThresholdFileHolder();
                 this.tfh = tfh;
                 tfh.write(in);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(in);
@@ -128,7 +128,7 @@ public final class StructureJSONBinary implements JSONBinary {
             base64Out.flush();
             base64Out.close();
             return bout.toString("US-ASCII");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             return "";
         } finally {

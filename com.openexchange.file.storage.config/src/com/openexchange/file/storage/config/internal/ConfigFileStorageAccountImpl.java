@@ -81,7 +81,7 @@ public class ConfigFileStorageAccountImpl extends DefaultFileStorageAccount impl
             final Map<String, Object> clonedConfig = null == thismap ? null : new HashMap<String, Object>(thismap);
             clone.configuration = clonedConfig;
             return clone;
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             throw new InternalError("Clone not supported although Cloneable is implemented.");
         }
     }

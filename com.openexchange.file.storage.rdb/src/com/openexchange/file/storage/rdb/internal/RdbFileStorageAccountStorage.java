@@ -167,7 +167,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                             try {
                                 final String decrypted = decrypt(toDecrypt, serviceId, id, session, confId, passwordElementName);
                                 configuration.put(passwordElementName, decrypted);
-                            } catch (final OXException x) {
+                            } catch (OXException x) {
                                 // Must not be fatal
                                 configuration.put(passwordElementName, "");
                                 // Supply a (probably false) password anyway.
@@ -178,7 +178,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 account.setConfiguration(configuration);
             }
             return account;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -241,7 +241,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                             try {
                                 final String decrypted = decrypt(toDecrypt, serviceId, accountId, session, confId, passwordElementName);
                                 configuration.put(passwordElementName, decrypted);
-                            } catch (final OXException x) {
+                            } catch (OXException x) {
                                 // Must not be fatal
                                 configuration.put(passwordElementName, "");
                                 // Provide a (probably false) password anyway.
@@ -252,7 +252,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 account.setConfiguration(configuration);
             }
             return account;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -302,7 +302,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 accounts = Collections.emptyList();
             }
             return accounts;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -344,7 +344,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 accounts = new TIntArrayList(0);
             }
             return accounts;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -418,9 +418,9 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             wc.commit(); // COMMIT
             rollback = 2;
             return accountId;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -444,7 +444,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         // Invalidate account
         try {
             CachingFileStorageAccountStorage.getInstance().invalidate(prop.serviceId, prop.id, session.getUserId(), session.getContextId());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
     }
@@ -647,11 +647,11 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             }
             wc.commit(); // COMMIT
             rollback = 2;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -668,7 +668,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
     private static <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return Services.getService(clazz);
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -729,7 +729,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         return true;
@@ -754,7 +754,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 ret.put(rs.getInt(1), rs.getInt(2));
             }
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -785,7 +785,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 confIds.add(confId);
             }
 
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -820,7 +820,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                         try {
                             // Try using the new secret. Maybe this account doesn't need the migration
                             cryptoService.decrypt(encrypted, newSecret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // Needs migration
                             final String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
                             update.put(field, transcripted);
@@ -831,7 +831,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     genericConfStorageService.update(ctx, confId, update);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -856,7 +856,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             // Query
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -891,7 +891,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // Discard
                             update.put(field, "");
                         }
@@ -931,7 +931,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // Discard
                             if (!confIdsToDelete.contains(confId)) {
                                 confIdsToDelete.add(confId);

@@ -113,7 +113,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
                         return;
                     }
                     url = rs.getString(1).toLowerCase(Locale.ENGLISH);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     Databases.closeSQLStuff(rs, stmt);
@@ -159,12 +159,12 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
                 if (restoreConstraints) {
                     try {
                         enableForeignKeyChecks(con);
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         org.slf4j.LoggerFactory.getLogger(StorageDeleteListener.class).error("", e);
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -176,7 +176,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
         try {
             DBUtils.disableMysqlForeignKeyChecks(con);
             return true;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }

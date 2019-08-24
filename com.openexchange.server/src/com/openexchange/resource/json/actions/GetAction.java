@@ -87,7 +87,7 @@ public final class GetAction extends AbstractResourceAction {
         com.openexchange.resource.Resource r = null;
         try {
             r = services.getServiceSafe(ResourceService.class).getResource(id, session.getContext());
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.debug("resource not found try to find id in user table", exc);
         }
 

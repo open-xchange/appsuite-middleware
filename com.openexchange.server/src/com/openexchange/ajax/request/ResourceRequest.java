@@ -139,7 +139,7 @@ public class ResourceRequest {
             final ResourceService resService = ServerServiceRegistry.getServize(ResourceService.class, true);
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.debug("Tried to find resources that were modified since {}", lastModified, exc);
         }
 
@@ -190,7 +190,7 @@ public class ResourceRequest {
 
                 try {
                     r = ServerServiceRegistry.getServize(ResourceService.class, true).getResource(id, session.getContext());
-                } catch (final OXException exc) {
+                } catch (OXException exc) {
                     LOG.debug("resource not found try to find id in user table", exc);
                 }
 
@@ -226,7 +226,7 @@ public class ResourceRequest {
         com.openexchange.resource.Resource r = null;
         try {
             r = ServerServiceRegistry.getServize(ResourceService.class, true).getResource(id, session.getContext());
-        } catch (final OXException exc) {
+        } catch (OXException exc) {
             LOG.debug("resource not found try to find id in user table", exc);
         }
 

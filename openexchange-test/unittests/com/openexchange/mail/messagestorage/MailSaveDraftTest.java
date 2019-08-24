@@ -119,7 +119,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                 MailMessage tmp = null;
                 try {
                     tmp = mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     prevUid = null;
                     exc = e;
                 }
@@ -162,7 +162,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                 mailAccess.close(false);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

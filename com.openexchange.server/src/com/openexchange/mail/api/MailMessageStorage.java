@@ -315,7 +315,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
                          */
                         filledMail = MimeMessageConverter.convertMessage(mimeMessage);
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     filledMail = null;
                 }
             }

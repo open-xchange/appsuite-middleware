@@ -172,11 +172,11 @@ public abstract class AbstractSession implements Session {
     public void sign(final HttpRequestBase request) throws OXException {
         try {
             getSigner().sign(request);
-        } catch (final OAuthCommunicationException e) {
+        } catch (OAuthCommunicationException e) {
             throw RESTExceptionCodes.ERROR.create(e);
-        } catch (final OAuthMessageSignerException e) {
+        } catch (OAuthMessageSignerException e) {
             throw RESTExceptionCodes.ERROR.create(e);
-        } catch (final OAuthExpectationFailedException e) {
+        } catch (OAuthExpectationFailedException e) {
             throw RESTExceptionCodes.ERROR.create(e);
         }
     }

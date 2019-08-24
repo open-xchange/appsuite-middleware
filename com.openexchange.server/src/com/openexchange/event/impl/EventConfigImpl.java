@@ -102,9 +102,9 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
             } finally {
                 Streams.close(in);
             }
-        } catch (final FileNotFoundException exc) {
+        } catch (FileNotFoundException exc) {
             LOG.error("Cannot find propfile: {}", propfile, exc);
-        } catch (final IOException exc) {
+        } catch (IOException exc) {
             LOG.error("Cannot read propfile: {}", propfile, exc);
         }
 

@@ -122,7 +122,7 @@ public class LoginCounterImpl implements LoginCounterService {
                 throw new MBeanException(null, "No such entry found (user="+userId+", context="+contextId+", client=\""+client+"\").");
             }
             return Collections.singletonList(new Object[] { new Date(Long.parseLong(rs.getString(1))), client });
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw new OXException(-1, e.getMessage(), e);
         } finally {
@@ -196,11 +196,11 @@ public class LoginCounterImpl implements LoginCounterService {
                                 results.put(client, value.intValue() + 1);
                             }
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         logger.warn("Client value is not a number.", e);
                     }
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 logger.error("", e);
                 throw new OXException(e);
             } finally {
@@ -222,7 +222,7 @@ public class LoginCounterImpl implements LoginCounterService {
         if (result != null) {
             try {
                 result.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
             }
         }
     }
@@ -236,7 +236,7 @@ public class LoginCounterImpl implements LoginCounterService {
         if (null != stmt) {
             try {
                 stmt.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
             }
         }
     }
@@ -318,7 +318,7 @@ public class LoginCounterImpl implements LoginCounterService {
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             return parseResult(startDate, endDate, rs);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw new OXException(-1, e.getMessage(), e);
         } finally {
@@ -339,7 +339,7 @@ public class LoginCounterImpl implements LoginCounterService {
                 if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
                     returnMap.put(name, date);
                 }
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 logger.warn("Client value is not a number.", e);
             }
         }

@@ -105,7 +105,7 @@ public final class CommonActivator implements BundleActivator {
 
             propValue = System.getProperty("networkaddress.cache.negative.ttl", "10");
             java.security.Security.setProperty("networkaddress.cache.negative.ttl" , propValue);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Starting bundle ''com.openexchange.common'' failed", e);
             throw e;
         }
@@ -123,7 +123,7 @@ public final class CommonActivator implements BundleActivator {
                 this.mailcapRegistration = null;
             }
             com.mysql.jdbc.AbandonedConnectionCleanupThread.uncheckedShutdown();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("Stopping bundle 'com.openexchange.common' failed", e);
             throw e;
         }

@@ -105,16 +105,16 @@ public class DateStringParser implements StringParser {
                 for(final int timeStyle: styles){
                     final DateFormat sdf = DateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
                     try { return sdf.parse(data);
-                        } catch (final ParseException e) {/*Next*/ }
+                        } catch (ParseException e) {/*Next*/ }
                 }
                 final DateFormat sdf = DateFormat.getDateInstance(dateStyle, loc);
                 try { return sdf.parse(data);
-                    } catch (final ParseException e) {/*Next*/ }
+                    } catch (ParseException e) {/*Next*/ }
                 }
         }
         final DateFormat sdf = DateFormat.getInstance();
         try { return sdf.parse(data);
-            } catch (final ParseException e) {/*Next*/ }
+            } catch (ParseException e) {/*Next*/ }
 
         return null;
     }

@@ -297,9 +297,9 @@ public final class IMAPConversationWorker {
             }
             // Use built-in algorithm
             return doReferenceOnlyThreadSort(fullName, indexRange, sortField, order, sentFullName, lookAhead, mergeWithSent, mailFields, headerNames, searchTerm);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw imapMessageStorage.handleMessagingException(fullName, e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw imapMessageStorage.handleRuntimeException(e);
         } finally {
             IMAPMessageStorage.closeSafe(sentFolder);
@@ -1019,9 +1019,9 @@ public final class IMAPConversationWorker {
 
             // Parse unified THREAD response
             return parseThreadList(toUnifiedThreadResponse(threadList), fullName, numMsgs, sortField, order, usedFields, headerNames);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw imapMessageStorage.handleMessagingException(fullName, e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw imapMessageStorage.handleRuntimeException(e);
         } finally {
             IMAPFolderWorker.clearCache(imapMessageStorage.getImapFolder());
@@ -1368,9 +1368,9 @@ public final class IMAPConversationWorker {
             final List<MailMessage> flatList = new LinkedList<>();
             ThreadSortUtil.toFlatList(structuredList, flatList);
             return flatList.toArray(new MailMessage[flatList.size()]);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw imapMessageStorage.handleMessagingException(fullName, e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw imapMessageStorage.handleRuntimeException(e);
         } finally {
             IMAPFolderWorker.clearCache(imapMessageStorage.getImapFolder());

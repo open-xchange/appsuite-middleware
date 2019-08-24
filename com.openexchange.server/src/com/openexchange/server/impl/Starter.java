@@ -217,7 +217,7 @@ public class Starter implements Initialization {
             long usedMemory = totalMemory - freeMemory;
             args.add(NumberFormat.getNumberInstance().format(usedMemory));
             args.add(sep);
-        } catch (final Exception gee) {
+        } catch (Exception gee) {
             LOG.error("", gee);
         }
 
@@ -241,7 +241,7 @@ public class Starter implements Initialization {
         while (!started.isEmpty()) {
             try {
                 started.pop().stop();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("Component shutdown failed.", e);
             }
         }

@@ -122,7 +122,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
             public Object getObject(final MailMessage candidate) {
                 try {
                     return candidate.getContent();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                     return null;
                 }
@@ -200,7 +200,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 }
                 try {
                     return new FlagTerm(Integer.parseInt(constant.toString()), true);
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Unsupported value for flag search: " + operation);
                 }
             }
@@ -315,7 +315,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 }
                 try {
                     return new ReceivedDateTerm(ct, new Date(Long.parseLong(constant.toString())));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Unsupported value for received date search: " + operation);
                 }
             }
@@ -428,7 +428,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 }
                 try {
                     return new SentDateTerm(ct, new Date(Long.parseLong(constant.toString())));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Unsupported value for sent date search: " + operation);
                 }
 
@@ -454,7 +454,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 }
                 try {
                     return new SizeTerm(ct, (int) Long.parseLong(constant.toString()));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Unsupported value for size search: " + operation);
                 }
 

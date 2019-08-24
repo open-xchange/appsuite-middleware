@@ -75,7 +75,7 @@ public class AttachmentDelDelete extends ContextDelete {
             stmt = writeCon.prepareStatement("DELETE FROM del_attachment WHERE cid=?");
             stmt.setInt(1, event.getContext().getContextId());
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);

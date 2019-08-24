@@ -106,7 +106,7 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
                 final String tmp = req.getParameter("ttlMillis");
                 try {
                     ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     ttlMillis = -1;
                 }
             }
@@ -144,9 +144,9 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
 
             // Return result
             return new AJAXRequestResult(attachmentObject, "json");
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

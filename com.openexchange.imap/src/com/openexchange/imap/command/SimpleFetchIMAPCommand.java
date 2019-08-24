@@ -339,7 +339,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                     mail.setAlternativeHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
                 }
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             /*
              * Discard corrupt message
              */
@@ -348,7 +348,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 LOG.warn("Message #{} discarded", I(mail.getSeqnum()), imapExc);
             }
             error = true;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             /*
              * Discard corrupt message
              */
@@ -473,7 +473,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                     synchronized (mdf) {
                         try {
                             mailMessage.setSentDate(mdf.parse(hdr.getValue()));
-                        } catch (final ParseException e) {
+                        } catch (ParseException e) {
                             LOG.error("", e);
                         }
                     }
@@ -534,7 +534,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 }
                 try {
                     msg.addHeader(name, hdr.getValue());
-                } catch (final IllegalArgumentException illegalArgumentExc) {
+                } catch (IllegalArgumentException illegalArgumentExc) {
                     logger.debug("Ignoring invalid header.", illegalArgumentExc);
                 }
                 /*-
@@ -562,7 +562,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 }
                 try {
                     msg.addHeader(name, hdr.getValue());
-                } catch (final IllegalArgumentException illegalArgumentExc) {
+                } catch (IllegalArgumentException illegalArgumentExc) {
                     logger.debug("Ignoring invalid header.", illegalArgumentExc);
                 }
                 /*-
@@ -800,7 +800,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 final String contentType = sb.toString();
                 msg.setContentType(new ContentType(contentType));
                 msg.addHeader("Content-Type", contentType);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 logger.warn("", e);
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
@@ -829,7 +829,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 try {
                     ContentType ct = new ContentType(contentType);
                     msg.setAlternativeHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Part) message.getContent()));
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     throw new MessagingException(e.getMessage(), e);
                 }
             }

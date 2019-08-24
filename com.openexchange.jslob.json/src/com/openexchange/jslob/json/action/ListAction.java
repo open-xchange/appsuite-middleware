@@ -110,7 +110,7 @@ public final class ListAction extends JSlobAction {
                 sIds.add(ids.getString(i));
             }
             return new AJAXRequestResult(jslobService.get(sIds, jslobRequest.getSession()), "jslob");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

@@ -151,7 +151,7 @@ public final class ContactAddUIDValueTask extends UpdateTaskAdapter {
                                     pStmt.setInt(3, id);
                                     pStmt.addBatch();
                                     return true;
-                                } catch (final SQLException e) {
+                                } catch (SQLException e) {
                                     exceptionReference.set(e);
                                     return false;
                                 }
@@ -163,7 +163,7 @@ public final class ContactAddUIDValueTask extends UpdateTaskAdapter {
                         }
                         innerStmt.executeBatch();
                         return true;
-                    } catch (final SQLException e) {
+                    } catch (SQLException e) {
                         exceptionReference.set(e);
                         return false;
                     } finally {

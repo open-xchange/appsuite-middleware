@@ -525,7 +525,7 @@ public final class IMAPCommandsCollection {
                         }
                     }
                     return retval;
-                } catch (final CommandFailedException e) {
+                } catch (CommandFailedException e) {
                     /*
                      * Either creation or deletion of temporary folder failed. Assume maildir folder format.
                      */
@@ -1534,7 +1534,7 @@ public final class IMAPCommandsCollection {
                     return null;
                 }
             });
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -2050,7 +2050,7 @@ public final class IMAPCommandsCollection {
                 }
 
             });
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             LOG.trace("", e);
         }
     }
@@ -2079,7 +2079,7 @@ public final class IMAPCommandsCollection {
                 }
 
             });
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             LOG.trace("", e);
         }
     }
@@ -2105,7 +2105,7 @@ public final class IMAPCommandsCollection {
                 }
 
             });
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             LOG.trace("", e);
         }
     }
@@ -2345,11 +2345,11 @@ public final class IMAPCommandsCollection {
                             final int[] ni = new int[limit];
                             System.arraycopy(tmp, 0, ni, 0, limit);
                             newMsgSeqNums = ni;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             throw wrapException(e, null);
-                        } catch (final MessagingException e) {
+                        } catch (MessagingException e) {
                             throw wrapException(e, null);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             throw wrapException(e, null);
                         }
                     } else {
@@ -2372,7 +2372,7 @@ public final class IMAPCommandsCollection {
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
                     final FetchProfile fp = getFetchProfile(fields, sort, fastFetch, imapConfig.getCapabilities().hasAttachmentMarker(), imapConfig.asMap().containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW));
                     newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, serverInfo, false, false, body).doCommand();
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     throw wrapException(e, null);
                 }
                 return newMsgs;
@@ -2495,17 +2495,17 @@ public final class IMAPCommandsCollection {
         if (supportsUIDPLUS) {
             try {
                 IMAPCommandsCollection.uidExpunge(imapFolder, uids);
-            } catch (final FolderClosedException e) {
+            } catch (FolderClosedException e) {
                 /*
                  * Not possible to retry since connection is broken
                  */
                 throw e;
-            } catch (final StoreClosedException e) {
+            } catch (StoreClosedException e) {
                 /*
                  * Not possible to retry since connection is broken
                  */
                 throw e;
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 if (e.getNextException() instanceof ProtocolException) {
                     final ProtocolException protocolException = (ProtocolException) e.getNextException();
                     final Response response = protocolException.getResponse();
@@ -2591,7 +2591,7 @@ public final class IMAPCommandsCollection {
                 }
             });
             return val.booleanValue();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
@@ -2656,7 +2656,7 @@ public final class IMAPCommandsCollection {
                     return retval;
                 }
             })).booleanValue();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
@@ -3319,7 +3319,7 @@ public final class IMAPCommandsCollection {
                 BodyAndId bid = null;
                 try {
                     bid = getBODYSTRUCTURE(sectionId, bodystructure, null, 1, new boolean[1]);
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     final Exception cause = e.getNextException();
                     throw new ProtocolException(e.getMessage(), null == cause ? e : cause);
                 }
@@ -3512,7 +3512,7 @@ public final class IMAPCommandsCollection {
                 BodyAndId bid = null;
                 try {
                     bid = getBODYSTRUCTUREByContentId(contentId, bodystructure, null, 1, new boolean[1]);
-                } catch (final MessagingException e) {
+                } catch (MessagingException e) {
                     final Exception cause = e.getNextException();
                     throw new ProtocolException(e.getMessage(), null == cause ? e : cause);
                 }
@@ -3625,9 +3625,9 @@ public final class IMAPCommandsCollection {
             final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure, fullName, loadContent);
             ret.applyBodyStructure(bodystructure);
             return ret;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new ProtocolException(e.getMessage(), e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new ProtocolException(e.getMessage(), e);
         }
     }
@@ -3637,9 +3637,9 @@ public final class IMAPCommandsCollection {
             final IMAPMailPart ret = new IMAPMailPart(byteArray, bodystructure, fullName);
             ret.applyBodyStructure(bodystructure);
             return ret;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new ProtocolException(e.getMessage(), e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new ProtocolException(e.getMessage(), e);
         }
     }
@@ -3885,7 +3885,7 @@ public final class IMAPCommandsCollection {
                     }
 
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     throw wrapException(e, null);
                 } finally {
                     // p.notifyResponseHandlers(r);

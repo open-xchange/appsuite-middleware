@@ -583,7 +583,7 @@ public abstract class MailConfig {
                 int[] retval = USER_ID_CACHE.get(userID);
                 remove = false;
                 return retval;
-            } catch (final ExecutionException e) {
+            } catch (ExecutionException e) {
                 ThreadPools.launderThrowable(e, OXException.class);
             } finally {
                 if (remove) {
@@ -765,7 +765,7 @@ public abstract class MailConfig {
         }
         try {
             return IDNA.toACE(login);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return login;
         }
     }

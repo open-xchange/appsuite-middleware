@@ -192,11 +192,11 @@ public final class MimeSmilFixer {
                 mimeMessage.setHeader(MESSAGE_ID, messageId);
             }
             return mimeMessage;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final MessageRemovedIOException e) {
+        } catch (MessageRemovedIOException e) {
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -322,7 +322,7 @@ public final class MimeSmilFixer {
         try {
             final String[] tmp = part.getHeader(CONTENT_TYPE);
             return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -360,7 +360,7 @@ public final class MimeSmilFixer {
                 }
             }
             return (hasDisposition && Part.INLINE.equalsIgnoreCase(cd.getDisposition())) || (!hasDisposition && !cd.containsFilenameParameter() && !contentType.containsParameter("name"));
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

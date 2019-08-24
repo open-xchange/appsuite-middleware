@@ -93,7 +93,7 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
         for(final String component : webdavPath) {
             try {
                 path.append(URLDecoder.decode(component, "UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 // Won't happen
             }
         }

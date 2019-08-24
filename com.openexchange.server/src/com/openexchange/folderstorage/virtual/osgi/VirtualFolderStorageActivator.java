@@ -97,7 +97,7 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
             dictionary.put("tree", FolderStorage.ALL_TREE_ID);
             registerService(FolderStorage.class, VirtualFolderStorage.getInstance(), dictionary);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(VirtualFolderStorageActivator.class).error("", e);
             throw e;
         }

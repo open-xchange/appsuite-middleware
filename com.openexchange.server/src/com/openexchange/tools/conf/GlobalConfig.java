@@ -68,7 +68,7 @@ public class GlobalConfig {
         try {
             final String returnPattern = datePattern.get(country.toUpperCase()).toString();
             return returnPattern.substring(0, returnPattern.indexOf(' '));
-        } catch (final NullPointerException npe) {
+        } catch (NullPointerException npe) {
             final String defaultPattern = datePattern.get("DEFAULT").toString();
             return defaultPattern.substring(0, defaultPattern.indexOf(' '));
         }
@@ -77,7 +77,7 @@ public class GlobalConfig {
     public static String getDateTimePattern(final String country) {
         try {
             return datePattern.get(country.toUpperCase()).toString();
-        } catch (final NullPointerException npe) {
+        } catch (NullPointerException npe) {
             return datePattern.get("DEFAULT").toString();
         }
     }

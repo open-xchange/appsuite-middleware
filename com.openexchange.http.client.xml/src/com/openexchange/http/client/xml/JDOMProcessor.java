@@ -72,7 +72,7 @@ public class JDOMProcessor implements HTTPResponseProcessor {
 			throws OXException {
 		try {
 			return parser.parse((InputStream) response);
-		} catch (final Exception x) {
+		} catch (Exception x) {
 			throw OxHttpClientExceptionCodes.CATCH_ALL.create(x.getMessage(), x);
 		}
 	}

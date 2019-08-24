@@ -381,7 +381,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                         fromImageURLs.put(imageURL);
                     }
                     ((JSONObject) result.getResultObject()).put("from_image_urls", fromImageURLs);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
                 }
             }
@@ -398,7 +398,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
                 try {
                     return ContactUtil.generateImageUrl(session, contact);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.warn("Error generating contact image URL", e);
                 }
             }

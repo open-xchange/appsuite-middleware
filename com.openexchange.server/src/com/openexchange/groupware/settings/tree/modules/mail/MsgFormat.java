@@ -148,7 +148,7 @@ public class MsgFormat implements PreferencesItemService {
                             usm.setMsgFormat(msgFormat);
                             storage.saveUserSettingMail(usm, user.getId(), ctx);
                         }
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw SettingExceptionCodes.JSON_READ_ERROR.create(e);
                     }
                 }

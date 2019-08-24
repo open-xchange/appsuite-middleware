@@ -109,11 +109,11 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     public void doAuthentication(final Credentials authdata) throws OXException {
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(toCreds(authdata));
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
@@ -133,15 +133,15 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
             } else {
                 BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(toCreds(authdata), new Context(Integer.valueOf(contextId)));
             }
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
@@ -152,15 +152,15 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     public void doUserAuthentication(final Credentials authdata, final int contextId) throws OXException {
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(toCreds(authdata), new Context(Integer.valueOf(contextId)));
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;
-        } catch (final InvalidDataException e) {
+        } catch (InvalidDataException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
             throw oxe;

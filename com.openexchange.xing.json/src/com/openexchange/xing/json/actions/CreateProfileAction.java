@@ -101,7 +101,7 @@ public class CreateProfileAction extends AbstractXingAction {
             final QuotedInternetAddress addr = new QuotedInternetAddress(email, false);
             email = QuotedInternetAddress.toIDN(addr.getAddress());
             leadDescription.setEmail(email);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
 

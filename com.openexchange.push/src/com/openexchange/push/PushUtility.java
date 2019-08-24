@@ -162,7 +162,7 @@ public final class PushUtility {
              */
             eventAdmin.postEvent(event);
             LOG.debug("Notified new mails in folder \"{}\" for user {} in context {}", folder, I(userId), I(contextId));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

@@ -339,7 +339,7 @@ public class CollectorFormatter extends Formatter {
         String result;
         try {
             result = formatRecord((Handler) null, false);
-        } catch (final RuntimeException ignore) {
+        } catch (RuntimeException ignore) {
             result = super.toString();
         }
         return result;
@@ -558,9 +558,9 @@ public class CollectorFormatter extends Formatter {
             if (!"null".equalsIgnoreCase(v)) {
                 try {
                     f = LogManagerProperties.newFormatter(v);
-                } catch (final RuntimeException re) {
+                } catch (RuntimeException re) {
                     throw re;
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     throw new UndeclaredThrowableException(e);
                 }
             } else {
@@ -615,9 +615,9 @@ public class CollectorFormatter extends Formatter {
                     c = Comparator.class.cast(SeverityComparator.getInstance());
                 }
             }
-        } catch (final RuntimeException re) {
+        } catch (RuntimeException re) {
             throw re; //Avoid catch all.
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new UndeclaredThrowableException(e);
         }
         return c;

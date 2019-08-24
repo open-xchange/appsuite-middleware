@@ -189,7 +189,7 @@ public class ReplicationMonitor {
             if (!write && assign.isTransactionInitialized()) {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (10 == tries) {
                         // Consumed all available retry attempts. Do a fall back to the master.
                         LOG.warn("", e);
@@ -201,7 +201,7 @@ public class ReplicationMonitor {
                         }
                         try {
                             retval.close();
-                        } catch (final SQLException e1) {
+                        } catch (SQLException e1) {
                             OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                             LOG.error("", e2);
                         }
@@ -224,11 +224,11 @@ public class ReplicationMonitor {
                 incrementInstead();
                 try {
                     toReturn.close();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     LOG.error("", e1);
                 }
-            } catch (final PoolingException e) {
+            } catch (PoolingException e) {
                 // Use not actual slave if master connection cannot be obtained.
                 final OXException e1 = createException(assign, true, e);
                 LOG.warn("", e1);
@@ -286,7 +286,7 @@ public class ReplicationMonitor {
         final ConnectionPool pool;
         try {
             pool = pools.getPool(poolId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             return;
         }
@@ -307,7 +307,7 @@ public class ReplicationMonitor {
         } else {
             try {
                 pool.back(con);
-            } catch (final PoolingException e) {
+            } catch (PoolingException e) {
                 if (!wasHeartbeatEnabled) {
                     Databases.close(con);
                     final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());

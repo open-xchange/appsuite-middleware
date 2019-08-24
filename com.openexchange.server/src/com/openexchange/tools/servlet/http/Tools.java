@@ -204,7 +204,7 @@ public final class Tools {
     public static String toACE(final String idnAddress) throws OXException {
         try {
             return IDNA.toACE(idnAddress);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

@@ -628,9 +628,9 @@ public final class Init {
                 final CollectionCharsetProvider collectionCharsetProvider = (CollectionCharsetProvider) results[1];
                 collectionCharsetProvider.addCharsetProvider(new net.freeutils.charset.CharsetProvider());
                 collectionCharsetProvider.addCharsetProvider(new CustomCharsetProvider());
-            } catch (final NoSuchFieldException e) {
+            } catch (NoSuchFieldException e) {
                 throw getWrappingOXException(e);
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 throw getWrappingOXException(e);
             }
             services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
@@ -761,7 +761,7 @@ public final class Init {
             for (final Translations tr : new POTranslationsDiscoverer(dir).getTranslations()) {
                 i18nServices.addI18nService(new TranslationsI18N(tr));
             }
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }

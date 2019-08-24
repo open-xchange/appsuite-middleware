@@ -113,7 +113,7 @@ public class TransportAccountDescription {
         }
         try {
             setTransportServer(URIParser.parse(IDNA.toASCII(transportServerURL), URIDefaults.SMTP));
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, transportServerURL);
         }
     }
@@ -172,7 +172,7 @@ public class TransportAccountDescription {
         final String protocol = transportSecure ? transportProtocol + 's' : transportProtocol;
         try {
             return transportUrl = URITools.generateURI(protocol, IDNA.toASCII(transportServer), transportPort).toString();
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             final StringBuilder sb = new StringBuilder(32);
             sb.append(transportProtocol);
             if (transportSecure) {

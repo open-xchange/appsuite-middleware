@@ -111,7 +111,7 @@ public class DeleteTest {    // Success Case
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
     }
@@ -128,7 +128,7 @@ public class DeleteTest {    // Success Case
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
     }
@@ -146,7 +146,7 @@ public class DeleteTest {    // Success Case
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
 
@@ -174,7 +174,7 @@ public class DeleteTest {    // Success Case
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
 
@@ -202,7 +202,7 @@ public class DeleteTest {    // Success Case
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
 

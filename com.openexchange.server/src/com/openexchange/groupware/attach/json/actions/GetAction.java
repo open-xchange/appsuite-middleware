@@ -94,7 +94,7 @@ public final class GetAction extends AbstractAttachmentAction {
             final int id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
             return new AJAXRequestResult(get(folderId, attachedId, moduleId, id, session), "apiResponse");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -132,7 +132,7 @@ public final class GetAction extends AbstractAttachmentAction {
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

@@ -87,7 +87,7 @@ public class RemoveFileSolver implements ProblemSolver {
              * Afterwards we recreate the state file because it could happen that that now new free file slots are available.
              */
             storage.recreateStateFile();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("{}", e.getMessage(), e);
         }
     }

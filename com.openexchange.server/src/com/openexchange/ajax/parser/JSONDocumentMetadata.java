@@ -131,7 +131,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             } else {
                 jsonObject.remove(Metadata.LAST_MODIFIED_LITERAL.getName());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -152,7 +152,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             } else {
                 jsonObject.remove(Metadata.CREATION_DATE_LITERAL.getName());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -170,7 +170,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setModifiedBy(final int lastEditor) {
         try {
             jsonObject.put(Metadata.MODIFIED_BY_LITERAL.getName(), lastEditor);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -187,7 +187,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setFolderId(final long folderId) {
         try {
             jsonObject.put(Metadata.FOLDER_ID_LITERAL.getName(), folderId);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -204,7 +204,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setTitle(final String title) {
         try {
             jsonObject.put(Metadata.TITLE_LITERAL.getName(), title);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -221,7 +221,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setVersion(final int version) {
         try {
             jsonObject.put(Metadata.VERSION_LITERAL.getName(), version);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -243,7 +243,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setFileSize(final long length) {
         try {
             jsonObject.put(Metadata.FILE_SIZE_LITERAL.getName(), length);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -260,7 +260,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setFileMIMEType(final String type) {
         try {
             jsonObject.put(Metadata.FILE_MIMETYPE_LITERAL.getName(), type);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -277,7 +277,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setFileName(final String fileName) {
         try {
             jsonObject.put(Metadata.FILENAME_LITERAL.getName(), fileName);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -294,7 +294,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setId(final int id) {
         try {
             jsonObject.put(Metadata.ID_LITERAL.getName(), id);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -315,7 +315,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         } else {
             try {
                 jsonObject.put(Metadata.META_LITERAL.getName(), new JSONObject(properties));
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 LOG.error("",e);
             }
         }
@@ -333,7 +333,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setCreatedBy(final int creator) {
         try {
             jsonObject.put(Metadata.CREATED_BY_LITERAL.getName(), creator);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -350,7 +350,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setDescription(final String description) {
         try {
             jsonObject.put(Metadata.DESCRIPTION_LITERAL.getName(), description);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -367,7 +367,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setURL(final String url) {
         try {
             jsonObject.put(Metadata.URL_LITERAL.getName(), url);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -392,7 +392,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setCategories(final String categories) {
         try {
             jsonObject.put(Metadata.CATEGORIES_LITERAL.getName(), categories);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -409,7 +409,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setLockedUntil(final Date lockedUntil) {
         try {
             jsonObject.put(Metadata.LOCKED_UNTIL_LITERAL.getName(), lockedUntil);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -426,7 +426,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setFileMD5Sum(final String sum) {
         try {
             jsonObject.put(Metadata.FILE_MD5SUM_LITERAL.getName(), sum);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -440,7 +440,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setColorLabel(final int color) {
         try {
             jsonObject.put(Metadata.COLOR_LABEL_LITERAL.getName(), color);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -454,7 +454,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setIsCurrentVersion(final boolean bool) {
         try {
             jsonObject.put(Metadata.CURRENT_VERSION_LITERAL.getName(), bool);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -471,7 +471,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setVersionComment(final String string) {
         try {
             jsonObject.put(Metadata.VERSION_COMMENT_LITERAL.getName(), string);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -499,7 +499,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setFilestoreLocation(final String string) {
         try {
             jsonObject.put(Metadata.FILESTORE_LOCATION_LITERAL.getName(), string);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("",e);
         }
     }
@@ -508,7 +508,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     public void setNumberOfVersions(final int numberOfVersions) {
         try {
             jsonObject.put(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName(), numberOfVersions);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error("", e);
         }
     }

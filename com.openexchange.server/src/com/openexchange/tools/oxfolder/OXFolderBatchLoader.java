@@ -243,7 +243,7 @@ public final class OXFolderBatchLoader {
                             if (!rs.wasNull() && null != jsonBlobStream) {
                                 try {
                                     folderObj.setMeta(OXFolderUtility.deserializeMeta(jsonBlobStream));
-                                } catch (final JSONException e) {
+                                } catch (JSONException e) {
                                     throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, Integer.toString(fuid), Integer.toString(ctx.getContextId()));
                                 } finally {
                                     Streams.close(jsonBlobStream);
@@ -270,7 +270,7 @@ public final class OXFolderBatchLoader {
                 }
             }
             return folders;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -427,7 +427,7 @@ public final class OXFolderBatchLoader {
         }
         try {
             return Integer.parseInt(str);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             if (str.equalsIgnoreCase("system")) {
                 return ctx.getMailadmin();
             }

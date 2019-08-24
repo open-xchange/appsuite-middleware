@@ -220,13 +220,13 @@ public final class HtmlParser {
                     }
                 }
             }
-        } catch (final XmlPullParserException e) {
+        } catch (XmlPullParserException e) {
             LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
         } finally {

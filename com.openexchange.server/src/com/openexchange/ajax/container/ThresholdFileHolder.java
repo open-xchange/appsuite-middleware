@@ -307,7 +307,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                 out = new FileOutputStream(tempFile);
                 out.write(bytes, 0, bytes.length);
                 out.flush();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(out);
@@ -395,9 +395,9 @@ public final class ThresholdFileHolder implements IFileHolder {
                 out.flush();
             }
             this.count = count;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);
@@ -517,7 +517,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                 for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
                     out.write(buffer, 0, len);
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(in);
@@ -525,7 +525,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         } else {
             try {
                 buf.writeTo(out);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
@@ -561,7 +561,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             }
             baos.flush();
             return baos.toByteArray();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);
@@ -611,7 +611,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                 final File newTempFile = TmpFileFileHolder.newTempFile(source.autoManaged);
                 copyFile(source.tempFile, newTempFile);
                 copy.tempFile = newTempFile;
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
@@ -844,7 +844,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         public void write(final int b) throws IOException {
             try {
                 fileHolder.write(new byte[] { (byte) b });
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (e.getCause() instanceof IOException) {
                     throw (IOException) e.getCause();
                 }
@@ -856,7 +856,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         public void write(final byte[] b, final int off, final int len) throws IOException {
             try {
                 fileHolder.write(b, off, len);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (e.getCause() instanceof IOException) {
                     throw (IOException) e.getCause();
                 }

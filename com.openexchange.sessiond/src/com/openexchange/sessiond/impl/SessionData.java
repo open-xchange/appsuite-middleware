@@ -796,7 +796,7 @@ final class SessionData {
                     LOG.warn("Was not able to move the session into the most actual container.");
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
         } catch (IndexOutOfBoundsException e) {
             // About to shut-down
@@ -845,7 +845,7 @@ final class SessionData {
                 public void run() {
                     try {
                         tmp.call();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("Moving session to first container failed.", e);
                     }
                 }

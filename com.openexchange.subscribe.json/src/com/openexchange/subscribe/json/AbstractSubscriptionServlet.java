@@ -95,7 +95,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     protected void writeResponseSafely(final Response response, final HttpServletResponse resp, final Session session) {
         try {
             writeResponse(response, resp, session);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             getLog().error("", e);
         }
     }

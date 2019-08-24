@@ -206,7 +206,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
             OAuthAccess yahooAccess = getOAuthAccess(session, accountId);
             YahooClient yc = (YahooClient) yahooAccess.getClient().client;
             displayName = yc.getDisplayName();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOGGER.error("{}", e.getMessage(), e);
         }
 
@@ -387,7 +387,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
                     }
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOGGER.error("", e);
         }
         return oxContact;

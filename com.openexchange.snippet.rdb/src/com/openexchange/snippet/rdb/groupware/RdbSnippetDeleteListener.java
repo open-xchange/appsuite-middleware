@@ -108,7 +108,7 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
             try {
                 int contextId = event.getContext().getContextId();
                 RdbSnippetManagement.deleteForContext(contextId, writeCon);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             }
             return;
@@ -137,7 +137,7 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
                         try {
                             RdbSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
                             return true;
-                        } catch (final OXException e) {
+                        } catch (OXException e) {
                             error.set(e);
                             return false;
                         }
@@ -147,9 +147,9 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
                 if (null != e) {
                     throw e;
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(stmt);

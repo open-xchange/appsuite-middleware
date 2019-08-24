@@ -140,7 +140,7 @@ public class UpdateTest {    // Success Case
         try {
             action.perform(request, session);
             fail("Should have failed w/o ID");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             //SUCCESS
         }
 
@@ -175,7 +175,7 @@ public class UpdateTest {    // Success Case
         try {
             action.perform(request, session);
             fail("Should not swallow exceptions");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // SUCCESS
         }
 
@@ -210,7 +210,7 @@ public class UpdateTest {    // Success Case
         try {
             action.perform(request, session);
             fail("Should not swallow exceptions");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             // SUCCESS
         }
 

@@ -192,7 +192,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
                 logBuilder.append("    SMTP Timeout: {}{}");
                 args.add(I(smtpTimeout));
                 args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 smtpTimeout = 5000;
                 logBuilder.append("    SMTP Timeout: Invalid value \"{}\". Setting to fallback {}{}");
                 args.add(smtpTimeoutStr);
@@ -209,7 +209,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
                 logBuilder.append("    SMTP Connection Timeout: {}{}");
                 args.add(I(smtpConnectionTimeout));
                 args.add(lineSeparator);
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 smtpConnectionTimeout = 10000;
                 logBuilder.append("    SMTP Connection Timeout: Invalid value \"{}\". Setting to fallback {}{}");
                 args.add(smtpConTimeoutStr);

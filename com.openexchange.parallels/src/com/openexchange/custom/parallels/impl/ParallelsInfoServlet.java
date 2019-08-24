@@ -114,7 +114,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 
         try {
             actionGetData(req, resp);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
 
@@ -171,9 +171,9 @@ public final class ParallelsInfoServlet extends PermissionServlet {
             branded_host = getBrandingHostFromLoginMappings(ctx);
 
             mail = userobject.getMail();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
-        } catch (final ServiceException e) {
+        } catch (ServiceException e) {
             LOG.error("Error resolving branded url for context {}", I(contextid));
         }
 

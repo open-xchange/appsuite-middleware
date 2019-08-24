@@ -150,7 +150,7 @@ public class ContactWriter extends CommonWriter {
                     if (url != null) {
                         writeParameter(ContactFields.IMAGE1_URL, url, json);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     org.slf4j.LoggerFactory.getLogger(ContactWriter.class).warn("Contact image URL could not be generated.", e);
                 }
             }
@@ -680,7 +680,7 @@ public class ContactWriter extends CommonWriter {
                         } else {
                             writeValueNull(jsonArray);
                         }
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         org.slf4j.LoggerFactory.getLogger(ContactWriter.class).warn("Contact image URL could not be generated.", e);
                         writeValueNull(jsonArray);
                     }

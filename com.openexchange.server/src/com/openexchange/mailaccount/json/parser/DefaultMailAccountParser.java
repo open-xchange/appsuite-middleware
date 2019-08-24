@@ -150,7 +150,7 @@ public class DefaultMailAccountParser extends DataParser {
     public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws OXException {
         try {
             return parseElementAccount(account, json, warnings);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json.toString());
         }
     }

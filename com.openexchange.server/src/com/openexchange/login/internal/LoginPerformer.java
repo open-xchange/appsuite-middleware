@@ -594,7 +594,7 @@ public final class LoginPerformer {
                 for (int i = 0; i < blocking; i++) {
                     try {
                         completionService.take();
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
                 }
@@ -644,7 +644,7 @@ public final class LoginPerformer {
                 for (int i = 0; i < blocking; i++) {
                     try {
                         completionService.take();
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
                 }
@@ -669,7 +669,7 @@ public final class LoginPerformer {
             } else {
                 handler.handleLogout(login);
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
                     LOG.trace("", e);
@@ -689,7 +689,7 @@ public final class LoginPerformer {
                 default:
                     break;
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error(e.getMessage(), e);
         }
     }

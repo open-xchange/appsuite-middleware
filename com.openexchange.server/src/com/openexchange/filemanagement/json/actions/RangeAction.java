@@ -196,7 +196,7 @@ public final class RangeAction implements AJAXActionService {
             AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
             fileHolder = null;
             return requestResult;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(raf, fileHolder);

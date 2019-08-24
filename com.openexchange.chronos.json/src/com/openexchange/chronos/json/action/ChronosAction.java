@@ -422,7 +422,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
             }
 
             return retval;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }

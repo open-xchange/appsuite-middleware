@@ -103,7 +103,7 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
                 registration = null;
             }
             context.ungetService(reference);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }

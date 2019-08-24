@@ -1018,9 +1018,9 @@ public final class Tools {
             if (doAlterTable) {
                 modifyColumns(con, tableName, new Column(colName, "VARCHAR(" + newSize + ")"));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rsColumns);
@@ -1053,9 +1053,9 @@ public final class Tools {
 
             // No such VARCHAR column
             return -1;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rsColumns);

@@ -304,10 +304,10 @@ public class SearchEngineImpl extends DBService {
             } catch (StringLiteralSQLException e) {
                 // Cannot return any match
                 return SearchIterators.emptyIterator();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
             } finally {
@@ -568,10 +568,10 @@ public class SearchEngineImpl extends DBService {
             } catch (StringLiteralSQLException e) {
                 // Cannot return any match
                 return SearchIterators.emptyIterator();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
             } finally {

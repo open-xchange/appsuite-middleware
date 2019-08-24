@@ -161,7 +161,7 @@ public final class SystemPrivateFolder {
                 ret[i++] = folderObject.getObjectID();
             }
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -218,7 +218,7 @@ public final class SystemPrivateFolder {
                 ret.add(new String[] {String.valueOf(folderObject.getObjectID()),folderObject.getFolderName()});
             }
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }

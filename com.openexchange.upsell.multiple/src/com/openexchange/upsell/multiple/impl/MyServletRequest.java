@@ -149,7 +149,7 @@ public final class MyServletRequest {
             // load admin for custom data like redirect url
             this.admin = UserStorage.getInstance().getUser(this.ctx.getMailadmin(), ctx);
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             throw e;
         }
@@ -214,7 +214,7 @@ public final class MyServletRequest {
         } catch (RemoteException | StorageException | InvalidCredentialsException | NoSuchContextException | InvalidDataException | JSONException e) {
             LOG.error("Error changing context", e);
             throw MyServletExceptionCodes.API_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (ConfigCascadeExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 LOG.error("Error changing context. Mandatory configuration option not found", e);
                 throw MyServletExceptionCodes.API_COMMUNICATION_ERROR.create(e.getMessage());
@@ -277,10 +277,10 @@ public final class MyServletRequest {
                 LOG.debug("Sent upsell request email to enduser with email address:{}", email_addy_ox_user);
             }
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Error reading mandatory configuration parameters for sending upsell email", e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final UnsupportedEncodingException | JSONException e) {
+        } catch (UnsupportedEncodingException | JSONException e) {
             LOG.error("Error processing upsell email text", e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
         }
@@ -342,13 +342,13 @@ public final class MyServletRequest {
                     // pass the parameters to the external implementation
                     url = urlservice.generateUrl(getParameterMap(jsonObject), this.sessionObj, this.user, this.admin, this.ctx);
                     LOG.debug("Using custom redirect URL from URLGenerator service. URL: {}", url);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("Fatal error occurred, generating redirect URL from custom implementation failed!", e);
                 }
             }
 
             jsonResponseObject.put("upsell_static_redirect_url", url); // parsed url with all parameter
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             LOG.error("Error encoding static redirect URL", e);
         }
 
@@ -435,15 +435,15 @@ public final class MyServletRequest {
             } finally {
                 transport.close();
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Couldn't send provisioning mail", e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             LOG.error("Target email address cannot be parsed", e);
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, mailConfig, sessionObj);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Cannot occur
             throw MyServletExceptionCodes.EMAIL_COMMUNICATION_ERROR.create(e, e.getMessage());
         }
@@ -498,7 +498,7 @@ public final class MyServletRequest {
                 stringBuilder.append(line);
                 stringBuilder.append(System.getProperty("line.separator"));
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
         } finally {
             Streams.close(input);

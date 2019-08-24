@@ -169,9 +169,9 @@ public class ICal4JEmitter implements ICalEmitter {
         final CalendarOutputter outputter = new CalendarOutputter(false);
         try {
             outputter.output(calendar, stream);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new ConversionError(-1, Code.WRITE_PROBLEM, e);
-        } catch (final ValidationException e) {
+        } catch (ValidationException e) {
             throw new ConversionError(-1, Code.VALIDATION, e);
         }
     }
@@ -189,9 +189,9 @@ public class ICal4JEmitter implements ICalEmitter {
             writer.write(icalPart);
             writer.write("\n");
             writer.flush();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new ConversionError(-1, Code.WRITE_PROBLEM, e);
-        } catch (final ValidationException e) {
+        } catch (ValidationException e) {
             throw new ConversionError(-1, Code.VALIDATION, e);
         }
 

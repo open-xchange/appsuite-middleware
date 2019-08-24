@@ -83,7 +83,7 @@ public final class ResourceRequestActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         try {
             registerRequestHandler();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
             throw e;
         }

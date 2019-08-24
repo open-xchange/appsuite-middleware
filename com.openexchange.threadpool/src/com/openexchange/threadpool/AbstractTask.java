@@ -99,7 +99,7 @@ public abstract class AbstractTask<V> implements Task<V> {
             retval = call();
             ran = true;
             afterExecute(null);
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             if (!ran) {
                 afterExecute(ex);
             }

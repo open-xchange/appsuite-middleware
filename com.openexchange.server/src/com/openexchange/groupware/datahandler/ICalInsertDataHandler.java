@@ -124,7 +124,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         if (hasValue(dataArguments, ARGS[0])) {
             try {
                 calendarFolder = Integer.parseInt(dataArguments.get(ARGS[0]));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
             }
         }
@@ -133,7 +133,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         if (hasValue(dataArguments, ARGS[1])) {
             try {
                 taskFolder = Integer.parseInt(dataArguments.get(ARGS[1]));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
             }
         }
@@ -150,7 +150,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             long size;
             try {
                 size = Long.parseLong(data.getDataProperties().get(DataProperties.PROPERTY_SIZE));
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 size = 0;
             }
             inputStreamCopy = copyStream((InputStream) data.getData(), size);
@@ -183,7 +183,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                  */
                 tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, defaultZone);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             safeClose(inputStreamCopy);
@@ -235,7 +235,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                  */
                 try {
                     insertTasks(session, taskFolder, tasks, folderAndIdArray);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
                 }
             }

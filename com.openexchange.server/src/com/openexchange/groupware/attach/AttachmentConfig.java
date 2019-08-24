@@ -113,7 +113,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 			try {
 			    singleton = getInstance();
 			    singleton.start();
-			} catch (final OXException e) {
+			} catch (OXException e) {
 				LOG.error("Can't init config",e);
 			}
 		}
@@ -128,7 +128,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
         long size;
         try {
             size = Long.parseLong(sizeS.trim());
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.warn("{} is not a number: {}. Fall-back to system upload limitation.", AttachmentProperty.MAX_UPLOAD_SIZE.name(), sizeS);
             size = -1;
         }

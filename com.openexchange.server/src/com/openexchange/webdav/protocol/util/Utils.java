@@ -90,7 +90,7 @@ public class Utils {
                 synchronized (formats[i]) {
                     date = formats[i].parse(s);
                 }
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
             	// Ignore and try the others
             	LOG.debug("", e);
             }

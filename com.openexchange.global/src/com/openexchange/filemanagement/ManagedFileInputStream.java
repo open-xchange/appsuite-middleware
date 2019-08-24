@@ -81,7 +81,7 @@ public class ManagedFileInputStream extends FilterInputStream {
         super.close();
         try {
             mf.delete();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             // Ignore
         }
     }

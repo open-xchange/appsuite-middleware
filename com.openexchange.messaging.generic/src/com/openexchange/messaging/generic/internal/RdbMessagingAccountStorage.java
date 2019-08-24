@@ -170,7 +170,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                             try {
                                 final String decrypted = decrypt(toDecrypt, serviceId, id, session, confId, passwordElementName);
                                 configuration.put(passwordElementName, decrypted);
-                            } catch (final OXException x) {
+                            } catch (OXException x) {
                                 // Must not be fatal
                                 configuration.put(passwordElementName, "");
                                 // Supply a (probably false) password anyway.
@@ -181,7 +181,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 account.setConfiguration(configuration);
             }
             return modifier.modifyOutgoing(account);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -251,7 +251,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 accounts = Collections.emptyList();
             }
             return accounts;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -314,7 +314,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 accounts = Collections.emptyList();
             }
             return accounts;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -359,7 +359,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 accounts = new TIntArrayList(0);
             }
             return accounts;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -380,7 +380,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
@@ -423,13 +423,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             stmt.executeUpdate();
             wc.commit(); // COMMIT
             return genericConfId;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -449,7 +449,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         // Invalidate account
         try {
             CachingMessagingAccountStorage.getInstance().invalidate(prop.serviceId, prop.id, session.getUserId(), session.getContextId());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
     }
@@ -518,7 +518,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
 
             con.commit();
             rollback = 2;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
@@ -563,7 +563,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                     stmt.setString(pos++, serviceId);
                     stmt.setInt(pos, accountId);
                     stmt.executeUpdate();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     Databases.closeSQLStuff(stmt);
@@ -589,7 +589,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
         PreparedStatement stmt = null;
@@ -636,13 +636,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 stmt.executeUpdate();
             }
             wc.commit(); // COMMIT
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(wc); // ROLL-BACK
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             Databases.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -655,7 +655,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
     private static <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
             return MessagingGenericServiceRegistry.getService(clazz);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new OXException(e);
         }
     }
@@ -716,7 +716,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         return null;
@@ -741,7 +741,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 ret.put(rs.getInt(1), rs.getInt(2));
             }
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -770,7 +770,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 ret.add(rs.getInt(1));
             }
             return ret;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -803,7 +803,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                     try {
                         // Try using the new secret. Maybe this account doesn't need the migration
                         cryptoService.decrypt(encrypted, newSecret);
-                    } catch (final OXException x) {
+                    } catch (OXException x) {
                         // Needs migration
                         final String transcripted = cryptoService.encrypt(cryptoService.decrypt(encrypted, oldSecret), newSecret);
                         update.put(field, transcripted);
@@ -836,7 +836,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             // Query
             rs = stmt.executeQuery();
             return rs.next();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -871,7 +871,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // Discard
                             update.put(field, "");
                         }
@@ -911,7 +911,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
-                        } catch (final OXException x) {
+                        } catch (OXException x) {
                             // Discard
                             if (!confIdsToDelete.contains(confId)) {
                                 confIdsToDelete.add(confId);

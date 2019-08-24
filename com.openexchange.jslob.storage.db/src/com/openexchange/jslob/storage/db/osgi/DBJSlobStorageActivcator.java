@@ -161,7 +161,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                                 addService(CacheService.class, cacheService);
                                 CachingJSlobStorage.setCacheService(cacheService);
                                 return cacheService;
-                            } catch (final Exception e) {
+                            } catch (Exception e) {
                                 LOG.error("Starting up cache for 'com.openexchange.jslob.storage.db' failed.", e);
                             }
                             context.ungetService(reference);
@@ -182,7 +182,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                                     final Cache cache = service.getCache(regionName);
                                     cache.clear();
                                     cache.dispose();
-                                } catch (final Exception e) {
+                                } catch (Exception e) {
                                     LOG.error("Stopping cache for 'com.openexchange.jslob.storage.db' failed.", e);
                                 }
                             }
@@ -266,7 +266,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                 props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
                 registerService(EventHandler.class, eventHandler, props);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Starting bundle \"com.openexchange.jslob.storage.db\" failed", e);
             throw e;
         }
@@ -288,7 +288,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
         try {
             CachingJSlobStorage.shutdown();
             super.stopBundle();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("Stopping bundle \"com.openexchange.jslob.storage.db\" failed", e);
             throw e;
         } finally {

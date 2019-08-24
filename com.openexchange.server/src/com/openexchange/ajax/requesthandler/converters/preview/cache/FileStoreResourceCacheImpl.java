@@ -179,14 +179,14 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             if (!notDeleted.isEmpty()) {
                 LOG.warn("Some cached files could not be deleted from filestore. Consider using 'checkconsistency' to clean up manually.");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Error while deleting a batch of preview files. Trying one-by-one now...", e);
             // Retry one-by-one
             for (final String id : ids) {
                 if (null != id) {
                     try {
                         fileStorage.deleteFile(id);
-                    } catch (final Exception x) {
+                    } catch (Exception x) {
                         LOG.warn("Could not remove preview file '{}'. Consider using 'checkconsistency' to clean up the filestore.", id, x);
                     }
                 }
@@ -534,7 +534,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         try {
             Streams.close(fileStorage.getFile(metadata.getRefId()));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                 throw e;
             }

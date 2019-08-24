@@ -521,7 +521,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             for (Entry<String, Integer> quotaUsage : informationService.getQuotaUsageMetrics(usersInContext).entrySet()) {
                 driveUserMetrics.put("quota-usage-percent-" + quotaUsage.getKey(), quotaUsage.getValue());
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("Unable to execute SQL for drive metric gathering.", e);
         } catch (OXException e) {
             LOG.error("Unable to gather drive metrics.", e);

@@ -216,7 +216,7 @@ public class UpdateMailTest extends AbstractMailTest {
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
                     getClient().execute(deleteRequest);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -298,7 +298,7 @@ public class UpdateMailTest extends AbstractMailTest {
                 try {
                     final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
                     getClient().execute(deleteRequest);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

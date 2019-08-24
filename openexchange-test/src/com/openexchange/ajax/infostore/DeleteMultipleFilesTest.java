@@ -126,7 +126,7 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
         try {
             p = new PrintWriter(new FileWriter(ods));
             p.write(string);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         } finally {

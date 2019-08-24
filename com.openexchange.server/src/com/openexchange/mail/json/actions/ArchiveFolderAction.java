@@ -99,7 +99,7 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
             boolean createIfAbsent = AJAXRequestDataTools.parseBoolParameter("createIfAbsent", req.getRequest(), true);
             mailInterface.archiveMailFolder(days, folderId, session, useDefaultName, createIfAbsent);
             return new AJAXRequestResult(Boolean.TRUE, "native");
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

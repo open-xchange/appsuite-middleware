@@ -1072,7 +1072,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 writeCon = getWriteConnection(context);
                 document.setId(getId(context, writeCon));
                 commitDBTransaction();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
             } finally {
                 releaseWriteConnection(context, writeCon);
@@ -1348,7 +1348,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             stmt.setLong(1, context.getContextId());
             rs = stmt.executeQuery();
             return rs.next() ? rs.getLong(1) : -1L;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -1847,7 +1847,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     con = getReadConnection(parameters.getContext());
                     parameters.getDocument().setVersion(getNextVersionNumberForInfostoreObject(parameters.getContext().getContextId(), parameters.getDocument().getId(), con));
                     parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     LoggerHolder.LOG.error("SQL error", e);
                 } finally {
                     releaseReadConnection(parameters.getContext(), con);

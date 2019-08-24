@@ -141,7 +141,7 @@ public final class FileStorageUtility {
             if (!"http".equals(protocol) && !"https".equals(protocol)) {
                 throw new MalformedURLException("Only http & https protocols supported.");
             }
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(e, sUrl, e.getMessage());
         }
     }

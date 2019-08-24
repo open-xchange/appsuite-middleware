@@ -97,7 +97,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
         // Check for valid email address here:
         try {
             new QuotedInternetAddress(stringParam, true);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
         }
         // And finally check of that forward address is allowed

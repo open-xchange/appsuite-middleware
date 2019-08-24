@@ -135,7 +135,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
     		try {
     			final URL urlO = new URL(url);
     			url = urlO.getPath();
-    		} catch (final MalformedURLException x ){
+    		} catch (MalformedURLException x ){
     			LOG.debug("",x);
     		}
 		}
@@ -157,7 +157,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
                 path.append(decode(component,encoding));
             }
             return path;
-		} catch (final UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			return new WebdavPath(url);
 		}
 	}

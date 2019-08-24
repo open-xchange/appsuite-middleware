@@ -95,14 +95,14 @@ public class MigrateMSLiveAccountsTask implements UpdateTaskV2 {
             stmt.setString(1, KnownApi.MICROSOFT_GRAPH.getServiceId());
             stmt.setString(2, DEPRECATED_SERVICE_ID);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         }
         try (PreparedStatement stmt = connection.prepareStatement(RENAME_DISPLAY_NAME)) {
             stmt.setString(1, "My " + KnownApi.MICROSOFT_GRAPH.getDisplayName() + " account");
             stmt.setString(2, DEPRECATED_DISPLAY_NAME);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
+        } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         }
         // Also rename accounts with numerical index, e.g. 'My MS Live account (1)' ?

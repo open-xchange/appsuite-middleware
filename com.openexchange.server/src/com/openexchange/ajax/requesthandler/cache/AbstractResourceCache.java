@@ -124,7 +124,7 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
                 final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
                 final int contextId = session.getContextId();
                 removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), 0, contextId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("Couldn't remove cache entry.", e);
             }
         } else if (FileStorageEventConstants.DELETE_TOPIC.equals(topic)) {
@@ -132,7 +132,7 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
                 final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
                 final int contextId = session.getContextId();
                 removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), 0, contextId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("Couldn't remove cache entry.", e);
             }
         }
@@ -156,14 +156,14 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         String property = configService.getProperty(GLOBAL_QUOTA, "10485760").trim();
         try {
             globalQuota.set(Long.parseLong(property));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             globalQuota.set(-1L);
         }
 
         property = configService.getProperty(DOCUMENT_QUOTA, "524288").trim();
         try {
             documentQuota.set(Long.parseLong(property));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             documentQuota.set(-1L);
         }
     }
@@ -239,7 +239,7 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         try {
             final String baseType = new ContentType(fileType.trim()).getBaseType();
             return baseType.length() > MAX_FILE_TYPE_LENGTH ? baseType.substring(0, MAX_FILE_TYPE_LENGTH) : baseType;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.warn("Could not parse file type: {}", fileType, e);
             return null;
         }

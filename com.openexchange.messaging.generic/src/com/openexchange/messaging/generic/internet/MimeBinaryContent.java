@@ -97,7 +97,7 @@ public class MimeBinaryContent implements BinaryContent {
                 buffer.write(buf, 0, read);
             }
             cachedContent = buffer.toByteArray();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(inputStream);
@@ -149,7 +149,7 @@ public class MimeBinaryContent implements BinaryContent {
         }
         try {
             return part.getInputStream();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             try {
                 if (part instanceof MimeBodyPart) {
                     return ((MimeBodyPart) part).getRawInputStream();
@@ -158,7 +158,7 @@ public class MimeBinaryContent implements BinaryContent {
             } catch (final javax.mail.MessagingException me) {
                 me.setNextException(e);
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-            } catch (final IOException ioe) {
+            } catch (IOException ioe) {
                 throw MessagingExceptionCodes.IO_ERROR.create(ioe, ioe.getMessage());
             }
         } catch (final javax.mail.MessagingException e) {

@@ -147,16 +147,16 @@ public final class Create {
             con.setAutoCommit(false);
             insert(con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con);
             throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
@@ -176,7 +176,7 @@ public final class Create {
             GroupStorage storage = ServerServiceRegistry.getServize(GroupStorage.class, true);
             storage.insertGroup(ctx, con, group);
             storage.insertMember(ctx, con, group, group.getMember());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }

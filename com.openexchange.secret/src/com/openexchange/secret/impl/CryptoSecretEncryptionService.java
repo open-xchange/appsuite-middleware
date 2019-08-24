@@ -154,7 +154,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                     final String recrypted = recrypt(decrypted, secret);
                     strategy.update(recrypted, customizationNote);
                     return decrypted;
-                } catch (final GeneralSecurityException e) {
+                } catch (GeneralSecurityException e) {
                     LOG.debug("Failed to decrypt using old-style decryptor after failed privileged SecretService '{}' (user={}, context={})", secretService.getClass().getName(), iUserId, iContextId, e);
                 }
                 // Ignore and try other
@@ -176,7 +176,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
             if (!emptySecret) {
                 try {
                     return crypto.decrypt(toDecrypt, secret);
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     SecretService last = tokenList.peekLast();
                     LOG.debug("Failed to decrypt using currently applicable SecretService '{}' (user={}, context={})", last, iUserId, iContextId, x);
                     try {
@@ -184,7 +184,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                         final String recrypted = recrypt(decrypted, ranking >= 0 ? secretFromSecretService : last.getSecret(session));
                         strategy.update(recrypted, customizationNote);
                         return decrypted;
-                    } catch (final GeneralSecurityException e) {
+                    } catch (GeneralSecurityException e) {
                         LOG.debug("Failed to decrypt using old-style decryptor after failed currently applicable SecretService '{}' (user={}, context={})", last, iUserId, iContextId, e);
                     }
                     // Ignore and try other
@@ -200,11 +200,11 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
             if (Strings.isNotEmpty(secret)) {
                 try {
                     decrypted = crypto.decrypt(toDecrypt, secret);
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     LOG.debug("Failed to decrypt using next SecretService '{}' (user={}, context={})", current, iUserId, iContextId, x);
                     try {
                         decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
-                    } catch (final GeneralSecurityException e) {
+                    } catch (GeneralSecurityException e) {
                         LOG.debug("Failed to decrypt using old-style decryptor after failed next SecretService '{}' (user={}, context={})", current, iUserId, iContextId, e);
                     }
                     // Ignore and try other
@@ -222,7 +222,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                     if (decrypted != null) {
                         LOG.debug("Decrypted password with former crypt mechanism");
                     }
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     // Ignore and try other
                     LOG.debug("Failed to decrypt with former crypt mechanism (user={}, context={})", iUserId, iContextId, x);
                 }
@@ -230,11 +230,11 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
             if (decrypted == null) {
                 try {
                     decrypted = decrypthWithPasswordSecretService(toDecrypt, session);
-                } catch (final OXException x) {
+                } catch (OXException x) {
                     LOG.debug("Failed to decrypt using explicit password-based SecretService '{}'", passwordSecretService.getClass().getName(), x);
                     try {
                         decrypted = OldStyleDecrypt.decrypt(toDecrypt, session.getPassword());
-                    } catch (final GeneralSecurityException e) {
+                    } catch (GeneralSecurityException e) {
                         LOG.debug("Failed to decrypt using old-style decryptor after failed explicit password-based SecretService '{}' (user={}, context={})", passwordSecretService.getClass().getName(), iUserId, iContextId, e);
                     }
                     // Ignore and try other
@@ -248,11 +248,11 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                 }
                 try {
                     decrypted = decrypthWithCryptoService(toDecrypt, secret);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("Failed last attempt to decrypt using privileged SecretService '{}' (user={}, context={})", secretService.getClass().getName(), iUserId, iContextId, e);
                     try {
                         decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
-                    } catch (final GeneralSecurityException gse) {
+                    } catch (GeneralSecurityException gse) {
                         LOG.debug("Failed to decrypt using old-style decryptor after failed privileged SecretService '{}' (user={}, context={})", secretService.getClass().getName(), iUserId, iContextId, gse);
                     }
                     if (null == decrypted) {

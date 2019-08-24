@@ -130,12 +130,12 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
         final int accountId;
         try {
             accountId = ((Integer) args[0]).intValue();
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw Entity2ACLExceptionCode.MISSING_ARG.create(e, new Object[0]);
         }
         try {
             return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo, userId, ctx.getContextId());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw Entity2ACLExceptionCode.UNKNOWN_USER.create(e, Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), args[1].toString());
         }
     }
@@ -154,7 +154,7 @@ public class SUNMessagingServerEntity2ACL extends Entity2ACL {
             final String serverUrl = args[1].toString();
             final int sessionUser = ((Integer) args[2]).intValue();
             return getUserRetval(getUserIDInternal(pattern, ctx, accountId, serverUrl, sessionUser));
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw Entity2ACLExceptionCode.MISSING_ARG.create(e, new Object[0]);
         }
     }

@@ -101,7 +101,7 @@ public class RdbTaskSearch extends TaskSearch {
             while (result.next()) {
                 tasks.add(Integer.valueOf(result.getInt(1)));
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);

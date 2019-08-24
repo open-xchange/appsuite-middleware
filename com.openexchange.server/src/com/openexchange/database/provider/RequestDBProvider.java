@@ -150,7 +150,7 @@ public class RequestDBProvider implements DBProvider {
                     tx.writeConnection.commit();
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -166,7 +166,7 @@ public class RequestDBProvider implements DBProvider {
                 }
                 tx.writeConnection.rollback();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -222,7 +222,7 @@ public class RequestDBProvider implements DBProvider {
             if(tx.writeConnection.getAutoCommit() == tx.transactional) {
                 tx.writeConnection.setAutoCommit(!tx.transactional);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new OXException(OXExceptionConstants.CODE_DEFAULT, e.getMessage(), e);
         }
         if(tx != null && tx.ctx == null) {
@@ -293,7 +293,7 @@ public class RequestDBProvider implements DBProvider {
                 readCount.set(0);
                 tx.readConnection = null;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
         txIds.set(null);

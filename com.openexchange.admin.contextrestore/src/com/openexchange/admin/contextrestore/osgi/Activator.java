@@ -94,7 +94,7 @@ public class Activator extends HousekeepingActivator {
             serviceProperties.put("RMI_NAME", OXContextRestore.RMI_NAME);
             registerService(Remote.class, new OXContextRestore(), serviceProperties);
             log.info("RMI Interface for context restore registered.");
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error("Error while creating instance for OXContextRestoreInterface interface", e);
             throw e;
         }

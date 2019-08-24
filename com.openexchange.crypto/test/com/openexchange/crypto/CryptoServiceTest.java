@@ -114,7 +114,7 @@ public class CryptoServiceTest {
         try {
             cryptoService.decrypt(encrypted, badPassword);
             fail("Exception expected.");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue("Wrong exception thrown.", BadPassword.equals(e));
         }
     }
@@ -134,7 +134,7 @@ public class CryptoServiceTest {
         try {
             decryptedData = cryptoService.decrypt(encryptedData, password, true);
             fail("Exception expected.");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             assertTrue("Wrong exception thrown.", BadPassword.equals(e));
         }
     }

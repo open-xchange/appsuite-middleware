@@ -200,17 +200,17 @@ public final class IMAPSearch {
                 return searchWithUmlautSupport(searchTerm, seqNums, imapFolder);
             }
             return seqNums;
-        } catch (final FolderClosedException e) {
+        } catch (FolderClosedException e) {
             /*
              * Caused by a protocol error such as a socket error. No retry in this case.
              */
             throw e;
-        } catch (final StoreClosedException e) {
+        } catch (StoreClosedException e) {
             /*
              * Caused by a protocol error such as a socket error. No retry in this case.
              */
             throw e;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             final Exception nextException = e.getNextException();
             if (nextException instanceof ProtocolException) {
                 final ProtocolException protocolException = (ProtocolException) nextException;
@@ -280,7 +280,7 @@ public final class IMAPSearch {
 
             IMAPFolderWorker.clearCache(imapFolder);
             return results.toArray();
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -306,7 +306,7 @@ public final class IMAPSearch {
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 try {
                     return protocol.search(term);
-                } catch (final SearchException e) {
+                } catch (SearchException e) {
                     throw new ProtocolException(e.getMessage(), e);
                 }
             }

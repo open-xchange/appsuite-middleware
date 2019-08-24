@@ -103,7 +103,7 @@ public abstract class CreateCore extends GroupAbstraction {
 
             displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
             sysexit(0);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
         }
     }

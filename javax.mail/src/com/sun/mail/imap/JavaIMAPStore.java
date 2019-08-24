@@ -193,7 +193,7 @@ public class JavaIMAPStore extends IMAPStore {
                     return null;
                 }
             });
-        } catch (final PrivilegedActionException e) {
+        } catch (PrivilegedActionException e) {
             handlePrivilegedActionException(e);
         }
     }

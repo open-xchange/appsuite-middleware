@@ -206,7 +206,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
             }
             try {
                 return ContentType.getBaseType(ct);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 return value;
             }
         }

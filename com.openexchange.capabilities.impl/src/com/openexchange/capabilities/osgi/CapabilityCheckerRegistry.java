@@ -100,7 +100,7 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
         }
         try {
             return service.getCache("Capabilities");
-        } catch (final OXException e) {
+        } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(CapabilityCheckerRegistry.class).error("", e);
             return null;
         }
@@ -146,7 +146,7 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
         if (null != optCache) {
             try {
                 optCache.clear();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // ignore
             }
         }
@@ -190,7 +190,7 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
         if (null != optCache) {
             try {
                 optCache.clear();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // ignore
             }
         }

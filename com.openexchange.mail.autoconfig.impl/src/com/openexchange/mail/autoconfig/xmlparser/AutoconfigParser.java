@@ -142,7 +142,7 @@ public class AutoconfigParser {
         } finally {
             try {
                 is.close();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
 

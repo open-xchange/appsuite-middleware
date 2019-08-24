@@ -124,13 +124,13 @@ public abstract class AbstractCollection extends AbstractResource implements
 		for(final WebdavResource res : copy) {
 			try {
 				res.delete();
-			} catch (final WebdavProtocolException e) {
+			} catch (WebdavProtocolException e) {
                 exceptions.add(e);
 			}
 		}
 		try {
 			internalDelete();
-		} catch (final WebdavProtocolException e) {
+		} catch (WebdavProtocolException e) {
             exceptions.add(e);
 		}
 		if (exceptions.size() > 0) {
@@ -159,12 +159,12 @@ public abstract class AbstractCollection extends AbstractResource implements
 			for(final WebdavResource res : new ArrayList<WebdavResource>(getChildren())) {
 				try {
 					res.copy(dest.dup().append(res.getUrl().name()));
-				} catch (final WebdavProtocolException e) {
+				} catch (WebdavProtocolException e) {
 					exceptions.add(e);
 				}
 			}
 			return copy;
-		} catch (final WebdavProtocolException e) {
+		} catch (WebdavProtocolException e) {
             exceptions.add(e);
 		}
 		if(exceptions.size() > 0) {
@@ -202,7 +202,7 @@ public abstract class AbstractCollection extends AbstractResource implements
     public Iterator<WebdavResource> iterator() {
 		try {
 			return new ChildTreeIterator(getChildren().iterator());
-		} catch (final OXException e) {
+		} catch (OXException e) {
 			return null;
 		}
 	}

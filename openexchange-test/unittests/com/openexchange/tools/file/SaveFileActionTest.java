@@ -125,7 +125,7 @@ public class SaveFileActionTest extends AbstractActionTest {
         try {
             storage.getFile(saveFile.getFileStorageID());
             fail("Expected Exception");
-        } catch (final OXException x) {
+        } catch (OXException x) {
             assertTrue(true);
         }
     }

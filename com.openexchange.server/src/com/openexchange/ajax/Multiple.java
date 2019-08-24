@@ -192,7 +192,7 @@ public class Multiple extends SessionServlet {
             final Writer writer = resp.getWriter();
             writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
             writer.flush();
-        } catch (final JSONException | OXException | RuntimeException e) {
+        } catch (JSONException | OXException | RuntimeException e) {
             logError(session, e);
             sendError(resp);
         } finally {
@@ -308,7 +308,7 @@ public class Multiple extends SessionServlet {
         for (int i = 0; i < concurrentTasksCount; i++) {
             try {
                 completionService.take();
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -375,7 +375,7 @@ public class Multiple extends SessionServlet {
     protected static final AJAXState parseActionElement(final JSONObject inObject, final JSONArray serialResponses, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
         try {
             return doAction(DataParser.checkString(inObject, MODULE), inObject.optString(ACTION), inObject, session, req, new OXJSONWriter(serialResponses), state);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -528,7 +528,7 @@ public class Multiple extends SessionServlet {
             if (null != multipleHandler) {
                 try {
                     writeMailRequest(req);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     jsonWriter.object();
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), includeStackTraceOnError);
                     jsonWriter.endObject();
@@ -546,19 +546,19 @@ public class Multiple extends SessionServlet {
                     if (null != warnings && !warnings.isEmpty()) {
                         ResponseWriter.writeException(warnings.iterator().next(), jsonWriter, localeFrom(session), includeStackTraceOnError);
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
                     }
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), includeStackTraceOnError);
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     logError(session, oje);
                     if (jsonWriter.isExpectingValue()) {
                         jsonWriter.value("");
                     }
                     ResponseWriter.writeException(oje, jsonWriter, localeFrom(session), includeStackTraceOnError);
-                } catch (final RuntimeException rte) {
+                } catch (RuntimeException rte) {
                     logError(session, rte);
                     final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
                     if (jsonWriter.isExpectingValue()) {
@@ -572,7 +572,7 @@ public class Multiple extends SessionServlet {
             } else if (MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module)) {
                 try {
                     writeMailRequest(req);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     jsonWriter.object();
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), includeStackTraceOnError);
                     jsonWriter.endObject();
@@ -580,18 +580,18 @@ public class Multiple extends SessionServlet {
                 final FolderRequest folderequest = new FolderRequest(session, jsonWriter);
                 try {
                     folderequest.action(action, jsonObj);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     logError(session, e);
                     jsonWriter.object();
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), includeStackTraceOnError);
                     jsonWriter.endObject();
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     logError(session, oje);
                     jsonWriter.object();
                     ResponseWriter.writeException(oje, jsonWriter, localeFrom(session), includeStackTraceOnError);
                     jsonWriter.endObject();
-                } catch (final RuntimeException rte) {
+                } catch (RuntimeException rte) {
                     logError(session, rte);
                     final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
                     jsonWriter.object();
@@ -641,12 +641,12 @@ public class Multiple extends SessionServlet {
                         }
                         return state;
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     logError(session, e);
                     jsonWriter.object();
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), includeStackTraceOnError);
                     jsonWriter.endObject();
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                     logError(session, oje);
                     jsonWriter.object();
@@ -663,7 +663,7 @@ public class Multiple extends SessionServlet {
                 ResponseWriter.writeException(oxe, jsonWriter, localeFrom(session), includeStackTraceOnError);
                 jsonWriter.endObject();
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             /*
              * Cannot occur
              */
@@ -756,7 +756,7 @@ public class Multiple extends SessionServlet {
     private static void writeTo(final JSONValue jValue, final Writer writer) throws IOException {
         try {
             jValue.write(writer);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw new IOException(e.getMessage(), e);
         }
     }
@@ -766,7 +766,7 @@ public class Multiple extends SessionServlet {
         if (mi != null) {
             try {
                 mi.close(true);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.error("", e);
             }
         }
@@ -806,7 +806,7 @@ public class Multiple extends SessionServlet {
             try {
                 performActionElement(jsonDataResponse, module, session, req);
                 return null;
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

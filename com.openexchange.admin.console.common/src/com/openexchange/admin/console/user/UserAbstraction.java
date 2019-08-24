@@ -1006,7 +1006,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     context.setId(Integer.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.CONTEXTID.getString() + " is no integer");
                 }
             }
@@ -1608,7 +1608,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     user.setUploadFileSizeLimit(Integer.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.UPLOADFILESIZELIMIT.getString() + " is no integer");
                 }
             }
@@ -1619,7 +1619,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             public void callMethod(final String value) throws InvalidDataException {
                 try {
                     user.setUploadFileSizeLimitPerFile(Integer.valueOf(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     throw new InvalidDataException("Value in field " + Constants.uploadfilesizelimitperfile.getString() + " is no integer");
                 }
             }
@@ -2754,7 +2754,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                         usr.setBirthday(sdf.parse(date));
                     }
                 }
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"", e);
             }
         }
@@ -2770,7 +2770,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                         usr.setAnniversary(sdf.parse(date));
                     }
                 }
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
             }
         }
@@ -3764,7 +3764,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         //                            optionAndMethod.getMethod().invoke(usr, value);
         //                        }
         //                    }
-        //                } catch (final ParseException e) {
+        //                } catch (ParseException e) {
         //                    throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
         //                }
         //            } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {

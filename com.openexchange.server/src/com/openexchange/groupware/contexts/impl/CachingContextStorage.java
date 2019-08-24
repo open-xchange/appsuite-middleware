@@ -107,7 +107,7 @@ public class CachingContextStorage extends ContextStorage {
                 try {
                     cache.put(loginInfo, contextId, false);
                     cache.put(contextId, context, false);
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.error("", e);
                 }
             }
@@ -186,7 +186,7 @@ public class CachingContextStorage extends ContextStorage {
         if (cacheService != null) {
             try {
                 cacheService.freeCache(REGION_NAME);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

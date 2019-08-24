@@ -68,7 +68,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction {
                 }
 
             });
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -81,7 +81,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction {
         }
         try {
             doUpdates(getQueryCatalog().getInsert(), getAttachments(),false);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }

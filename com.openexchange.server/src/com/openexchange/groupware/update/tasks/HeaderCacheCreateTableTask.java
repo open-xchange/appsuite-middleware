@@ -164,7 +164,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
         try {
             stmt = con.prepareStatement(sqlCreate);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);

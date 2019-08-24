@@ -230,7 +230,7 @@ public final class MailDriveFile extends DefaultFile {
 
                 // Prepare additional metadata
                 this.metadata = new MailMetadata(message);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }

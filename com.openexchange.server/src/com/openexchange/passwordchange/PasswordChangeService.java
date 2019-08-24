@@ -207,7 +207,7 @@ public abstract class PasswordChangeService {
                     basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (e.equalsCode(6, "LGI")) {
                 /*
                  * Verification of old password failed
@@ -293,7 +293,7 @@ public abstract class PasswordChangeService {
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("Updating password in user session failed", e);
             throw e;
         }
@@ -336,7 +336,7 @@ public abstract class PasswordChangeService {
                 jcs.remove(cacheService.newCacheKey(contextId, String.valueOf(0), String.valueOf(userId)));
                 jcs.remove(cacheService.newCacheKey(contextId, Integer.toString(userId)));
                 jcs.invalidateGroup(Integer.toString(contextId));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 // Ignore
             }
         }

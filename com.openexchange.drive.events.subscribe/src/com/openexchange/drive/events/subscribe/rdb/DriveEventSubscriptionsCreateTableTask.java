@@ -92,15 +92,15 @@ public class DriveEventSubscriptionsCreateTableTask extends UpdateTaskAdapter {
                     }
                     stmt = writeCon.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
             writeCon.commit(); // COMMIT
             rollback = 2;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);

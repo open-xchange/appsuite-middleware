@@ -165,7 +165,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
                         jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
                     }
                     reason = jsonObject.getString("reason");
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
                 throw new HttpResponseException(statusCode, reason);
@@ -200,7 +200,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
                         jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
                     }
                     reason = jsonObject.getJSONObject("error").getString("message");
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
                 throw new HttpResponseException(statusCode, reason);
@@ -260,7 +260,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             URI uri = new URI(sUrl);
             HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
             return new CallProperties(uri, clientAndUri.httpClient, targetHost, endpoint);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             throw DoveAdmClientExceptionCodes.INVALID_DOVECOT_URL.create(null == sUrl ? "<empty>" : sUrl);
         }
     }
@@ -498,7 +498,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             URIBuilder builder = new URIBuilder();
             builder.setScheme(baseUri.getScheme()).setHost(baseUri.getHost()).setPort(baseUri.getPort()).setPath(null == optPath ? baseUri.getPath() : optPath).setQuery(null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"));
             return builder.build();
-        } catch (final URISyntaxException x) {
+        } catch (URISyntaxException x) {
             throw new IllegalArgumentException("Failed to build URI", x);
         }
     }
@@ -548,7 +548,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             final InputStreamEntity entity = new InputStreamEntity(sink.getStream(), sink.getLength(), ContentType.APPLICATION_JSON);
             error = false;
             return entity;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 throw (IOException) cause;
@@ -616,7 +616,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         if (null != request) {
             try {
                 request.reset();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -698,7 +698,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
                     traceBuilder.append(jResponse);
                 }
                 return (R) jResponse;
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 consume(httpResponse);

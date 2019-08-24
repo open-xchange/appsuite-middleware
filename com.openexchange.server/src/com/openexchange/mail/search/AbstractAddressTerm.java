@@ -74,7 +74,7 @@ public abstract class AbstractAddressTerm extends SearchTerm<String> {
         String addr;
         try {
             addr = new QuotedInternetAddress(pattern, false).getUnicodeAddress();
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             addr = pattern;
         }
         this.addr = addr;

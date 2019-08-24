@@ -122,7 +122,7 @@ public final class HzQueue<E> extends AbstractHzResource implements Queue<E> {
                 hzQueue.removeItemListener(regID);
             } catch (HazelcastInstanceNotActiveException e) {
                 throw handleNotActiveException(e);
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 // Removing message listener failed
                 LOG.warn("Couldn't remove message listener from Hazelcast queue \"{}\".", name, e);
             }

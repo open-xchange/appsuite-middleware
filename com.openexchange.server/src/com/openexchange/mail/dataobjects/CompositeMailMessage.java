@@ -251,7 +251,7 @@ public final class CompositeMailMessage extends MailMessage {
             if (index >= delegateEnclosedCount) {
                 try {
                     return additionalParts.get(index - delegateEnclosedCount);
-                } catch (final IndexOutOfBoundsException e) {
+                } catch (IndexOutOfBoundsException e) {
                     return null;
                 }
             }
@@ -259,7 +259,7 @@ public final class CompositeMailMessage extends MailMessage {
         }
         try {
             return additionalParts.get(index);
-        } catch (final IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             throw new IndexOutOfBoundsException("No mail part at index " + index);
         }
     }
@@ -372,7 +372,7 @@ public final class CompositeMailMessage extends MailMessage {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -417,7 +417,7 @@ public final class CompositeMailMessage extends MailMessage {
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
-                            } catch (final OXException e) {
+                            } catch (OXException e) {
                                 final IOException io = new IOException(e.getMessage());
                                 io.initCause(e);
                                 throw io;
@@ -453,9 +453,9 @@ public final class CompositeMailMessage extends MailMessage {
             MessageUtility.setContent(mimeMultipart, mimeMessage);
             // mimeMessage.setContent(mimeMultipart);
             mimeMessage.writeTo(out);
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

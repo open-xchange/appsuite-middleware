@@ -110,7 +110,7 @@ public class DummyLockNull extends DummyCollection {
 		final WebdavResource res = getRealResource();
 		try {
             res.create();
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
 		if (res instanceof DummyResource) {

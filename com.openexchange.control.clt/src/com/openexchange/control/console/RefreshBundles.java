@@ -71,7 +71,7 @@ public final class RefreshBundles extends AbstractConsoleHandler {
             init(args, true);
             refresh();
             error = false;
-        } catch (final Exception exc) {
+        } catch (Exception exc) {
             final Throwable cause = exc.getCause();
             if (null == cause) {
                 System.out.println(exc.getMessage());
@@ -87,7 +87,7 @@ public final class RefreshBundles extends AbstractConsoleHandler {
         } finally {
             try {
                 close();
-            } catch (final Exception exc) {
+            } catch (Exception exc) {
                 System.out.println("closing all connections failed: " + exc.getMessage());
                 exc.printStackTrace(System.out);
             }

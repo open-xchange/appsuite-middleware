@@ -105,7 +105,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         final String preparedFileName = uploadFile.getPreparedFileName();
         try {
             setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             // Retry with guess by file name
             setContentType(MimeType2ExtMap.getContentType(preparedFileName));
         }
@@ -117,7 +117,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                     in = new FileInputStream(this.uploadFile);
                     contentType.setCharsetParameter(CharsetDetector.detectCharset(in));
                     setContentType(contentType);
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     // Ignore
                 } finally {
                     Streams.close(in);
@@ -185,7 +185,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                     LOG.debug("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", cs);
                 }
                 dataSource = new FileDataSource(uploadFile, getContentType().toString());
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
@@ -213,7 +213,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 try {
                     charset = detectCharset(new FileInputStream(uploadFile));
                     LOG.debug("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
-                } catch (final FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
             }
@@ -221,9 +221,9 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             try {
                 fis = new FileInputStream(uploadFile);
                 cachedContent = readStream(fis, charset);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -232,7 +232,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                 if (fis != null) {
                     try {
                         fis.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         LOG.error("", e);
                     }
                 }
@@ -277,7 +277,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
     public InputStream getInputStream() throws OXException {
         try {
             return new FileInputStream(uploadFile);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

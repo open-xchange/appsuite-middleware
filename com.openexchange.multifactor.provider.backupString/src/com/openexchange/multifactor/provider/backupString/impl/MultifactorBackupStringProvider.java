@@ -164,7 +164,7 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
             //Adding the salt at the end to prevent potential length extension attacks
             final byte[] digest = md.digest(salt.getBytes(StandardCharsets.UTF_8));
             return toHex(digest);
-        } catch (final NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw MultifactorExceptionCodes.ERROR_CREATING_FACTOR.create(e, e.getMessage());
         }
     }

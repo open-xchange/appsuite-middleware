@@ -132,9 +132,9 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         try {
             parsePushTokenParameter(request);
             return doPerform(request, session);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -685,11 +685,11 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                     try {
                         Integer.parseInt(folderId);
                         folder.setSubscribed(true);
-                    } catch (final NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         // Ignore
                     }
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 // Ignore
             }
         }

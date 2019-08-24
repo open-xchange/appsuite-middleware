@@ -208,7 +208,7 @@ public final class RequestTools {
             if (Base64.isBase64(encodedBytes)) {
                 return Base64.decodeBase64(encodedBytes);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.warn("Could not check for EAS base64-encoded query string", e);
         }
 

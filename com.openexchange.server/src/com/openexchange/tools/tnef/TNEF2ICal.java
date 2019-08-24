@@ -132,7 +132,7 @@ public final class TNEF2ICal {
         try {
             final Attr messageClass = message.getAttribute(Attr.attMessageClass);
             return isVPart(messageClass == null ? "" : ((String) messageClass.getValue()).toUpperCase(Locale.ENGLISH));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             return false;
         }
@@ -466,13 +466,13 @@ public final class TNEF2ICal {
              */
             calendar.getComponents().add(event);
             return calendar;
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             LOG.error("", e);
             return null;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             return null;
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("", e);
             return null;
         }

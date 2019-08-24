@@ -113,7 +113,7 @@ public final class IDGenerator {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             final SQLException sexp = new SQLException("Cannot get connection from dbpool.");
             sexp.initCause(e);
             throw sexp;
@@ -123,7 +123,7 @@ public final class IDGenerator {
             con.setAutoCommit(false);
             newId = getId(context, type, con);
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             con.rollback();
             throw e;
         } finally {
@@ -272,7 +272,7 @@ public final class IDGenerator {
                 if (result.next()) {
                     newId = result.getInt(1);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
@@ -300,7 +300,7 @@ public final class IDGenerator {
                 if (result.next()) {
                     newId = result.getInt(1);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
@@ -398,7 +398,7 @@ public final class IDGenerator {
                 if (result.next()) {
                     newId = result.getInt(1);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
@@ -425,7 +425,7 @@ public final class IDGenerator {
                 if (result.next()) {
                     newId = result.getInt(1);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {

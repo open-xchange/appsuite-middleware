@@ -110,26 +110,26 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
                 if (changed == 1) {
                     LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, I(context.getContextId()), identifier);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("{}", e.getMessage(), e);
                 try {
                     database.rollback();
                     return;
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.debug("{}", e1.getMessage(), e1);
                 }
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 LOG.error("{}", e.getMessage(), e);
                 try {
                     database.rollback();
                     return;
-                } catch (final OXException e1) {
+                } catch (OXException e1) {
                     LOG.debug("{}", e1.getMessage(), e1);
                 }
             } finally {
                 try {
                     database.finish();
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     LOG.debug("{}", e.getMessage(), e);
                 }
             }

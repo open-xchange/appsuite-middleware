@@ -191,7 +191,7 @@ final class Reminder {
         try {
             reminders = remStor.loadReminder(Collections.toArray(tmp.keySet()),
                 userId, Types.TASK, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
         for (final ReminderObject reminder : reminders) {
@@ -232,7 +232,7 @@ final class Reminder {
                     userId, Types.TASK, ctx);
                 task.setAlarm(remind.getDate());
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw e;
         }
     }
@@ -241,7 +241,7 @@ final class Reminder {
         final ReminderSQLInterface reminder = ReminderHandler.getInstance();
         try {
             reminder.deleteReminder(task.getObjectID(), Types.TASK, con, ctx);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 throw e;
             }

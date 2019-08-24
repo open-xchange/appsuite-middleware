@@ -101,12 +101,12 @@ public final class DataContentHandlerDataSource implements DataSource {
             public void run() {
                 try {
                     dch.writeTo(object, objectMimeType, pos);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     pin.setException(e);
                 } finally {
                     try {
                         pos.close();
-                    } catch (final IOException ie) {
+                    } catch (IOException ie) {
                         // Ignore
                     }
                 }

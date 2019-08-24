@@ -98,7 +98,7 @@ public final class MailCacheConfiguration implements Initialization {
         }
         try {
             ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(new FileInputStream(cacheConfigFile));
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -120,7 +120,7 @@ public final class MailCacheConfiguration implements Initialization {
         if (null != cacheService) {
             try {
                 cacheService.freeCache(MailMessageCache.REGION_NAME);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }

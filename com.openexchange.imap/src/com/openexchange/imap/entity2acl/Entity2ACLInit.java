@@ -111,11 +111,11 @@ public final class Entity2ACLInit implements Initialization {
                     Entity2ACL.setInstance(implementingClass.newInstance());
                 }
             }
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw Entity2ACLExceptionCode.CLASS_NOT_FOUND.create(e, new Object[0]);
-        } catch (final InstantiationException e) {
+        } catch (InstantiationException e) {
             throw Entity2ACLExceptionCode.INSTANTIATION_FAILED.create(e, new Object[0]);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw Entity2ACLExceptionCode.INSTANTIATION_FAILED.create(e, new Object[0]);
         }
     }

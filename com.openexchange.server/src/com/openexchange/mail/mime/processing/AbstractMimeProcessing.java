@@ -125,7 +125,7 @@ public abstract class AbstractMimeProcessing {
             if (prefix.indexOf("#DATE#") >= 0) {
                 try {
                     prefix = PATTERN_DATE.matcher(prefix).replaceAll(date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone)));
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.warn("", t);
                     prefix = PATTERN_DATE.matcher(prefix).replaceAll("");
                 }
@@ -133,7 +133,7 @@ public abstract class AbstractMimeProcessing {
             if (prefix.indexOf("#TIME#") >= 0) {
                 try {
                     prefix = PATTERN_TIME.matcher(prefix).replaceAll(date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone)));
-                } catch (final Exception t) {
+                } catch (Exception t) {
                     LOG.warn("", t);
                     prefix = PATTERN_TIME.matcher(prefix).replaceAll("");
                 }

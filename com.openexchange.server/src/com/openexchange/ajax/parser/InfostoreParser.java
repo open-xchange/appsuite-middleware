@@ -95,7 +95,7 @@ public class InfostoreParser {
             int id = -1;
             try {
                 id = Integer.parseInt(idString);
-            } catch (final NumberFormatException x) {
+            } catch (NumberFormatException x) {
                 throw new UnknownMetadataException(idString);
             }
             final Metadata m = Metadata.get(id);

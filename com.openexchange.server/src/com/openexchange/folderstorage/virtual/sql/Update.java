@@ -91,13 +91,13 @@ public final class Update {
             Delete.deleteFolder(cid, tree, user, folder.getID(), false, session, con);
             Insert.insertFolder(cid, tree, user, folder, null, session, con);
             con.commit(); // COMMIT
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             Databases.rollback(con); // ROLLBACK
             throw e;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {

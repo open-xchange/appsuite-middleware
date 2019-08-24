@@ -217,7 +217,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 if (null != in) {
                     try {
                         in.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -245,7 +245,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 if (null != in) {
                     try {
                         in.close();
-                    } catch (final IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }

@@ -139,9 +139,9 @@ public final class GetVersitAction extends AbstractMailAction {
             jsonWriter.endArray();
             final AJAXRequestResult data = new AJAXRequestResult(jsonWriter.getObject(), "json");
             return data;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }

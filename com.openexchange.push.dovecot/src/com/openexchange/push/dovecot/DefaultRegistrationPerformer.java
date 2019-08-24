@@ -287,7 +287,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         if (null != mailAccess) {
             try {
                 mailAccess.close(false);
-            } catch (final Exception x) {
+            } catch (Exception x) {
                 // Ignore
             }
         }

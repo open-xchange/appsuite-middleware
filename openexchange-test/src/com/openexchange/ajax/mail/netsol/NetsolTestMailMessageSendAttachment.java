@@ -100,13 +100,13 @@ public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTes
             out = null;
             tmpFile.deleteOnExit();
             return tmpFile;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             return null;
         } finally {
             if (null != out) {
                 try {
                     out.close();
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }

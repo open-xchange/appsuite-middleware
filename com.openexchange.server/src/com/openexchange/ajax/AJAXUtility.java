@@ -296,7 +296,7 @@ public final class AJAXUtility {
                     if (uri.isAbsolute() || null != uri.getScheme() || null != uri.getHost()) {
                         throw new IllegalArgumentException("Illegal Location value: " + s);
                     }
-                } catch (final URISyntaxException e) {
+                } catch (URISyntaxException e) {
                     throw new IllegalArgumentException("Illegal Location value: " + s, e);
                 }
                 // Adapt pattern
@@ -311,9 +311,9 @@ public final class AJAXUtility {
                 }
             }
             return null == prefix ? retval : new StringBuilder(prefix).append(retval).toString();
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("A runtime error occurred.", e);
             return s;
         }
@@ -383,9 +383,9 @@ public final class AJAXUtility {
             final String cs = isEmpty(charset) ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : charset;
             URLCodec codec = getUrlCodec(cs);
             return null == codec ? s : codec.decode(s, cs);
-        } catch (final DecoderException e) {
+        } catch (DecoderException e) {
             return s;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             return s;
         }
     }
@@ -403,7 +403,7 @@ public final class AJAXUtility {
         }
         try {
             return resp.getWriter();
-        } catch (final IllegalStateException e) {
+        } catch (IllegalStateException e) {
             // ServletResponse.getOutputStream() was already called
             if (tryFallBack) {
                 try {
@@ -415,7 +415,7 @@ public final class AJAXUtility {
                         }
                     }
                     return new PrintWriter(new OutputStreamWriter(resp.getOutputStream(), charenc), false);
-                } catch (final Exception x) {
+                } catch (Exception x) {
                     LOG.warn("Unable to acquire Writer instance from HTTP response.", x);
                 }
             } else {

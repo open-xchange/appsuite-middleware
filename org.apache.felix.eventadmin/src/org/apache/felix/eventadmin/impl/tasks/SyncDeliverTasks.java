@@ -150,7 +150,7 @@ public class SyncDeliverTasks
                                 // stop the timer
                                 timerBarrier.waitForRendezvous();
                             }
-                            catch (final IllegalStateException ise)
+                            catch (IllegalStateException ise)
                             {
                                 // this can happen on shutdown, so we ignore it
                             }
@@ -166,7 +166,7 @@ public class SyncDeliverTasks
                     {
                         timerBarrier.waitAttemptForRendezvous(this.timeout);
                     }
-                    catch (final TimeoutException ie)
+                    catch (TimeoutException ie)
                     {
                         // if we timed out, we have to blacklist the handler
                         task.blackListHandler();

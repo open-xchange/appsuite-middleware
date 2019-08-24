@@ -296,7 +296,7 @@ public class DefaultGuestService implements GuestService {
         try {
             @SuppressWarnings("unused")
             QuotedInternetAddress tmp = new QuotedInternetAddress(mailAddress, true);
-        } catch (final AddressException e) {
+        } catch (AddressException e) {
             throw GuestExceptionCodes.INVALID_EMAIL_ADDRESS.create(e, mailAddress);
         }
     }

@@ -1968,7 +1968,7 @@ public final class SessionHandler {
                                 }
                             }
                             sessionStorageService.removeSessions(sessionsToRemove);
-                        } catch (final RuntimeException e) {
+                        } catch (RuntimeException e) {
                             LOG.error("", e);
                         } catch (OXException e) {
                             LOG.error("", e);
@@ -2169,7 +2169,7 @@ public final class SessionHandler {
                     LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                     postSessionStored(session);
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Failed to put session {} with Auth-Id {} into session storage (user={}, context={})", session.getSessionID(), session.getAuthId(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
             }
             return null;

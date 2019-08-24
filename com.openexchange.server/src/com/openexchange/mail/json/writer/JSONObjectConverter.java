@@ -163,7 +163,7 @@ public final class JSONObjectConverter {
             copyValue(MailJSONField.ACCOUNT_ID.getKey(), rawJSONMailObject, jsonObject);
             raw2JsonMail0(rawJSONMailObject, jsonObject);
             return jsonObject;
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -176,7 +176,7 @@ public final class JSONObjectConverter {
             copyValue(MailJSONField.CONTENT_TYPE.getKey(), rawJSONMailObject, jsonObject);
             copyValue(MailJSONField.SIZE.getKey(), rawJSONMailObject, jsonObject);
             raw2Json0(rawJSONMailObject, jsonObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -322,7 +322,7 @@ public final class JSONObjectConverter {
                 jsonObject.put(MailJSONField.MODIFIED.getKey(), modified[0] ? 1 : 0);
             }
 
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -371,7 +371,7 @@ public final class JSONObjectConverter {
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             attachmentsArr.put(jsonObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -396,7 +396,7 @@ public final class JSONObjectConverter {
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             attachmentsArr.put(jsonObject);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
@@ -437,7 +437,7 @@ public final class JSONObjectConverter {
                 }
                 attachmentsArr.put(originalVersion);
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }

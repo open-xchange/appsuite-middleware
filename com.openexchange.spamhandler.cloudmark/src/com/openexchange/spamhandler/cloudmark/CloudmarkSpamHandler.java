@@ -212,7 +212,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 InternetAddress targetSpamAddress = null;
                 try {
                     targetSpamAddress = new QuotedInternetAddress(sTargetSpamEmailAddress, true);
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
                 }
 
@@ -276,7 +276,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 InternetAddress targetHamAddress = null;
                 try {
                     targetHamAddress = new QuotedInternetAddress(sTargetHamEmailAddress, true);
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
                 }
 

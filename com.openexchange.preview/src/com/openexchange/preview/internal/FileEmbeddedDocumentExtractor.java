@@ -117,7 +117,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
             if (name.indexOf('.') == -1 && contentType != null) {
                 try {
                     name += config.getMimeRepository().forName(contentType).getExtension();
-                } catch (final MimeTypeException e) {
+                } catch (MimeTypeException e) {
                     LOG.debug("Invalid MIME type encountered: {}", contentType, e);
                 }
                 if (name.indexOf('.') == -1) {
@@ -125,7 +125,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
                     contentType = documentHandler.getDocumentType(Streams.newByteArrayInputStream(bytes));
                     try {
                         name += config.getMimeRepository().forName(contentType).getExtension();
-                    } catch (final MimeTypeException e) {
+                    } catch (MimeTypeException e) {
                         LOG.debug("Invalid MIME type encountered: {}", contentType, e);
                     }
                     in = Streams.newByteArrayInputStream(bytes);
@@ -147,7 +147,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
                 IOUtils.closeQuietly(os);
             }
             documentHandler.extractedFiles.put(resourceName, fileManagement.createManagedFile(outputFile));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new IOException("An Open-Xchange error occurred.", e);
         } finally {
             IOUtils.closeQuietly(in);

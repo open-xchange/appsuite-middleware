@@ -154,7 +154,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
                     accountMapping.addMapping(origin, target);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
 
@@ -178,7 +178,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 account.setId(newId);
 
                 mapping.put(I(oldId), I(newId));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw UserCopyExceptionCodes.ID_PROBLEM.create(e, "com.openexchange.oauth.account");
             }
         }
@@ -207,7 +207,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 account.setScope(rs.getString(i++));
                 accounts.add(account);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -234,7 +234,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
             }
 
             stmt.executeBatch();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             Databases.closeSQLStuff(stmt);

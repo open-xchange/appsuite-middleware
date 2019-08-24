@@ -219,7 +219,7 @@ public class Executor extends Assert {
 
         try {
             Thread.sleep(sleep);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
             System.out.println("InterruptedException while sleeping between test requests. Does that help?");
@@ -486,13 +486,13 @@ public class Executor extends Assert {
         String sleepS;
         try {
             sleepS = AJAXConfig.getProperty(Property.SLEEP);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             sleepS = null;
         }
         int sleep;
         try {
             sleep = Integer.parseInt(sleepS);
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             sleep = 500;
         }
         return sleep;

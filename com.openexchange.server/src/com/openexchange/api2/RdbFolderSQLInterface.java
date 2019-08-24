@@ -194,7 +194,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(session.getUserId(), folderModule2String(fo.getModule()), Integer.valueOf(ctx.getContextId()));
             }
             return fo;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -272,7 +272,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 }
             }
             return folderobject;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -326,7 +326,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 CacheFolderStorage.getInstance().removeSingleFromCache(Collections.singletonList(Integer.toString(folderobject.getParentFolderID())), FolderStorage.REAL_TREE_ID, userId, session, false);
             }
             return folderId;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -477,7 +477,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
             return OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, userId, groups, ctx, userPermissionBits, since);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -546,7 +546,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
             return objectID;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -558,7 +558,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
         for (int i = 0; i < size; i++) {
             try {
                 retval.add(oxfolderAccess.getFolderObject(iter.next().intValue()));
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
                 continue;
             }

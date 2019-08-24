@@ -116,7 +116,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
             try {
                 deleteCalendarFolderData(newUserConfiguration.getUserId(), event);
                 LOG.info("All calendar-related folder data removed due to loss of calendar module access");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not remove all calendar-related folder data caused by loss of calendar module access.");
                 LOG.debug("", e);
             }
@@ -128,7 +128,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
             try {
                 deleteTaskFolderData(newUserConfiguration.getUserId(), event);
                 LOG.info("All task-related folder data removed due to loss of task module access");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not remove all task-related folder data caused by loss of task module access.");
                 LOG.debug("", e);
             }
@@ -140,7 +140,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
             try {
                 deleteInfostoreFolderData(newUserConfiguration.getUserId(), event);
                 LOG.info("All infostore-related folder data removed due to loss of infostore module access");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not remove all infostore-related folder data caused by loss of infostore module access.");
                 LOG.debug("", e);
             }
@@ -152,7 +152,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
             try {
                 deleteSharedFolderData(newUserConfiguration.getUserId(), event);
                 LOG.info("All shared folder data removed due to loss of full shared folder access");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 LOG.warn("Could not remove all shared folder data caused by loss of full shared folder access.");
                 LOG.debug("", e);
             }
@@ -164,7 +164,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
             if (FolderQueryCacheManager.isInitialized()) {
                 FolderQueryCacheManager.getInstance().invalidateContextQueries(event.getContext().getContextId());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -245,7 +245,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
              * Update cache
              */
             removeFromFolderCache(fuids, entity, event.getContext());
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
@@ -316,7 +316,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
                 OXFolderDowngradeSQL.handleAffectedPublicFolder(entity, fuid, cid, TABLE_PERMISSIONS_WORKING, writeCon);
                 ids.add(fuid);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
@@ -404,7 +404,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
             db.startTransaction();
             db.removeDocument(folderID, System.currentTimeMillis(), ServerSessionAdapter.valueOf(event.getSession(), event.getContext()));
             db.commit();
-        } catch (final OXException x) {
+        } catch (OXException x) {
             db.rollback();
             throw x;
         } finally {
@@ -430,7 +430,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
                 TABLE_PERMISSIONS_WORKING,
                 event.getWriteCon());
             set.addAll(tmp);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         /*
@@ -451,7 +451,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
         if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
             try {
                 FolderCacheManager.getInstance().removeFolderObjects(folderIDs, ctx);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
         }
