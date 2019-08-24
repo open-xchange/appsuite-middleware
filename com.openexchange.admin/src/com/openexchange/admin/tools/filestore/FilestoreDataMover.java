@@ -267,7 +267,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
             throw e;
         } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw new StorageException(e.toString(), e);
+            throw new StorageException(e.toString());
         }
         return null;
     }
