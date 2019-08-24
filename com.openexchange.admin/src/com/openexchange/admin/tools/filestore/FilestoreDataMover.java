@@ -332,7 +332,8 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         } catch (URISyntaxException e) {
             thrown = e; throw new StorageException(e.getMessage(), e);
         } catch (RuntimeException e) {
-            thrown = e; throw new StorageException(e.getMessage(), e);
+            LOGGER.error("", e);
+            thrown = e; throw new StorageException(e.getMessage());
         } catch (Error x) {
             thrown = x; throw x;
         } catch (Throwable t) {
