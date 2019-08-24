@@ -68,6 +68,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.config.MailProperties;
@@ -93,7 +94,9 @@ import com.openexchange.push.impl.jobqueue.PermanentListenerJobQueue;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -156,15 +159,33 @@ public final class PushManagerRegistry implements PushListenerService {
         reschedulerRef = new AtomicReference<PermanentListenerRescheduler>();
     }
 
-    private boolean hasWebMail(Session session) {
+    private boolean hasWebMailAndIsActive(Session session) {
         try {
-            boolean hasWebMail = ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasWebMail();
-            if (false == hasWebMail) {
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            if (false == serverSession.getUserPermissionBits().hasWebMail()) {
                 LOG.info("User {} in context {} has no 'WebMail' permission. Hence, no listener will be started.", I(session.getUserId()), I(session.getContextId()));
             }
-            return hasWebMail;
+            if (false == serverSession.getUser().isMailEnabled()) {
+                LOG.info("User {} in context {} is deactivated. Hence, no listener will be started.", I(session.getUserId()), I(session.getContextId()));
+            }
+            return true;
         } catch (OXException e) {
-            LOG.error("Failed to check if 'WebMail' permission is allowed for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
+            LOG.error("Failed to check 'WebMail' permission and activation for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
+            return false;
+        }
+    }
+
+    private boolean hasWebMailAndIsActive(int userId, int contextId) {
+        try {
+            if (false == UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, contextId).hasWebMail()) {
+                LOG.info("User {} in context {} has no 'WebMail' permission. Hence, no listener will be started.", I(userId), I(contextId));
+            }
+            if (false == services.getServiceSafe(UserService.class).getUser(userId, contextId).isMailEnabled()) {
+                LOG.info("User {} in context {} is deactivated. Hence, no listener will be started.", I(userId), I(contextId));
+            }
+            return true;
+        } catch (OXException e) {
+            LOG.error("Failed to check 'WebMail' permission and activation for user {} in context {}", I(userId), I(contextId), e);
             return false;
         }
     }
@@ -288,35 +309,39 @@ public final class PushManagerRegistry implements PushListenerService {
             int contextId = pushUser.getContextId();
             int userId = pushUser.getUserId();
 
-            try {
-                if (blockedContexts.contains(contextId) || schemaBeingLockedOrNeedsUpdate(contextId)) {
-                    blockedContexts.add(contextId);
-                    LOG.info("Database schema is locked or needs update. Denied start-up of permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
+            if (hasWebMailAndIsActive(userId, contextId)) {
+                try {
+                    if (blockedContexts.contains(contextId) || schemaBeingLockedOrNeedsUpdate(contextId)) {
+                        blockedContexts.add(contextId);
+                        LOG.info("Database schema is locked or needs update. Denied start-up of permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
 
-                    DatabaseService dbService = services.getOptionalService(DatabaseService.class);
-                    if (null != dbService) {
-                        try {
-                            for (int contextInSameSchema : dbService.getContextsInSameSchema(contextId)) {
-                                blockedContexts.add(contextInSameSchema);
+                        DatabaseService dbService = services.getOptionalService(DatabaseService.class);
+                        if (null != dbService) {
+                            try {
+                                for (int contextInSameSchema : dbService.getContextsInSameSchema(contextId)) {
+                                    blockedContexts.add(contextInSameSchema);
+                                }
+                            } catch (Exception e) {
+                                // Ignore
                             }
-                        } catch (Exception e) {
-                            // Ignore
+                        }
+                    } else {
+                        PermanentListenerJob job = jobQueue.scheduleJob(pushUser, extendedService);
+                        if (null != job) {
+                            startedOnes.add(job);
+                            //LOG.debug("Scheduled to start permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
                         }
                     }
-                } else {
-                    PermanentListenerJob job = jobQueue.scheduleJob(pushUser, extendedService);
-                    if (null != job) {
-                        startedOnes.add(job);
-                        //LOG.debug("Scheduled to start permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
-                    }
+                } catch (OXException e) {
+                    LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
+                } catch (ShutDownRuntimeException shutDown) {
+                    LOG.error("Server shut-down while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, shutDown);
+                    break NextPushUser;
+                } catch (RuntimeException e) {
+                    LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
                 }
-            } catch (OXException e) {
-                LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
-            } catch (ShutDownRuntimeException shutDown) {
-                LOG.error("Server shut-down while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, shutDown);
-                break NextPushUser;
-            } catch (RuntimeException e) {
-                LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", I(userId), I(contextId), extendedService, e);
+            } else {
+                LOG.debug("Denied start of a permanent push listener for user {} in context {}: Missing \"webmail\" permission or user is disabled.", I(userId), I(contextId));
             }
         }
         Collections.sort(startedOnes);
@@ -503,11 +528,11 @@ public final class PushManagerRegistry implements PushListenerService {
             LOG.debug("Denied registration of a permanent push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return false;
         }
-        if (false == hasWebMail(session)) {
+        if (false == hasWebMailAndIsActive(session)) {
             /*
              * No "webmail" permission granted
              */
-            LOG.info("Denied registration of a permanent push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", clientId, I(session.getUserId()), I(session.getContextId()));
+            LOG.info("Denied registration of a permanent push listener for client {} from user {} in context {}: Missing \"webmail\" permission or user is disabled.", clientId, I(session.getUserId()), I(session.getContextId()));
             return false;
         }
         if (false == PushUtility.allowedClient(clientId, null, true)) {
@@ -803,11 +828,11 @@ public final class PushManagerRegistry implements PushListenerService {
             LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
-        if (false == hasWebMail(session)) {
+        if (false == hasWebMailAndIsActive(session)) {
             /*
              * No "webmail" permission granted
              */
-            LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Missing \"webmail\" permission or user is disabled.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         if (false == PushUtility.allowedClient(session.getClient(), session, true)) {

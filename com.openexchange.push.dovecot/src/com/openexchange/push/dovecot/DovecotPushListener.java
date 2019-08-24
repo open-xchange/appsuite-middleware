@@ -213,6 +213,12 @@ public class DovecotPushListener implements PushListener, Runnable {
             return null;
         }
 
+        if (false == registrationContext.hasWebMailAndIsActive()) {
+            StringBuilder sb = new StringBuilder("Denied start of a permanent push listener for user ").append(registrationContext.getUserId());
+            sb.append(" in context ").append(registrationContext.getContextId()).append(": Missing \"webmail\" permission or user is disabled.");
+            return sb.toString();
+        }
+
         TimerService timerService = services.getOptionalService(TimerService.class);
         if (null == timerService) {
             throw ServiceExceptionCode.absentService(TimerService.class);
