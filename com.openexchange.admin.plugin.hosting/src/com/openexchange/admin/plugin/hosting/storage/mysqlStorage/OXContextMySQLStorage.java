@@ -1811,35 +1811,35 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     ctx.setEnabled(Boolean.TRUE);
                     adminUser.setId(I(adminId));
                     return ctx;
-                } catch (final OXException e) {
+                } catch (OXException e) {
                     SQLException sqle = DBUtils.extractSqlException(e);
                     if (!condition.isFailedTransactionRollback(sqle)) {
                         LOG.error("Error", e);
                         throw new StorageException(e.toString());
                     }
-                } catch (final StorageException e) {
+                } catch (StorageException e) {
                     SQLException sqle = DBUtils.extractSqlException(e);
                     if (!condition.isFailedTransactionRollback(sqle)) {
                         LOG.error("Storage Error", e);
                         throw e;
                     }
-                } catch (final DataTruncation e) {
+                } catch (DataTruncation e) {
                     LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
                     throw AdminCache.parseDataTruncation(e);
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     if (!condition.isFailedTransactionRollback(e)) {
                         LOG.error("SQL Error", e);
                         throw new StorageException(e);
                     }
-                } catch (final InvalidDataException e) {
+                } catch (InvalidDataException e) {
                     LOG.error("InvalidData Error", e);
                     throw new StorageException(e);
-                } catch (final EnforceableDataObjectException e) {
+                } catch (EnforceableDataObjectException e) {
                     LOG.error("Enforceable DataObject Error", e);
                     throw new StorageException(e);
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     LOG.error("Internal Error", e);
-                    throw new StorageException("Internal server error occured", e);
+                    throw StorageException.storageExceotionFor(e);
                 } finally {
                     if (rollback > 0) {
                         if (rollback == 1) {

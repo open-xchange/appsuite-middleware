@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
+import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
@@ -185,7 +186,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
@@ -254,7 +255,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw new InvalidDataException(e.getMessage());
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
@@ -313,12 +314,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
     @Override
-    public Restriction[] getAvailableRestrictions(final Credentials creds) throws InvalidCredentialsException, StorageException, OXResellerException {
+    public Restriction[] getAvailableRestrictions(final Credentials creds) throws RemoteException, InvalidCredentialsException, StorageException, OXResellerException {
         if (null == creds) {
             throw new InvalidCredentialsException("Credentials are missing.");
         }
@@ -346,7 +347,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
@@ -399,7 +400,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
 
     }
@@ -435,12 +436,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
     @Override
-    public void initDatabaseRestrictions(final Credentials creds) throws StorageException, InvalidCredentialsException, OXResellerException {
+    public void initDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
             basicauth.doAuthentication(creds);
             final Map<String, Restriction> validRestrictions = oxresell.listRestrictions("*");
@@ -459,7 +460,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
@@ -489,7 +490,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
@@ -514,7 +515,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             throw e;
         } catch (final RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
@@ -535,12 +536,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
-        } catch (final RuntimeException e) {
-            LOGGER.error("", e);
-            throw e;
         } catch (OXResellerException e) {
             LOGGER.error("", e);
             throw e;
+        } catch (final RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
         }
     }
 
@@ -619,12 +620,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
-        } catch (final RuntimeException e) {
-            LOGGER.error("", e);
-            throw e;
         } catch (OXResellerException e) {
             LOGGER.error("", e);
             throw e;
+        } catch (final RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
         }
     }
 

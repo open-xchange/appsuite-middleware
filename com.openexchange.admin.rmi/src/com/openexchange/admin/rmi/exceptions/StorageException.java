@@ -59,6 +59,20 @@ public class StorageException extends Exception {
 
     private static final long serialVersionUID = -7054584373955744724L;
 
+    /**
+     * Compiles a {@code StorageException} for given {@code RuntimeException} instance.
+     *
+     * @param cause The {@code RuntimeException} instance
+     * @return The {@code StorageException} carrying given cause's message and stack trace
+     */
+    public static StorageException storageExceotionFor(RuntimeException cause) {
+        StorageException se = new StorageException(cause.getMessage());
+        se.setStackTrace(cause.getStackTrace());
+        return se;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     public StorageException(String message) {
         super(message);
     }

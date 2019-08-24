@@ -632,21 +632,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             LOG.info("User {} in context {} changed! Changed attributes: {}", Integer.valueOf(userId), Integer.valueOf(contextId), toString(changedAttributes));
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
-        } catch (final ServiceException e) {
+        } catch (ServiceException e) {
             LOG.error("Required service is missing.", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException | SecurityException | OXException e) {
+            throw new StorageException(e.getMessage());
+        } catch (IllegalArgumentException | SecurityException | OXException e) {
             LOG.error("Error", e);
             throw new StorageException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (rollback) {
                 rollback(con);
@@ -1291,31 +1291,31 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Filestore2UserUtil.addFilestore2UserEntry(contextId, userId, filestoreId.intValue(), ClientAdminThreadExtended.cache);
             }
             return userId;
-        } catch (final ServiceException e) {
+        } catch (ServiceException e) {
             LOG.error("Required service not found.", e);
             throw new StorageException(e.toString());
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new StorageException(e.toString(), e);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             throw new StorageException(e.toString(), e);
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             LOG.error("IllegalArgument Error", e);
             throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             LOG.error("IllegalAccess Error", e);
             throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             LOG.error("InvocationTarget Error", e);
             throw new StorageException(e);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             LOG.error("InvocationTarget Error", e);
             throw new StorageException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             Databases.closeSQLStuff(ps);
         }
@@ -1602,15 +1602,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback = 2;
             LOG.info("User {} created!", Integer.toString(userId));
             return userId;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
-        } catch (final SQLException sql) {
+        } catch (SQLException sql) {
             LOG.error("SQL Error", sql);
             throw new StorageException(sql.toString());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (rollback > 0) {
                 if (rollback == 1) {
@@ -1657,12 +1657,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 retval[i] = iter.next().intValue();
             }
             return retval;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -1702,7 +1702,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
@@ -1760,7 +1760,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
@@ -2113,7 +2113,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } catch (OXException e) {
             LOG.error("GUI setting Error", e);
             throw new StorageException(e.toString());
@@ -2381,20 +2381,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         }
                         LOG.info("User {} deleted!", user.getId());
                     }
-                } catch (final StorageException st) {
+                } catch (StorageException st) {
                     final SQLException sqle = DBUtils.extractSqlException(st);
                     if (!condition.isFailedTransactionRollback(sqle)) {
                         LOG.error("Storage Error", st);
                         throw st;
                     }
-                } catch (final SQLException sql) {
+                } catch (SQLException sql) {
                     if (!condition.isFailedTransactionRollback(sql)) {
                         LOG.error("SQL Error", sql);
                         throw new StorageException(sql.toString(), sql);
                     }
-                } catch (final RuntimeException e) {
+                } catch (RuntimeException e) {
                     LOG.error("", e);
-                    throw e;
+                    throw StorageException.storageExceotionFor(e);
                 } finally {
                     if (rollback > 0) {
                         if (rollback == 1) {
@@ -2458,12 +2458,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             if (rollback) {
                 rollback(con);
@@ -2825,7 +2825,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
@@ -2856,7 +2856,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } catch (RuntimeException e) {
             LOG.error("", e);
-            throw e;
+            throw StorageException.storageExceotionFor(e);
         } catch (OXException e) {
             LOG.error("Cache Error", e);
             throw new StorageException(e.getMessage());

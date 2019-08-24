@@ -2660,7 +2660,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(e);
         } catch (final RuntimeException e) {
             LOG.error("Runtime Error", e);
-            throw new StorageException(e);
+            throw StorageException.storageExceotionFor(e);
         } finally {
             closeSQLStuff(stmt);
             if (rollback) {

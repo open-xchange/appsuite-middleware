@@ -866,12 +866,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.getData(new Context[] { ctx })[0];
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOGGER.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
     }
 
@@ -1302,7 +1302,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } catch (final RuntimeException e) {
                 // Last resort...
                 LOGGER.error("", e);
-                throw new StorageException("Moving context filestore failed due to an internal error");
+                throw new StorageException("Moving context filestore failed due to an internal error: " + e.getMessage());
             } finally {
                 oxcox.enable(ctx);
             }
