@@ -203,7 +203,7 @@ public class MultifactorAuthenticator {
      * @throws OXException
      */
     public void deleteRegistrations(MultifactorRequest multifactorRequest) throws OXException {
-        if(multifactorProvider.deleteRegistrations(multifactorRequest.getContextId(), multifactorRequest.getUserId())) {
+        if (multifactorProvider.deleteRegistrations(multifactorRequest.getContextId(), multifactorRequest.getUserId())) {
             listenerChain.onAfterDelete(multifactorRequest.getUserId(), multifactorRequest.getContextId(), getEnabledDeviceCount(multifactorRequest));
         }
     }

@@ -281,12 +281,12 @@ public class Check {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
         }
-        if( AlarmAction.SMS.equals(alarm.getAction())) {
-            if(!alarm.containsAttendees()) {
+        if ( AlarmAction.SMS.equals(alarm.getAction())) {
+            if (!alarm.containsAttendees()) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
             }
             for(Attendee att : alarm.getAttendees()) {
-                if(!att.containsUri() || !att.getUri().toLowerCase().contains("tel:")) {
+                if (!att.containsUri() || !att.getUri().toLowerCase().contains("tel:")) {
                     throw CalendarExceptionCodes.INVALID_ALARM.create(alarm);
                 }
             }

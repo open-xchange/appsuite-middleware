@@ -176,7 +176,7 @@ public class ServerConfigImpl implements ServerConfig {
         mailConfig.setButtonBorderColor("#356697");
         mailConfig.setButtonTextColor("#ffffff");
         Map<String, Object> mailsMap = (Map<String, Object>) mappings.get("notificationMails");
-        if(mailsMap == null) {
+        if (mailsMap == null) {
             LOG.warn("No 'notificationMails' config was found, please fix 'as-config.yml'. Falling back to default.");
         } else {
             Map<String, Object> buttonMap = (Map<String,Object>) mailsMap.get("button");

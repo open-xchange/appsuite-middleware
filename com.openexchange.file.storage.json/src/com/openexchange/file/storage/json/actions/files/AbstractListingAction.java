@@ -212,7 +212,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
-                        if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                        if (timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
                             timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                         }
                         files.add(fileMetadata);
@@ -227,12 +227,12 @@ public abstract class AbstractListingAction extends AbstractFileAction {
         }
 
         // Calculate eventually missing time stamp
-        if(timestamp == null && results.hasNext()) {
+        if (timestamp == null && results.hasNext()) {
             List<File> files = new LinkedList<File>();
             while (results.hasNext()) {
                 // Call preview service for next file
                 File fileMetadata = results.next();
-                if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                if (timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
                     timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                 }
                 files.add(fileMetadata);

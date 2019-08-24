@@ -123,7 +123,7 @@ public class Builder<T extends Model<T>> {
     }
 
     public String getTableName() {
-        if(tableName == null) {
+        if (tableName == null) {
             return metadata.getName();
         }
         return tableName;

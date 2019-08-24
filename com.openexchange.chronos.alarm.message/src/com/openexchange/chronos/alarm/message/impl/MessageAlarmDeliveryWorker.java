@@ -384,7 +384,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                         calTriggerTime.setTimeInMillis(trigger.getTime().longValue());
                         Calendar now = Calendar.getInstance(UTC);
                         AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
-                        if(alarmNotificationService == null) {
+                        if (alarmNotificationService == null) {
                             LOG.error("Missing required AlarmNotificationService for alarm action \"{}\"", alarm.getAction().getValue());
                             throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
                         }
@@ -612,7 +612,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(I(key.getCid()), I(key.getAccount())), Collections.singletonList(trigger)), Long.valueOf(now.getTimeInMillis()));
             processingSet = true;
             AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
-            if(alarmNotificationService == null) {
+            if (alarmNotificationService == null) {
                 LOG.error("Missing required AlarmNotificationService for alarm action \"{}\"", alarm.getAction().getValue());
                 throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
             }

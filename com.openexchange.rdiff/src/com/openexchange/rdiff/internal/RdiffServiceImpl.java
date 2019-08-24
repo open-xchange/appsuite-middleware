@@ -101,7 +101,7 @@ public final class RdiffServiceImpl implements RdiffService {
         try {
             @SuppressWarnings("unchecked")
             final List<org.metastatic.rsync.ChecksumPair> signatures = rdiff.makeSignatures(sourceIn);
-            if(signatures == null) {
+            if (signatures == null) {
                 throw RdiffExceptionCodes.ERROR.create("Stream is empty.");
             }
             return toChecksums(signatures);

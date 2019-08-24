@@ -107,14 +107,14 @@ public class PGPSignatureVerifier {
      */
     private static Long getPublicMasterKeyId(PGPPublicKey publicKey) {
 
-        if(publicKey.isMasterKey()) {
+        if (publicKey.isMasterKey()) {
             //The given key is the actual master key
             return L(publicKey.getKeyID());
         }
 
         //Get the subkey binding and return the ID of the master key
         @SuppressWarnings("rawtypes") Iterator subkeyBinding = publicKey.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
-        if(subkeyBinding.hasNext()) {
+        if (subkeyBinding.hasNext()) {
             PGPSignature signature = (PGPSignature)subkeyBinding.next();
             return L(signature.getKeyID());
         }
@@ -129,11 +129,11 @@ public class PGPSignatureVerifier {
      * @throws Exception
      */
     private PGPPublicKey getMasterKey(PGPPublicKey key) throws Exception {
-        if(key.isMasterKey()) {
+        if (key.isMasterKey()) {
            return key;
         }
         Long masterKeyId = getPublicMasterKeyId(key);
-        if(masterKeyId != null) {
+        if (masterKeyId != null) {
             return this.keyRetrievalStrategy.getPublicKey(l(masterKeyId));
         }
 
@@ -158,7 +158,7 @@ public class PGPSignatureVerifier {
         PGPSignatureList signatureList = pgpObject instanceof PGPSignatureList ? (PGPSignatureList) pgpObject : null;
 
         //If no plain signature list was found, we check if we have a compressed signature list
-        if(signatureList == null && pgpObject instanceof PGPCompressedData) {
+        if (signatureList == null && pgpObject instanceof PGPCompressedData) {
             PGPCompressedData compressedData = (PGPCompressedData)pgpObject;
             pgpObject = new PGPObjectFactory(compressedData.getDataStream(), new BcKeyFingerprintCalculator()).nextObject();
             //Check again if we now have a decomprssed signature list
@@ -173,7 +173,7 @@ public class PGPSignatureVerifier {
             while (iterator.hasNext()) {
                 PGPSignature signature = iterator.next();
                 PGPPublicKey publicKey = getPublicKey(signature);
-                if(publicKey != null) {
+                if (publicKey != null) {
                     signature.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), publicKey);
                     keysForSignature.put(signature, publicKey);
                 }
@@ -186,7 +186,7 @@ public class PGPSignatureVerifier {
                 iterator = signatureList.iterator();
                 while (iterator.hasNext()) {
                     PGPSignature signature = iterator.next();
-                    if(keysForSignature.containsKey(signature)) /* only update if initialized with found key */ {
+                    if (keysForSignature.containsKey(signature)) /* only update if initialized with found key */ {
                         signature.update(buffer, 0, len);
                     }
                 }
@@ -196,11 +196,11 @@ public class PGPSignatureVerifier {
             iterator = signatureList.iterator();
             while (iterator.hasNext()) {
                 PGPSignature signature = iterator.next();
-                if(keysForSignature.containsKey(signature)) {
+                if (keysForSignature.containsKey(signature)) {
                     PGPPublicKey issuerKey = keysForSignature.get(signature);
                     Iterator<String> userIds = null;
                     PGPPublicKey masterKey = getMasterKey(issuerKey);
-                    if(masterKey != null) {
+                    if (masterKey != null) {
                         userIds = masterKey.getUserIDs();
                     }
                     PGPSignatureVerificationResult verificationResult = new PGPSignatureVerificationResult(signature, signature.verify());

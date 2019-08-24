@@ -168,7 +168,7 @@ public class PushMsInit {
         if (delayPushQueue != null) {
             synchronized (this) {
                 delayPushQueue = this.delayPushQueue;
-                if(delayPushQueue != null) {
+                if (delayPushQueue != null) {
                     delayPushQueue.close();
                     this.delayPushQueue=null;
                 }

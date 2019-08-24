@@ -84,11 +84,11 @@ public class DateStringParser implements StringParser {
 
     @Override
     public <T> T parse(final String s, final Class<T> t) {
-        if(t != Date.class || s == null) {
+        if (t != Date.class || s == null) {
             return null;
         }
         final Long parsed = subParser.parse(s, Long.class);
-        if(parsed != null) {
+        if (parsed != null) {
             @SuppressWarnings("unchecked") T date = (T) new Date(parsed.longValue());
             return date;
         }

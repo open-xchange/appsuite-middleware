@@ -232,7 +232,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
 
     @Override
     public void cleanupForId(ID id) {
-        if(SyntheticChannel.PROTOCOL.equals(id.getProtocol())) {
+        if (SyntheticChannel.PROTOCOL.equals(id.getProtocol())) {
             cleanupForSyntheticId(id);
         } else {
             cleanupForClientId(id);
@@ -298,7 +298,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
         Validate.notNull(client, "Client ID must not be null");
         Collection<PortableSelectorChoice> removedChoices = getClientToGroupsMapping().remove(new PortableID(client));
         //This will automatically remove the group -> member association for this client
-        if(sendLeave) {
+        if (sendLeave) {
             sendLeave(removedChoices);
         }
         return removedChoices;
@@ -316,7 +316,7 @@ public class DistributedGroupManagerImpl extends AbstractRealtimeJanitor impleme
     private Collection<PortableSelectorChoice> removeGroup(ID group, boolean sendNotMember) throws OXException {
         Validate.notNull(group, "Group ID must not be null");
         Collection<PortableSelectorChoice> removedChoices = getGroupToMembersMapping().remove(new PortableID(group));
-        if(sendNotMember) {
+        if (sendNotMember) {
             sendNotMember(removedChoices);
         }
         return removedChoices;

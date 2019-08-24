@@ -80,8 +80,8 @@ public class ReminderServiceImpl implements ReminderService{
      * @throws OXException
      */
     private void checkPermission(Session session, ReminderObject reminder, boolean write) throws OXException {
-        if(reminder.getUser() != session.getUserId()){
-            if(write){
+        if (reminder.getUser() != session.getUserId()){
+            if (write){
                 throw ReminderExceptionCode.NO_PERMISSION_MODIFY.create();
             }
             throw ReminderExceptionCode.NO_PERMISSION_READ.create();
@@ -309,7 +309,7 @@ public class ReminderServiceImpl implements ReminderService{
             List<ReminderObject> result = new ArrayList<ReminderObject>();
             while (reminders.hasNext()) {
                 ReminderObject reminder = reminders.next();
-                if(reminder.getModule() == Types.APPOINTMENT){
+                if (reminder.getModule() == Types.APPOINTMENT){
                     continue;
                 }
                 checkPermission(session, reminder, false);

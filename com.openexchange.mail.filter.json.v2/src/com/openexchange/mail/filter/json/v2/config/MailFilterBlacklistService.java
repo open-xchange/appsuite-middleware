@@ -100,7 +100,7 @@ public class MailFilterBlacklistService {
             // Create Basic MailFilterBlacklistType
             MailFilterBlacklistProperty property = new MailFilterBlacklistProperty(base);
             String blacklistString = config.getProperty(userId, contextId, property);
-            if(blacklistString!=null){
+            if (blacklistString!=null){
                 addBlacklist(property, blacklistString, result);
             }
         }
@@ -111,7 +111,7 @@ public class MailFilterBlacklistService {
             for(Field element: Field.values()){
                 MailFilterBlacklistProperty property = new MailFilterBlacklistProperty(BasicGroup.tests, key, element);
                 String blacklistString = config.getProperty(userId, contextId, property);
-                if(blacklistString!=null){
+                if (blacklistString!=null){
                     addBlacklist(property, blacklistString, result);
                 }
             }
@@ -132,13 +132,13 @@ public class MailFilterBlacklistService {
     }
 
     private Set<String> validateBlacklist(MailFilterBlacklistProperty type, String[] list){
-        if(BasicGroup.actions.equals(type.getBase()) && type.getSub()==null){
+        if (BasicGroup.actions.equals(type.getBase()) && type.getSub()==null){
             return validateActionBlacklist(list);
         }
-        if(BasicGroup.tests.equals(type.getBase()) && type.getSub()==null){
+        if (BasicGroup.tests.equals(type.getBase()) && type.getSub()==null){
             return validateTestBlacklist(list);
         }
-        if(BasicGroup.comparisons.equals(type.getBase()) && type.getSub()==null){
+        if (BasicGroup.comparisons.equals(type.getBase()) && type.getSub()==null){
             return validateComparatorBlacklist(list);
         }
         return new HashSet<String>(Arrays.asList(list));

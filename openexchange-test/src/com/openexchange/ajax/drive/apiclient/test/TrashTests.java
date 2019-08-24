@@ -119,7 +119,7 @@ public class TrashTests extends AbstractAPIClientSession {
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> rootFolderArray = (ArrayList<ArrayList<Object>>) data;
         String Id = null;
         for(ArrayList<Object> obj : rootFolderArray) {
-            if(obj.get(1).equals(name)) {
+            if (obj.get(1).equals(name)) {
                 Id = (String) obj.get(0);
                 break;
             }

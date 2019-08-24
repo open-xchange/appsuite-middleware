@@ -164,7 +164,7 @@ public class GroupManager extends AbstractRealtimeJanitor implements GroupManage
         Validate.notNull(id, "ID must not be null");
         Validate.notNull(duration, "Duration must not be null");
         Duration old = inactivityMap.put(id, duration);
-        if(!duration.equals(old)) {
+        if (!duration.equals(old)) {
             informGroupDispatchers(id, duration);
         }
     }

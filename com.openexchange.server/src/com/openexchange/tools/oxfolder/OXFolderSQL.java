@@ -1075,7 +1075,7 @@ public final class OXFolderSQL {
                         stmt.setInt(pos++, isAdmin ? 1 : 0);
                         stmt.setInt(pos++, system);
                         stmt.setInt(pos++, type.getTypeNumber());
-                        if(legator != null) {
+                        if (legator != null) {
                             stmt.setInt(pos++, Integer.parseInt(legator));
                         } else {
                             stmt.setNull(pos++, java.sql.Types.INTEGER);
@@ -1904,7 +1904,7 @@ public final class OXFolderSQL {
                         stmt.setInt(pos++, oclPerm.isGroupPermission() ? 1 : 0);
                         stmt.setInt(pos++, oclPerm.getType().getTypeNumber());
                         String legator = oclPerm.getPermissionLegator();
-                        if(legator != null) {
+                        if (legator != null) {
                             stmt.setInt(11, Integer.parseInt(legator));
                         } else {
                             stmt.setNull(11, java.sql.Types.INTEGER);

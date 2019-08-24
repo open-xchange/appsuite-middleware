@@ -166,7 +166,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         }
         // only let other plugins authenticate, when we have the BundleContext
         // AND when
-        if( plugInAware && doPluginAuth) {
+        if ( plugInAware && doPluginAuth) {
             // Trigger plugin extensions
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
@@ -180,11 +180,11 @@ public class BasicAuthenticator extends OXCommonImpl {
             }
         }
         // first check if whole authentication mech is disabled
-        if(!cache.masterAuthenticationDisabled()){
-            if( authdata == null ) {
+        if (!cache.masterAuthenticationDisabled()){
+            if ( authdata == null ) {
                 throw new InvalidCredentialsException("credential object is null");
             }
-            if(!fileAuth.authenticate(authdata)){
+            if (!fileAuth.authenticate(authdata)){
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
                 LOG.error("Master authentication for user: {}", authdata.getLogin(), invalidCredentialsException);
                 throw invalidCredentialsException;
@@ -208,7 +208,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         if (cache.isMasterAdmin(creds) ) {
             return true;
         }
-        if( plugInAware ) {
+        if ( plugInAware ) {
             // Trigger plugin extensions
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
@@ -253,7 +253,7 @@ public class BasicAuthenticator extends OXCommonImpl {
 
         // first check if whole authentication mechanism is disabled
         if (!cache.contextAuthenticationDisabled()) {
-            if( isMasterOfContext(authdata, ctx) ) {
+            if ( isMasterOfContext(authdata, ctx) ) {
                 doAuthentication(authdata);
             } else if (!oxtool.existsUserName(ctx, authdata.getLogin()) || !sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(

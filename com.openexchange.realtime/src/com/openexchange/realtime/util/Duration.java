@@ -128,40 +128,40 @@ public class Duration {
         Validate.notNull(unit, "Duration TimeUnit must not be null.");
         long incomingInS = unit.toSeconds(value);
         
-        if(incomingInS < TEN_SECONDS.getValueInS()) {
+        if (incomingInS < TEN_SECONDS.getValueInS()) {
             return NONE;
         }
-        if(incomingInS >= TEN_SECONDS.getValueInS() && incomingInS < THIRTY_SECONDS.getValueInS()) {
+        if (incomingInS >= TEN_SECONDS.getValueInS() && incomingInS < THIRTY_SECONDS.getValueInS()) {
             return TEN_SECONDS;
         }
-        if(incomingInS >= THIRTY_SECONDS.getValueInS() && incomingInS < ONE_MINUTE.getValueInS()) {
+        if (incomingInS >= THIRTY_SECONDS.getValueInS() && incomingInS < ONE_MINUTE.getValueInS()) {
             return THIRTY_SECONDS;
         }
-        if(incomingInS >= ONE_MINUTE.getValueInS() && incomingInS < TWO_MINUTES.getValueInS()) {
+        if (incomingInS >= ONE_MINUTE.getValueInS() && incomingInS < TWO_MINUTES.getValueInS()) {
             return ONE_MINUTE;
         }
-        if(incomingInS >= TWO_MINUTES.getValueInS() && incomingInS < THREE_MINUTES.getValueInS()) {
+        if (incomingInS >= TWO_MINUTES.getValueInS() && incomingInS < THREE_MINUTES.getValueInS()) {
             return TWO_MINUTES;
         }
-        if(incomingInS >= THREE_MINUTES.getValueInS() && incomingInS < FOUR_MINUTES.getValueInS()) {
+        if (incomingInS >= THREE_MINUTES.getValueInS() && incomingInS < FOUR_MINUTES.getValueInS()) {
             return THREE_MINUTES;
         }
-        if(incomingInS >= FOUR_MINUTES.getValueInS() && incomingInS < FIVE_MINUTES.getValueInS()) {
+        if (incomingInS >= FOUR_MINUTES.getValueInS() && incomingInS < FIVE_MINUTES.getValueInS()) {
             return FOUR_MINUTES;
         }
-        if(incomingInS >= FIVE_MINUTES.getValueInS() && incomingInS < TEN_MINUTES.getValueInS()) {
+        if (incomingInS >= FIVE_MINUTES.getValueInS() && incomingInS < TEN_MINUTES.getValueInS()) {
             return FIVE_MINUTES;
         }
-        if(incomingInS >= TEN_MINUTES.getValueInS() && incomingInS < FIVETEEN_MINUTES.getValueInS()) {
+        if (incomingInS >= TEN_MINUTES.getValueInS() && incomingInS < FIVETEEN_MINUTES.getValueInS()) {
             return TEN_MINUTES;
         }
-        if(incomingInS >= FIVETEEN_MINUTES.getValueInS() && incomingInS < TWENTY_MINUTES.getValueInS()) {
+        if (incomingInS >= FIVETEEN_MINUTES.getValueInS() && incomingInS < TWENTY_MINUTES.getValueInS()) {
             return FIVETEEN_MINUTES;
         }
-        if(incomingInS >= TWENTY_MINUTES.getValueInS() && incomingInS < TWENTYFIVE_MINUTES.getValueInS()) {
+        if (incomingInS >= TWENTY_MINUTES.getValueInS() && incomingInS < TWENTYFIVE_MINUTES.getValueInS()) {
             return TWENTY_MINUTES;
         }
-        if(incomingInS >= TWENTYFIVE_MINUTES.getValueInS() && incomingInS < THIRTY_MINUTES.getValueInS()) {
+        if (incomingInS >= TWENTYFIVE_MINUTES.getValueInS() && incomingInS < THIRTY_MINUTES.getValueInS()) {
             return TWENTYFIVE_MINUTES;
         }
         return THIRTY_MINUTES;

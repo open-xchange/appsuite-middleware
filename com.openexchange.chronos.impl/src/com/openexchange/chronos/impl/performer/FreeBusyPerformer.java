@@ -737,16 +737,16 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             }
         }
 
-        if(Transp.TRANSPARENT.equals(transp.getValue())) {
+        if (Transp.TRANSPARENT.equals(transp.getValue())) {
             return FbType.FREE;
         }
-        if(event.getStatus() == null) {
+        if (event.getStatus() == null) {
             return FbType.BUSY;
         }
-        if(EventStatus.TENTATIVE.equals(event.getStatus())) {
+        if (EventStatus.TENTATIVE.equals(event.getStatus())) {
             return FbType.BUSY_TENTATIVE;
         }
-        if(EventStatus.CANCELLED.equals(event.getStatus())) {
+        if (EventStatus.CANCELLED.equals(event.getStatus())) {
             return FbType.FREE;
         }
         return FbType.BUSY;

@@ -84,7 +84,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	}
 
 	public Writer getWriter() throws IOException {
-		if(w==null) {
+		if (w==null) {
 			w = res.getWriter();
 		}
 		return w;
@@ -97,7 +97,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 
 	@Override
     public Object getBody() {
-		if(null != body) {
+		if (null != body) {
 			return body;
 		}
 		try {
@@ -137,7 +137,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 		}
 		b.append("BODY: ");
 		final Object body = getBody();
-		if(null == body) {
+		if (null == body) {
 			b.append("No body");
 		} else {
 			b.append(body);

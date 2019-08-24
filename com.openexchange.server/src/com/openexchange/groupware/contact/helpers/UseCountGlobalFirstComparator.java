@@ -64,10 +64,10 @@ public class UseCountGlobalFirstComparator implements Comparator<Contact> {
 
     @Override
     public int compare(Contact o1, Contact o2) {
-        if(o1.getParentFolderID() == o2.getParentFolderID()) {
+        if (o1.getParentFolderID() == o2.getParentFolderID()) {
             return o1.getUseCount() - o2.getUseCount();
         }
-        if(o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+        if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
             return 1;
         }
         return -1;

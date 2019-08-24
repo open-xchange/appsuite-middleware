@@ -1697,7 +1697,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             do {
                 final String attribute = m.group();
-                if(attribute.contains("<") && attribute.contains(">")) {
+                if (attribute.contains("<") && attribute.contains(">")) {
                     String replace = attribute;
                     replace = replace.replace("<", "&lt;");
                     replace = replace.replace(">", "&gt;");

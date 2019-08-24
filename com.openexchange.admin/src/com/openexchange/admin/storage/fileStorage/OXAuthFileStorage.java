@@ -79,7 +79,7 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
     @Override
     public boolean authenticate(final Credentials authdata) {
         final Credentials master = ClientAdminThread.cache.getMasterCredentials();
-        if(master != null && authdata != null &&
+        if (master != null && authdata != null &&
            master.getLogin() != null && authdata.getLogin() != null &&
            master.getPassword() != null && authdata.getPassword() != null &&
            master.getLogin().equals(authdata.getLogin())) {

@@ -127,7 +127,7 @@ public class SieveResponse {
         public static Code getCode(final String respCode) {
             for(final Code code : Code.values() ) {
                 final String codeStr = code.toString();
-                if( respCode.startsWith(codeStr) ) {
+                if ( respCode.startsWith(codeStr) ) {
                     return code;
                 }
             }
@@ -137,7 +137,7 @@ public class SieveResponse {
         public static boolean isKnownCode(final String respCode) {
             for(final Code code : Code.values() ) {
                 final String codeStr = code.toString();
-                if( respCode.startsWith(codeStr) ) {
+                if ( respCode.startsWith(codeStr) ) {
                     return true;
                 }
             }

@@ -67,8 +67,8 @@ public class MailAttachmentState {
     private int accountId;
 
     public  MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailService mailService, final ServerSession session, final int accountId) throws OXException {
-        if(mailAccess != null) {
-            if(this.accountId == accountId) {
+        if (mailAccess != null) {
+            if (this.accountId == accountId) {
                 return mailAccess;
             }
             throw new IllegalStateException("AccountID does not match");
@@ -82,7 +82,7 @@ public class MailAttachmentState {
     }
 
     public void close() {
-        if(mailAccess != null) {
+        if (mailAccess != null) {
             mailAccess.close(true);
         }
     }

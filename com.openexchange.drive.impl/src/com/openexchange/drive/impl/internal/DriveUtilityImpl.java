@@ -607,7 +607,7 @@ public class DriveUtilityImpl implements DriveUtility {
             SearchIterator<File> files = trashContent.getFiles();
             if (files != null) {
                 JSONArray fileArray = loadFiles(syncSession, files);
-                if(fileArray.length() > 0) {
+                if (fileArray.length() > 0) {
                     result.put(FILES, filterUnwantedFields(fileArray));
                 }
             }

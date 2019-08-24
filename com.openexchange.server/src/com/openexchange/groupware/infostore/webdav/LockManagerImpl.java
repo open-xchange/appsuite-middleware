@@ -144,7 +144,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         lock.setOwner(rs.getInt("userid"));
         final int scopeNum = rs.getInt("scope");
         for(final Scope scope : Scope.values()) {
-            if(scopeNum == scope.ordinal()) {
+            if (scopeNum == scope.ordinal()) {
                 lock.setScope(scope);
             }
         }

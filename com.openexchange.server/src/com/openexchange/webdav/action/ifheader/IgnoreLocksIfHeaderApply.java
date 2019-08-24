@@ -62,7 +62,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class IgnoreLocksIfHeaderApply extends StandardIfHeaderApply {
     @Override
     public boolean matches(final IfHeaderEntity entity, final WebdavResource resource) throws WebdavProtocolException {
-        if(entity.isLockToken()) {
+        if (entity.isLockToken()) {
             return true;
         }
         return super.matches(entity, resource);

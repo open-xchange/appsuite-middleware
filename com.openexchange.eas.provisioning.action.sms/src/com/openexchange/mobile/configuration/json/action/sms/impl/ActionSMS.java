@@ -118,7 +118,7 @@ public class ActionSMS implements ActionService {
 		// send sms and check response code
 		try {
 			smssend.send();
-			if(smssend.wasSuccessfull()){
+			if (smssend.wasSuccessfull()){
 				provisioningResponse.setMessage("SMS sent successfully...");
 				provisioningResponse.setSuccess(true);
 				LOG.info("SMS to recipient {} (unformatted nr:{}) sent successfully for user {} in context {}", to_formatted, to, I(userid), I(cid));

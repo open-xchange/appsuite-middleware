@@ -87,7 +87,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
      * @return The calendar service utilities
      */
     public static CalendarServiceUtilities getInstance() {
-        if(instance == null){
+        if (instance == null){
             instance = new CalendarServiceUtilitiesImpl();
         }
         return instance;

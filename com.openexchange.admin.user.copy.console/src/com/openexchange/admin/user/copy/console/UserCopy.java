@@ -151,7 +151,7 @@ public class UserCopy extends ObjectNamingAbstraction {
             sb.append(" with new user id ");
             sb.append(destuserid);
         }
-        if( null != parser && parser.checkNoNewLine()) {
+        if ( null != parser && parser.checkNoNewLine()) {
             final String output = sb.toString().replace("\n", "");
             System.out.println(output);
         } else {

@@ -410,10 +410,10 @@ public class CalendarBuilder {
                 final String strDate = property.getValue();
                 
                 // Change the timezone
-                if(property instanceof DateProperty) {
+                if (property instanceof DateProperty) {
                     ((DateProperty) property).setTimeZone(timezone);
                 }
-                else if(property instanceof DateListProperty) {
+                else if (property instanceof DateListProperty) {
                     ((DateListProperty) property).setTimeZone(timezone);
                 }
                     

@@ -134,7 +134,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
 
             @Override
             public T handle(final ResultSet rs) throws SQLException {
-                if(!rs.next()){
+                if (!rs.next()){
                     return null;
                 }
                 final T thing = metadata.create();
@@ -157,7 +157,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         for (final String field : extraFields) {
             final Predicate old = predicate;
             predicate = new EQUALS(field, Constant.PLACEHOLDER);
-            if(old != null) {
+            if (old != null) {
                 predicate = old.AND(predicate);
             }
         }
@@ -189,7 +189,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         updatedAttributes = new ArrayList<Attribute<T>>(updatedAttributes);
         updatedAttributes.remove(metadata.getIdField());
         updatedAttributes.retainAll(getAttributes());
-        if(updatedAttributes.isEmpty()) {
+        if (updatedAttributes.isEmpty()) {
             return;
         }
         final UPDATE update = builder.update(updatedAttributes);
@@ -228,7 +228,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
 
     protected List<Object> primaryKey(Object id) {
         final Object overridden = overridesToDB.handle(metadata.getIdField(), id);
-        if(overridden != null) {
+        if (overridden != null) {
             id = overridden;
         }
         final LinkedList<Object> primaryKey = new LinkedList<Object>();
@@ -256,7 +256,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
 
         } finally {
             sBuilder.closePreparedStatement(null, rs);
-            if(con != null) {
+            if (con != null) {
                 dbService.backReadOnly(ctxId, con);
             }
         }
@@ -271,7 +271,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
             sBuilder.executeStatement(con, command, values);
 
         } finally {
-            if(con != null) {
+            if (con != null) {
                 try {
                     con.rollback();
                 } catch (SQLException x) {

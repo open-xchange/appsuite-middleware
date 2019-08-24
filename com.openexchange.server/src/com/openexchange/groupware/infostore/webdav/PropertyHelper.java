@@ -137,16 +137,16 @@ public class PropertyHelper {
     }
 
     private void loadProperty(final String namespace, final String name) throws WebdavProtocolException {
-		if(removedProperties.contains(new WebdavProperty(namespace, name))) {
+		if (removedProperties.contains(new WebdavProperty(namespace, name))) {
 			return;
 		}
-		if(loadedAllProps) {
+		if (loadedAllProps) {
 			return;
 		}
 		try {
             final ServerSession session = getSession();
 			final List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext());
-			if(list.isEmpty()) {
+			if (list.isEmpty()) {
 				return;
 			}
 			final WebdavProperty prop = list.get(0);
@@ -158,7 +158,7 @@ public class PropertyHelper {
 	}
 
 	private void loadAllProperties() throws WebdavProtocolException {
-		if(loadedAllProps) {
+		if (loadedAllProps) {
 			return;
 		}
 		loadedAllProps = true;
@@ -174,7 +174,7 @@ public class PropertyHelper {
 	}
 
 	public void dumpPropertiesToDB() throws OXException {
-		if(!changed) {
+		if (!changed) {
 			return;
 		}
 		changed = false;

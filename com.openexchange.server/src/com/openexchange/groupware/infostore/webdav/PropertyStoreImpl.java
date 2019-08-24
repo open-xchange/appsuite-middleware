@@ -109,7 +109,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             while(rs.next()) {
                 final Integer id = I(rs.getInt(1));
                 List<WebdavProperty> props = retVal.get(id);
-                if(props == null) {
+                if (props == null) {
                     props = new ArrayList<WebdavProperty>();
                     retVal.put(id, props);
                 }
@@ -256,7 +256,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
             while(rs.next()) {
                 final Integer id = I(rs.getInt(1));
                 List<WebdavProperty> props = retVal.get(id);
-                if(props == null) {
+                if (props == null) {
                     props = new ArrayList<WebdavProperty>();
                     retVal.put(id, props);
                 }
@@ -325,7 +325,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
     }
 
     private void removeProperties(final int entity, final List<WebdavProperty> properties, final Context ctx, final Connection writeCon) throws SQLException {
-        if(properties.isEmpty()) {
+        if (properties.isEmpty()) {
             return;
         }
         PreparedStatement stmt = null;

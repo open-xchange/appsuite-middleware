@@ -322,7 +322,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     @Override
     public DocumentMetadata next() throws OXException {
         hasNext();
-        if(exception != null) {
+        if (exception != null) {
             throw exception;
         }
         initNext = true;

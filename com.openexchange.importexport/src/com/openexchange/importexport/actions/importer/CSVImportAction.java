@@ -132,7 +132,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
 
 	@Override
 	public Importer getImporter() {
-		if(this.importer == null) {
+		if (this.importer == null) {
             this.importer = loadImporter();
         }
 		return this.importer;

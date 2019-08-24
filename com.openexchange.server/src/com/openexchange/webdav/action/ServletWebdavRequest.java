@@ -119,7 +119,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 
 	@Override
     public WebdavPath getDestinationUrl() {
-		if(destUrl != null) {
+		if (destUrl != null) {
 			return destUrl;
 		}
 
@@ -127,7 +127,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	}
 
 	protected WebdavPath toWebdavURL(String url) {
-		if(url == null) {
+		if (url == null) {
 			return null;
 		}
 
@@ -140,7 +140,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
     		}
 		}
 
-		if(url.startsWith(req.getServletPath())) {
+		if (url.startsWith(req.getServletPath())) {
 			url =  url.substring(req.getServletPath().length());
 		}
 		try {
@@ -150,7 +150,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
             }
             final WebdavPath path = new WebdavPath();
             for(final String component : url.split("/+")) {
-                if(component.equals("")){
+                if (component.equals("")){
                     continue;
                 }
 

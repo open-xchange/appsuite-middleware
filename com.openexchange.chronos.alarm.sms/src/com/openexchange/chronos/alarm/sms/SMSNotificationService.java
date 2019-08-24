@@ -108,7 +108,7 @@ public class SMSNotificationService implements AlarmNotificationService {
     public void send(Event event, Alarm alarm, int contextId, int accountId, int userId, long trigger) throws OXException {
         User user = userService.getUser(userId, contextId);
         String phoneNumber = getPhoneNumber(alarm, user.getLocale());
-        if(phoneNumber == null) {
+        if (phoneNumber == null) {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", I(userId), I(contextId));
             return;
         }

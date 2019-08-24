@@ -89,7 +89,7 @@ public class UserAgentBehaviour implements Behaviour{
 			while(addMe != null) {
 				final Class[] interfaces = addMe.getInterfaces();
 				for(final Class<? extends Object> iFace : interfaces) {
-					if(classes.get(iFace) != null) {
+					if (classes.get(iFace) != null) {
 						throw ConsistencyExceptionCodes.REGISTRATION_FAILED.create("Two implemenations for "+iFace);
 					}
 					classes.put(iFace, object);
@@ -110,7 +110,7 @@ public class UserAgentBehaviour implements Behaviour{
 
 	@Override
     public boolean matches(final WebdavRequest req) {
-		if(req.getHeader("user-agent") == null) {
+		if (req.getHeader("user-agent") == null) {
 			return false;
 		}
 		return pattern.matcher(req.getHeader("user-agent")).find();

@@ -84,7 +84,7 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
     @Override
     public Integer[] filter(Collection<Integer> input) throws PipesAndFiltersException {
         List<Integer> cids;
-        if( null == admin ) {
+        if ( null == admin ) {
             return input.toArray(new Integer[input.size()]);
         }
         try {

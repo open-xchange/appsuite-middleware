@@ -145,7 +145,7 @@ public class Bug16107Test extends ManagedAppointmentTest {
         //        has = catm.has(start, end);
         //        count = 0;
         //        for(boolean b : has)
-        //            if(b) count++;
+        //            if (b) count++;
         //
         //        assertEquals("HasRequest should find the right amount of occurences "+name, occurences, count);
         //

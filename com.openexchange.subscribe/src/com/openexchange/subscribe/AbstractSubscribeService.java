@@ -124,7 +124,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
                 getSubscriptionSource().getId())) {
 
-                if(userId == -1) {
+                if (userId == -1) {
                     subscriptions.add(subscription);
                 } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId()).booleanValue()) {
                     subscriptions.add(subscription);
@@ -132,7 +132,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                     final EffectivePermission folderPermission = FOLDERS.get().getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
                     final boolean visible = folderPermission.isFolderVisible() ;
                     canSee.put(subscription.getFolderId(), B(visible));
-                    if(visible) {
+                    if (visible) {
                         subscriptions.add(subscription);
                     }
 

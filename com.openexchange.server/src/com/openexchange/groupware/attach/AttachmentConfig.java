@@ -109,7 +109,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     public static String getProperty(final String key) {
     	AttachmentConfig singleton = _singleton;
-        if(!loaded || singleton == null) {
+        if (!loaded || singleton == null) {
 			try {
 			    singleton = getInstance();
 			    singleton.start();
@@ -140,7 +140,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
 	private static long sysconfMaxUpload() {
 		final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-		if(null == sizeS) {
+		if (null == sizeS) {
 			return 0;
 		}
 		return Long.parseLong(sizeS);
@@ -148,7 +148,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     @Override
     public void start() throws OXException {
-        if(!loaded || _singleton == null) {
+        if (!loaded || _singleton == null) {
             INIT_LOCK.lock();
             try {
                 getInstance().loadPropertiesInternal();

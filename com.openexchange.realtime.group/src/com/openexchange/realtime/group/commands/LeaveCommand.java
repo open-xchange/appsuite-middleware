@@ -144,7 +144,7 @@ public class LeaveCommand implements GroupCommand {
      * @return the real sender
      */
     private ID getRealSender(Stanza stanza) {
-        if(isSynchronous(stanza)) {
+        if (isSynchronous(stanza)) {
             return stanza.getOnBehalfOf();
         }
         return stanza.getFrom();

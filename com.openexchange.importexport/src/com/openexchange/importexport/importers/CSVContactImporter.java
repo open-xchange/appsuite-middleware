@@ -360,12 +360,12 @@ public class CSVContactImporter extends AbstractImporter {
             // skip unsupported import fields
             boolean skip = false;
             for(ContactField field: UNSUPPORTED_FIELDS){
-                if(field.getReadableName().equals(fieldName)){
+                if (field.getReadableName().equals(fieldName)){
                     skip=true;
                     break;
                 }
             }
-            if(skip){
+            if (skip){
                 continue;
             }
             final ContactField currField = getRelevantField(fieldName);

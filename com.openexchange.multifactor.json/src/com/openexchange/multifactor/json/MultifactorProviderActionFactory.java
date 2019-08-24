@@ -86,7 +86,7 @@ public class MultifactorProviderActionFactory implements AJAXActionServiceFactor
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         AJAXActionService actionService = actions.get(action);
-        if(actionService == null) {
+        if (actionService == null) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, MODULE);
         }
         return actionService;

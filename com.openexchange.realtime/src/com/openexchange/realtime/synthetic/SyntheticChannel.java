@@ -285,7 +285,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
             LOG.error("Failed to acquire conjure lock during cleanup for ID: {}", id, e);
         }
         try {
-            if(handles.containsKey(id)) {
+            if (handles.containsKey(id)) {
                 /*
                  * Lock conjure so no new GroupDispatcher is created until we finished cleanup. A second clean for the same id will either:
                  *  - wait for this lock and do nothin after it got the lock

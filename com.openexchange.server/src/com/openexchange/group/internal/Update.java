@@ -289,7 +289,7 @@ final class Update {
             } catch (SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
-            if(writeConnectionUsed){
+            if (writeConnectionUsed){
                 DBPool.closeWriterSilent(ctx, con);
             } else {
                 DBPool.closeWriterAfterReading(ctx, con);

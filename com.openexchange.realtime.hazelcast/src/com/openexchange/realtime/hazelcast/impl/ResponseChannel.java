@@ -200,7 +200,7 @@ public class ResponseChannel implements Channel {
     public void send(Stanza stanza, ID recipient) throws OXException {
         stanza.trace("Delivering synchronously. ResponseChannel.");
         Lock lock = locks.get(recipient);
-        if(lock == null) {
+        if (lock == null) {
             throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Missing lock for recipient: " + recipient);
         }
         try {

@@ -158,7 +158,7 @@ public class AttachmentRequest extends CommonRequest {
                         return true;
                     }
                 }
-                if(!object.has(DATASOURCE)) {
+                if (!object.has(DATASOURCE)) {
                     missingParameter(DATASOURCE, action);
                     return true;
                 }
@@ -176,7 +176,7 @@ public class AttachmentRequest extends CommonRequest {
                 final String datasourceIdentifier = datasourceDef.getString(IDENTIFIER);
 
                 final DataSource source = conversionService.getDataSource(datasourceIdentifier);
-                if(source == null) {
+                if (source == null) {
                     invalidParameter("datasource", datasourceIdentifier);
                     return true;
                 }
@@ -190,21 +190,21 @@ public class AttachmentRequest extends CommonRequest {
                 }
 
                 InputStream is;
-                if(types.contains(InputStream.class)) {
+                if (types.contains(InputStream.class)) {
                     final Data<InputStream> data = source.getData(InputStream.class, new DataArguments(arguments), session);
                     final String sizeS = data.getDataProperties().get(DataProperties.PROPERTY_SIZE);
                     final String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
 
-                    if(sizeS != null) {
+                    if (sizeS != null) {
                         attachment.setFilesize(Long.parseLong(sizeS));
                     }
 
-                    if(contentTypeS != null) {
+                    if (contentTypeS != null) {
                         attachment.setFileMIMEType(contentTypeS);
                     }
 
                     final String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
-                    if(name != null && null == attachment.getFilename()) {
+                    if (name != null && null == attachment.getFilename()) {
                         attachment.setFilename(name);
                     }
 
@@ -217,12 +217,12 @@ public class AttachmentRequest extends CommonRequest {
                     attachment.setFilesize(bytes.length);
 
                     final String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
-                    if(contentTypeS != null) {
+                    if (contentTypeS != null) {
                         attachment.setFileMIMEType(contentTypeS);
                     }
 
                     final String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
-                    if(name != null && null == attachment.getFilename()) {
+                    if (name != null && null == attachment.getFilename()) {
                         attachment.setFilename(name);
                     }
 
@@ -231,7 +231,7 @@ public class AttachmentRequest extends CommonRequest {
                     return true; // Maybe add better error message here.
                 }
 
-                if(attachment.getFilename() == null) {
+                if (attachment.getFilename() == null) {
                     attachment.setFilename("unknown"+System.currentTimeMillis());
                 }
 

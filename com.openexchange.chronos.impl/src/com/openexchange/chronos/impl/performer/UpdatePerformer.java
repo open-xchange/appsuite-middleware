@@ -316,7 +316,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (eventData.containsAlarms()) {
             Event updatedEvent = loadEventData(originalEvent.getId());
             List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
-            if(originalChangeExceptions != null) {
+            if (originalChangeExceptions != null) {
 
                 List<Event> copies = new ArrayList<>(originalChangeExceptions.size());
                 for(Event eve: originalChangeExceptions) {

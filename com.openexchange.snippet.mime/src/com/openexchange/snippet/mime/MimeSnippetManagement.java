@@ -706,7 +706,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if(backAfterRead){
+            if (backAfterRead){
                 databaseService.backWritableAfterReading(contextId, con);
             }else {
                 databaseService.backWritable(contextId, con);

@@ -124,7 +124,7 @@ public class ElementPath implements Serializable, Comparable<ElementPath> {
 
     @Override
     public String toString() {
-        if("".equals(namespace)) {
+        if ("".equals(namespace)) {
             return "ElementPath [" + element + "]";
         }
         return "ElementPath [" + namespace + "." + element + "]";

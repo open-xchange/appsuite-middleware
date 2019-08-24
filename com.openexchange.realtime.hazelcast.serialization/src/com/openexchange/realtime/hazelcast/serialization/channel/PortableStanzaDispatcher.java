@@ -174,7 +174,7 @@ public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, C
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         Portable[] portableTargets = reader.readPortableArray(FIELD_TARGETS);
-        if(null == portableTargets) {
+        if (null == portableTargets) {
             LOG.warn("Unable to find any portable targets.");
         } else {
             for (Portable portableTarget : portableTargets) {

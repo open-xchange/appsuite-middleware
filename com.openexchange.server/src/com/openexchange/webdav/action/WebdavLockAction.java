@@ -81,21 +81,21 @@ public class WebdavLockAction extends AbstractAction {
 		lock.setDepth(getDepth(req.getHeader("Depth")));
 
 		try {
-		    if(req.hasBody()) {
+		    if (req.hasBody()) {
 		        configureLock(req, lock);
 		    } else {
 		        defaultLockParams(lock);
 		    }
-		    if(null == lock.getToken() && req.getUserInfo().containsKey("mentionedLocks")) {
+		    if (null == lock.getToken() && req.getUserInfo().containsKey("mentionedLocks")) {
 		        List<String> mentionedLocks = (List<String>) req.getUserInfo().get("mentionedLocks");
-		        if(1 == mentionedLocks.size()) {
+		        if (1 == mentionedLocks.size()) {
 		            lock.setToken(mentionedLocks.get(0));
 		        }
 		    }
 
 			WebdavResource resource = req.getResource();
 
-            if(null != lock.getToken()) {
+            if (null != lock.getToken()) {
                 WebdavLock originalLock = resource.getLock(lock.getToken());
                 copyOldValues(originalLock, lock);
             }
@@ -134,7 +134,7 @@ public class WebdavLockAction extends AbstractAction {
 	}
 
     private void copyOldValues(WebdavLock originalLock, WebdavLock lock) {
-        if(lock.getOwner() == null) {
+        if (lock.getOwner() == null) {
             lock.setOwner(originalLock.getOwner());
         }
     }
@@ -150,11 +150,11 @@ public class WebdavLockAction extends AbstractAction {
     private void configureLock(final WebdavRequest req, final WebdavLock lock) throws JDOMException, IOException {
         final Element root = req.getBodyAsDocument().getRootElement();
         Element child = root.getChild("lockscope",DAV_NS);
-        if(child != null) {
+        if (child != null) {
             final Element lockscope = child.getChildren().get(0);
 
-            if(lockscope.getNamespace().equals(DAV_NS)) {
-            	if(lockscope.getName().equalsIgnoreCase("shared")) {
+            if (lockscope.getNamespace().equals(DAV_NS)) {
+            	if (lockscope.getName().equalsIgnoreCase("shared")) {
             		lock.setScope(Scope.SHARED_LITERAL);
             	} else {
             		lock.setScope(Scope.EXCLUSIVE_LITERAL);
@@ -167,16 +167,16 @@ public class WebdavLockAction extends AbstractAction {
         final Element owner = root.getChild("owner",DAV_NS);
         final XMLOutputter outputter = new XMLOutputter();
 
-        if(owner != null) {
+        if (owner != null) {
             lock.setOwner(outputter.outputString(owner.cloneContent()));
         }
     }
 
 	private int getDepth(final String header) {
-        if(null == header) {
+        if (null == header) {
 			return 0;
 		}
-		if(header.equalsIgnoreCase("infinity")) {
+		if (header.equalsIgnoreCase("infinity")) {
 			return WebdavCollection.INFINITY;
 		}
 
@@ -184,13 +184,13 @@ public class WebdavLockAction extends AbstractAction {
 	}
 
 	private long getTimeout(String header) {
-		if(null == header) {
+		if (null == header) {
 			return 600 * 1000;
 		}
-		if(header.indexOf(',') != -1) {
+		if (header.indexOf(',') != -1) {
 			header = header.substring(0,header.indexOf(',')).trim();
 		}
-		if(header.equalsIgnoreCase("infinite")) {
+		if (header.equalsIgnoreCase("infinite")) {
 			return WebdavLock.NEVER;
 		}
 

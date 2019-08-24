@@ -84,7 +84,7 @@ public class SendAction extends AbstractMessagingAction {
     @Override
     protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws JSONException, IOException, OXException {
         final MessagingMessage message = req.getMessage();
-        if(message == null) {
+        if (message == null) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
         }
         MessagingAccountTransport transport = req.getTransport(session.getUserId(), session.getContextId());

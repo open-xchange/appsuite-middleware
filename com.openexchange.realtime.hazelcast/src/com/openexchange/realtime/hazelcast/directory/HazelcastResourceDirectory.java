@@ -303,7 +303,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 for (PortableID id : concreteIds) {
                     idMapping.remove(id.toGeneralForm(), id);
                     PortableResource removedResource = allResources.remove(id);
-                    if(removedResource != null) {
+                    if (removedResource != null) {
                         removedResources.put(id, removedResource);
                     }
                 }
@@ -314,7 +314,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                     Collection<PortableID> foundConcreteIds = idMapping.remove(generalId);
                     for (PortableID concreteId : foundConcreteIds) {
                         PortableResource removedResource = allResources.remove(concreteId);
-                        if(removedResource != null) {
+                        if (removedResource != null) {
                             removedResources.put(concreteId, removedResource);
                         }
                     }
@@ -380,13 +380,13 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             if (currentPortableResource.getPresence() == null) {
                 // current resource doesn't provide presence infos, might be a DefaultResource / idle reconnect
                 previousPortableResource = resourceMapping.get(currentPortableID);
-                if(previousPortableResource != null && previousPortableResource.getPresence() != null) {
+                if (previousPortableResource != null && previousPortableResource.getPresence() != null) {
                     // but the previous resource provides a presence
                     currentPortableResource.setPresence(previousPortableResource.getPresence());
                     resourceMapping.put(currentPortableID, currentPortableResource);
                 } else {
                     // neither current nor previous resource provide presence infos
-                    if(overwrite) {
+                    if (overwrite) {
                         previousPortableResource = resourceMapping.put(currentPortableID, currentPortableResource);
                     } else {
                         previousPortableResource = resourceMapping.putIfAbsent(currentPortableID, currentPortableResource);
@@ -394,7 +394,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 }
             } else {
                 // current resource provides Presence data
-                if(overwrite) {
+                if (overwrite) {
                     previousPortableResource = resourceMapping.put(currentPortableID, currentPortableResource);
                 } else {
                     previousPortableResource = resourceMapping.putIfAbsent(currentPortableID, currentPortableResource);

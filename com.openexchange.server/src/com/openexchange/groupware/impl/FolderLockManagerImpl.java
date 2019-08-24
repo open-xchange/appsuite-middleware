@@ -115,7 +115,7 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
             while(rs.next()) {
                 final FolderLock lock = newLock();
                 fillLock(lock, rs);
-                if(lock.getTimeout()<1) {
+                if (lock.getTimeout()<1) {
                     removeLock(lock.getId(), ctx);
                     lockExpired(lock);
                 } else {

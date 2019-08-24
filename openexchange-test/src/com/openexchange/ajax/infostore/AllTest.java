@@ -98,7 +98,7 @@ public class AllTest extends InfostoreAJAXTest {
             String objectId = row.getString(0);
             int numberOfVersions = row.getInt(1);
 
-            if(objectId.equals(id)) {
+            if (objectId.equals(id)) {
                 assertEquals(2, numberOfVersions);
                 found = true;
             }

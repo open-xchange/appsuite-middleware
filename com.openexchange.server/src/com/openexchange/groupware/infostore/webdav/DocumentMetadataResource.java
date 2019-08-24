@@ -212,7 +212,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     @Override
     protected boolean isset(final Property p) {
         /*
-         * if(p.getId() == Protocol.GETCONTENTLANGUAGE) { return false; }
+         * if (p.getId() == Protocol.GETCONTENTLANGUAGE) { return false; }
          */
         return !propertyHelper.isRemoved(new WebdavProperty(p.getNamespace(), p.getName()));
     }
@@ -813,7 +813,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     private void initNameAndTitle() {
         if (metadata.getFileName() == null || metadata.getFileName().trim().length() == 0) {
-            // if(url.contains("/"))
+            // if (url.contains("/"))
             metadata.setFileName(url.name());
         }
         metadata.setTitle(metadata.getFileName());

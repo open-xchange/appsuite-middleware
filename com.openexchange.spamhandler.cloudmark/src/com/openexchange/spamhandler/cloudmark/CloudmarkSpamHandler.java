@@ -285,7 +285,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
                 if (null != targetHamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
-                    if(senderAddress==null){
+                    if (senderAddress==null){
                         LOG.warn("Unable to transport ham mail. The sender address is missing.");
                     } else {
                         for (String mailId : mailIDs) {

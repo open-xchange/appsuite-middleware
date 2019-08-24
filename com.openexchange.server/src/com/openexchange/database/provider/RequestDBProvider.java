@@ -146,7 +146,7 @@ public class RequestDBProvider implements DBProvider {
     protected void commit(final DBTransaction tx) throws OXException {
         try {
             if (tx.writeConnection != null && !tx.writeConnection.getAutoCommit()) {
-                if(tx.commit) {
+                if (tx.commit) {
                     tx.writeConnection.commit();
                 }
             }
@@ -156,12 +156,12 @@ public class RequestDBProvider implements DBProvider {
     }
 
     protected void rollback(final DBTransaction tx) throws OXException {
-        if(tx == null) {
+        if (tx == null) {
             return;
         }
         try {
-            if(tx.writeConnection!=null) {
-                if(tx.writeConnection.getAutoCommit()) {
+            if (tx.writeConnection!=null) {
+                if (tx.writeConnection.getAutoCommit()) {
                     throw new IllegalStateException("This request cannot be rolled back because it wasn't part of a transaction");
                 }
                 tx.writeConnection.rollback();
@@ -175,13 +175,13 @@ public class RequestDBProvider implements DBProvider {
     public Connection getReadConnection(final Context ctx) throws OXException{
         final DBTransaction tx = getActiveTransaction();
         int rc = readCount.get();
-        if(tx != null && tx.ctx == null) {
+        if (tx != null && tx.ctx == null) {
             tx.ctx = ctx;
         }
-        if(tx != null && tx.writeConnection != null) {
+        if (tx != null && tx.writeConnection != null) {
             return tx.writeConnection;
         }
-        if(tx != null && tx.readConnection != null) {
+        if (tx != null && tx.readConnection != null) {
             final Throwable t = new Throwable();
             rc++;
             t.fillInStackTrace();
@@ -192,7 +192,7 @@ public class RequestDBProvider implements DBProvider {
 
         final Connection readCon = getProvider().getReadConnection(ctx);
         LOG.debug("---> {}", readCon);
-        if(tx != null) {
+        if (tx != null) {
             tx.readConnection = readCon;
             rc++;
             final Throwable t = new Throwable();
@@ -206,26 +206,26 @@ public class RequestDBProvider implements DBProvider {
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException{
         final DBTransaction tx = getActiveTransaction();
-        if(tx == null) {
+        if (tx == null) {
             return getProvider().getWriteConnection(ctx);
         }
         final int rc = readCount.get();
-        if(rc>0) {
+        if (rc>0) {
             throw new IllegalStateException("Don't use a read and write connection in parallel. Read Connections in use: "+rc, tx.readConnectionStacks.get(rc));
         }
-        if(tx.writeConnection != null) {
+        if (tx.writeConnection != null) {
             return tx.writeConnection;
         }
         tx.writeConnection = getProvider().getWriteConnection(ctx);
         try {
             tx.autoCommit = tx.writeConnection.getAutoCommit();
-            if(tx.writeConnection.getAutoCommit() == tx.transactional) {
+            if (tx.writeConnection.getAutoCommit() == tx.transactional) {
                 tx.writeConnection.setAutoCommit(!tx.transactional);
             }
         } catch (SQLException e) {
             throw new OXException(OXExceptionConstants.CODE_DEFAULT, e.getMessage(), e);
         }
-        if(tx != null && tx.ctx == null) {
+        if (tx != null && tx.ctx == null) {
             tx.ctx = ctx;
         }
         return tx.writeConnection;
@@ -234,16 +234,16 @@ public class RequestDBProvider implements DBProvider {
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con){
         final DBTransaction tx = getActiveTransaction();
-        //if(tx == null) {
+        //if (tx == null) {
         //    throw new IllegalStateException("There is no transaction active at the moment.");
         //}
-        if(tx != null && tx.writeConnection != null && tx.writeConnection.equals(con)) {
+        if (tx != null && tx.writeConnection != null && tx.writeConnection.equals(con)) {
             return;
         }
-        if(tx != null && tx.readConnection != null && tx.readConnection.equals(con)) {
+        if (tx != null && tx.readConnection != null && tx.readConnection.equals(con)) {
             int rc = readCount.get();
             rc--;
-            if(rc==0) {
+            if (rc==0) {
                 LOG.debug("<--- {}", con);
                 getProvider().releaseReadConnection(ctx,con);
                 tx.readConnection=null;
@@ -251,7 +251,7 @@ public class RequestDBProvider implements DBProvider {
             readCount.set(rc);
             return;
         }
-        if(tx != null) {
+        if (tx != null) {
             return;
         }
         LOG.debug("<--- {}", con);
@@ -262,7 +262,7 @@ public class RequestDBProvider implements DBProvider {
     @Override
     public void releaseWriteConnection(final Context ctx, final Connection con){
         final DBTransaction tx = getActiveTransaction();
-        if(tx == null) {
+        if (tx == null) {
             getProvider().releaseWriteConnection(ctx, con);
         }
     }
@@ -270,19 +270,19 @@ public class RequestDBProvider implements DBProvider {
     @Override
     public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
         final DBTransaction tx = getActiveTransaction();
-        if(tx == null) {
+        if (tx == null) {
             getProvider().releaseWriteConnectionAfterReading(ctx, con);
         }
     }
 
     public void finish() throws OXException {
         final DBTransaction tx = getActiveTransaction();
-        if(tx == null) {
+        if (tx == null) {
             return;
         }
         try {
             if (tx.writeConnection != null) {
-                if(tx.writeConnection.getAutoCommit() != tx.autoCommit) {
+                if (tx.writeConnection.getAutoCommit() != tx.autoCommit) {
                     tx.writeConnection.setAutoCommit(tx.autoCommit);
                 }
                 getProvider().releaseWriteConnection(tx.ctx,tx.writeConnection);
@@ -298,7 +298,7 @@ public class RequestDBProvider implements DBProvider {
         }
         txIds.set(null);
         final DBProvider prov = getProvider();
-        if(prov instanceof Closeable) {
+        if (prov instanceof Closeable) {
             Streams.close((Closeable) prov);
         }
     }
@@ -309,7 +309,7 @@ public class RequestDBProvider implements DBProvider {
 
     public boolean isTransactional(){
         final DBTransaction tx = getActiveTransaction();
-        if(tx != null && tx.transactional) {
+        if (tx != null && tx.transactional) {
             return true;
         }
         return this.transactional;
@@ -317,10 +317,10 @@ public class RequestDBProvider implements DBProvider {
 
     public void setRequestTransactional(final boolean transactional) {
         final DBTransaction tx = getActiveTransaction();
-        if(tx == null) {
+        if (tx == null) {
             throw new IllegalStateException("No Transaction Active");
         }
-        if(tx.writeConnection != null && transactional) {
+        if (tx.writeConnection != null && transactional) {
             throw new IllegalStateException("Cannot switch on transaction after a write occurred");
         }
         tx.transactional = transactional;

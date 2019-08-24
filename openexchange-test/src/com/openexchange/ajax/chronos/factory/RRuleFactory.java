@@ -115,7 +115,7 @@ public class RRuleFactory {
      * @return The recurrence rule
      */
     public static String getFrequencyWithUntilLimit(RecurringFrequency freq, DateTimeData until, Weekday optWeekday ) {
-        if(optWeekday != null) {
+        if (optWeekday != null) {
             return "FREQ=" + freq.name() + ";BYDAY=" + optWeekday.name() + ";UNTIL=" + until.getValue();
         }
         return "FREQ=" + freq.name() + ";UNTIL=" + until.getValue();
@@ -246,7 +246,7 @@ public class RRuleFactory {
                 builder.append("BYDAY=");
                 boolean first = true;
                 for (Weekday day : days) {
-                    if(first) {
+                    if (first) {
                         first = false;
                     } else {
                         builder.append(",");

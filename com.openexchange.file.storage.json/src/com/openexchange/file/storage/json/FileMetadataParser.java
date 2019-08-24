@@ -100,7 +100,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         	File.Field.inject(jsonHandler, file, purged);
         } catch (RuntimeException x) {
             Throwable cause = x.getCause();
-            if(cause != null) {
+            if (cause != null) {
                 if (OXException.class.isInstance(cause)) {
                     throw (OXException) cause;
                 } else if (JSONException.class.isInstance(cause)) {
@@ -126,7 +126,7 @@ public class FileMetadataParser implements FileMetadataParserService{
         public Object handle(final Field field, final Object... args) {
             final File md = md(args);
             final JSONObject object = get(1, JSONObject.class, args);
-            if(!object.has(field.getName())) {
+            if (!object.has(field.getName())) {
                 return md;
             }
 
@@ -158,7 +158,7 @@ public class FileMetadataParser implements FileMetadataParserService{
             @Override
             public Object handle(final Field field, final Object... args) {
                 final List<File.Field> fields = (List<File.Field>) args[0];
-                if(object.has(field.getName())) {
+                if (object.has(field.getName())) {
                     fields.add(field);
                 }
                 return fields;

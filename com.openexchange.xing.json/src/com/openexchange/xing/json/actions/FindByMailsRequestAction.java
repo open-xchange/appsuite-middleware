@@ -95,7 +95,7 @@ public class FindByMailsRequestAction extends AbstractXingAction {
 
         JSONObject jsonData = (JSONObject) objData;
         JSONArray jsonArray = jsonData.optJSONArray("emails");
-        if(jsonArray == null) {
+        if (jsonArray == null) {
         	throw XingExceptionCodes.MANDATORY_REQUEST_DATA_MISSING.create("emails");
         }
 

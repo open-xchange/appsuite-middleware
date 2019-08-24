@@ -116,7 +116,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
     protected void initNext() throws OXException {
         while(delegate.hasNext()) {
             next = delegate.next();
-            if(accept(next)) {
+            if (accept(next)) {
                 return;
             }
         }

@@ -111,7 +111,7 @@ public class CreateSchema extends AbstractSchemaRMIToolkit {
             String rmiHost = (String) parser.getOptionValue(optRMIHost);
             int targetClusterId = Integer.valueOf((String) parser.getOptionValue(optTargetCluster));
             SchemaMoveRemote smr = null;
-            if(Strings.isEmpty(rmiHost)) {
+            if (Strings.isEmpty(rmiHost)) {
                 smr = getSchemaMoveRemoteInterface();
             } else {
                 smr = getSchemaMoveRemoteInterface(rmiHost);

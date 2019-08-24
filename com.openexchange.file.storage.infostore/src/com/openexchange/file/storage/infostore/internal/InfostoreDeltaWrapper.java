@@ -74,7 +74,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     @Override
     public SearchIterator<File> getDeleted() {
         SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
-        if(deleted == null) {
+        if (deleted == null) {
             return null;
         }
         return new InfostoreSearchIterator(deleted);
@@ -84,7 +84,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     @Override
     public SearchIterator<File> getModified() {
         SearchIterator<DocumentMetadata> modified = delegate.getModified();
-        if(modified == null) {
+        if (modified == null) {
             return null;
         }
         return new InfostoreSearchIterator(modified);
@@ -94,7 +94,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     @Override
     public SearchIterator<File> getNew() {
         SearchIterator<DocumentMetadata> new1 = delegate.getNew();
-        if(new1 == null) {
+        if (new1 == null) {
             return null;
         }
         return new InfostoreSearchIterator(new1);
@@ -104,7 +104,7 @@ public class InfostoreDeltaWrapper implements Delta<File>{
     @Override
     public SearchIterator<File> results() throws OXException {
         SearchIterator<DocumentMetadata> results = delegate.results();
-        if(results == null) {
+        if (results == null) {
             return null;
         }
         return new InfostoreSearchIterator(results);

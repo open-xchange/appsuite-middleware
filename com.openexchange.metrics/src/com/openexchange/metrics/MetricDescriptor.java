@@ -425,10 +425,10 @@ public class MetricDescriptor {
          * @return the {@link MetricBuilder} for chained calls
          */
         public MetricBuilder addDimension(String key, String value) {
-            if("type".equals(key) || "name".equals(key)) {
+            if ("type".equals(key) || "name".equals(key)) {
                 throw new IllegalArgumentException("The key is not allowed");
             }
-            if(dimensions == null) {
+            if (dimensions == null) {
                 dimensions = new ConcurrentHashMap<>();
             }
             dimensions.put(key, value);
@@ -480,7 +480,7 @@ public class MetricDescriptor {
             descriptor.setMetricType(metricType);
             descriptor.setFQN(group + "." + name);
             descriptor.setDescription(description);
-            if(dimensions != null) {
+            if (dimensions != null) {
                 descriptor.setDimensions(dimensions);
             }
         }

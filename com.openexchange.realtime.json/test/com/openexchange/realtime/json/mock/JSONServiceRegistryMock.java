@@ -76,7 +76,7 @@ public class JSONServiceRegistryMock implements ServiceLookup {
 
     @Override
     public <S> S getService(Class<? extends S> clazz) {
-        if(GlobalRealtimeCleanup.class.isAssignableFrom(clazz)) {
+        if (GlobalRealtimeCleanup.class.isAssignableFrom(clazz)) {
             return (S) new NoOpGlobalRealtimeCleanup(states);
         } else {
             return null;

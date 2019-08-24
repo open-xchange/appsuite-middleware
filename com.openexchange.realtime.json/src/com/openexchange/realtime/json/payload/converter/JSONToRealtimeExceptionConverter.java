@@ -30,7 +30,7 @@ public class JSONToRealtimeExceptionConverter extends AbstractJSONConverter {
             StackTraceElement[] stackTrace = getStackTrace(incoming.getJSONArray("stackTrace"));
             Object causeObject = incoming.opt("cause");
             Throwable cause = null;
-            if(causeObject != null) {
+            if (causeObject != null) {
                 cause = (Throwable) converter.convert("json", Throwable.class.getSimpleName(), causeObject, session);
             }
             RealtimeException outgoing = RealtimeExceptionCodes.create(codeNumber, cause, logArgs);

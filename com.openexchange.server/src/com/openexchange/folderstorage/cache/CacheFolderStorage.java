@@ -1724,7 +1724,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
         boolean isMove = null != folder.getParentID();
         String oldParentId = storageVersion.getParentID();
-        if(oldParentId == null){
+        if (oldParentId == null){
             throw OXFolderExceptionCode.UNKNOWN_EXCEPTION.create("Missing old parent id");
         }
         {

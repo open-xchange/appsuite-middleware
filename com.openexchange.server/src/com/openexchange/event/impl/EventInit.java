@@ -81,7 +81,7 @@ public class EventInit implements Initialization {
 
     @Override
     public void start() throws OXException {
-        if(started) {
+        if (started) {
 			return;
 		}
         started = true;

@@ -146,7 +146,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     private void writeResponseSafely(final Object data, final Locale locale, final Date timestamp, final Collection<OXException> warnings, final HttpServletResponse resp, Session session) {
         final Response response = new Response(locale);
         response.setData(data);
-        if(null != timestamp) {
+        if (null != timestamp) {
             response.setTimestamp(timestamp);
         }
         if (null != warnings && !warnings.isEmpty()) {
@@ -196,7 +196,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final String parameter = req.getParameter(parameterName);
             request.put(parameterName, parameter);
         }
-        if(requiresBody(action)) {
+        if (requiresBody(action)) {
             request.put(ResponseFields.DATA, toJSONConformantValue(req));
         }
         return modify(req, action, request);

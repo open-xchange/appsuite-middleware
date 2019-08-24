@@ -404,7 +404,7 @@ public class DefaultShareService implements ShareService {
                 guestUserUpdated = true;
             }
             if (linkUpdate.containsPassword()) {
-                if(updatePassword(connectionHelper, context, guest, linkUpdate.getPassword())){
+                if (updatePassword(connectionHelper, context, guest, linkUpdate.getPassword())){
                     guestUserUpdated = true;
                     passwordChanged = true;
                 }
@@ -506,7 +506,7 @@ public class DefaultShareService implements ShareService {
             for (TargetPermission permission : permissions) {
                 if (false == permission.isGroup() && LINK_PERMISSION_BITS == permission.getBits()) {
                     boolean includeSubfolders = false;
-                    if(permission instanceof SubfolderAwareTargetPermission) {
+                    if (permission instanceof SubfolderAwareTargetPermission) {
                         if (((SubfolderAwareTargetPermission) permission).getSystem() != 0) {
                             continue;
                         }
@@ -577,8 +577,8 @@ public class DefaultShareService implements ShareService {
 
     private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId){
         for(TargetPermission perm: permissions) {
-            if(perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
-                if(perm instanceof SubfolderAwareTargetPermission) {
+            if (perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
+                if (perm instanceof SubfolderAwareTargetPermission) {
                     return ((SubfolderAwareTargetPermission) perm).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
                 } else {
                     return false;

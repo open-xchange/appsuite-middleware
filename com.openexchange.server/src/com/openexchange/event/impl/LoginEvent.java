@@ -85,7 +85,7 @@ public class LoginEvent {
     }
 
     public LoginEvent(Event event) {
-        if(!TOPIC.equals(event.getTopic())) {
+        if (!TOPIC.equals(event.getTopic())) {
             throw new IllegalArgumentException("Can only handle events with topic "+TOPIC);
         }
         this.userId = (Integer) event.getProperty(USER_KEY);
@@ -111,7 +111,7 @@ public class LoginEvent {
 
     public void post() {
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
-        if(eventAdmin == null) {
+        if (eventAdmin == null) {
             LOG.debug("Event Admin is disabled, so skipping LoginEvent");
             return;
         }

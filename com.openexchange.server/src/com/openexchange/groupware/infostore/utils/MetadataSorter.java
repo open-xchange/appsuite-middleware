@@ -82,13 +82,13 @@ public class MetadataSorter {
         public int compare(final DocumentMetadata arg0, final DocumentMetadata arg1) {
 			final Comparable<Object> v1 = getValue(arg0);
 			final Comparable<Object> v2 = getValue(arg1);
-			if(v2 == null && v1 == null) {
+			if (v2 == null && v1 == null) {
 				return 0;
 			}
-			if(v2 == null) {
+			if (v2 == null) {
 				return 1;
 			}
-			if(v1 == null) {
+			if (v1 == null) {
 				return -1;
 			}
 			switch(direction){
@@ -100,7 +100,7 @@ public class MetadataSorter {
 		private Comparable getValue(final DocumentMetadata arg0) {
 			final DocumentMetadata metadata = arg0;
 			final GetSwitch get = new GetSwitch(metadata);
-			if(metadataField != null) {
+			if (metadataField != null) {
 				return (Comparable) metadataField.doSwitch(get);
 			}
 			return metadata.getProperty(field);
@@ -153,7 +153,7 @@ public class MetadataSorter {
 	}
 
 	public DocumentMetadata[] getSorted(){
-		if(null == metadata && metadataList != null){
+		if (null == metadata && metadataList != null){
 			final List<DocumentMetadata> sortedMetadata = getSortedAsList();
 			return sortedMetadata.toArray(new DocumentMetadata[sortedMetadata.size()]);
 		}
@@ -164,10 +164,10 @@ public class MetadataSorter {
 	}
 
 	public List<DocumentMetadata> getSortedAsList(){
-		if(null == metadataList && null != metadata){
+		if (null == metadataList && null != metadata){
 			return Arrays.asList(getSorted());
 		}
-		if(null != metadataList) {
+		if (null != metadataList) {
 			final List<DocumentMetadata> copy = new ArrayList<DocumentMetadata>(metadataList);
 			Collections.sort(copy,new MetadataComparator(field,direction));
 			return copy;

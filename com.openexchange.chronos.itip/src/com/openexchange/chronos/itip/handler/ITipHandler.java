@@ -325,7 +325,7 @@ public class ITipHandler implements CalendarHandler {
      */
     private boolean isMove(UpdateResult update) {
         // @formatter:off
-        if(update.containsAnyChangeOf(NOT_MOVE_EVENT_FIELDS) ||
+        if (update.containsAnyChangeOf(NOT_MOVE_EVENT_FIELDS) ||
            update.getAttendeeUpdates() == null || 
            (update.getAttendeeUpdates().getAddedItems() != null && update.getAttendeeUpdates().getAddedItems().isEmpty() == false) ||
            (update.getAttendeeUpdates().getRemovedItems() != null && update.getAttendeeUpdates().getRemovedItems().isEmpty() == false) ||

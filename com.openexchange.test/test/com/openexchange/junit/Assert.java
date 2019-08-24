@@ -120,7 +120,7 @@ public class Assert extends org.junit.Assert {
      * @throws IllegalArgumentException
      */
     public static void assertEqualAttributes(String message, Object expected, Object actual, String...fields) throws Exception {
-        if(! expected.getClass().isAssignableFrom(actual.getClass())) {
+        if (! expected.getClass().isAssignableFrom(actual.getClass())) {
             fail(message+" The class "+actual.getClass()+" is not compatible with "+expected.getClass());
         }
         BeanInfo beanInfo = Introspector.getBeanInfo(expected.getClass());
@@ -130,12 +130,12 @@ public class Assert extends org.junit.Assert {
 
         for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String propName = propertyDescriptor.getName();
-            if(all || fieldsToCompare.contains(propName)) {
+            if (all || fieldsToCompare.contains(propName)) {
                 Method readMethod = propertyDescriptor.getReadMethod();
-                if(readMethod == null && !all) {
+                if (readMethod == null && !all) {
                     fail("Can't read property "+propName);
                 }
-                if(readMethod == null) {
+                if (readMethod == null) {
                     continue;
                 }
                 Object expectedValue = readMethod.invoke(expected);

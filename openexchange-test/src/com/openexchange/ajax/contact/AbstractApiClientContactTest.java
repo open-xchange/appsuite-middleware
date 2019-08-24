@@ -472,7 +472,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
             element.setId(id);
             body.add(element);
         }
-        if(!body.isEmpty()) {
+        if (!body.isEmpty()) {
             try {
                 contactsApi.deleteContacts(getSessionId(), Long.valueOf(Long.MAX_VALUE), body);
             } catch(@SuppressWarnings("unused") Exception e) {

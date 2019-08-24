@@ -2254,7 +2254,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return null;
         //        ArrayList<Group> data = new ArrayList<Group>();
         //
-        //        if(data.size()==0){
+        //        if (data.size()==0){
         //            return null;
         //        }else{
         //            return data.toArray(new Group[data.size()]);

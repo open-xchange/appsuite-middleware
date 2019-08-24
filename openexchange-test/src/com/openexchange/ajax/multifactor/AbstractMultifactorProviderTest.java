@@ -382,7 +382,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(autologin.getErrorDesc(), is(nullValue()));
 
         //Thus registering new device should be successful
-        if(isBackupOnlyProvider()) {
+        if (isBackupOnlyProvider()) {
             //A user cannot register a "backup-only" device if no other devices are registered
             //so we start by adding a primary device first
             MultifactorStartRegistrationResponseData registration = startRegistration(TOTPProviderTests.TOTP_PROVIDER_NAME);

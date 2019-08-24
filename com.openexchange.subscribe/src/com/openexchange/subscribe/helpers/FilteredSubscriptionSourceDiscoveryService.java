@@ -119,7 +119,7 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
     protected boolean accepts(final String identifier) {
         try {
             final ComposedConfigProperty<Boolean> property = config.property(identifier, boolean.class);
-            if(property.isDefined()) {
+            if (property.isDefined()) {
                 return property.get().booleanValue();
             }
             return true;

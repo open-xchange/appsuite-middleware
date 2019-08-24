@@ -123,14 +123,14 @@ public final class EmitterTools {
     }
 
     public static net.fortuna.ical4j.model.Date toDate(final java.util.Date date, String tzid) {
-    	if(tzid == null) {
+    	if (tzid == null) {
             return toDate(date);
         }
         return new TzDate(date.getTime(), tzid);
     }
 
     public static String extractTimezoneIfPossible(CalendarObject co){
-    	if(Appointment.class.isAssignableFrom(co.getClass())) {
+    	if (Appointment.class.isAssignableFrom(co.getClass())) {
             return ((Appointment) co).getTimezone();
         }
     	return null;

@@ -112,7 +112,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         int score = 0;
         final int threshold = getThreshold(session);
 
-        if(isReasonablyEmpty(original) && isReasonablyEmpty(candidate)) {
+        if (isReasonablyEmpty(original) && isReasonablyEmpty(candidate)) {
         	return threshold + 1;
         }
         // For the sake of simplicity we assume that equal names mean equal contacts
@@ -144,7 +144,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             score += 5;
         }
 
-        if( score < threshold && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
+        if ( score < threshold && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
             score = threshold + 1;
         }
         return score;
@@ -177,7 +177,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void closeSession(final Object session) {
-        if(session instanceof Map<?,?>) {
+        if (session instanceof Map<?,?>) {
             @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
             Session ses = (Session) userInfo.get(I(SESSION));
             ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);

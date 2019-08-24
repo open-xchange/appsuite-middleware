@@ -107,7 +107,7 @@ public class PGPSecretKeyRingFactory {
         List<PGPSecretKeyRing> ret = new ArrayList<PGPSecretKeyRing>();
         for(String secretKeyData : parserResult.getSecretKeysData()) {
             PGPSecretKeyRing parsedKey = create(secretKeyData);
-            if(parsedKey != null) {
+            if (parsedKey != null) {
                 ret.add(parsedKey);
             }
         }

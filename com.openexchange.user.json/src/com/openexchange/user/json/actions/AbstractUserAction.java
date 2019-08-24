@@ -319,7 +319,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
     protected static void censor(final ServerSession session, final User[] user) throws OXException {
         final UserCensorship censorship = getUserCensorship(session);
         for(int i = 0; i < user.length; i++) {
-            if(user[i].getId() == session.getUserId()) {
+            if (user[i].getId() == session.getUserId()) {
                 continue;
             }
             user[i] = censorship.censor(user[i]);
@@ -327,7 +327,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
     }
 
     protected static User censor(final ServerSession session, final User user) throws OXException {
-        if(user.getId() == session.getUserId()) {
+        if (user.getId() == session.getUserId()) {
             return user;
         }
         final UserCensorship censorship = getUserCensorship(session);

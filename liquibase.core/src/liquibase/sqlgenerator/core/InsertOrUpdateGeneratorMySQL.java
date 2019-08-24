@@ -39,7 +39,7 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
             }
         }
         
-        if(hasFields) {
+        if (hasFields) {
         	// append the updateClause onto the end of the insert statement
             updateClause.deleteCharAt(updateClause.lastIndexOf(","));
         	sql.append(updateClause);

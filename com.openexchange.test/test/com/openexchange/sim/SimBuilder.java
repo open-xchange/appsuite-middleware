@@ -93,7 +93,7 @@ public class SimBuilder {
     public List<String> getMissingCalls() {
         LinkedList<String> missingCalls = new LinkedList<String>();
         for (DynamicSim expectedCall : expectedCalls) {
-            if(!expectedCall.wasCalled()) {
+            if (!expectedCall.wasCalled()) {
                 missingCalls.add(expectedCall.getExpectation().toString());
             }
         }

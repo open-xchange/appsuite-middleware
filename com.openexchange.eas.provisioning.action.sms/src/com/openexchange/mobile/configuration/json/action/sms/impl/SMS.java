@@ -189,8 +189,8 @@ public class SMS {
 		}
 
 		 //check if sending was OK
-		 if(result!=null){
-			 if(result.get("StatusCode").toString().trim().equalsIgnoreCase("200")){
+		 if (result!=null){
+			 if (result.get("StatusCode").toString().trim().equalsIgnoreCase("200")){
 				 wassendingsuccessfull = true;
 			 }else{
 				 wassendingsuccessfull = false;

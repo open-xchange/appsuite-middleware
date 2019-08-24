@@ -109,7 +109,7 @@ public class HTTPToolkit {
 
         final java.net.URL javaURL = new java.net.URL(encodedSite);
 
-        if(check) {
+        if (check) {
             checkContentAndLength(javaURL, timeout);
         }
 

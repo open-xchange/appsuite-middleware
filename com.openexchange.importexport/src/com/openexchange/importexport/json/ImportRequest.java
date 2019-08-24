@@ -95,16 +95,16 @@ public class ImportRequest {
 		if (!request.containsParameter("callback")) {
 			request.putParameter("callback", "import"); // hack to stay backwards-compatible with 6.20 version that did not comply to the HTTP API
 		}
-		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
+		if (request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
 			throw ImportExportExceptionCodes.NEED_FOLDER.create();
 		}
 		this.folders = Arrays.asList(request.getParameter(AJAXServlet.PARAMETER_FOLDERID).split(","));
 
 		long maxSize = sysconfMaxUpload();
-		if(!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)){
+		if (!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)){
 			throw ImportExportExceptionCodes.NO_FILE_UPLOADED.create();
 		}
-		if(request.getFiles(-1, maxSize > 0 ? maxSize : -1L).size() > 1){
+		if (request.getFiles(-1, maxSize > 0 ? maxSize : -1L).size() > 1){
 			throw ImportExportExceptionCodes.ONLY_ONE_FILE.create();
 		}
 		UploadFile uploadFile = request.getFiles().get(0);

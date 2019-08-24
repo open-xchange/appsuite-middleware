@@ -598,8 +598,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     public static CachedResource getCachedResourceForContext(ServerSession session, String cacheKey, ResourceCache resourceCache) {
         CachedResource cachedResource= null;
         final int contextId = session.getContextId();
-        if(Strings.isNotEmpty(cacheKey)) {
-            if(resourceCache != null) {
+        if (Strings.isNotEmpty(cacheKey)) {
+            if (resourceCache != null) {
                 try {
                     cachedResource = resourceCache.get(cacheKey, 0, contextId);
                 } catch (OXException e) {

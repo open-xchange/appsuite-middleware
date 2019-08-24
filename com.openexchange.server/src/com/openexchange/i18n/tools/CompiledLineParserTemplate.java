@@ -139,7 +139,7 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
                 if (escaped) {
                     escaped = false;
                 } else {
-                    if(firstPos == -1) {
+                    if (firstPos == -1) {
                         LOG.error("Parser Error: Missing opening bracket in line: {}", I(lineCount), new Throwable());
                         open = null;
                     } else {

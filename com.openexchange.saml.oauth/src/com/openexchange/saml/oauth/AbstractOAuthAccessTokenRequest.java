@@ -134,7 +134,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
             requestAccessToken.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             // Build base64(<client-id> + ":" + <client-secret>) "Authorization" header
-            if(oAuthConfiguration.getClientId()!=null && oAuthConfiguration.getClientSecret()!=null){
+            if (oAuthConfiguration.getClientId()!=null && oAuthConfiguration.getClientSecret()!=null){
                 String authString = new StringBuilder(oAuthConfiguration.getClientId()).append(':').append(oAuthConfiguration.getClientSecret()).toString();
                 String auth = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
                 requestAccessToken.addHeader("Authorization", auth);
@@ -143,7 +143,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
             // Build the url-encoded pairs for the POST request
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
             nvps.add(new BasicNameValuePair("grant_type", getGrantType()));
-            if(Strings.isNotEmpty(scope)){
+            if (Strings.isNotEmpty(scope)){
                 nvps.add(new BasicNameValuePair(SCOPE, scope));
             }
             addAccessInfo(accessInfo, nvps);

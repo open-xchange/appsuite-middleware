@@ -127,7 +127,7 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
     private void exception() throws OXException {
-        if(null != exception) {
+        if (null != exception) {
             throw exception;
         }
     }

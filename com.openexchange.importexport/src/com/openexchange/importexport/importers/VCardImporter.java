@@ -209,7 +209,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         }
                         Contact contactObj = vCardImport.getContact();
                         contactObj.setParentFolderID(contactFolderId);
-                        if(maxSimilarity!=null){
+                        if (maxSimilarity!=null){
                             Contact duplicate = checkSimilarity(session, contactObj, Float.parseFloat(maxSimilarity));
                             if (duplicate != null) {
                                 importResult.setException(ImportExportExceptionCodes.CONTACT_TOO_SIMILAR.create(contactObj.getUid(), duplicate.getUid(), I(duplicate.getParentFolderID())));

@@ -94,7 +94,7 @@ public class CheckSizeSwitch {
         final GetSwitch get = new GetSwitch(metadata);
 
         for(final Metadata m : Metadata.VALUES) {
-            if(!FIELDS_TO_CHECK.contains(m)) {
+            if (!FIELDS_TO_CHECK.contains(m)) {
                 continue;
             }
             final Object value = m.doSwitch(get);
@@ -105,7 +105,7 @@ public class CheckSizeSwitch {
             } else {
                 valueLength = 0;
             }
-            if(maxSize < valueLength) {
+            if (maxSize < valueLength) {
                 final OXException x = InfostoreExceptionCodes.TOO_LONG_VALUES.create();
                 x.addProblematic(new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength));
                 throw x;

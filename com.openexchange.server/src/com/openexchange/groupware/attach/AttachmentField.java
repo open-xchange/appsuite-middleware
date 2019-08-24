@@ -133,7 +133,7 @@ public class AttachmentField {
 
 	public static AttachmentField get(final String s) {
 		for(final AttachmentField field : VALUES) {
-			if(field.name.equals(s)) {
+			if (field.name.equals(s)) {
 				return field;
 			}
 		}

@@ -186,7 +186,7 @@ public class ExtractSessionProcessorHandler implements PacketProcessorHandler {
     @Override
     public PGPPacket[] handlePacket(PGPPacket packet) throws Exception {
         Packet rawPacket = packet.getBcPacket();
-        if(rawPacket instanceof PublicKeyEncSessionPacket) {
+        if (rawPacket instanceof PublicKeyEncSessionPacket) {
            PublicKeyEncSessionPacket sessionPacket = (PublicKeyEncSessionPacket) rawPacket;
            this.encryptedSessions.add(toEncryptedSession(sessionPacket));
         }

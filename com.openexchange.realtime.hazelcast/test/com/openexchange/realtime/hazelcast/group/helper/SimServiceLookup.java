@@ -64,7 +64,7 @@ public class SimServiceLookup implements ServiceLookup {
     
     @Override
     public <S> S getService(Class<? extends S> clazz) {
-        if(clazz.isInstance(dumbThreadPool)) {
+        if (clazz.isInstance(dumbThreadPool)) {
             return (S)dumbThreadPool;
         } else {
             return null;

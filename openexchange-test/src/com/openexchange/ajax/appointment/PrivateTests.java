@@ -235,11 +235,11 @@ public class PrivateTests extends AbstractAJAXSession {
             client1.execute(new DeleteRequest(app));
             client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, folder));
            
-            if(null != client3){
+            if (null != client3){
                 client3.logout();
                 client3 = null;
             }
-            if(null != client4){
+            if (null != client4){
                 client4.logout();
                 client4 = null;
             }

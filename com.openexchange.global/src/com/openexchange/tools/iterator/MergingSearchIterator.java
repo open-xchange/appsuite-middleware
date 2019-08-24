@@ -77,7 +77,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         this.iterators = iterators;
         this.topmost = new ArrayList<T>(iterators.size());
         for(final SearchIterator<T> iterator : iterators) {
-            if(iterator.hasNext()) {
+            if (iterator.hasNext()) {
                 topmost.add(iterator.next());
                 hasNext = true;
             } else {
@@ -123,7 +123,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     @Override
     public boolean hasWarnings() {
         for(final SearchIterator<T> iterator : iterators) {
-            if(iterator.hasWarnings()) {
+            if (iterator.hasWarnings()) {
                 return true;
             }
         }
@@ -132,7 +132,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
 
     @Override
     public T next() throws OXException {
-        if(!hasNext) {
+        if (!hasNext) {
             return null;
         }
         // Find largest index
@@ -148,7 +148,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
             }
         }
         // Replenish
-        if(iterators.get(largestIndex).hasNext()) {
+        if (iterators.get(largestIndex).hasNext()) {
             topmost.set(largestIndex, iterators.get(largestIndex).next());
         } else {
             topmost.set(largestIndex, null);
@@ -157,7 +157,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         // hasNext?
         hasNext = false;
         for(final T thing : topmost) {
-            if(thing != null) {
+            if (thing != null) {
                 hasNext = true;
             }
         }

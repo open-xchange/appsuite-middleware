@@ -97,7 +97,7 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
         final List<SubscriptionSource> sources = discovery.getSources();
         for (final SubscriptionSource subscriptionSource : sources) {
             final Set<String> passwordFields = subscriptionSource.getPasswordFields();
-            if(passwordFields.isEmpty()) {
+            if (passwordFields.isEmpty()) {
                 continue;
             }
 
@@ -113,7 +113,7 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
         final List<SubscriptionSource> sources = discovery.getSources();
         for (final SubscriptionSource subscriptionSource : sources) {
             final Set<String> passwordFields = subscriptionSource.getPasswordFields();
-            if(passwordFields.isEmpty()) {
+            if (passwordFields.isEmpty()) {
                 continue;
             }
 
@@ -129,7 +129,7 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
         final List<SubscriptionSource> sources = discovery.getSources();
         for (final SubscriptionSource subscriptionSource : sources) {
             final Set<String> passwordFields = subscriptionSource.getPasswordFields();
-            if(passwordFields.isEmpty()) {
+            if (passwordFields.isEmpty()) {
                 continue;
             }
 

@@ -83,7 +83,7 @@ public abstract class LockHelper {
 
 	public LockHelper(final LockManager lockManager, final SessionHolder sessionHolder, final WebdavPath url) {
 		this.lockManager = lockManager;
-		if(null == sessionHolder) {
+		if (null == sessionHolder) {
 			throw new IllegalArgumentException("sessionHolder may not be null");
 		}
 		this.sessionHolder = sessionHolder;
@@ -105,7 +105,7 @@ public abstract class LockHelper {
 		final List<WebdavLock> notExpired = new ArrayList<WebdavLock>();
 		final long now = System.currentTimeMillis();
 		for(final WebdavLock lock : lockList) {
-			if(lock.isActive(now)) {
+			if (lock.isActive(now)) {
 				notExpired.add(lock);
 			} else {
 				removeLock(lock.getToken());
@@ -118,7 +118,7 @@ public abstract class LockHelper {
 	public void addLock(final WebdavLock lock) throws WebdavProtocolException {
 		try {
 			loadLocks();
-			if(lock.getToken()!= null && locks.containsKey(lock.getToken())) {
+			if (lock.getToken()!= null && locks.containsKey(lock.getToken())) {
 				relock(lock);
                 locks.put(lock.getToken(), lock);
                 return;
@@ -153,10 +153,10 @@ public abstract class LockHelper {
 	protected abstract Lock toLock(WebdavLock lock);
 
 	private synchronized void loadLocks() throws WebdavProtocolException {
-		if(loadedLocks) {
+		if (loadedLocks) {
 			return;
 		}
-		if(id == 0) {
+		if (id == 0) {
 			return;
 		}
 		loadedLocks = true;
@@ -182,7 +182,7 @@ public abstract class LockHelper {
 	}
 
 	public void dumpLocksToDB() throws OXException {
-		if(removedLocks.isEmpty()) {
+		if (removedLocks.isEmpty()) {
 			return;
 		}
 		final ServerSession session = getSession();

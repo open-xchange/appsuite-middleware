@@ -543,7 +543,7 @@ public final class SieveTextFilter {
             int minDiff = Integer.MAX_VALUE;
             Rule rightRule = null;
             for (final Rule rule : rules) {
-                final int abs = getPosDif(rule.getLinenumber() - ruleComment.getLine());
+                final int abs = getPosDif (rule.getLinenumber() - ruleComment.getLine());
                 if (abs < minDiff) {
                     minDiff = abs;
                     rightRule = rule;
@@ -645,7 +645,7 @@ public final class SieveTextFilter {
         return size;
     }
 
-    private int getPosDif(final int i) {
+    private int getPosDif (final int i) {
         return (i > 0) ? i : Integer.MAX_VALUE;
     }
 

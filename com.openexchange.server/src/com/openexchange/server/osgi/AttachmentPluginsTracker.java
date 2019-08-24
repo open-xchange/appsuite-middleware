@@ -77,7 +77,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         Integer folderId = getInt(reference, Constants.OX_OVERRIDE_FOLDER);
 
         SpecificServiceChooser<T> chooser = getChooser(module);
-        if(chooser == null) {
+        if (chooser == null) {
             LOG.warn("Can't register services for module {} in tracker {}", I(module), getClass().getName());
             return;
         }
@@ -104,28 +104,28 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         Integer contextId = getInt(reference, Constants.OX_OVERRIDE_CONTEXT);
         Integer folderId = getInt(reference, Constants.OX_OVERRIDE_FOLDER);
         Integer ranking = getInt(reference, org.osgi.framework.Constants.SERVICE_RANKING);
-        if(ranking == null) {
+        if (ranking == null) {
             ranking = I(0);
         }
         SpecificServiceChooser<T> chooser = getChooser(module);
-        if(chooser == null) {
+        if (chooser == null) {
             LOG.error("Can't register services for module {} in tracker {}", I(module), getClass().getName());
             return;
         }
         try {
-            if(contextId == null && folderId == null) {
+            if (contextId == null && folderId == null) {
                 chooser.registerForEverything(tracked, ranking.intValue());
                 return;
             }
-            if(contextId != null && folderId != null) {
+            if (contextId != null && folderId != null) {
                 chooser.registerForContextAndFolder(tracked, ranking.intValue(), contextId.intValue(), folderId.intValue());
                 return;
             }
-            if(contextId != null) {
+            if (contextId != null) {
                 chooser.registerForContext(tracked, ranking.intValue(), contextId.intValue());
                 return;
             }
-            if(folderId != null) {
+            if (folderId != null) {
                 chooser.registerForFolder(tracked, ranking.intValue(), folderId.intValue());
             }
 
@@ -145,10 +145,10 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
 
     protected Integer getInt(ServiceReference reference, String key) {
         Object property = reference.getProperty(key);
-        if(property == null) {
+        if (property == null) {
             return null;
         }
-        if(Integer.class.isInstance(property))  {
+        if (Integer.class.isInstance(property))  {
             return (Integer) property;
         }
         return Integer.valueOf(property.toString());

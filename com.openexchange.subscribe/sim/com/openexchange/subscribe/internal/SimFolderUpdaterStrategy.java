@@ -83,7 +83,7 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
     }
 
     public boolean wasUpdated(final String orig, final String update) {
-        if(!updatedElements.containsKey(orig)) {
+        if (!updatedElements.containsKey(orig)) {
             return false;
         }
         return updatedElements.get(orig).equals(update);
@@ -99,7 +99,7 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
         for (int i = 0, size = Math.min(original.length(), candidate.length()); i < size; i++) {
             final int cO = original.charAt(i);
             final int cC = candidate.charAt(i);
-            if(cO == cC) {
+            if (cO == cC) {
                 counter++;
             } else {
                 return counter;

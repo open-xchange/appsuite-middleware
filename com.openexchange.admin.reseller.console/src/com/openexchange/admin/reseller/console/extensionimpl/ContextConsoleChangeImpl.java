@@ -110,7 +110,7 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
             dbres = dbctxext.getRestriction();
             final HashSet<Restriction> ret = ResellerAbstraction.handleAddEditRemoveRestrictions(OXResellerTools.array2HashSet(dbres), addres, removeRes, editRes);
             Restriction[] restrictions = null;
-            if( null != ret ) {
+            if ( null != ret ) {
                 restrictions = ret.toArray(new Restriction[ret.size()]);
             }
             if (null == firstExtensionByName) {
@@ -120,7 +120,7 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
                 } else {
                     ctxext = new OXContextExtensionImpl();
                 }
-                if( null != customid ) {
+                if ( null != customid ) {
                     ctxext.setCustomid(customid);
                 }
                 ctx.addExtension(ctxext);
@@ -128,7 +128,7 @@ public class ContextConsoleChangeImpl extends BasicCommandlineOptions implements
                 if (null != restrictions) {
                     firstExtensionByName.setRestriction(restrictions);
                 }
-                if( null != customid ) {
+                if ( null != customid ) {
                     firstExtensionByName.setCustomid(customid);
                 }
             }

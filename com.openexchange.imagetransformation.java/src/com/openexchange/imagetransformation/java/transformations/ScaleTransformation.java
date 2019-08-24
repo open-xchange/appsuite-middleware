@@ -117,15 +117,15 @@ public class ScaleTransformation implements ImageTransformation {
         int targetWidth = (int) dimension.getWidth();
         int targetHeight = (int) dimension.getHeight();
         if (shrinkOnly && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
-            if(ScaleType.COVER_AND_CROP ==  scaleType){
+            if (ScaleType.COVER_AND_CROP ==  scaleType){
                 return extentImageIfNeeded(sourceImage, maxWidth, maxHeight);
             }
             return sourceImage; // nothing to do
         }
 
         BufferedImage resized = Scalr.resize(sourceImage, Method.AUTOMATIC, targetWidth, targetHeight);
-        if(ScaleType.COVER_AND_CROP ==  scaleType && (resized.getWidth()>maxWidth || resized.getHeight() > maxHeight)){
-            if(resized.getWidth()>maxWidth){
+        if (ScaleType.COVER_AND_CROP ==  scaleType && (resized.getWidth()>maxWidth || resized.getHeight() > maxHeight)){
+            if (resized.getWidth()>maxWidth){
                 int x = (int) Math.floor((resized.getWidth()-maxWidth) / 2d);
                 resized = Scalr.crop(resized, x, 0, maxWidth, maxHeight);
             } else {

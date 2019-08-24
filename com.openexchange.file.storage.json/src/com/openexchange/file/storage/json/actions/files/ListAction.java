@@ -77,13 +77,13 @@ public class ListAction extends AbstractListingAction {
 
         List<Field> columns = request.getFieldsToLoad();
         boolean copy = false;
-        if(!columns.contains(File.Field.FOLDER_ID)) {
+        if (!columns.contains(File.Field.FOLDER_ID)) {
             columns = new ArrayList<File.Field>(columns);
             columns.add(File.Field.FOLDER_ID);
             copy = true;
         }
-        if(!columns.contains(File.Field.ID)) {
-            if(!copy) {
+        if (!columns.contains(File.Field.ID)) {
+            if (!copy) {
                 columns = new ArrayList<File.Field>(columns);
                 copy = true;
             }
@@ -91,7 +91,7 @@ public class ListAction extends AbstractListingAction {
         }
 
         final List<String> ids = request.getIds();
-        if(ids.stream().anyMatch((x) -> x == null)) {
+        if (ids.stream().anyMatch((x) -> x == null)) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
         }
 
@@ -105,7 +105,7 @@ public class ListAction extends AbstractListingAction {
                 int i = threshhold;
                 while(i < ids.size()) {
                     FileID fileID = new FileID(ids.get(i));
-                    if(fileID.toUniqueID().equals(thing.getId())) {
+                    if (fileID.toUniqueID().equals(thing.getId())) {
                         threshhold = i+1;
                         break;
                     }

@@ -115,7 +115,7 @@ public class PGPMimeServiceImpl implements PGPMimeService {
         Enumeration<Header> headers = mimeMessage.getAllHeaders();
         while (headers.hasMoreElements()) {
             Header h = headers.nextElement();
-            if(!headerBlacklist.contains(h.getName())) {
+            if (!headerBlacklist.contains(h.getName())) {
                 ret.put(h.getName(), h.getValue());
             }
         }

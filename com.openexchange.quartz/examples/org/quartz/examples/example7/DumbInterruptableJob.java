@@ -79,7 +79,7 @@ public class DumbInterruptableJob implements InterruptableJob {
                 }
 
                 // periodically check if we've been interrupted...
-                if(_interrupted) {
+                if (_interrupted) {
                     System.out.println("--- " + _jobKey + "  -- Interrupted... bailing out!");
                     return; // could also choose to throw a JobExecutionException
                              // if that made for sense based on the particular

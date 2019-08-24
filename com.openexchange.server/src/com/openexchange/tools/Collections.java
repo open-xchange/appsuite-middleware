@@ -225,13 +225,13 @@ public final class Collections {
     public static <T> boolean any(final Collection<T> haystack, T... needles){
         for(T hay: haystack){
             for(T needle: needles){
-                if(needle == null){
-                    if(hay == null) {
+                if (needle == null){
+                    if (hay == null) {
                         return true;
                     }
                     continue;
                 }
-                if(needle.equals(hay)) {
+                if (needle.equals(hay)) {
                     return true;
                 }
             }

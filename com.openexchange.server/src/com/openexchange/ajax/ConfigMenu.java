@@ -232,7 +232,7 @@ public class ConfigMenu extends SessionServlet {
             if (null != value && value.length() > 0) {
                 if ('[' == value.charAt(0)) {
                     final JSONArray array = new JSONArray(value);
-                    if(array.length() == 0) {
+                    if (array.length() == 0) {
                         setting.setEmptyMultiValue();
                     } else {
                         for (int i = 0; i < array.length(); i++) {

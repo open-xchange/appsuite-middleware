@@ -85,7 +85,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         ServletContext servletContext = servletContextEvent.getServletContext();
         try {
             InetAddress localHost = NetUtil.getLocalHost();
-            if(localHost == null) {
+            if (localHost == null) {
                 servletContext.log("Cannot find hostname: No localhost available.");
                 return;
             }

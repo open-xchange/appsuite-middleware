@@ -139,7 +139,7 @@ public class EnhancedContact {
 		
 		for(ContactField field: desiredFields) {
 			String key = String.valueOf(field.getAjaxName());
-			if(contact.containsKey(key)) {
+			if (contact.containsKey(key)) {
                 phones.add((String) contact.get(key));
             }
 		}
@@ -160,7 +160,7 @@ public class EnhancedContact {
 		
 		for(ContactField field: desiredFields) {
 			String key = String.valueOf(field.getAjaxName());
-			if(contact.containsKey(key)) {
+			if (contact.containsKey(key)) {
                 phones.add((String) contact.get(key));
             }
 		}

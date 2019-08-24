@@ -593,7 +593,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                                     continue; // don't inherit anonymous share links
                                 }
                             }
-                            if(permission.getType() == FolderPermissionType.LEGATOR){
+                            if (permission.getType() == FolderPermissionType.LEGATOR){
                                 OCLPermission tmp = permission.deepClone();
                                 tmp.setType(FolderPermissionType.INHERITED);
                                 tmp.setPermissionLegator(String.valueOf(parent.getObjectID()));
@@ -2694,7 +2694,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                         for (Permission p : lastParentPermissions) {
                             if (p.getEntity() != storageParameters.getUserId()) {
                                 OCLPermission newOCLPermission = newOCLPermissionFor(p);
-                                if(newOCLPermission.getType().equals(FolderPermissionType.LEGATOR)) {
+                                if (newOCLPermission.getType().equals(FolderPermissionType.LEGATOR)) {
                                     // Change LEGATOR permissions to inherited permissions
                                     newOCLPermission.setType(FolderPermissionType.INHERITED);
                                     newOCLPermission.setPermissionLegator(String.valueOf(folderId));

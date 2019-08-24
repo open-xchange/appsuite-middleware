@@ -422,7 +422,7 @@ public class DistributedGroupManagerImplTest {
         Iterator<Stanza> iterator = sentStanzas.values().iterator();
         while(iterator.hasNext()) {
             Stanza next = iterator.next();
-            if(from.equals(next.getFrom()) && recipients.contains(next.getTo())) {
+            if (from.equals(next.getFrom()) && recipients.contains(next.getTo())) {
                 stanzas.add(next);
             }
         }

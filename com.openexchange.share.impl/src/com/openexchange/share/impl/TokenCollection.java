@@ -191,8 +191,8 @@ public class TokenCollection {
 
     private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId){
         for(TargetPermission perm: permissions) {
-            if(perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
-                if(perm instanceof SubfolderAwareTargetPermission) {
+            if (perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
+                if (perm instanceof SubfolderAwareTargetPermission) {
                     return ((SubfolderAwareTargetPermission) perm).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
                 } else {
                     return false;

@@ -47,7 +47,7 @@ public class RealtimeExceptionToJSONConverter extends AbstractPOJOConverter {
             jsonException.put("logArgs", logArgArray);
             jsonException.put("localizedMessage", localizedMessage);
             jsonException.put("stackTrace", stackTraceToJSON(stackTraceElements));
-            if(cause != null) {
+            if (cause != null) {
                 jsonException.put("cause", converter.convert(Throwable.class.getSimpleName(), "json", cause, null));
             }
         } catch (Exception e) {

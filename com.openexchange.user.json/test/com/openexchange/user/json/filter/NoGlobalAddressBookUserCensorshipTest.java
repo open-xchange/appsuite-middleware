@@ -81,11 +81,11 @@ public class NoGlobalAddressBookUserCensorshipTest {         @Test
         user = censorship.censor(user);
 
         for(final UserField field : UserField.ALL_FIELDS) {
-            if(!UserField.isUserOnlyField(field.getColumn())){
+            if (!UserField.isUserOnlyField(field.getColumn())){
                 continue;
             }
             final Object value = get(field, user);
-            if(UserField.UNPROTECTED_FIELDS.contains(field)) {
+            if (UserField.UNPROTECTED_FIELDS.contains(field)) {
                 assertFalse("Should have remained untouched: "+field, value != null);
             } else {
                 assertTrue("Should have been hidden: "+field, value == null || -1 == ((Integer) value).intValue());
@@ -113,9 +113,9 @@ public class NoGlobalAddressBookUserCensorshipTest {         @Test
         final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
         for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             final Method writeMethod = propertyDescriptor.getWriteMethod();
-            if(writeMethod != null) {
+            if (writeMethod != null) {
                 final Object value = DEFAULT_VALUES.get(writeMethod.getParameterTypes()[0]);
-                if(value != null) {
+                if (value != null) {
                     writeMethod.invoke(user, value);
                 } else {
                     System.err.println("No value found for setter: "+writeMethod);

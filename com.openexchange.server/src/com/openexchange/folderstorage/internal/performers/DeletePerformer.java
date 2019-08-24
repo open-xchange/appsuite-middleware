@@ -291,7 +291,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
     }
 
     private void checkTrashAware(FolderStorage storage) throws OXException {
-        if(!(storage instanceof TrashAwareFolderStorage)){
+        if (!(storage instanceof TrashAwareFolderStorage)){
             throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
         }
     }

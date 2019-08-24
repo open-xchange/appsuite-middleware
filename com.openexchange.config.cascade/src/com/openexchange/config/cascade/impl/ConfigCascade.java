@@ -288,7 +288,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     final Set<String> metadataNames = new HashSet<String>();
                     for (final ConfigProviderService provider : getConfigProviders(null)) {
                         final BasicProperty basicProperty = provider.get(property, context, user);
-                        if(basicProperty != null) {
+                        if (basicProperty != null) {
                             metadataNames.addAll(basicProperty.getMetadataNames());
                         }
                     }

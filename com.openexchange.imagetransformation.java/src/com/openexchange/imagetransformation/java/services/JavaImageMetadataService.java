@@ -96,7 +96,7 @@ public class JavaImageMetadataService implements ImageMetadataService {
             // Check for heif file
             bufferedInputStream.mark(65536);
             Dimension result = getDimensionFromHeifFile(bufferedInputStream);
-            if(result != null) {
+            if (result != null) {
                 return result;
             }
 
@@ -176,7 +176,7 @@ public class JavaImageMetadataService implements ImageMetadataService {
         try {
             // Check for heif file
             ImageMetadata result = getMetadataFromHeifFile(bufferedInputStream, imageMetadataOptions);
-            if(result != null) {
+            if (result != null) {
                 return result;
             }
 

@@ -85,7 +85,7 @@ public final class ProxyEventHandler implements EventHandler {
                 // For each session
                 final ProxyRegistryImpl registryImpl = ProxyRegistryImpl.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if(!session.isTransient()) {
+                    if (!session.isTransient()) {
                         registryImpl.dropRegistrationsFor(session.getSessionID());
                     }
                 }

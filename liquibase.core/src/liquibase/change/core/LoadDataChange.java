@@ -160,7 +160,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
-                    if( i >= line.length ) {
+                    if ( i >= line.length ) {
                       throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i-1) + " columns, the header has " + headers.length);
                     }
 

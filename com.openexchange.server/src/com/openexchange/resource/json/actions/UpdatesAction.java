@@ -101,18 +101,18 @@ public final class UpdatesAction extends AbstractResourceAction {
         List<Resource> deleted= new LinkedList<Resource>();
 
         long lm = 0;
-        if(updatedResources != null){
+        if (updatedResources != null){
             for(final Resource res: updatedResources){
-                if(res.getLastModified().getTime() > lm) {
+                if (res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
                 modified.add(res);
             }
         }
 
-        if(deletedResources != null){
+        if (deletedResources != null){
             for(final Resource res: deletedResources){
-                if(res.getLastModified().getTime() > lm) {
+                if (res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
 

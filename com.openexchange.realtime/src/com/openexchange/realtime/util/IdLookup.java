@@ -95,7 +95,7 @@ public class IdLookup {
             LOG.debug("Failed to parse id components of {} to int, will continue string based lookup", id);
         }
 
-        if(contextId < 1 ) {
+        if (contextId < 1 ) {
             if (context == null || context.equals("")) {
                 LOG.debug("Context missing from id representation {}. Setting to 'defaultcontext'");
                 context = "defaultcontext";
@@ -107,7 +107,7 @@ public class IdLookup {
             }
         }
 
-        if(userId < 1 ) {
+        if (userId < 1 ) {
             contextService = getContextService();
             userService = getUserService();
             Context contextObject = contextService.getContext(contextId);

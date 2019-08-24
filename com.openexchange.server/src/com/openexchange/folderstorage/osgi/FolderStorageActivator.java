@@ -181,7 +181,7 @@ public final class FolderStorageActivator implements BundleActivator {
                     return displayName;
                 }
                 displayName = UserStorage.getInstance().getUser(createdBy, context).getDisplayName();
-                if(displayName != null) {
+                if (displayName != null) {
                     cache.put(key, displayName);
                 }
                 return displayName;

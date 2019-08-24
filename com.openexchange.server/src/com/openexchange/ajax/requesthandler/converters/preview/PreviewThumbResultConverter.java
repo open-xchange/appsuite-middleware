@@ -203,7 +203,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                          */
                         PreviewAndCacheTask previewAndCache = new PreviewAndCacheTask(new AJAXRequestResult(result), requestData.copyOf(), session, previewService, THRESHOLD, true, cacheKeyGenerator);
                         ExecutorService executorService = ThreadPools.getExecutorService();
-                        if(executorService==null){
+                        if (executorService==null){
                             LOG.info("Unable to retrieve ExecutorService from Threadpools. Server is probably shutting down.");
                             return;
                         }

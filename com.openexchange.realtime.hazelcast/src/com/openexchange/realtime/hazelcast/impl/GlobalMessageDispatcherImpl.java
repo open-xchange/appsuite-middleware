@@ -118,11 +118,11 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
     @Override
     public void send(Stanza stanza) throws OXException {
         IDMap<Resource> idMap = directory.get(stanza.getTo());
-        if(idMap == null || idMap.isEmpty()) {
+        if (idMap == null || idMap.isEmpty()) {
             throw DispatchExceptionCode.RESOURCE_OFFLINE.create(stanza.getTo());
         }
         Map<ID, OXException> exceptions = send(stanza, idMap);
-        if(!exceptions.isEmpty()) {
+        if (!exceptions.isEmpty()) {
             throw exceptions.values().iterator().next();
         }
     }
@@ -158,7 +158,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
             RoutingInfo routingInfo = resource.getRoutingInfo();
             if (routingInfo != null) {
                 Member member = memberFromRoutingInfo(routingInfo);
-                if(member != null) {
+                if (member != null) {
                     Set<ID> ids = targets.get(member);
                     if (ids == null) {
                         ids = new HashSet<ID>();
@@ -190,15 +190,15 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
         Set<Member> members = hazelcastInstance.getCluster().getMembers();
 
-        if(Strings.isNotEmpty(uuid)) {
+        if (Strings.isNotEmpty(uuid)) {
             for(Member member : members) {
-                    if(uuid.equals(member.getUuid())) {
+                    if (uuid.equals(member.getUuid())) {
                         return member;
                     }
             }
         } else {
             for(Member member : members) {
-                    if(socketAddress.equals(member.getSocketAddress())) {
+                    if (socketAddress.equals(member.getSocketAddress())) {
                         return member;
                     }
             }
@@ -307,7 +307,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
                 ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
-                if(otherPeerMap != null) {
+                if (otherPeerMap != null) {
                     LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
                     peerMap = otherPeerMap;
                 }
@@ -317,7 +317,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
                 nextNumber = new AtomicLong(0);
                 AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
-                if(otherNextNumber != null) {
+                if (otherNextNumber != null) {
                     LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
                     nextNumber = otherNextNumber;
                 }
@@ -327,7 +327,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
             LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
             stanza.setSequenceNumber(ensuredSequence);
             stanza.trace("Updating sequence number for " + receiver.getUuid() + ": " + ensuredSequence);
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("peerMapsPerID after ensuring Sequence: {}", peerMapPerID);
             }
         }

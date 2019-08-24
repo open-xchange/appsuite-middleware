@@ -128,9 +128,9 @@ public final class InlineImageDataSource implements ImageDataSource {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
-            if(serviceLookup != null) {
+            if (serviceLookup != null) {
                 CryptographicAwareMailAccessFactory cryptoMailAccessFactory = serviceLookup.getOptionalService(CryptographicAwareMailAccessFactory.class);
-                if(cryptoMailAccessFactory != null) {
+                if (cryptoMailAccessFactory != null) {
                     //Handling for encrypted mails if a cryptographic aware service is available.
                     mailAccess = cryptoMailAccessFactory.createAccess((MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess, session, auth);
                 }

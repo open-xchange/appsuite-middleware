@@ -292,9 +292,9 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         //Check for encryption
         final boolean encrypt = null == storeProps ? false : storeProps.containsKey("encrypt") && (boolean) storeProps.get("encrypt");
-        if(encrypt) {
+        if (encrypt) {
             CryptographicAwareIDBasedFileAccessFactory cryptoFileAccessFactory = this.serviceLookup.getOptionalService(CryptographicAwareIDBasedFileAccessFactory.class);
-            if(cryptoFileAccessFactory != null) {
+            if (cryptoFileAccessFactory != null) {
                 //encrypt the mail attachment
                 EnumSet<CryptographyMode> encryptMode = EnumSet.of(CryptographyMode.ENCRYPT);
                 fileAccess = cryptoFileAccessFactory.createAccess(fileAccess, encryptMode, session);

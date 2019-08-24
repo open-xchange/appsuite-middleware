@@ -115,11 +115,11 @@ public class IfHeaderParser {
 
 	private void not(final String cs) throws IfHeaderParseException {
 		char c = cs.charAt(i++);
-		if(c != 'o' && c != 'O') {
+		if (c != 'o' && c != 'O') {
 			throw new IfHeaderParseException("Illegal character "+c+" in list",i+1);
 		}
 		c = cs.charAt(i++);
-		if(c != 't' && c != 'T') {
+		if (c != 't' && c != 'T') {
 			throw new IfHeaderParseException("Illegal character "+c+" in list",i+1);
 		}
 

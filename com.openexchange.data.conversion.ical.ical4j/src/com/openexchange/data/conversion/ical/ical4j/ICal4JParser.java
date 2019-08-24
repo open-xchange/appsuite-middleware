@@ -214,7 +214,7 @@ public class ICal4JParser implements ICalParser {
         || dateProperty.getParameter("TZID").getValue() == null){
                 return defaultTZ;
         }
-        if(dateProperty.isUtc()) {
+        if (dateProperty.isUtc()) {
         	tz = TimeZone.getTimeZone("UTC");
         }
         Parameter tzid = dateProperty.getParameter("TZID");
@@ -222,7 +222,7 @@ public class ICal4JParser implements ICalParser {
 		TimeZone inTZID = TimeZone.getTimeZone(tzidName);
 
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
-		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
+		if (inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
 			inTZID = ParserTools.findTzidBySimilarity(tzidName);
 		}
 
@@ -252,27 +252,27 @@ public class ICal4JParser implements ICalParser {
             // Copy until we find an END:VCALENDAR
             boolean beginFound = false;
             for (String line; (line = reader.readLine()) != null;) {
-            	if(!beginFound && line.endsWith("BEGIN:VCALENDAR")){
+            	if (!beginFound && line.endsWith("BEGIN:VCALENDAR")){
             		line = removeByteOrderMarks(line);
             	}
-                if(line.startsWith("BEGIN:VCALENDAR")) {
+                if (line.startsWith("BEGIN:VCALENDAR")) {
                     beginFound = true;
                 } else if ( !beginFound && !"".equals(line)) {
                     continue; // ignore bad lines between "VCALENDAR" Tags.
                 }
-                if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
-                	if(line.matches("^\\s*BEGIN:VTIMEZONE")){
+                if (!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
+                	if (line.matches("^\\s*BEGIN:VTIMEZONE")){
                 		timezoneStarted = true;
                 	}
-                    if(!line.matches("\\s*")) {
+                    if (!line.matches("\\s*")) {
                         read = true;
-                        if(timezoneStarted && !timezoneEnded){ //hack to fix bug 11958
+                        if (timezoneStarted && !timezoneEnded){ //hack to fix bug 11958
                         	timezoneInfo.append(line).append('\n');
                         } else {
                         	chunk.append(line).append('\n');
                         }
                     }
-                	if(line.matches("^\\s*END:VTIMEZONE")){ //hack to fix bug 11958
+                	if (line.matches("^\\s*END:VTIMEZONE")){ //hack to fix bug 11958
                 		timezoneEnded = true;
                 		timezoneRead = true && timezoneStarted;
                 	}
@@ -280,13 +280,13 @@ public class ICal4JParser implements ICalParser {
                     break;
                 }
             }
-            if(!read) {  return null; }
+            if (!read) {  return null; }
             chunk.append("END:VCALENDAR\n");
-            if(timezoneRead){
+            if (timezoneRead){
             	int locationForInsertion = chunk.indexOf("BEGIN:");
-            	if(locationForInsertion > -1){
+            	if (locationForInsertion > -1){
             		locationForInsertion = chunk.indexOf("BEGIN:", locationForInsertion + 1);
-            		if(locationForInsertion > -1){
+            		if (locationForInsertion > -1){
             			chunk.insert(locationForInsertion, timezoneInfo);
             		}
             	}
@@ -484,26 +484,26 @@ public class ICal4JParser implements ICalParser {
     	int length = buf.length;
 
 		final char first = buf[0];
-        if(length > 3) {
-            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
-				if(Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
+        if (length > 3) {
+            if (Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+				if (Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
                     return new String(Arrays.copyOfRange(buf, 3, length));
                 }
-				if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
+				if (Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
                     return new String(Arrays.copyOfRange(buf, 3, length));
                 }
 			}
         }
-		if(length > 1) {
-		    if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
-                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
+		if (length > 1) {
+		    if (Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
+                if (Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
                     return new String(Arrays.copyOfRange(buf, 2, length));
                 }
             }
         }
-		if(length > 0) {
-            if(Character.getNumericValue(first) < 0) {
-                if(Character.getType(first) == 16) {
+		if (length > 0) {
+            if (Character.getNumericValue(first) < 0) {
+                if (Character.getType(first) == 16) {
                     return new String(Arrays.copyOfRange(buf, 1, length));
                 }
             }

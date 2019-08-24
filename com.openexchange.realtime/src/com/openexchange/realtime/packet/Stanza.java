@@ -440,7 +440,7 @@ public abstract class Stanza implements Serializable {
      */
     private Collection<PayloadElement> filterPayloadElements(Collection<PayloadTree> trees, ElementPath... nodePaths) {
         Set<PayloadElement> matchingElements = new HashSet<PayloadElement>();
-        if(trees.isEmpty() || nodePaths.length == 0) {
+        if (trees.isEmpty() || nodePaths.length == 0) {
             return matchingElements;
         }
         for (PayloadTree tree : trees) {
@@ -487,7 +487,7 @@ public abstract class Stanza implements Serializable {
         Optional<T> retval = Optional.absent();
 
         Collection<PayloadElement> filteredPayloadElements = null;
-        if(treePath == null) {
+        if (treePath == null) {
             filteredPayloadElements = filterPayloadElements(elementPath);
         } else {
             filteredPayloadElements = filterPayloadElements(getPayloadTrees(treePath), elementPath);

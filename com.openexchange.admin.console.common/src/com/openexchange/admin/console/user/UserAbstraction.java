@@ -3758,7 +3758,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         //                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
         //                try {
         //                    final String date = (String)parser.getOptionValue(optionAndMethod.getOption());
-        //                    if( date != null ) {
+        //                    if ( date != null ) {
         //                        final Date value = sdf.parse(date);
         //                        if (null != value) {
         //                            optionAndMethod.getMethod().invoke(usr, value);

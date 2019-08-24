@@ -74,7 +74,7 @@ public class UWAWidgetWriter extends ModelWriter<UWAWidget> {
 
         @Override
         public Object handle(Attribute<UWAWidget> attr, Object... args) {
-            if(args[0] == null) {
+            if (args[0] == null) {
                 return null;
             }
             if (attr == Field.PARAMETERS || attr == Field.ADJ) {

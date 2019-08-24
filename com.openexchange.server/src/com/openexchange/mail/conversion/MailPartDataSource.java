@@ -92,7 +92,7 @@ public abstract class MailPartDataSource implements DataSource {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             CryptographicAwareMailAccessFactory cryptoMailAccessFactory = Services.getServiceLookup().getOptionalService(CryptographicAwareMailAccessFactory.class);
-            if(cryptoMailAccessFactory != null) {
+            if (cryptoMailAccessFactory != null) {
                 mailAccess = cryptoMailAccessFactory.createAccess(
                     (MailAccess<IMailFolderStorage, IMailMessageStorage>) mailAccess,
                     session,

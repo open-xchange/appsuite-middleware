@@ -80,7 +80,7 @@ public class ICalExporter extends AbstractExporter {
 
     @Override
     public boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException {
-        if(!format.equals(Format.ICAL)){
+        if (!format.equals(Format.ICAL)){
             return false;
         }
         UserizedFolder userizedFolder = getUserizedFolder(session, folder);

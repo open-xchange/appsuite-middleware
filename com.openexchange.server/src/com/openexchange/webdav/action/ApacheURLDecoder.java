@@ -81,7 +81,7 @@ public class ApacheURLDecoder {
         for (int i = 0; i < chunks.length; i++) {
             String chunk = chunks[i];
             decoded.append(URLDecoder.decode(chunk, encoding));
-            if(i != chunks.length - 1 || endsWithPlus) {
+            if (i != chunks.length - 1 || endsWithPlus) {
                 decoded.append('+');
             }
         }

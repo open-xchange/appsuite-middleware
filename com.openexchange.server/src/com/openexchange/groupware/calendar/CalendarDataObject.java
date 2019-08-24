@@ -145,7 +145,7 @@ public class CalendarDataObject extends Appointment {
             final long mod = until.getTime() % Constants.MILLI_DAY;
             if (mod != 0) {
                 String tzn = getTimezone();
-                if(tzn == null) {
+                if (tzn == null) {
                     tzn = "UTC";
                 }
                 if (exceedsHourOfDay(until.getTime(), tzn)) {

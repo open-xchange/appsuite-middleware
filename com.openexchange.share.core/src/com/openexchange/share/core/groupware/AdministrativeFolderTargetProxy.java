@@ -260,7 +260,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             oclPermission.setGroupPermission(permission.isGroup());
             int[] bits = Permissions.parsePermissionBits(permission.getBits());
             oclPermission.setAllPermission(bits[0], bits[1], bits[2], bits[3]);
-            if(permission instanceof SubfolderAwareTargetPermission) {
+            if (permission instanceof SubfolderAwareTargetPermission) {
                 oclPermission.setType(FolderPermissionType.getType(((SubfolderAwareTargetPermission) permission).getType()));
                 oclPermission.setPermissionLegator(((SubfolderAwareTargetPermission) permission).getPermissionLegator());
             }

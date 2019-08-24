@@ -59,7 +59,7 @@ public class Changes extends KeyValueHolder {
 
     public void update(CommonObject obj) {
         for (int key : getKeys()) {
-            if(getMap().get(Integer.valueOf(key)) == null) {
+            if (getMap().get(Integer.valueOf(key)) == null) {
                 obj.remove(key);
             } else {
                 obj.set(key, getMap().get(Integer.valueOf(key)));

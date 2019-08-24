@@ -238,8 +238,8 @@ public class RTProtocolImpl implements RTProtocol {
 
     @Override
     public void handleRealtimeException(ID recipient, RealtimeException exception, Stanza stanza) {
-        if(recipient != null) {
-            if(stanza == null) {
+        if (recipient != null) {
+            if (stanza == null) {
                 stanza = new GenericError(exception);
                 stanza.setTo(recipient);
             } else {

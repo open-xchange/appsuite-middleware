@@ -175,10 +175,10 @@ public class LoginServlet extends AJAXServlet {
             " var referrer=document.referrer;\n" +
             " var redirect_url;\n" +
             " // If referrer already contains failed parameter, we don't add a 2nd one.\n" +
-            " if(referrer.indexOf(\"login=failed\")>=0){\n" +
+            " if (referrer.indexOf(\"login=failed\")>=0){\n" +
             "  redirect_url=referrer;\n" + " }else{\n" +
             "  // Check if referrer contains multiple parameter\n" +
-            "  if(referrer.indexOf(\"?\")<0){\n" +
+            "  if (referrer.indexOf(\"?\")<0){\n" +
             "   redirect_url=referrer+\"?login=failed\";\n" +
             "  }else{\n" +
             "   redirect_url=referrer+\"&login=failed\";\n" +

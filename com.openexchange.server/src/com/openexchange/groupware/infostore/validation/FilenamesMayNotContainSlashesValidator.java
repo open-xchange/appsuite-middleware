@@ -75,7 +75,7 @@ public class FilenamesMayNotContainSlashesValidator implements InfostoreValidato
     public DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns) {
         String filename = metadata.getFileName();
         DocumentMetadataValidation validation = new DocumentMetadataValidation();
-        if(filename != null && filename.indexOf('/') >= 0) {
+        if (filename != null && filename.indexOf('/') >= 0) {
             validation.setError(Metadata.FILENAME_LITERAL, "Filenames may not contain slashes.");
         }
         validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_SLASH.create());

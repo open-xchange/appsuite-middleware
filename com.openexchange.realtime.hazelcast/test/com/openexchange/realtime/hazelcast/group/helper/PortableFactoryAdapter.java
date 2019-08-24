@@ -70,7 +70,7 @@ public class PortableFactoryAdapter implements PortableFactory {
 
     @Override
     public Portable create(int classId) {
-        if(customFactory.getClassId() == classId) {
+        if (customFactory.getClassId() == classId) {
             return customFactory.create();
         }
         return null;

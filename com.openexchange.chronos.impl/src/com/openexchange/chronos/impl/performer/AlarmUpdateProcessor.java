@@ -162,10 +162,10 @@ public class AlarmUpdateProcessor {
             List<Alarm> exceptionAlarms = exception.getAlarms();
             List<Alarm> filtered = AlarmUtils.filterRelativeTriggers(exceptionAlarms);
             Optional<Map<Integer, Alarm>> optional = getRelations(originial, filtered);
-            if(optional.isPresent()) {
+            if (optional.isPresent()) {
                 applicableExceptions.put(exception, optional.get());
                 List<Alarm> copy = exceptionAlarms == null ? new ArrayList<>() : copyAlarms(exceptionAlarms);
-                if(filtered != null && false == filtered.isEmpty()) {
+                if (filtered != null && false == filtered.isEmpty()) {
                     copy.removeIf((alarm) ->  filtered.stream().anyMatch((other) -> alarm.getId() == other.getId()));
                 }
                 unrelativeAlarms.put(exception, copy);
@@ -242,7 +242,7 @@ public class AlarmUpdateProcessor {
      * @return A mapping of id to alarms or an empty map in case an alarm is unrelated
      */
     private static Optional<Map<Integer, Alarm>> getRelations(List<Alarm> originalAlarms, List<Alarm> exceptionAlarms) {
-        if(originalAlarms == null && exceptionAlarms == null) {
+        if (originalAlarms == null && exceptionAlarms == null) {
             return Optional.of(Collections.emptyMap());
         }
         if (originalAlarms == null || exceptionAlarms == null || originalAlarms.size() != exceptionAlarms.size()) {

@@ -208,7 +208,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     }
 
     public void putHeader(final MessagingHeader header) {
-        if(headers.containsKey(header.getName())) {
+        if (headers.containsKey(header.getName())) {
             headers.get(header.getName()).add(header);
         } else {
             headers.put(header.getName(), new ArrayList<MessagingHeader>(Arrays.asList(header)));

@@ -99,7 +99,7 @@ public class PGPKeySignatureVerifier {
                     while (userIds.hasNext()) {
                         final String userId = userIds.next();
                         final Iterator<PGPSignature> signatures = publicKey.getSignaturesForID(userId);
-                        if(signatures != null) {
+                        if (signatures != null) {
                             final ArrayList<PGPSignature> list = new ArrayList<>();
                             signatures.forEachRemaining(list::add);
                             //Check if the signature is for the current user-id

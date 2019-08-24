@@ -580,7 +580,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             throw SQLException.create(e);
         } finally {
             try {
-                if(writeConnection != null) {
+                if (writeConnection != null) {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
@@ -612,7 +612,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             throw SQLException.create(e);
         } finally {
             try {
-                if(writeConnection != null) {
+                if (writeConnection != null) {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }
@@ -639,7 +639,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             for (final Integer configId : configIds) {
                 values.set(2, configId);
                 final int deleted = new StatementBuilder().executeStatement(writeConnection, delete, values);
-                if(deleted == 1) {
+                if (deleted == 1) {
                     // Delete the generic configuration only if the source_id matched
                     storageService.delete(writeConnection, ctx, configId.intValue());
                     modified = true;
@@ -650,7 +650,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             throw SQLException.create(e);
         } finally {
             try {
-                if(writeConnection != null) {
+                if (writeConnection != null) {
                     txPolicy.rollback(writeConnection);
                     txPolicy.setAutoCommit(writeConnection, true);
                 }

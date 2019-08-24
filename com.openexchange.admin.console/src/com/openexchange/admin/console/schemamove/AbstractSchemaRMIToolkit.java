@@ -103,16 +103,16 @@ public abstract class AbstractSchemaRMIToolkit extends ObjectNamingAbstraction {
     protected SchemaMoveRemote getSchemaMoveRemoteInterface(String rmiHost) throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException {
         if (Strings.isNotEmpty(rmiHost)) {
             StringBuffer sb = new StringBuffer(64);
-            if(false == rmiHost.startsWith("rmi://")) {
+            if (false == rmiHost.startsWith("rmi://")) {
                sb.append("rmi://");
                sb.append(rmiHost);
             } else {
                 sb.append(rmiHost);
             }
-            if(false == rmiHost.contains(":")) {
+            if (false == rmiHost.contains(":")) {
                 sb.append(":1099");
             }
-            if(false == rmiHost.endsWith("/")) {
+            if (false == rmiHost.endsWith("/")) {
                 sb.append("/");
             }
             return (SchemaMoveRemote) Naming.lookup(sb.toString() + SchemaMoveRemote.RMI_NAME);
@@ -141,7 +141,7 @@ public abstract class AbstractSchemaRMIToolkit extends ObjectNamingAbstraction {
 
     protected List<String> getRMIHostsFromOptions(AdminParser parser, CLIOption rmiOption) {
         String list = (String) parser.getOptionValue(rmiOption);
-        if(list == null) {
+        if (list == null) {
             return null;
         }
         return new LinkedList<String>(Arrays.asList(COMMA_SEPERATION_PATTERN.split(list)));

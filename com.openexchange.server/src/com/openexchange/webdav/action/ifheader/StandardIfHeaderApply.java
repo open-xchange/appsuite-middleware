@@ -64,7 +64,7 @@ public class StandardIfHeaderApply implements IfHeaderApply {
     @Override
     public boolean matches(final IfHeaderEntity entity, final WebdavResource resource) throws WebdavProtocolException {
         boolean matches = false;
-        if(entity.isETag()) {
+        if (entity.isETag()) {
             matches = entity.getPayload().equals(resource.getETag());
         } else {
             matches = null != resource.getLock(entity.getPayload());

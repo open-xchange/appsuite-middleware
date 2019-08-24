@@ -197,7 +197,7 @@ public final class CalendarDeleteListener implements DeleteListener {
             // Legacy storage doesen't know a calendar user, so make an independent call
             updater.replaceAttendeeIn(updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId))));
         } catch (IllegalArgumentException e) {
-            if(false == e.getMessage().equals("No mapping available for: CALENDAR_USER")) {
+            if (false == e.getMessage().equals("No mapping available for: CALENDAR_USER")) {
                 throw e;
             }
         }

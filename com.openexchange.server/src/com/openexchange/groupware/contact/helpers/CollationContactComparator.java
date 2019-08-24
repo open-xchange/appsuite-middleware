@@ -88,25 +88,25 @@ public class CollationContactComparator implements Comparator<Contact>{
 
 	@Override
     public int compare(Contact o1, Contact o2) {
-        if(o1 == o2 || orderDir == 0) {
+        if (o1 == o2 || orderDir == 0) {
             return 0;
         }
-        if(o1 == null && o2 != null) {
+        if (o1 == null && o2 != null) {
             return -1;
         }
-        if(o2 == null) {
+        if (o2 == null) {
             return 1;
         }
 
         Object f1 = o1.get(orderBy.getNumber());
         Object f2 = o2.get(orderBy.getNumber());
-        if(f1 == f2) {
+        if (f1 == f2) {
             return 0;
         }
-        if(f1 == null && f2 != null) {
+        if (f1 == null && f2 != null) {
             return -1;
         }
-        if(f2 == null) {
+        if (f2 == null) {
             return 1;
         }
         return orderDir * collator.compare(f1, f2);

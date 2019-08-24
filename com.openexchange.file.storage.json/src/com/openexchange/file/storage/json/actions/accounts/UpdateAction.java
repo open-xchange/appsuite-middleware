@@ -79,7 +79,7 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
 
         final JSONObject data = (JSONObject) request.requireData();
-        if(!data.has(FileStorageAccountConstants.ID)) {
+        if (!data.has(FileStorageAccountConstants.ID)) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageAccountConstants.ID);
         }
         final FileStorageAccount account = parser.parse(data);

@@ -425,7 +425,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 if ("svg".equals(sourceFormatName)) {
                     resultFile = repetitiveFile;
                 } else {
-                    Boolean animatedGifResult = isAnimatedGif(sourceFormatName, repetitiveFile);
+                    Boolean animatedGifResult = isAnimatedGif (sourceFormatName, repetitiveFile);
                     if (null == animatedGifResult) {
                         resultFile = repetitiveFile;
                         if (LOG.isWarnEnabled()) {
@@ -631,7 +631,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         return (Strings.isNotEmpty(sourceMimeType) && ("image/bmp".equals(sourceMimeType) || "image/gif".equals(sourceMimeType) || "image/png".equals(sourceMimeType))) ? sourceMimeType : "image/jpeg";
     }
 
-    private static Boolean isAnimatedGif(String sourceFormatName, IFileHolder repetitiveFile) throws IOException, OXException {
+    private static Boolean isAnimatedGif (String sourceFormatName, IFileHolder repetitiveFile) throws IOException, OXException {
         if (false == "gif".equals(sourceFormatName)) {
             return Boolean.FALSE;
         }
@@ -642,7 +642,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         }
 
         try {
-            return ImageUtils.isAnimatedGif(repetitiveInputStm) ? Boolean.TRUE : Boolean.FALSE;
+            return ImageUtils.isAnimatedGif (repetitiveInputStm) ? Boolean.TRUE : Boolean.FALSE;
         } finally {
             Streams.close(repetitiveInputStm);
         }

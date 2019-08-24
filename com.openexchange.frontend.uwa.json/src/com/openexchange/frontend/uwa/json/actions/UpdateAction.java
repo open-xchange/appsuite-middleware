@@ -74,7 +74,7 @@ public class UpdateAction extends AbstractUWAAction {
     @Override
     protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
         UWAWidget widget = req.getBody();
-        if(widget == null) {
+        if (widget == null) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         List<Attribute<UWAWidget>> fields = req.getFields();

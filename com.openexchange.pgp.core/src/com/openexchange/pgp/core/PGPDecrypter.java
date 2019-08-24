@@ -286,14 +286,14 @@ public class PGPDecrypter {
      */
     private static Long getPublicMasterKeyId(PGPPublicKey publicKey) {
 
-        if(publicKey.isMasterKey()) {
+        if (publicKey.isMasterKey()) {
             //The given key is the actual master key
             return L(publicKey.getKeyID());
         }
 
         //Get the subkey binding and return the ID of the master key
         @SuppressWarnings("rawtypes") Iterator subkeyBinding = publicKey.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
-        if(subkeyBinding.hasNext()) {
+        if (subkeyBinding.hasNext()) {
             PGPSignature signature = (PGPSignature)subkeyBinding.next();
             return L(signature.getKeyID());
         }
@@ -308,11 +308,11 @@ public class PGPDecrypter {
      * @throws Exception
      */
     private PGPPublicKey getMasterKey(PGPPublicKey key) throws Exception {
-        if(key.isMasterKey()) {
+        if (key.isMasterKey()) {
            return key;
         }
         Long masterKeyId = getPublicMasterKeyId(key);
-        if(masterKeyId != null) {
+        if (masterKeyId != null) {
             return this.keyRetrievalStrategy.getPublicKey(l(masterKeyId));
         }
 
@@ -370,7 +370,7 @@ public class PGPDecrypter {
 
             //Get the public key encrypted data for the given user's private key
             PGPDataContainer publicKeyEncryptedData = getDataContainer(encryptedDataList, userID, password);
-            if(!keyFound(publicKeyEncryptedData.getPrivateKey())) {
+            if (!keyFound(publicKeyEncryptedData.getPrivateKey())) {
                 throw PGPCoreExceptionCodes.PRIVATE_KEY_NOT_FOUND.create(userID + getMissingKeyIds(encryptedDataList));
             }
 
@@ -451,13 +451,13 @@ public class PGPDecrypter {
                         if (signatureInitialized) {
                             //Verify signatures
                             PGPSignatureVerificationResult pgpSignatureVerificationResult = new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature));
-                            if(singatureVerifyKey != null) {
+                            if (singatureVerifyKey != null) {
                                pgpSignatureVerificationResult.setIssuerKey(singatureVerifyKey);
                                Iterator<String> userIds = null;
                                PGPPublicKey masterKey = getMasterKey(singatureVerifyKey);
-                               if(masterKey != null) {
+                               if (masterKey != null) {
                                    userIds = masterKey.getUserIDs();
-                                   if(userIds != null) {
+                                   if (userIds != null) {
                                        //Adding user-id so that it is possible for a caller to determine who created this signature
                                        while(userIds.hasNext()) {
                                            pgpSignatureVerificationResult.addIssuerUserId(userIds.next());
@@ -478,13 +478,13 @@ public class PGPDecrypter {
 
             //Perform integrity/MDC validation
             mdcVerificationResult = MDCVerificationResult.createFrom(publicKeyEncryptedData);
-            if(mdcVerificationResult.isPresent()) {
-                if(!mdcVerificationResult.verified){
+            if (mdcVerificationResult.isPresent()) {
+                if (!mdcVerificationResult.verified){
                     throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Integrity check of the message failed.");
                 }
             }
             else {
-               if(mdcValidationMode == MDCValidationMode.FAIL_ON_MISSING) {
+               if (mdcValidationMode == MDCValidationMode.FAIL_ON_MISSING) {
                     throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Itegrity protection not found.");
                }
             }

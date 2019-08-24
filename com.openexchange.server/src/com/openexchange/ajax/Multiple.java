@@ -620,7 +620,7 @@ public class Multiple extends SessionServlet {
                     tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
                     if (tmp == null) {
                         final boolean decrypt = jsonObj.optBoolean("decrypt", false);
-                        if(decrypt) {
+                        if (decrypt) {
                             mi = MailServletInterface.getInstanceWithDecryptionSupport(session, null /* by now only using session attached auth */);
                         }
                         else {
@@ -742,7 +742,7 @@ public class Multiple extends SessionServlet {
             final MultipleHandlerFactoryService factoryService = registry.getFactoryService(module);
             if (null != factoryService) {
                 final MultipleHandler multipleHandler = factoryService.createMultipleHandler();
-                if(PathAware.class.isInstance(multipleHandler)) {
+                if (PathAware.class.isInstance(multipleHandler)) {
                     final PathAware pa = (PathAware) multipleHandler;
                     pa.setPath(module.substring(factoryService.getSupportedModule().length()));
                 }

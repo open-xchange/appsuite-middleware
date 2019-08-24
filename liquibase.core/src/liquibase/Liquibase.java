@@ -103,7 +103,7 @@ public class Liquibase {
 
     private void setDatabase(Database database) throws DatabaseException {
         this.database=database;
-        if(database!=null) {
+        if (database!=null) {
             setDatabasePropertiesAsChangelogParameters(database);
         }
     }

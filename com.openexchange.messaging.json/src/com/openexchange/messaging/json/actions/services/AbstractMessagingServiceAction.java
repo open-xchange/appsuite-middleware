@@ -93,7 +93,7 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
 
     protected final MessagingServiceWriter getWriter(final ServerSession session) {
         I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
-        if(registry == null) {
+        if (registry == null) {
             return  new MessagingServiceWriter(Translator.EMPTY);
         }
 

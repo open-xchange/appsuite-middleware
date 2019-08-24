@@ -583,7 +583,7 @@ public class Executor {
         if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder())) {
             stringBuilder.append("ORDER BY ");
             if (forAutocomplete) {
-                if(wrappingClauseForGroupBy) {
+                if (wrappingClauseForGroupBy) {
                     stringBuilder.append("min(value) DESC, min(fid) ASC, ");
                 } else {
                     stringBuilder.append("value DESC, fid ASC, ");
@@ -610,20 +610,20 @@ public class Executor {
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
             ContactField by = order.getBy();
             if (ContactField.USE_COUNT == by) {
-                if(wrappingClauseForGroupBy) {
+                if (wrappingClauseForGroupBy) {
                     stringBuilder.append("min(").append(Table.OBJECT_USE_COUNT).append(".value)");
                 } else {
                     stringBuilder.append(Table.OBJECT_USE_COUNT).append(".value");
                 }
             } else {
-                if(wrappingClauseForGroupBy) {
+                if (wrappingClauseForGroupBy) {
                     stringBuilder.append("min(").append(Mappers.CONTACT.get(by).getColumnLabel()).append(")");
                 } else {
                     stringBuilder.append(Mappers.CONTACT.get(by).getColumnLabel());
                 }
             }
         } else {
-            if(wrappingClauseForGroupBy) {
+            if (wrappingClauseForGroupBy) {
                 stringBuilder.append("CONVERT (min(").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(") USING '")
                 .append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
             } else {
@@ -669,7 +669,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             boolean withUseCount = false;
             for(ContactField field: fields){
-                if(ContactField.USE_COUNT.equals(field)){
+                if (ContactField.USE_COUNT.equals(field)){
                     withUseCount=true;
                 }
             }

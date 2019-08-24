@@ -112,7 +112,7 @@ public class DisableSchema extends AbstractSchemaRMIToolkit {
             String schemaName = (String) parser.getOptionValue(optSchema);
             List<String> rmiHosts = getRMIHostsFromOptions(parser, optRMIHosts);
 
-            if(rmiHosts == null) {
+            if (rmiHosts == null) {
                 SchemaMoveRemote smr = getSchemaMoveRemoteInterface();
                 smr.disableSchema(auth, schemaName);
                 smr.invalidateContexts(auth, schemaName, true);
@@ -124,10 +124,10 @@ public class DisableSchema extends AbstractSchemaRMIToolkit {
                    remotes.add(getSchemaMoveRemoteInterface(rmiHost));
                 }
 
-                if(false == remotes.isEmpty()) {
+                if (false == remotes.isEmpty()) {
                     boolean shouldDisableSchema = true;
                     for(SchemaMoveRemote smr : remotes) {
-                        if(shouldDisableSchema) {
+                        if (shouldDisableSchema) {
                             smr.disableSchema(auth, schemaName);
                             shouldDisableSchema = false;
                         }

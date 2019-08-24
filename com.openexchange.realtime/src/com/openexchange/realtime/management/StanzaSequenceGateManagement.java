@@ -79,7 +79,7 @@ public class StanzaSequenceGateManagement extends ManagementObject<StanzaSequenc
      */
     public StanzaSequenceGateManagement(String name) {
         super(StanzaSequenceGateMBean.class);
-        if(Strings.isEmpty(name)) {
+        if (Strings.isEmpty(name)) {
             throw new IllegalArgumentException("Parameter name must not be empty");
         }
         this.name  = name;

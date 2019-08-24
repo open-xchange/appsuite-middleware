@@ -71,7 +71,7 @@ public class WebdavRequestCycleAction extends AbstractAction {
 			stopped = true;
 			throw x;
 		} finally {
-			if(!stopped) {
+			if (!stopped) {
 				req.getFactory().endRequest(500);
 			}
 		}

@@ -147,7 +147,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     @Override
     protected Object clone() throws CloneNotSupportedException {
         final ExtendableDataObject object = (ExtendableDataObject) super.clone();
-        if( this.extensions != null ) {
+        if ( this.extensions != null ) {
             object.extensions = new Hashtable<String, OXCommonExtensionInterface>(this.extensions);
         }
         return object;

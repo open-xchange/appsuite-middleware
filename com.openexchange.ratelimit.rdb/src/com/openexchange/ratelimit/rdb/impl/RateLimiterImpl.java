@@ -243,7 +243,7 @@ public class RateLimiterImpl implements RateLimiter {
         } catch (SQLException e) {
             LoggerHolder.LOG.error("Error deleting rateLimit permits.", e);
         } finally {
-            if(rowsUpdated > 0) {
+            if (rowsUpdated > 0) {
                 dbProvider.releaseWriteConnection(ctx, con);
             } else {
                 dbProvider.releaseWriteConnectionAfterReading(ctx, con);

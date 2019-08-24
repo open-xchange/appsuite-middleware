@@ -206,7 +206,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     trigger.setFolder(resultSet.getString("folder"));
                     trigger.setTime(L(resultSet.getTimestamp("alarm").getTime()));
 
-                    if(resultSet.getInt("recurrence")>0) {
+                    if (resultSet.getInt("recurrence")>0) {
                         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                         calendar.setTime(new Date(l(trigger.getTime())));
                         calendar.add(Calendar.MINUTE, -1);

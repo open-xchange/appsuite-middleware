@@ -108,11 +108,11 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
     }
 
     protected String normalize(String url) {
-        if(url.length()==0) {
+        if (url.length()==0) {
             return "/";
         }
         url = url.replaceAll("/+", "/");
-        if(url.charAt(url.length()-1)=='/') {
+        if (url.charAt(url.length()-1)=='/') {
             return url.substring(0,url.length()-1);
         }
         return url;

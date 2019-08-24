@@ -200,7 +200,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             final String newParentId = folder.getParentID();
             final boolean move = (null != newParentId && !newParentId.equals(oldParentId));
             final Folder destinationFolder;
-            if(move){
+            if (move){
                 destinationFolder = storage.getFolder(treeId, newParentId, storageParameters);
             } else {
                 destinationFolder = storageFolder;
@@ -569,7 +569,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     private void addjustPermissionType(Folder updated, Folder original) {
         for(Permission origPerm : original.getPermissions()) {
-            if(FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
+            if (FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
                 // Adjust type of existing permission
                 for(Permission updatedPerm: updated.getPermissions()) {
                     if (updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem()) {
@@ -605,7 +605,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (!FolderPermissionType.INHERITED.equals(tmp.getType())) {
                             tmp.setType(FolderPermissionType.INHERITED);
                         }
-                        if(perm.getType() == FolderPermissionType.LEGATOR) {
+                        if (perm.getType() == FolderPermissionType.LEGATOR) {
                             if (!parentId.equals(tmp.getPermissionLegator())) {
                                 tmp.setPermissionLegator(parentId);
                             }
@@ -621,7 +621,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 if (!exists) {
                     Permission cloned = (Permission) perm.clone();
                     cloned.setType(FolderPermissionType.INHERITED);
-                    if(perm.getType() == FolderPermissionType.LEGATOR) {
+                    if (perm.getType() == FolderPermissionType.LEGATOR) {
                         cloned.setPermissionLegator(parentId);
                     }
                     result.add(cloned);

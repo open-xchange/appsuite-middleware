@@ -251,7 +251,7 @@ public class ParallelsSpamdService implements SpamdService {
 
 
             // check if contains a "faultcode" part, if no, parse for data
-            if(!xml_rpc_response.contains("<name>faultCode</name>")){
+            if (!xml_rpc_response.contains("<name>faultCode</name>")){
 
                 final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
                 final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -268,7 +268,7 @@ public class ParallelsSpamdService implements SpamdService {
 
 
                     final Node firstMemberNode = listOfMembers.item(s);
-                    if(firstMemberNode.getNodeType() == Node.ELEMENT_NODE){
+                    if (firstMemberNode.getNodeType() == Node.ELEMENT_NODE){
 
 
                         final Element firstMemberElement = (Element)firstMemberNode;
@@ -283,7 +283,7 @@ public class ParallelsSpamdService implements SpamdService {
                         final Element firstNameElement_ = (Element)firstMemberList_.item(0);
                         final NodeList textFNList_ = firstNameElement_.getChildNodes();
 
-                        if((textFNList.item(0)).getNodeValue().trim().equals("server")){
+                        if ((textFNList.item(0)).getNodeValue().trim().equals("server")){
                             // server ip ==
                             response_server = (textFNList_.item(0)).getNodeValue().trim();
                                 LOG.debug("Returning {} as host to spamhandler", response_server);
@@ -327,7 +327,7 @@ public class ParallelsSpamdService implements SpamdService {
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
         }finally{
             // free http client
-            if(http_client!=null){
+            if (http_client!=null){
                 http_client = null;
             }
         }

@@ -121,11 +121,11 @@ public class MailCategoriesConfigConverter implements ResultConverter {
             return;
         }
         
-        if(resultObject instanceof List){ 
+        if (resultObject instanceof List){ 
             @SuppressWarnings("unchecked")
             List<MailCategoryConfig> list = (List<MailCategoryConfig>) resultObject;
             
-            if(list==null || list.isEmpty()){
+            if (list==null || list.isEmpty()){
                 result.setResultObject(JSONObject.NULL, "json");
                 return;
             }

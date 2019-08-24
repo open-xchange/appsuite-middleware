@@ -77,7 +77,7 @@ public class UpdateAction extends AbstractMessagingAccountAction {
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
 
         final JSONObject data = (JSONObject) request.requireData();
-        if(!data.has("id")) {
+        if (!data.has("id")) {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create("id");
         }
         final MessagingAccount account = parser.parse(data, session.getUserId(), session.getContextId());

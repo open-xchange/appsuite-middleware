@@ -70,7 +70,7 @@ public class RTResultFormatter {
 
         List<Long> acknowledgements = (List<Long>) resultMap.get(RTAction.ACKS);
         formatter.append("\tacks:").append("\n");
-        if(acknowledgements == null) {
+        if (acknowledgements == null) {
             formatter.append("\t\t[]").append("\n");
         } else {
             formatter.append("\t\t").append(acknowledgements.toString()).append("\n");
@@ -78,7 +78,7 @@ public class RTResultFormatter {
 
         JSONObject error = (JSONObject) resultMap.get(RTAction.ERROR);
         formatter.append("\terror:").append("\n");
-        if(error == null) {
+        if (error == null) {
             formatter.append("\t\t").append("none").append("\n");
         } else {
             formatter.append("\t\t").append(shortenOutput(error.toString())).append("\n");
@@ -86,7 +86,7 @@ public class RTResultFormatter {
 
         JSONObject result = (JSONObject) resultMap.get(RTAction.RESULT);
         formatter.append("\tresult:").append("\n");
-        if(result == null) {
+        if (result == null) {
             formatter.append("\t\t").append("none").append("\n");
         } else {
             formatter.append("\t\t").append(shortenOutput(result.toString())).append("\n");
@@ -94,7 +94,7 @@ public class RTResultFormatter {
 
         List<JSONObject> stanzas = (List<JSONObject>) resultMap.get(RTAction.STANZAS);
         formatter.append("\tstanzas:").append("\n");
-        if(stanzas == null || stanzas.isEmpty()) {
+        if (stanzas == null || stanzas.isEmpty()) {
             formatter.append("\t\t{}").append("\n");
         } else {
             for (JSONObject stanza : stanzas) {

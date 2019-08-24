@@ -99,7 +99,7 @@ public class InfostoreParser {
                 throw new UnknownMetadataException(idString);
             }
             final Metadata m = Metadata.get(id);
-            if(m == null) {
+            if (m == null) {
                 throw new UnknownMetadataException(idString);
             }
             cols[i++] = m;
@@ -116,16 +116,16 @@ public class InfostoreParser {
         for(final Iterator iter = obj.keys(); iter.hasNext();) {
             final String key = (String) iter.next();
             final Metadata m = Metadata.get(key);
-            if(m == null) {
+            if (m == null) {
                 throw new UnknownMetadataException(key);
             }
-            if(m == Metadata.FILENAME_LITERAL && (obj.optString(key) == null || obj.optString(key).equals(""))) {
+            if (m == Metadata.FILENAME_LITERAL && (obj.optString(key) == null || obj.optString(key).equals(""))) {
                 shrink = true;
             } else {
                 metadata[i++] = m;
             }
         }
-        if(shrink) {
+        if (shrink) {
             final Metadata[] shrunk = new Metadata[metadata.length-1];
             System.arraycopy(metadata, 0, shrunk, 0, shrunk.length);
             return shrunk;

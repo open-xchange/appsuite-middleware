@@ -202,7 +202,7 @@ public class CSVReader {
                 if (c == quotechar) {
                 	// this gets complex... the quote may end a quoted block, or escape another quote.
                 	// do a 1-char lookahead:
-                	if( inQuotes  // we are in quotes, therefore there can be escaped quotes in here.
+                	if ( inQuotes  // we are in quotes, therefore there can be escaped quotes in here.
                 	    && nextLine.length() > (i+1)  // there is indeed another character to check.
                 	    && nextLine.charAt(i+1) == quotechar ){ // ..and that char. is a quote also.
                 		// we have two quote chars in a row == one quote char, so consume them both and
@@ -212,7 +212,7 @@ public class CSVReader {
                 	}else{
                 		inQuotes = !inQuotes;
                 		// the tricky case of an embedded quote in the middle: a,bc"d"ef,g
-                		if(i>2 //not on the begining of the line
+                		if (i>2 //not on the begining of the line
                 				&& nextLine.charAt(i-1) != this.separator //not at the begining of an escape sequence 
                 				&& nextLine.length()>(i+1) &&
                 				nextLine.charAt(i+1) != this.separator //not at the	end of an escape sequence

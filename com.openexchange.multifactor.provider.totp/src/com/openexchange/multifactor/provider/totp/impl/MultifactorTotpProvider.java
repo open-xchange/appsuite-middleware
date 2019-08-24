@@ -146,7 +146,7 @@ public class MultifactorTotpProvider implements MultifactorProvider {
     private void doAuthenticationInternal(ChallengeAnswer answer, TotpMultifactorDevice device) throws OXException {
         final String sharedSecret = device.getSharedSecret();
         String inputCode = answer.requireField(TotpField.SECRET).toString();
-        if(!Strings.isEmpty(inputCode)) {
+        if (!Strings.isEmpty(inputCode)) {
             inputCode = MultifactorFormatter.removeWhiteSpaces(inputCode);
             if (TotpCore.verify(sharedSecret, inputCode)) {
                 return;

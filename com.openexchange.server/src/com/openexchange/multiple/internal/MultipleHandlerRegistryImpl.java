@@ -83,10 +83,10 @@ public final class MultipleHandlerRegistryImpl implements com.openexchange.multi
     @Override
     public MultipleHandlerFactoryService getFactoryService(final String module) {
         MultipleHandlerFactoryService candidate = registry.get(module);
-        if(candidate == null) {
+        if (candidate == null) {
             // Maybe prefixed
             for (Map.Entry<String, MultipleHandlerFactoryService> entry : registry.entrySet()) {
-                if(module.startsWith(entry.getKey())) {
+                if (module.startsWith(entry.getKey())) {
                     return entry.getValue();
                 }
             }

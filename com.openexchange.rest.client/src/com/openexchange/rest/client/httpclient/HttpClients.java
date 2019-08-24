@@ -271,7 +271,7 @@ public final class HttpClients {
             clientBuilder.setKeepAliveStrategy(config.keepAliveStrategy);
         }
 
-        if(config.connectionReuseStrategy != null) {
+        if (config.connectionReuseStrategy != null) {
             clientBuilder.setConnectionReuseStrategy(config.connectionReuseStrategy);
         }
 

@@ -142,7 +142,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
          * perform alarm update & track results
          */
         if (updateAlarms(originalEvent, calendarUserId, originalAlarms, alarms)) {
-            if(exceptions != null) {
+            if (exceptions != null) {
                 // Propagate alarm changes to exceptions
                 Map<Event, List<Alarm>> alarmToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, alarms == null ? Collections.emptyList() : alarms, exceptions);
                 for(Entry<Event, List<Alarm>> entry: alarmToUpdate.entrySet()) {

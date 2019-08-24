@@ -104,7 +104,7 @@ public class DistributedGroupManagerManagement extends ManagementObject<Distribu
             String key = entry.getKey().toString();
             String value = entry.getValue().toString();
             List<String> collected = jmxMap.get(key);
-            if(collected == null) {
+            if (collected == null) {
                 collected = new ArrayList<String>();
                 jmxMap.put(key, collected);
             }

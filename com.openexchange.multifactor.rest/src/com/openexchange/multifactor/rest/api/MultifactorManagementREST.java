@@ -125,7 +125,7 @@ public class MultifactorManagementREST {
      */
     private boolean isMasterAccountOverride() {
        ConfigurationService configService = getService(ConfigurationService.class);
-       if(configService != null) {
+       if (configService != null) {
            return configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
        }
        LOG.debug("Could not get ConfigurationService");

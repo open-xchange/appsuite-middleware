@@ -98,11 +98,11 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
     public ArrayList<String> getCSVData(final Context ctx) throws PluginException {
         final ArrayList<String> retval = new ArrayList<String>();
         final OXContextExtensionImpl extension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
-        if( extension == null ) {
+        if ( extension == null ) {
             throw new PluginException("No extension data found in server reply.");
         }
         final String customid = extension.getCustomid();
-        if(extension.isCustomidset() && null != customid) {
+        if (extension.isCustomidset() && null != customid) {
             retval.add(customid);
         } else {
             retval.add(null);
@@ -127,11 +127,11 @@ public class ContextConsoleListImpl implements ContextConsoleListInterface {
     public ArrayList<String> getHumanReadableData(final Context ctx) throws PluginException {
         final ArrayList<String> retval = new ArrayList<String>();
         final OXContextExtensionImpl extension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
-        if( extension == null ) {
+        if ( extension == null ) {
             throw new PluginException("No extension data found in server reply.");
         }
         final String customid = extension.getCustomid();
-        if(extension.isCustomidset() && null != customid) {
+        if (extension.isCustomidset() && null != customid) {
             retval.add(customid);
         } else {
             retval.add(null);

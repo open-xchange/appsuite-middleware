@@ -139,7 +139,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
                 groupsApi.deleteGroup(getSessionId(), timestamp, body);
             }
         }
-        if(tasksToDelete != null && !tasksToDelete.isEmpty()) {
+        if (tasksToDelete != null && !tasksToDelete.isEmpty()) {
             taskApi.deleteTasks(getSessionId(), taskTimestamp, tasksToDelete);
         }
         super.tearDown();

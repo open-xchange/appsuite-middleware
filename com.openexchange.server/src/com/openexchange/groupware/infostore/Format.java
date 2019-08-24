@@ -109,7 +109,7 @@ public class Format implements Serializable {
 
 	public static Format get(final String format){
 		for(final Format f : VALUES){
-			if(f.getName().equals(format)) {
+			if (f.getName().equals(format)) {
 				return f;
 			}
 		}

@@ -135,7 +135,7 @@ public abstract class ChangeCore extends UserFilestoreAbstraction {
             // apply rights from commandline
             boolean changed = setModuleAccessOptions(parser, access);
 
-            if(changed) {
+            if (changed) {
                 // apply changes in module access on server
                 oxusr.changeModuleAccess(ctx, usr, access, auth);
             }

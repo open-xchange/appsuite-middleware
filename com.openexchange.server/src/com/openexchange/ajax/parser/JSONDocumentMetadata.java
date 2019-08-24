@@ -93,9 +93,9 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         this.jsonObject = new JSONObject(json);
 
         //Test parsing of complex objects
-        if(jsonObject.has(Metadata.URL_LITERAL.getName())) {
+        if (jsonObject.has(Metadata.URL_LITERAL.getName())) {
             String url = jsonObject.getString(Metadata.URL_LITERAL.getName());
-            if(!"".equals(url.trim())) {
+            if (!"".equals(url.trim())) {
                 url = helper.process(url);
                 jsonObject.put(Metadata.URL_LITERAL.getName(),url);
             }
@@ -104,7 +104,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getProperty(final String key) {
-        if(Metadata.get(key) == null) {
+        if (Metadata.get(key) == null) {
             return jsonObject.optString(key);
         }
         return null;
@@ -117,7 +117,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public Date getLastModified() {
-        if(!jsonObject.has(Metadata.LAST_MODIFIED_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.LAST_MODIFIED_LITERAL.getName())) {
             return null;
         }
         return new Date(jsonObject.optLong(Metadata.LAST_MODIFIED_LITERAL.getName()));
@@ -138,7 +138,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public Date getCreationDate() {
-        if(!jsonObject.has(Metadata.CREATION_DATE_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.CREATION_DATE_LITERAL.getName())) {
             return null;
         }
         return new Date(jsonObject.optLong(Metadata.CREATION_DATE_LITERAL.getName()));
@@ -159,7 +159,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public int getModifiedBy() {
-        if(!jsonObject.has(Metadata.MODIFIED_BY_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.MODIFIED_BY_LITERAL.getName())) {
             return -1;
         }
         return jsonObject.optInt(Metadata.MODIFIED_BY_LITERAL.getName());
@@ -177,7 +177,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public long getFolderId() {
-        if(!jsonObject.has(Metadata.FOLDER_ID_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.FOLDER_ID_LITERAL.getName())) {
             return -1;
         }
         return jsonObject.optLong(Metadata.FOLDER_ID_LITERAL.getName());
@@ -194,7 +194,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getTitle() {
-        if(!jsonObject.has(Metadata.TITLE_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.TITLE_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.TITLE_LITERAL.getName());
@@ -211,7 +211,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public int getVersion() {
-        if(!jsonObject.has(Metadata.VERSION_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.VERSION_LITERAL.getName())) {
             return 0;
         }
         return jsonObject.optInt(Metadata.VERSION_LITERAL.getName());
@@ -233,7 +233,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public long getFileSize() {
-        if(!jsonObject.has(Metadata.FILE_SIZE_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.FILE_SIZE_LITERAL.getName())) {
             return -1;
         }
         return jsonObject.optLong(Metadata.FILE_SIZE_LITERAL.getName());
@@ -250,7 +250,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getFileMIMEType() {
-        if(!jsonObject.has(Metadata.FILE_MIMETYPE_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.FILE_MIMETYPE_LITERAL.getName())) {
             return DEFAULT_MIMETYPE;
         }
         return jsonObject.optString(Metadata.FILE_MIMETYPE_LITERAL.getName());
@@ -267,7 +267,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getFileName() {
-        if(!jsonObject.has(Metadata.FILENAME_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.FILENAME_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.FILENAME_LITERAL.getName());
@@ -284,7 +284,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public int getId() {
-        if(!jsonObject.has(Metadata.ID_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.ID_LITERAL.getName())) {
             return InfostoreFacade.NEW;
         }
         return jsonObject.optInt(Metadata.ID_LITERAL.getName());
@@ -323,7 +323,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public int getCreatedBy() {
-        if(!jsonObject.has(Metadata.CREATED_BY_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.CREATED_BY_LITERAL.getName())) {
             return -1;
         }
         return jsonObject.optInt(Metadata.CREATED_BY_LITERAL.getName());
@@ -340,7 +340,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getDescription() {
-        if(!jsonObject.has(Metadata.DESCRIPTION_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.DESCRIPTION_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.DESCRIPTION_LITERAL.getName());
@@ -357,7 +357,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getURL() {
-        if(!jsonObject.has(Metadata.URL_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.URL_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.URL_LITERAL.getName());
@@ -374,7 +374,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public long getSequenceNumber() {
-        if(getLastModified()==null) {
+        if (getLastModified()==null) {
             return 0;
         }
         return getLastModified().getTime();
@@ -382,7 +382,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getCategories() {
-        if(!jsonObject.has(Metadata.CATEGORIES_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.CATEGORIES_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.CATEGORIES_LITERAL.getName());
@@ -399,7 +399,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public Date getLockedUntil() {
-        if(!jsonObject.has(Metadata.LOCKED_UNTIL_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.LOCKED_UNTIL_LITERAL.getName())) {
             return null;
         }
         return new Date(jsonObject.optLong(Metadata.LOCKED_UNTIL_LITERAL.getName()));
@@ -416,7 +416,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getFileMD5Sum() {
-        if(!jsonObject.has(Metadata.FILE_MD5SUM_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.FILE_MD5SUM_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.FILE_MD5SUM_LITERAL.getName());
@@ -461,7 +461,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getVersionComment() {
-        if(!jsonObject.has(Metadata.VERSION_COMMENT_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.VERSION_COMMENT_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.VERSION_COMMENT_LITERAL.getName());
@@ -487,7 +487,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public String getFilestoreLocation() {
-        if(!jsonObject.has(Metadata.FILESTORE_LOCATION_LITERAL.getName())) {
+        if (!jsonObject.has(Metadata.FILESTORE_LOCATION_LITERAL.getName())) {
             return null;
         }
         return jsonObject.optString(Metadata.FILESTORE_LOCATION_LITERAL.getName());
@@ -515,7 +515,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public int getNumberOfVersions() {
-        if(jsonObject.has(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName())) {
+        if (jsonObject.has(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName())) {
             return jsonObject.optInt(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName());
         }
         return -1;

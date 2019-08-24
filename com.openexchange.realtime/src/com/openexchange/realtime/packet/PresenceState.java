@@ -78,7 +78,7 @@ public enum PresenceState {
         PresenceState[] states = values();
         for(int i = 0; i < states.length; i++) {
             sb.append(states[i]);
-            if(i < states.length - 1) {
+            if (i < states.length - 1) {
                 sb.append(", ");
             }
         }

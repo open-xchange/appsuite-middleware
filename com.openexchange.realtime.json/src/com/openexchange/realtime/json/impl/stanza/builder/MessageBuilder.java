@@ -72,7 +72,7 @@ public class MessageBuilder extends StanzaBuilder<Message> {
      */
     public MessageBuilder(ID from, JSONObject json, ServerSession session) {
         super(session);
-        if(from == null || json == null) {
+        if (from == null || json == null) {
             throw new IllegalArgumentException();
         }
         this.from = from;

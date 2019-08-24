@@ -97,7 +97,7 @@ public class EnrolAction extends RTAction {
 
         String userAtContext = constructedId.getUser() + "@" + constructedId.getContext();
         RealtimeConfig realtimeConfig = RealtimeConfig.getInstance();
-        if(realtimeConfig.isTraceAllUsersEnabled() || realtimeConfig.getUsersToTrace().contains(userAtContext)) {
+        if (realtimeConfig.isTraceAllUsersEnabled() || realtimeConfig.getUsersToTrace().contains(userAtContext)) {
             JSONObject tracingDemandJSON = stanzaToJSON(new TracingDemand(constructedId, constructedId, true));
             stanzas.add(tracingDemandJSON);
         } else {

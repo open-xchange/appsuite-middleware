@@ -73,7 +73,7 @@ public class InfostoreTimedResult implements TimedResult<File> {
     @Override
     public SearchIterator<File> results() throws OXException {
         SearchIterator<DocumentMetadata> results = documents.results();
-        if(results == null) {
+        if (results == null) {
             return null;
         }
         return new InfostoreSearchIterator(results);

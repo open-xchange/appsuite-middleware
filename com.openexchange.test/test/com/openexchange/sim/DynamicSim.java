@@ -78,13 +78,13 @@ public class DynamicSim implements InvocationHandler{
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         expectation.verify(method, args);
         wasCalled = true;
-        if(exception != null) {
+        if (exception != null) {
             throw exception;
         }
-        if(retval != null) {
+        if (retval != null) {
             return retval;
         }
-        if(block != null) {
+        if (block != null) {
             return block.perform(proxy, args);
         }
         return null;
@@ -131,7 +131,7 @@ public class DynamicSim implements InvocationHandler{
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if(index == invocationHandlers.length) {
+            if (index == invocationHandlers.length) {
                 throw new IllegalStateException("Didn't expect method call: "+method);
             }
             return invocationHandlers[index++].invoke(proxy, method, args);

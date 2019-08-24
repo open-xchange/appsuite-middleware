@@ -121,21 +121,21 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			stmt.setString(1,url.toEscapedString());
 			stmt.setInt(2, ctx.getContextId());
 			rs = stmt.executeQuery();
-			if(rs.next()) {
+			if (rs.next()) {
 				return rs.getInt(1);
 			}
 			return -1;
 		} catch (SQLException x) {
 			throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
-			if(stmt != null) {
+			if (stmt != null) {
 				try {
 					stmt.close();
 				} catch (SQLException e1) {
 					LOG.debug("",e1);
 				}
 			}
-			if(rs != null) {
+			if (rs != null) {
 				try {
 					rs.close();
 				} catch (SQLException e) {
@@ -233,7 +233,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 				}
 			}
 			autocommit(writeCon);
-			if(writeCon != null) {
+			if (writeCon != null) {
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}
@@ -287,7 +287,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	@Override
     public WebdavLock getLock(final String token) throws WebdavProtocolException {
 		final WebdavLock lock = lockHelper.getLock(token);
-		if(lock != null) {
+		if (lock != null) {
 			return lock;
 		}
 		return findParentLock(token);
@@ -379,7 +379,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	@Override
     public void unlock(final String token) throws WebdavProtocolException {
 		lockHelper.removeLock(token);
-		if(getOwnLocks().isEmpty()) {
+		if (getOwnLocks().isEmpty()) {
 			delete();
 		}
 	}
@@ -390,7 +390,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	}
 
 	private void dumpToDB() throws SQLException, OXException {
-		if(exists) {
+		if (exists) {
 			return;
 		}
 		final Context ctx = sessionHolder.getContext();
@@ -418,7 +418,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 				stmt.close();
 			}
 			autocommit(writeCon);
-			if(writeCon != null) {
+			if (writeCon != null) {
 				provider.releaseWriteConnection(ctx, writeCon);
 			}
 		}

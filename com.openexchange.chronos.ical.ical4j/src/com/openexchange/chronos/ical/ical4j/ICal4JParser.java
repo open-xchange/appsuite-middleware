@@ -359,26 +359,26 @@ public class ICal4JParser {
         int length = buf.length;
 
         final char first = buf[0];
-        if(length > 3) {
-            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
-                if(Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
+        if (length > 3) {
+            if (Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+                if (Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
                     return new String(Arrays.copyOfRange(buf, 3, length));
                 }
-                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
+                if (Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
                     return new String(Arrays.copyOfRange(buf, 3, length));
                 }
             }
         }
-        if(length > 1) {
-            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
-                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
+        if (length > 1) {
+            if (Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
+                if (Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
                     return new String(Arrays.copyOfRange(buf, 2, length));
                 }
             }
         }
-        if(length > 0) {
-            if(Character.getNumericValue(first) < 0) {
-                if(Character.getType(first) == 16) {
+        if (length > 0) {
+            if (Character.getNumericValue(first) < 0) {
+                if (Character.getType(first) == 16) {
                     return new String(Arrays.copyOfRange(buf, 1, length));
                 }
             }

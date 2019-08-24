@@ -1454,7 +1454,7 @@ public class Spamc {
             String tokens[];
             while (reader.ready()) {
                 line = reader.readLine();
-                if(line == null) {
+                if (line == null) {
                     break;
                 }
                 if (line.length() > 0 && (line.charAt(0) == '#' || line.charAt(0) == '\r' || line.charAt(0) == '\n')) {

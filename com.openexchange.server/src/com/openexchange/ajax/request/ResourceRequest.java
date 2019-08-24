@@ -145,9 +145,9 @@ public class ResourceRequest {
 
         final JSONArray modified = new JSONArray();
         long lm = 0;
-        if(updatedResources != null){
+        if (updatedResources != null){
             for(final Resource res: updatedResources){
-                if(res.getLastModified().getTime() > lm) {
+                if (res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
                 modified.put(ResourceWriter.writeResource(res));
@@ -155,9 +155,9 @@ public class ResourceRequest {
         }
 
         final JSONArray deleted = new JSONArray();
-        if(deletedResources != null){
+        if (deletedResources != null){
             for(final Resource res: deletedResources){
-                if(res.getLastModified().getTime() > lm) {
+                if (res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
 

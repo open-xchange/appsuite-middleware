@@ -127,7 +127,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
     @Override
     @After
     public void tearDown() throws Exception {
-        if(!fileIds.isEmpty()) {
+        if (!fileIds.isEmpty()) {
             infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp, fileIds, Boolean.TRUE, null);
         }
         if (!folders.isEmpty()) {

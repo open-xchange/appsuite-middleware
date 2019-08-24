@@ -154,14 +154,14 @@ public class CleanupMemberShipListener implements MembershipListener {
      * @return true if member is not null, the cleanup was finished during the last run and the last run was not more than 5 minutes ago
      */
     private boolean cleanupDone(PortableCleanupStatus cleanupStatus) {
-        if(cleanupStatus!= null) {
+        if (cleanupStatus!= null) {
             long cleaningFinishTime = cleanupStatus.getCleaningFinishTime();
-            if(cleaningFinishTime == -1) {
+            if (cleaningFinishTime == -1) {
                 //the cleanup wasn't finished
                 return false;
             }
             long diff = System.currentTimeMillis() - cleaningFinishTime;
-            if(diff > 300000) {
+            if (diff > 300000) {
                 //the last cleanup was more than 5 minutes ago, clean again!
                 return false;
             } else {

@@ -63,11 +63,11 @@ public class WebdavHeadAction extends AbstractAction {
 	}
 
 	protected final void head(final WebdavResponse res, final WebdavResource resource, final long overrideLength) throws WebdavProtocolException {
-		if(resource == null) {
+		if (resource == null) {
 			return;
 		}
 		res.setHeader("Content-Type", resource.getContentType());
-		if(!resource.isCollection()) {
+		if (!resource.isCollection()) {
 			res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : Long.toString(overrideLength));
 		}
 		res.setHeader("ETag", resource.getETag());

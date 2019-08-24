@@ -108,7 +108,7 @@ public class FormDescriptionWriter {
         }
 
         Map<String, String> options = formElement.getOptions();
-        if(options != null && !options.isEmpty()) {
+        if (options != null && !options.isEmpty()) {
             JSONObject jsonOptions = new JSONObject();
             for (Map.Entry<String, String> entry : options.entrySet())  {
                 jsonOptions.put(entry.getKey(),  entry.getValue());

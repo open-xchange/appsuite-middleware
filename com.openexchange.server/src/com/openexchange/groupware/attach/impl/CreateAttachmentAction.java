@@ -56,7 +56,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction {
 
     @Override
     protected void undoAction() throws OXException {
-        if(getAttachments().size() == 0) {
+        if (getAttachments().size() == 0) {
             return;
         }
         try {
@@ -76,7 +76,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction {
 
     @Override
     public void perform() throws OXException {
-        if(getAttachments().size() == 0) {
+        if (getAttachments().size() == 0) {
             return;
         }
         try {

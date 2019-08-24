@@ -414,7 +414,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
     @Override
     public Filter<Integer, Integer> filter(final Credentials auth) throws PluginException {
         try {
-            if( ! ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
+            if ( ! ClientAdminThreadExtended.cache.isMasterAdmin(auth) ) {
                 ResellerAdmin adm = null;
                 adm = (this.oxresell.getData(new ResellerAdmin[]{ new ResellerAdmin(auth.getLogin()) } ))[0];
                 return new ResellerContextFilter(cache, adm);

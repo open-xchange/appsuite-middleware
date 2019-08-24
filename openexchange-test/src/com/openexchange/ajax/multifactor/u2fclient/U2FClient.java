@@ -242,15 +242,15 @@ public class U2FClient {
         byte[] keyHandle,
         byte[] userPublicKey) throws IOException, U2FClientException {
 
-        if(applicationParameterSha256.length != 32) {
+        if (applicationParameterSha256.length != 32) {
             throw new U2FClientException("The application paramter must be 32 bytes but was " + applicationParameterSha256.length);
         }
 
-        if(challengeParameterSha256.length != 32) {
+        if (challengeParameterSha256.length != 32) {
             throw new U2FClientException("The challenge paramter must be 32 bytes but was " +  challengeParameterSha256.length);
         }
 
-        if(userPublicKey.length != 65) {
+        if (userPublicKey.length != 65) {
             throw new U2FClientException("User public key length must be 65 bytes but was " + userPublicKey.length);
         }
 
@@ -270,11 +270,11 @@ public class U2FClient {
         byte[] challenge) throws IOException, U2FClientException {
 
 
-        if(applicationParameterSha256.length != 32) {
+        if (applicationParameterSha256.length != 32) {
             throw new U2FClientException("The application paramter must be 32 bytes but was " + applicationParameterSha256.length);
         }
 
-        if(challenge.length != 32) {
+        if (challenge.length != 32) {
             throw new U2FClientException("The application paramter must be 32 bytes but was " + applicationParameterSha256.length);
         }
 
@@ -293,10 +293,10 @@ public class U2FClient {
         byte[] attestationCertificate,
         byte[] signature) throws IOException, U2FClientException {
 
-        if(keyHandle.length > 255) {
+        if (keyHandle.length > 255) {
             throw new U2FClientException("Key handle length must not exceed 255 bytes but was " + keyHandle.length);
         }
-        if(userPublicKey.length != 65) {
+        if (userPublicKey.length != 65) {
             throw new U2FClientException("User public key length must be 65 bytes but was " + userPublicKey.length);
         }
 
@@ -334,7 +334,7 @@ public class U2FClient {
 
         MultifactorStartRegistrationResponseDataChallengeRegisterRequests registerRequest = startRegistrationData.getChallenge().getRegisterRequests().get(0);
 
-        if(! U2F_VERSION.equals(registerRequest.getVersion())) {
+        if (! U2F_VERSION.equals(registerRequest.getVersion())) {
             throw new U2FClientException(String.format("Unsupported U2F version %s", registerRequest.getVersion()));
         }
 
@@ -405,7 +405,7 @@ public class U2FClient {
 
             //Create the data to sign neccessary to finish the authentication process
             U2FKeyPair key = deviceAccess.getKeyPair(U2FEncodings.decodeBase64(base64KeyHandle));
-            if(key != null) {
+            if (key != null) {
                 final int counter = key.getCounter();
                 final String base64ClientHandle = U2FEncodings.encodeBase64Url(key.getKeyHandle());
 

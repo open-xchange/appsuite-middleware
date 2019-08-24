@@ -92,7 +92,7 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 			{
 				id = ids.getInt(i);
 				final SubscriptionSource source = getDiscovery(subscribeRequest.getServerSession()).getSource(context, id);
-	            if(source != null) {
+	            if (source != null) {
 	                final SubscribeService subscribeService = source.getSubscribeService();
 	                final Subscription subscription = subscribeService.loadSubscription(context, id, services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
 	                if (subscription != null) {

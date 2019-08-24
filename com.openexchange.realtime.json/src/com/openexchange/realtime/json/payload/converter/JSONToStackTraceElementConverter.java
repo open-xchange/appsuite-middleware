@@ -73,7 +73,7 @@ public class JSONToStackTraceElementConverter extends AbstractJSONConverter {
             JSONObject stackTraceObject = (JSONObject) data;
             //can be null
             String fileName = null;
-            if(stackTraceObject.hasAndNotNull("fileName")) {
+            if (stackTraceObject.hasAndNotNull("fileName")) {
                 fileName = stackTraceObject.optString("fileName");
             }
             String className = stackTraceObject.getString("className");

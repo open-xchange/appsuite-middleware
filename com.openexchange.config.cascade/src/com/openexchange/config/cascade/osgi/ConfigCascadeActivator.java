@@ -166,7 +166,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
                 @Override
                 public <T> T parse(final String s, final Class<T> t) {
                     final StringParser parser = stringParsers.getService();
-                    if(parser == null) {
+                    if (parser == null) {
                         logger.error("Could not find suitable string parser in OSGi system");
                         return null;
                     }

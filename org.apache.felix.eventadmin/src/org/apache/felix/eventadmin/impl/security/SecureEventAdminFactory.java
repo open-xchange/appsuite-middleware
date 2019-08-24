@@ -97,7 +97,7 @@ public class SecureEventAdminFactory implements ServiceFactory<EventAdmin>
      */
     private void checkNull(final Object object, final String name)
     {
-        if(null == object)
+        if (null == object)
         {
             throw new NullPointerException(name + " may not be null");
         }

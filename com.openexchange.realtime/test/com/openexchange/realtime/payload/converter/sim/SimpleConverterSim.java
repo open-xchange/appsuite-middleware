@@ -75,7 +75,7 @@ public class SimpleConverterSim implements SimpleConverter {
     public void registerConverter(SimplePayloadConverter payloadConverter) {
         String inputFormat = payloadConverter.getInputFormat();
         List<ConverterBox> converters = converterMap.get(inputFormat);
-        if(converters == null) {
+        if (converters == null) {
             converters = new ArrayList<ConverterBox>();
             converterMap.put(inputFormat, converters);
         }
@@ -87,7 +87,7 @@ public class SimpleConverterSim implements SimpleConverter {
         List<ConverterBox> list = converterMap.get(from);
         SimpleConverter converter = null;
         for (ConverterBox converterBox : list) {
-            if(converterBox.getOutPutFormat().equals(to)) {
+            if (converterBox.getOutPutFormat().equals(to)) {
                 converter = converterBox.getSimpleConverter();
             }
         }

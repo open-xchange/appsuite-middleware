@@ -138,10 +138,10 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
             if (null != hazelcastInstance) {
                 Member localMember = HazelcastAccess.getLocalMember();
                 Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
-                if(!clusterMembers.remove(localMember)) {
+                if (!clusterMembers.remove(localMember)) {
                     LOG.warn("Couldn't remove local member from cluster members.");
                 }
-                if(!clusterMembers.isEmpty()) {
+                if (!clusterMembers.isEmpty()) {
                     hazelcastInstance.getExecutorService("default").submitToMembers(new PortableCleanupDispatcher(id), clusterMembers);
                 } else {
                     LOG.debug("No other cluster members besides the local member. No further clean up necessary.");

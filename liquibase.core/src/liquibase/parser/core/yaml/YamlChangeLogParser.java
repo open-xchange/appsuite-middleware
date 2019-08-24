@@ -72,7 +72,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 throw new ChangeLogParseException("Syntax error in "+getSupportedFileExtension()+": " + e.getMessage(), e);
             }
 
-            if(changeLogAsMap == null) {
+            if (changeLogAsMap == null) {
                 throw new ChangeLogParseException("Unable to parse changelog.");
             }
 
@@ -434,7 +434,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
         if (isRelativePath) {
             // workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
             String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
-            if(tempFile != null && new File(tempFile).exists() == true) {
+            if (tempFile != null && new File(tempFile).exists() == true) {
                 fileName = tempFile;
             } else {
                 fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;

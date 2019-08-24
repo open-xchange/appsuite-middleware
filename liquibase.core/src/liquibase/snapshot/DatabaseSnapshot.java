@@ -92,7 +92,7 @@ public abstract class DatabaseSnapshot {
 
         SnapshotGeneratorChain chain = createGeneratorChain(example.getClass(), database);
         T object = null;
-        if(chain != null) {
+        if (chain != null) {
             object = chain.snapshot(example, this);
         }
 

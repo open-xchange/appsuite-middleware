@@ -633,7 +633,7 @@ public enum UserField {
 
     public static boolean isProtected(final int field) {
         for (final UserField uf : UNPROTECTED_FIELDS) {
-            if(uf.getColumn() == field) {
+            if (uf.getColumn() == field) {
                 return false;
             }
         }

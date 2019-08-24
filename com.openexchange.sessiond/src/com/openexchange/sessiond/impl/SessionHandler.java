@@ -1765,7 +1765,7 @@ public final class SessionHandler {
      */
     public static int getMetricActiveSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
-        if(sessionData == null) {
+        if (sessionData == null) {
             return 0;
         }
         int[] shortTermSessionsPerContainer = sessionData.getShortTermSessionsPerContainer();
@@ -1779,7 +1779,7 @@ public final class SessionHandler {
      */
     public static int getMetricShortSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
-        if(sessionData == null) {
+        if (sessionData == null) {
             return 0;
         }
         return sessionData.getNumShortTerm();
@@ -1792,7 +1792,7 @@ public final class SessionHandler {
      */
     public static int getMetricLongSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
-        if(sessionData == null) {
+        if (sessionData == null) {
             return 0;
         }
         return sessionData.getNumLongTerm();

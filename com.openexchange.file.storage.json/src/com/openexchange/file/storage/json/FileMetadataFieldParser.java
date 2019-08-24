@@ -121,7 +121,7 @@ public class FileMetadataFieldParser {
     }
 
     private static Object categories(final JSONArray value) throws JSONException {
-        if(value.length() == 0) {
+        if (value.length() == 0) {
             return "";
         }
         final StringBuilder b = new StringBuilder();

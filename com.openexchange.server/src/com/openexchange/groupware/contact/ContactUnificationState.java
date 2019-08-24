@@ -70,7 +70,7 @@ public enum ContactUnificationState {
 
     public static ContactUnificationState getByNumber(int num){
         for(ContactUnificationState state: values()) {
-            if(state.getNumber() == num) {
+            if (state.getNumber() == num) {
                 return state;
             }
         }

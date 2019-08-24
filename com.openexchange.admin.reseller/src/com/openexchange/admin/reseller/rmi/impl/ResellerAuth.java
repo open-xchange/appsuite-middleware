@@ -83,7 +83,7 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
         try {
             OXResellerStorageInterface oxresell = OXResellerStorageInterface.getInstance();
             ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(authdata.getLogin())})[0];
-            if( ! GenericChecks.authByMech(adm.getPassword(), authdata.getPassword(), adm.getPasswordMech(), adm.getSalt()) ) {
+            if ( ! GenericChecks.authByMech(adm.getPassword(), authdata.getPassword(), adm.getPasswordMech(), adm.getSalt()) ) {
                 throw new InvalidCredentialsException("authentication failed");
             }
         } catch (StorageException e) {
@@ -100,7 +100,7 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
     public boolean isMasterOfContext(Credentials creds, Context ctx) throws InvalidCredentialsException {
         try {
             OXResellerStorageInterface oxresell = OXResellerStorageInterface.getInstance();
-            if( ! oxresell.existsAdmin(new ResellerAdmin(creds.getLogin()) ) ) {
+            if ( ! oxresell.existsAdmin(new ResellerAdmin(creds.getLogin()) ) ) {
                 return false;
             }
             ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(creds.getLogin())})[0];

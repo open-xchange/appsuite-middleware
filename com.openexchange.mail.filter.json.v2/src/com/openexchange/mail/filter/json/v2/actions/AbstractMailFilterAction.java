@@ -84,7 +84,7 @@ public abstract class AbstractMailFilterAction implements EnqueuableAJAXActionSe
 
     protected JSONObject getJSONBody(Object data) throws OXException {
 
-        if(!(data instanceof JSONObject)){
+        if (!(data instanceof JSONObject)){
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONObject.class.getSimpleName(), data.getClass().getSimpleName());
         }
 
@@ -93,7 +93,7 @@ public abstract class AbstractMailFilterAction implements EnqueuableAJAXActionSe
 
     protected JSONArray getJSONArrayBody(Object data) throws OXException {
 
-        if(!(data instanceof JSONArray)){
+        if (!(data instanceof JSONArray)){
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONObject.class.getSimpleName(), data.getClass().getSimpleName());
         }
 
@@ -114,7 +114,7 @@ public abstract class AbstractMailFilterAction implements EnqueuableAJAXActionSe
     protected Credentials getCredentials(Session session, AJAXRequestData request) {
         Credentials credentials = new Credentials(session);
         String userName = getUserName(request);
-        if(Strings.isNotEmpty(userName)) {
+        if (Strings.isNotEmpty(userName)) {
             credentials.setUsername(userName);
         }
         return credentials;

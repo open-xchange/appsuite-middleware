@@ -397,7 +397,7 @@ public class EventPatches {
                         return;
                     }
                     Event newChangeException = newChangeExceptions.get(0);
-                    if(newChangeException == null) {
+                    if (newChangeException == null) {
                         return;
                     }
                     Alarm snoozedAlarm = null;
@@ -1156,7 +1156,7 @@ public class EventPatches {
             extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_FAKED_MASTER.getId(), "1"));
             extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_GENERATION.getId(), Integer.valueOf(phantom.getSequence())));
             Optional<Object> ack = findXMOZASTACK(exportedEvents);
-            if(ack.isPresent()) {
+            if (ack.isPresent()) {
                 extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_LASTACK.getId(), ack.get()));
             }
             fake.setExtendedProperties(extendedProperties);

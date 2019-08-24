@@ -121,7 +121,7 @@ public class EventAdminSecurityDecorator implements EventAdmin
      */
     public boolean equals(final Object o)
     {
-        if(o instanceof EventAdminSecurityDecorator)
+        if (o instanceof EventAdminSecurityDecorator)
         {
             return m_admin.equals(((EventAdminSecurityDecorator) o).m_admin);
         }
@@ -138,7 +138,7 @@ public class EventAdminSecurityDecorator implements EventAdmin
     private void checkPermission(final String topic)
     {
         final Permission p = PermissionsUtil.createPublishPermission(topic);
-        if(p != null && !m_bundle.hasPermission(p))
+        if (p != null && !m_bundle.hasPermission(p))
         {
             throw new SecurityException("Bundle[" + m_bundle +
                 "] has no PUBLISH permission for topic [" + topic + "]");
@@ -152,7 +152,7 @@ public class EventAdminSecurityDecorator implements EventAdmin
      */
     private void checkNull(final Object object, final String name)
     {
-        if(null == object)
+        if (null == object)
         {
             throw new NullPointerException(name + " may not be null");
         }

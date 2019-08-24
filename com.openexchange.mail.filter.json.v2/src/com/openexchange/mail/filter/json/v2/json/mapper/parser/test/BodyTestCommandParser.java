@@ -88,8 +88,8 @@ public class BodyTestCommandParser extends AbstractSimplifiedMatcherAwareCommand
         final List<Object> argList = new ArrayList<Object>();
         String matcher = CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName);
         String normalizedMatcher = MatchType.getNormalName(matcher);
-        if(normalizedMatcher != null){
-            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
+        if (normalizedMatcher != null){
+            if (StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
                 handleSimplifiedMatcher(normalizedMatcher, argList, jsonObject);
             } else {
                 argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
@@ -183,7 +183,7 @@ public class BodyTestCommandParser extends AbstractSimplifiedMatcherAwareCommand
             matchType = matchType.substring(1);
             type = MatchType.valueOf(matchType);
             type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
-            if(transformToNotMatcher){
+            if (transformToNotMatcher){
                 jsonObject.put(BodyTestField.comparison.name(), type.getNotName());
             } else {
                 jsonObject.put(BodyTestField.comparison.name(), type.name());

@@ -113,7 +113,7 @@ public class WebdavPropfindAction extends AbstractAction {
         ResourceMarshaller marshaller;
         if (null != req.getHeader("Depth")) {
             int depth = 0;
-            if(req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
+            if (req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
                 depth = WebdavCollection.INFINITY;
             } else {
                 depth = Integer.parseInt(req.getHeader("Depth"));
@@ -155,7 +155,7 @@ public class WebdavPropfindAction extends AbstractAction {
             loadingHints.setProps(LoadingHints.Property.ALL);
 		}
 
-		if(null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {
+		if (null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {
 			marshaller = new PropfindAllPropsMarshaller(req.getURLPrefix(), req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.ALL);
 		}

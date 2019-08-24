@@ -151,7 +151,7 @@ public class QueryAction extends RTAction {
     public AJAXRequestResult perform(final AJAXRequestData request, ServerSession session) throws OXException {
         final ID id = constructID(request, session);
 
-        if(!stateManager.isConnected(id)) {
+        if (!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
             LOG.debug("", stateMissingException);
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
@@ -209,7 +209,7 @@ public class QueryAction extends RTAction {
 
 
 
-            if(gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
+            if (gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
@@ -245,7 +245,7 @@ public class QueryAction extends RTAction {
             // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
             if (!customActionResults.containsKey(CARESULT_DONE)) {
                 try {
-                    if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
+                    if (!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
                         LOG.debug("Timeout while waiting for handling Stanza:{} \n CustomActionResults contains: {}", new StanzaWriter().write(stanza), customActionResults);
                         customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create());
                     }
@@ -272,8 +272,8 @@ public class QueryAction extends RTAction {
              * the client gets something that he knows to handle
              */
             RealtimeException noResultException = null;
-            if(cause != null) {
-                if(!RealtimeException.class.isInstance(cause)) {
+            if (cause != null) {
+                if (!RealtimeException.class.isInstance(cause)) {
                     noResultException = RealtimeExceptionCodes.RESULT_MISSING.create(cause);
                 } else {
                     noResultException = RealtimeException.class.cast(cause);

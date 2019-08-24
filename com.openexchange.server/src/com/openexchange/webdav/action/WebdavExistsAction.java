@@ -62,10 +62,10 @@ public class WebdavExistsAction extends AbstractAction {
 
     @Override
 	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
-		if(!req.getResource().exists()) {
+		if (!req.getResource().exists()) {
 		    notFound(req, res);
         }
-        if(req.getResource().isLockNull() && !tolerateLockNull) {
+        if (req.getResource().isLockNull() && !tolerateLockNull) {
             notFound(req, res);
         }
         yield(req,res);

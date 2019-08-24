@@ -176,7 +176,7 @@ public class GrizzlyConfig {
 
             this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
             // keep backwards compatibility with AJP configuration
-            if(httpHost.equals("*")) {
+            if (httpHost.equals("*")) {
                 this.httpHost="0.0.0.0";
             }
             this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);

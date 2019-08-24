@@ -300,10 +300,10 @@ class SingleMessageDeliveryTask implements Runnable {
                 writeCon = null;
                 
                 Event mailEvent = event;
-                if(CalendarUtils.isSeriesMaster(event) && trigger.getRecurrenceId() != null) {
+                if (CalendarUtils.isSeriesMaster(event) && trigger.getRecurrenceId() != null) {
                     Date from = new Date(trigger.getRecurrenceId().getValue().getTimestamp());
                     RecurrenceIterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, from, null);
-                    if(iterator.hasNext()) {
+                    if (iterator.hasNext()) {
                         mailEvent = iterator.next();
                     }
                 }

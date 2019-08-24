@@ -90,7 +90,7 @@ public class DummyLockNull extends DummyCollection {
 	@Override
 	public void unlock(final String token) throws WebdavProtocolException {
 		super.unlock(token);
-		if(getOwnLocks().isEmpty()) {
+		if (getOwnLocks().isEmpty()) {
 			mgr.removeLockNull(this.getUrl());
 		}
 	}

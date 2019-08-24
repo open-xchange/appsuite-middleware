@@ -123,7 +123,7 @@ public class FreeBusyConverter implements ResultConverter {
                     json.put(ChronosFreeBusyJsonFields.ATTENDEE, ((AttendeesMapping<?>) EventMapper.getInstance().get(EventField.ATTENDEES)).serialize(attendee.getKey(), TimeZone.getTimeZone(timeZoneID)));
                     FreeBusyResult freeBusyResult = attendee.getValue();
                     json.put(ChronosFreeBusyJsonFields.FREE_BUSY_TIME, parseFreeBusyTime(freeBusyResult, session, timeZoneID));
-                    if(freeBusyResult.getWarnings() != null && freeBusyResult.getWarnings().size()!=0){
+                    if (freeBusyResult.getWarnings() != null && freeBusyResult.getWarnings().size()!=0){
                         JSONArray warningsArray = new JSONArray(freeBusyResult.getWarnings().size());
                         for(OXException ex : freeBusyResult.getWarnings()){
                             JSONObject warning = new JSONObject();
@@ -156,7 +156,7 @@ public class FreeBusyConverter implements ResultConverter {
      */
     private JSONArray parseFreeBusyTime(FreeBusyResult freeBusyResult, Session session, String timeZoneID) throws JSONException, OXException {
         List<FreeBusyTime> freeBusyTimes = freeBusyResult.getFreeBusyTimes();
-        if(freeBusyTimes==null){
+        if (freeBusyTimes==null){
             return new JSONArray();
         }
         JSONArray result = new JSONArray(freeBusyTimes.size());
@@ -166,7 +166,7 @@ public class FreeBusyConverter implements ResultConverter {
             json.put(ChronosFreeBusyJsonFields.FreeBusyTime.END_TIME, time.getEndTime().getTime());
             json.put(ChronosFreeBusyJsonFields.FreeBusyTime.FB_TYPE, time.getFbType().getValue());
             Event event = time.getEvent();
-            if(event!=null){
+            if (event!=null){
               json.put(ChronosFreeBusyJsonFields.FreeBusyTime.EVENT, EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session));
             }
             result.put(json);

@@ -88,7 +88,7 @@ public class MailColorModePreferenceItem implements PreferencesItemService, Conf
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                if(factory==null){
+                if (factory==null){
                     setting.setSingleValue(Boolean.FALSE);
                     return;
                 }

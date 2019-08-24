@@ -135,7 +135,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
-            if(connection != null) {
+            if (connection != null) {
                 dbs.backWritable(connection);
             }
         }
@@ -184,7 +184,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);
-            if(connection != null) {
+            if (connection != null) {
                 dbs.backReadOnly(connection);
             }
         }
@@ -203,7 +203,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setInt(index++, userId);
             statement.setString(index++, deviceId);
             result = statement.executeQuery();
-            if(result.next()) {
+            if (result.next()) {
                 return Optional.of(createDeviceFrom(result));
             }
             return Optional.empty();
@@ -211,7 +211,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(result, statement);
-            if(connection != null) {
+            if (connection != null) {
                 dbs.backReadOnly(connection);
             }
         }

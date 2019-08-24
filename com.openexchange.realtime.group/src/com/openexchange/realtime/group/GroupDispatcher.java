@@ -211,7 +211,7 @@ public class GroupDispatcher implements ComponentHandle {
      * @return true if the user is always allowed to send e.g. is a synthetic component from an internal context
      */
     protected boolean isWhitelisted(ID sender) {
-        if(
+        if (
             sender != null
             && sender.isInternal()
           ) {
@@ -349,7 +349,7 @@ public class GroupDispatcher implements ComponentHandle {
      * @throws OXException
      */
     public void join(ID id, String stamp, Stanza stanza) throws OXException {
-        if(isDisposed) {
+        if (isDisposed) {
             throw RealtimeExceptionCodes.GROUP_DISPOSED.create(groupId);
         }
         if (idsRef.get().contains(id)) {
@@ -385,7 +385,7 @@ public class GroupDispatcher implements ComponentHandle {
         }
         if (added) {
             DistributedGroupManager groupManager = GROUPMANAGER_REF.get();
-            if(groupManager == null) {
+            if (groupManager == null) {
                 LOG.error("GroupManager reference unset.");
             } else {
                 groupManager.addChoice(new SelectorChoice(id , groupId, stamp));
@@ -401,8 +401,8 @@ public class GroupDispatcher implements ComponentHandle {
     public void leave(ID id, Stanza stanza) throws OXException {
         //check if the sender is a member at all
         Set<ID> members = idsRef.get();
-        if(!members.contains(id)) {
-            if(members.isEmpty()) {
+        if (!members.contains(id)) {
+            if (members.isEmpty()) {
                 dispose();
             }
             throw RealtimeExceptionCodes.NOT_A_MEMBER.create(id);

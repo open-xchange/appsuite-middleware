@@ -259,7 +259,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         ReminderObject reminder = new ReminderObject();
         reminder.setDate(new Date(trigger.getTime().longValue()));
         EventID eventId = null;
-        if(trigger.containsRecurrenceId()){
+        if (trigger.containsRecurrenceId()){
             eventId = new EventID(trigger.getFolder(), trigger.getEventId(), trigger.getRecurrenceId());
         } else {
             eventId = new EventID(trigger.getFolder(), trigger.getEventId());

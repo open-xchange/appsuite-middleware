@@ -201,7 +201,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             if (null == tmp) {
                 tmp = createFieldComparer(sortField, null == locale ? Locale.US : locale);
             }
-            if(flaggingColor != null && sortField == MailSortField.COLOR_LABEL && tmp instanceof FlaggingModeAwareIFieldComparer) {
+            if (flaggingColor != null && sortField == MailSortField.COLOR_LABEL && tmp instanceof FlaggingModeAwareIFieldComparer) {
                 ((FlaggingModeAwareIFieldComparer) tmp).setFlaggingColor(flaggingColor);
             }
             fieldComparer = tmp;

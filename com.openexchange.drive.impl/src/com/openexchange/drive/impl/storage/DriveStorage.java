@@ -1261,7 +1261,7 @@ public class DriveStorage {
      */
     public TrashContent getTrashContent() throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
-        if(trashFolder == null) {
+        if (trashFolder == null) {
             return null;
         }
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);

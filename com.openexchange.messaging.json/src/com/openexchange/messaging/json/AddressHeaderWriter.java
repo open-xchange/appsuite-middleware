@@ -113,7 +113,7 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
             final MessagingAddressHeader addr = toMessagingAddress(address);
             object.put("personal", addr.getPersonal());
             object.put("address", addr.getAddress());
-            if(entry.getKey().equalsIgnoreCase(KnownHeader.FROM.toString())) {
+            if (entry.getKey().equalsIgnoreCase(KnownHeader.FROM.toString())) {
                 return object;
             }
             addresses.put(object);
@@ -122,7 +122,7 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
     }
 
     private MessagingAddressHeader toMessagingAddress(final MessagingHeader address) throws OXException {
-        if(MessagingAddressHeader.class.isInstance(address)) {
+        if (MessagingAddressHeader.class.isInstance(address)) {
             return (MessagingAddressHeader) address;
         }
         return MimeAddressMessagingHeader.valueOfRFC822(address.getName(), address.getValue());

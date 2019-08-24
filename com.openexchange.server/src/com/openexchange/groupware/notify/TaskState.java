@@ -111,7 +111,7 @@ public class TaskState extends LinkableState {
 
 	@Override
     public boolean sendMail(final UserSettingMail userSettingMail, int owner, int participant, int modificationUser) {
-        if(participant == modificationUser) { return false; }
+        if (participant == modificationUser) { return false; }
 
          switch(type) {
             case ACCEPTED: case DECLINED: case TENTATIVELY_ACCEPTED:

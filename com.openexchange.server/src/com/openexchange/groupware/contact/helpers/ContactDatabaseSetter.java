@@ -78,7 +78,7 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MarkAsDistributionList");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
 
@@ -97,7 +97,7 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PrivateFlag");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
 
@@ -112,7 +112,7 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreationDate");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
 
@@ -128,7 +128,7 @@ public class ContactDatabaseSetter extends AbstractContactSwitcherWithDelegate {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("LastModified");
         }
         final Contact conObj = (Contact) objects[0];
-        if(objects[1] == null) {
+        if (objects[1] == null) {
             return conObj;
         }
 

@@ -172,7 +172,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             rs = prep.executeQuery();
             String cid = null;
             String loginmapping = null;
-            if(rs.next()){
+            if (rs.next()){
                 cid = rs.getString("cid");
                 loginmapping = rs.getString("login_info");
             }else{
@@ -185,7 +185,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             final String[] tmp_ = loginmapping.split("\\|\\|");
 
             // only if we get 2 strings out of the split , then proceed
-            if(tmp_.length!=2){
+            if (tmp_.length!=2){
                 LOG.error("handleLoginInfo: Could not split up login_info mapping correctly for mappingstring \"{}\" ", loginmapping);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }

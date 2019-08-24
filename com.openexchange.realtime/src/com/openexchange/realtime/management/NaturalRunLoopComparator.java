@@ -71,7 +71,7 @@ public class NaturalRunLoopComparator implements Comparator<SyntheticChannelRunL
         Matcher matcher1 = COMPARISON_PATTERN.matcher(o1.getName());
         Matcher matcher2 = COMPARISON_PATTERN.matcher(o2.getName());
         try {
-            if(matcher1.matches() && matcher2.matches()) {
+            if (matcher1.matches() && matcher2.matches()) {
                 int prefixComparison = matcher1.group(1).compareTo(matcher2.group(1));
                 if (prefixComparison != 0) {
                     return prefixComparison;

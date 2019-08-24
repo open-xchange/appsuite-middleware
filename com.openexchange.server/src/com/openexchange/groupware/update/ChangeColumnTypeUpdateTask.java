@@ -147,7 +147,7 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
 
     protected boolean correctType(Connection con) throws OXException, SQLException {
         String name = Tools.getColumnTypeName(con, tableName, column.getName());
-        if(name == null) {
+        if (name == null) {
             throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create(column.getName());
         }
         return name.equalsIgnoreCase(column.getDefinition());

@@ -287,7 +287,7 @@ public enum MessagingField {
 
     public static void initHeaders() {
         for (final KnownHeader header : KnownHeader.values()) {
-            if(null != header.getEquivalentField()) {
+            if (null != header.getEquivalentField()) {
                 equivalentHeaders.put(header.getEquivalentField(), header);
             }
         }

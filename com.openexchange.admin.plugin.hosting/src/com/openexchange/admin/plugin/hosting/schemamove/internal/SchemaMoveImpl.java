@@ -177,7 +177,7 @@ public class SchemaMoveImpl implements SchemaMoveService {
             throw StorageException.wrapForRMI(e);
         }
 
-        if(invalidateSession) {
+        if (invalidateSession) {
             /*
              * Kill sessions for the disabled contexts globally
              */

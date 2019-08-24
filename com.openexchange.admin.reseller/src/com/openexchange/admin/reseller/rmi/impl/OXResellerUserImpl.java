@@ -113,7 +113,7 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
     public void create(Context ctx, User usr, UserModuleAccess access, Credentials cred) throws PluginException {
         try {
             final ResellerAdmin owner = oxresell.getContextOwner(ctx);
-            if( 0 == owner.getId().intValue() ) {
+            if ( 0 == owner.getId().intValue() ) {
                 // if context has no owner, restriction checks cannot be done and
                 // context has been created by master admin
                 return;

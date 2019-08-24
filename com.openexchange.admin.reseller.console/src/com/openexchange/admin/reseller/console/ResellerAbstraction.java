@@ -235,7 +235,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
 
     protected static void parseAndSetAddRestrictions(final AdminParser parser, final ResellerAdmin adm, final CLIOption option) throws InvalidDataException {
         HashSet<Restriction> res = parseRestrictions(parser, option);
-        if( res.size() > 0 ) {
+        if ( res.size() > 0 ) {
             adm.setRestrictions(res.toArray(new Restriction[res.size()]));
         }
     }
@@ -251,11 +251,11 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     }
 
     public static Restriction getRestrictionFromString(final String opt) throws InvalidDataException {
-        if( opt.indexOf('=') < 0 ) {
+        if ( opt.indexOf('=') < 0 ) {
             throw new InvalidDataException("Restriction must be key=value pair");
         }
         final String[] keyval = opt.split("=");
-        if( keyval.length > 2 ) {
+        if ( keyval.length > 2 ) {
             throw new InvalidDataException("Restriction must only contain one \"=\" character");
         }
         final Restriction restriction = new Restriction(keyval[0], keyval[1]);

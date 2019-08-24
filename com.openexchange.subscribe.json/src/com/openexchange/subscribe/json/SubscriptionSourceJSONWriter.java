@@ -101,7 +101,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         for (final SubscriptionSource source : sourceList) {
             final JSONArray row = new JSONArray();
             for(final String field : fields) {
-                if(ID.equals(field)) {
+                if (ID.equals(field)) {
                     row.put(source.getId());
                 } else if (DISPLAY_NAME.equals(field)) {
                     String displayName = source.getDisplayName();

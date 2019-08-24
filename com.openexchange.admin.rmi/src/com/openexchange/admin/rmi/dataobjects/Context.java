@@ -532,7 +532,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public Map<String, Map<String, String>> getUserAttributes() {
-        if(userAttributes == null) {
+        if (userAttributes == null) {
             userAttributes = new HashMap<String, Map<String, String>>();
         }
         return userAttributes;
@@ -544,11 +544,11 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public Map<String, String> getNamespace(String namespace) {
-        if(userAttributes == null) {
+        if (userAttributes == null) {
             userAttributes = new HashMap<String, Map<String, String>>();
         }
         Map<String, String> ns = userAttributes.get(namespace);
-        if(ns == null) {
+        if (ns == null) {
             ns = new HashMap<String, String>();
             userAttributes.put(namespace, ns);
         }

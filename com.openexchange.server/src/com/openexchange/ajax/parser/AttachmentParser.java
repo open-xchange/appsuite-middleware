@@ -83,7 +83,7 @@ public class AttachmentParser {
     }
 
     public AttachmentField[] getColumns(final String[] parameterValues) throws UnknownColumnException{
-        if(parameterValues == null) {
+        if (parameterValues == null) {
             return null;
         }
         final AttachmentField[] columns = new AttachmentField[parameterValues.length];
@@ -96,7 +96,7 @@ public class AttachmentParser {
                 throw new UnknownColumnException(idString);
             }
             final AttachmentField f = AttachmentField.get(id);
-            if(f == null) {
+            if (f == null) {
                 throw new UnknownColumnException(idString);
             }
             columns[i++] = f;

@@ -93,7 +93,7 @@ public class Asserts {
 
     public static void assertPriority(List<SubscriptionSource> sources, String identifier, int priority) {
         for (SubscriptionSource subscriptionSource : sources) {
-            if(subscriptionSource.getId().equals(identifier)) {
+            if (subscriptionSource.getId().equals(identifier)) {
                 assertEquals(priority, subscriptionSource.getPriority());
                 return;
             }

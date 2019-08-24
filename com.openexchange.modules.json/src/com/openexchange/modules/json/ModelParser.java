@@ -80,7 +80,7 @@ public class ModelParser<T extends Model<T>> {
     public T parse(JSONObject json, List<Attribute<T>> attributesToParse) throws JSONException {
         T thing = metadata.create();
         for (Attribute<T> attribute : attributesToParse) {
-            if(!json.has(attribute.getName())) {
+            if (!json.has(attribute.getName())) {
                 continue;
             }
             Object value = json.get(attribute.getName());
@@ -97,7 +97,7 @@ public class ModelParser<T extends Model<T>> {
     public List<Attribute<T>> getFields(JSONObject json, List<Attribute<T>> attributes) {
         List<Attribute<T>> retval = new ArrayList<Attribute<T>>(attributes.size());
         for (Attribute<T> attribute : attributes) {
-            if(json.has(attribute.getName())) {
+            if (json.has(attribute.getName())) {
                 retval.add(attribute);
             }
         }

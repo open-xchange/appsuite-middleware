@@ -77,7 +77,7 @@ public class MemoryStorage<T extends Model<T>> {
     public MemoryStorage(Map<String, Map<String, Object>> database, Metadata<T> metadata, AttributeHandler<T> overrides) {
         super();
         db  = new HashMap<Object, T>();
-        if(database == null) {
+        if (database == null) {
             return;
         }
         for (Map.Entry<String, Map<String, Object>> pair : database.entrySet()) {

@@ -172,7 +172,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         if (null != privateComment) {
             component.getProperties().add(new XProperty("X-CALENDARSERVER-PRIVATE-COMMENT", privateComment));
         }
-        if(resources.isEmpty()) { return; }
+        if (resources.isEmpty()) { return; }
         setResources(index, component, resources, ctx);
     }
 

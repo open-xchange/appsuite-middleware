@@ -129,7 +129,7 @@ public class DynamicPortableFactoryImpl implements DynamicPortableFactory {
         ArrayList<ClassDefinition> classDefinitions = new ArrayList<ClassDefinition>(registeredFactories.size());
         for (CustomPortableFactory factory : registeredFactories) {
             ClassDefinition classDefinition = factory.getClassDefinition();
-            if(classDefinition != null) {
+            if (classDefinition != null) {
                 classDefinitions.add(classDefinition);
             }
         }

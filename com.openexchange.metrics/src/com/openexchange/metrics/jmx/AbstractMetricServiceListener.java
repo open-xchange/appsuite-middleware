@@ -182,7 +182,7 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         Hashtable<String, String> properties = new Hashtable<>();
         properties.put("type", metricDescriptor.getGroup());
         properties.put("name", metricDescriptor.getName());
-        if(metricDescriptor.getDimensions() != null && metricDescriptor.getDimensions().isEmpty() == false) {
+        if (metricDescriptor.getDimensions() != null && metricDescriptor.getDimensions().isEmpty() == false) {
             properties.putAll(metricDescriptor.getDimensions());
         }
 

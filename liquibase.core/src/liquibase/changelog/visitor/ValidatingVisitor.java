@@ -90,7 +90,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
             
             
-            if(shouldValidate){
+            if (shouldValidate){
                 warnings.addAll(change.warn(database));
             
                 try {                
@@ -110,7 +110,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
         }
 
-        if(ranChangeSet != null){
+        if (ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
                 if (!changeSet.shouldRunOnChange()) {
                     invalidMD5Sums.add(changeSet);

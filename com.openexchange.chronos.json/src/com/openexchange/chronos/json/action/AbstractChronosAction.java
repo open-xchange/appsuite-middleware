@@ -307,7 +307,7 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     }
 
     private static EventField[] parseFields(String value) {
-        if(Strings.isEmpty(value)){
+        if (Strings.isEmpty(value)){
             return new EventField[0];
         }
 

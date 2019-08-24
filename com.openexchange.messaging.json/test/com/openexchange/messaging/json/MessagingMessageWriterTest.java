@@ -153,7 +153,7 @@ public class MessagingMessageWriterTest {
         // Where happy if they are all included. Concrete header writing is tested elsewhere
 
         for (final MessagingField field : MessagingField.values()) {
-            if(field.getEquivalentHeader() != null) {
+            if (field.getEquivalentHeader() != null) {
                 assertTrue("Missing field: "+field.toString()+" in ", messageJSON.has(field.toString()));
             }
         }

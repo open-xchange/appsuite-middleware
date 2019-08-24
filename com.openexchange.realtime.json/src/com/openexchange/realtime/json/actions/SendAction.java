@@ -145,7 +145,7 @@ public class SendAction extends RTAction  {
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         ID id = constructID(request, session);
-        if(!stateManager.isConnected(id)) {
+        if (!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
             LOG.debug("", stateMissingException);
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);

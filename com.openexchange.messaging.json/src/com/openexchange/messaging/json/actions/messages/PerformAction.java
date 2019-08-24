@@ -96,8 +96,8 @@ public class PerformAction extends AbstractMessagingAction {
         final MessagingMessage input = req.getMessage();
         MessagingMessage output = null;
 
-        if(input == null) {
-            if(req.isset("folder", "id")) {
+        if (input == null) {
+            if (req.isset("folder", "id")) {
                 output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(req.getFolderId(), req.getId(), req.getMessageAction());
             } else {
                 output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(req.getMessageAction());
@@ -106,7 +106,7 @@ public class PerformAction extends AbstractMessagingAction {
             output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(input, req.getMessageAction());
         }
 
-        if(output == null) {
+        if (output == null) {
             return new AJAXRequestResult(I(1));
         }
         return new AJAXRequestResult(writer.write(output, req.getAccountAddress(), session, DISPLAY_MODE));

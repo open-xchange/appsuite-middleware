@@ -204,7 +204,7 @@ public class TaskTestManager implements TestManager {
         DeleteRequest request = new DeleteRequest(taskToDelete, failOnErrorOverride);
         try {
             setLastResponse(getClient().execute(request));
-            if(lastResponse.hasError() && null != getClient2()) {
+            if (lastResponse.hasError() && null != getClient2()) {
                 setLastResponse(getClient2().execute(request));
             }
         } catch (Exception e) {

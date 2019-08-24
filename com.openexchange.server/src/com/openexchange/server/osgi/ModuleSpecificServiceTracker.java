@@ -95,7 +95,7 @@ public class ModuleSpecificServiceTracker<T> extends ServiceTracker {
     }
 
     protected int atoi(Object property) {
-        if(Integer.class.isInstance(property)) {
+        if (Integer.class.isInstance(property)) {
             return (Integer) property;
         }
         return Integer.parseInt(property.toString());

@@ -80,7 +80,7 @@ public class Utils {
     }
 
 	public static Date convert(final String s) {
-		if(s == null) {
+		if (s == null) {
 			return null;
 		}
 		Date date = null;
@@ -99,7 +99,7 @@ public class Utils {
 	}
 
 	public static String convert(final Date d) {
-		if(d == null) {
+		if (d == null) {
 			return null;
 		}
 		synchronized(output_format) {

@@ -185,7 +185,7 @@ public final class Tools  {
         // )               0x29
         // \               0x5c
         // NUL             0x00
-        if(ldapfilter == null) {
+        if (ldapfilter == null) {
             return "";
         }
         final StringBuilder sa = new StringBuilder();

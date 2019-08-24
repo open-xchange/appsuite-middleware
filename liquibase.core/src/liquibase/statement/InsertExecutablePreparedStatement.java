@@ -22,7 +22,7 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 	    sql.append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
 	    sql.append("(");
 	    for(ColumnConfig column : getColumns()) {
-	        if(database.supportsAutoIncrement()
+	        if (database.supportsAutoIncrement()
 	            && Boolean.TRUE.equals(column.isAutoIncrement())) {
 	            continue;
 	        }

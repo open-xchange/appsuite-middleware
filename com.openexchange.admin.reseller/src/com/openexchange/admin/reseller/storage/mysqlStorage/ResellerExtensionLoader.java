@@ -120,7 +120,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                     for (Context context : partition) {
                         OXContextExtensionImpl ctxext = (OXContextExtensionImpl)context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
                         // add extension of none present (Bug 18881)
-                        if( null == ctxext ) {
+                        if ( null == ctxext ) {
                             ctxext = new OXContextExtensionImpl();
                             context.addExtension(ctxext);
                         }
@@ -133,13 +133,13 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                         OXContextExtensionImpl ctxext = (OXContextExtensionImpl)context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
                         HashSet<Restriction> restrictions;
                         restrictions = OXResellerTools.array2HashSet(ctxext.getRestriction());
-                        if( null == restrictions ) {
+                        if ( null == restrictions ) {
                             restrictions = new HashSet<Restriction>();
                         }
                         context.removeExtension(ctxext);
                         ctxext.setCustomid(rs.getString(2));
                         int rid = rs.getInt(3);
-                        if( rid > 0 ) {
+                        if ( rid > 0 ) {
                             final Restriction res = new Restriction();
                             res.setId(I(rid));
                             res.setValue(rs.getString(4));

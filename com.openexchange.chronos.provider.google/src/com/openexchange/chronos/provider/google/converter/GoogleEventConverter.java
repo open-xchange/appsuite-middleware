@@ -433,7 +433,7 @@ public class GoogleEventConverter {
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getRecurringEventId() != null) {
                     try {
-                        if(from.getOriginalStartTime() != null) {
+                        if (from.getOriginalStartTime() != null) {
                             com.google.api.client.util.DateTime rfc3339 = from.getOriginalStartTime().getDate() == null ? from.getOriginalStartTime().getDateTime() : from.getOriginalStartTime().getDate();
                             RecurrenceId recId = new DefaultRecurrenceId(new DateTime(rfc3339.getValue()));
                             to.setRecurrenceId(recId);

@@ -740,7 +740,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             } catch (RuntimeException e) {
                 throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-        } else if(ResultType.INPUT_STREAM.equals(resultType)) {
+        } else if (ResultType.INPUT_STREAM.equals(resultType)) {
             // Return the input stream
             return (T) inputStream;
         }

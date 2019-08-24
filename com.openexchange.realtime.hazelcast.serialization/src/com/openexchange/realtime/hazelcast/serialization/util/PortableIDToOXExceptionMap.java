@@ -101,7 +101,7 @@ public class PortableIDToOXExceptionMap extends IDMap<OXException> implements Cu
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        if(entrySet().size() > 0) {
+        if (entrySet().size() > 0) {
             List<PortableIDToOXExceptionMapEntry> entryList = new ArrayList<PortableIDToOXExceptionMapEntry>(entrySet().size());
             for(Entry<ID, OXException> entry : entrySet()) {
                 entryList.add(new PortableIDToOXExceptionMapEntry(entry));
@@ -116,9 +116,9 @@ public class PortableIDToOXExceptionMap extends IDMap<OXException> implements Cu
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         delegate.clear();
-        if(reader.getFieldNames().contains(MAP_ENTRIES)) {
+        if (reader.getFieldNames().contains(MAP_ENTRIES)) {
             Portable[] map_entries = reader.readPortableArray(MAP_ENTRIES);
-            if(map_entries != null && map_entries.length > 0) {
+            if (map_entries != null && map_entries.length > 0) {
                 for(int i = 0; i < map_entries.length; i++) {
                     PortableIDToOXExceptionMapEntry entry = PortableIDToOXExceptionMapEntry.class.cast(map_entries[i]);
                     delegate.put(entry.getKey(), entry.getValue());

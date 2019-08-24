@@ -96,7 +96,7 @@ public final class ContactDeleteListener implements DeleteListener {
         if (type == DeleteEvent.TYPE_USER) {
 
             Integer destUser = deleteEvent.getDestinationUserID();
-            if(destUser == null){
+            if (destUser == null){
                 destUser = I(deleteEvent.getContext().getMailadmin());
             }
             /*

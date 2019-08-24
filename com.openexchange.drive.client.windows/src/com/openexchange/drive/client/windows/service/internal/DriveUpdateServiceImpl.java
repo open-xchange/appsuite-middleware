@@ -152,7 +152,7 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         values.put("OX_USERNAME", StringEscapeUtils.escapeXml(quote(username)));
         String exeFileName = getExeFileName(branding);
         String msiFileName = getMsiFileName(branding);
-        if(exeFileName == null || msiFileName == null) {
+        if (exeFileName == null || msiFileName == null) {
             throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
         }
         try {

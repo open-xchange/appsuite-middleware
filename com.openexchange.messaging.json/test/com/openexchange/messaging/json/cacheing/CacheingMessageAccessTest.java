@@ -198,7 +198,7 @@ public class CacheingMessageAccessTest {
         @Override
         protected MessagingMessage get(final String folder, final String id) {
             final MessagingMessage retval = cached;
-            if(forgetAfterFirstHit) {
+            if (forgetAfterFirstHit) {
                 cached = null;
             }
             this.folder = folder;

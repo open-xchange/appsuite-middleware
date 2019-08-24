@@ -254,7 +254,7 @@ public final class DeleteAction extends AbstractFolderAction {
         if (failOnError) {
 
             for (TrashResult trashResult : results) {
-                if(trashResult.isSupported()){
+                if (trashResult.isSupported()){
                     JSONObject obj = new JSONObject(3);
                     obj.put(SUPPORTED, true);
                     if (trashResult.isTrashed()) {
@@ -274,7 +274,7 @@ public final class DeleteAction extends AbstractFolderAction {
             }
         } else {
             for (TrashResult trashResult : results) {
-                if(trashResult.isSupported()){
+                if (trashResult.isSupported()){
                     JSONObject obj = new JSONObject(3);
                     obj.put(SUPPORTED, true);
                     if (trashResult.hasFailed()) {

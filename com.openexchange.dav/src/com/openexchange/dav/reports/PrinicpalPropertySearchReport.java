@@ -277,7 +277,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                 }
                 String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
-                if(prop == null) {
+                if (prop == null) {
                     continue;
                 }
                 for (Element element : prop.getChildren()) {

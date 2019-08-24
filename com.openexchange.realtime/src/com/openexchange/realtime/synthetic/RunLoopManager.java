@@ -269,7 +269,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
             for( Entry<ID, SyntheticChannelRunLoop> entry : loopMap.entrySet() ) {
                 ID handleId = entry.getKey();
                 SyntheticChannelRunLoop runLoop = entry.getValue();
-                if(removedLoop.equals(runLoop)) {
+                if (removedLoop.equals(runLoop)) {
                     loopMap.remove(handleId);
                 }
             }
@@ -287,7 +287,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
         int count=0;
         List<SyntheticChannelRunLoop> loopCluster = loopClusters.get(component.getId());
         for (Entry<ID, SyntheticChannelRunLoop> entry : loopMap.entrySet()) {
-            if(loopCluster.contains(entry.getValue())) {
+            if (loopCluster.contains(entry.getValue())) {
                 count++;
             }
         }
@@ -313,7 +313,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
         List<Entry<ID,SyntheticChannelRunLoop>> handlesInCluster = new ArrayList<Entry<ID,SyntheticChannelRunLoop>>();
         List<SyntheticChannelRunLoop> loopCluster = loopClusters.get(componentId);
         for (Entry<ID, SyntheticChannelRunLoop> entry : loopMap.entrySet()) {
-            if(loopCluster.contains(entry.getValue())) {
+            if (loopCluster.contains(entry.getValue())) {
                 handlesInCluster.add(entry);
             }
         }

@@ -220,7 +220,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         @Override
         public Permission convert(TargetPermission permission) {
-            if(permission instanceof SubfolderAwareTargetPermission) {
+            if (permission instanceof SubfolderAwareTargetPermission) {
                 BasicPermission result = new ImmutableTypePermission(permission.getEntity(), permission.isGroup(), permission.getBits());
                 result.setType(FolderPermissionType.getType(((SubfolderAwareTargetPermission) permission).getType()));
                 return result;

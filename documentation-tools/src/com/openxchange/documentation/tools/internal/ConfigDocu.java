@@ -116,7 +116,7 @@ public class ConfigDocu {
         List<Property> result = new ArrayList<>(20);
         for(YamlFile file: data) {
             for(Property prop: file.getProperties()) {
-                if(prop.getTags().contains(tag)) {
+                if (prop.getTags().contains(tag)) {
                     result.add(prop);
                 }
             }

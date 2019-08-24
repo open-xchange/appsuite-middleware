@@ -95,7 +95,7 @@ public class BrandingConfigurationRemoteImpl implements BrandingConfigurationRem
                     tmp.add(brand);
                 }
             }
-            if(invalidate_only){
+            if (invalidate_only){
                 brandings.removeAll(tmp);
             } else {
                 brandings = tmp;

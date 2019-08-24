@@ -193,7 +193,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
             if (threshold == null) {
                 threshold = new AtomicLong(0);
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
-                if(meantime != null) {
+                if (meantime != null) {
                     LOG.debug("Found another number: {} in the meantime for the SequencePrincipal: {}", meantime, stanza.getSequencePrincipal());
                     threshold = meantime;
                 }
@@ -263,7 +263,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
 
                 if (inbox.size() < BUFFER_SIZE) {
                     //We see no reason to buffer if the gap in the sequence numbers is too big. instruct the client to reset the sequence
-                    if(stanza.getSequenceNumber() > threshold.get() + BUFFER_SIZE) {
+                    if (stanza.getSequenceNumber() > threshold.get() + BUFFER_SIZE) {
                         stanza.trace("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
                         LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
                         throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
@@ -271,12 +271,12 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
                     //Try to buffer up a valid sequence of Stanzas
                     boolean alreadyContained = false;
                     for (StanzaWithCustomAction stanzaWithCustomAction : inbox) {
-                        if(stanzaWithCustomAction.sequenceNumber == stanza.getSequenceNumber()) {
+                        if (stanzaWithCustomAction.sequenceNumber == stanza.getSequenceNumber()) {
                             alreadyContained = true;
                             break;
                         }
                     }
-                    if(!alreadyContained) {
+                    if (!alreadyContained) {
                         stanza.trace("Not in sequence, enqueing");
                             LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {}", threshold.get(), stanza.getSequenceNumber());
                         inbox.add(new StanzaWithCustomAction(stanza, customAction));

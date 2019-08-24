@@ -113,10 +113,10 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         List<AlarmTrigger> triggers = eventManager.getAlarmTrigger(until, actions);
         //AlarmTriggerData result = triggers;
         List<AlarmTrigger> result = null;
-        if(filter != null) {
+        if (filter != null) {
             result = new ArrayList<>();
             for(AlarmTrigger trigger: triggers) {
-                if(trigger.getEventId().equals(filter)) {
+                if (trigger.getEventId().equals(filter)) {
                     result.add(trigger);
                 }
             }

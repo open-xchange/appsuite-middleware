@@ -221,17 +221,17 @@ public class AlarmPropagationTests extends AbstractAlarmTest {
         
         for(Alarm alarm: event.getAlarms()) {
             String duration = alarm.getTrigger().getDuration();
-            if(duration != null) {
-                if(duration.equals(PT15M)) {
+            if (duration != null) {
+                if (duration.equals(PT15M)) {
                     found[0]=true;
                     continue;
                 }
-                if(duration.equals(PT30M)) {
+                if (duration.equals(PT30M)) {
                     found[1]=true;
                     continue;
                 }
             } else {
-                if(alarm.getTrigger().getDateTime() != null) {
+                if (alarm.getTrigger().getDateTime() != null) {
                     found[2]=true;
                     continue;
                 }

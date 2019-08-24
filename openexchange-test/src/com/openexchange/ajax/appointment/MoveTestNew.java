@@ -163,7 +163,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
                 manager.cleanUp();
             }
 
-            if(null != clientC) {
+            if (null != clientC) {
                 clientC.logout();
                 clientC = null;
             }

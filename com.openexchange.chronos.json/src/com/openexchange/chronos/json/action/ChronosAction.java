@@ -479,19 +479,19 @@ public abstract class ChronosAction extends AbstractChronosAction {
     private void incrementGroupUseCount(AJAXRequestData requestData) {
 
         String groupsString = requestData.getParameter(PARAM_USED_GROUP);
-        if(Strings.isEmpty(groupsString)) {
+        if (Strings.isEmpty(groupsString)) {
             // Nothing to do here
             return;
         }
         String[] groups = Strings.splitByCommaNotInQuotes(groupsString);
         PrincipalUseCountService principalUseCountService = services.getOptionalService(PrincipalUseCountService.class);
-        if(principalUseCountService == null) {
+        if (principalUseCountService == null) {
             LOG.debug("Missing {} service.", PrincipalUseCountService.class.getName());
             return;
         }
 
         ThreadPoolService threadPoolService = services.getOptionalService(ThreadPoolService.class);
-        if(threadPoolService != null) {
+        if (threadPoolService != null) {
             threadPoolService.getExecutor().execute(() -> {
                 incrementGroupUseCount(requestData.getSession(), principalUseCountService, groups);
             });

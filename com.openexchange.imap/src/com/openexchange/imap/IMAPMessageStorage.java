@@ -1973,11 +1973,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
 
             int[] seqNumsToFetch = getSeqNumsToFetch(sortField, order, indexRange, fallbackOnFailedSORT);
-            if(seqNumsToFetch == null) {
+            if (seqNumsToFetch == null) {
                 // no messages with the given flag
                 return performIMAPSearch(MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, fields, indexRange, headerNames, messageCount);
             }
-            if(seqNumsToFetch.length == 0) {
+            if (seqNumsToFetch.length == 0) {
                 return EMPTY_RETVAL;
             }
 

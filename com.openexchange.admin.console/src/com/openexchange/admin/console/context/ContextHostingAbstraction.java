@@ -133,7 +133,7 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
 
     public void changeMappingSetting(final OXContextInterface oxres, final Context ctx, final Credentials auth, final boolean change) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         // check if wants to change login mappings, then first load current mappings from server
-        if(add_mappings!=null || remove_mappings!=null){
+        if (add_mappings!=null || remove_mappings!=null){
             if (change) {
                 final Context server_ctx = oxres.getData(ctx, auth);
                 ctx.setLoginMappings(server_ctx.getLoginMappings());
@@ -144,7 +144,7 @@ public class ContextHostingAbstraction extends ObjectNamingAbstraction {
             }
 
             // remove mappings
-            if(remove_mappings!=null){
+            if (remove_mappings!=null){
                 ctx.removeLoginMappings(Arrays.asList(remove_mappings));
             }
         }

@@ -135,7 +135,7 @@ public class SqlGeneratorFactory {
     }
 
     private Type[] getGenericInterfaces(Class<?> clazz) {
-        if(genericInterfacesCache.containsKey(clazz)) {
+        if (genericInterfacesCache.containsKey(clazz)) {
             return genericInterfacesCache.get(clazz);
         }
 
@@ -145,7 +145,7 @@ public class SqlGeneratorFactory {
     }
 
     private Type getGenericSuperclass(Class<?> clazz) {
-        if(genericSuperClassCache.containsKey(clazz)) {
+        if (genericSuperClassCache.containsKey(clazz)) {
             return genericSuperClassCache.get(clazz);
         }
 

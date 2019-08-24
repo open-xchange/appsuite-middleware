@@ -112,7 +112,7 @@ public class ShareLinks {
      */
     public static String generateInternal(HostData hostData, ShareTarget target) throws OXException {
         Module module = Module.getForFolderConstant(target.getModule());
-        if(null==module){
+        if (null==module){
             throw ShareCoreExceptionCodes.UNKOWN_MODULE.create(I(target.getModule()));
         }
         String moduleStr = module.getName();

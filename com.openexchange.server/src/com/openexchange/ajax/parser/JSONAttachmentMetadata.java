@@ -79,7 +79,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public int getCreatedBy() {
-        if(json.has(AttachmentField.CREATED_BY_LITERAL.getName())) {
+        if (json.has(AttachmentField.CREATED_BY_LITERAL.getName())) {
             return json.optInt(AttachmentField.CREATED_BY_LITERAL.getName());
         }
         return -1;
@@ -96,7 +96,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public Date getCreationDate() {
-        if(!json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
+        if (!json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
             return null;
         }
         return new Date(json.optLong(AttachmentField.CREATION_DATE_LITERAL.getName()));
@@ -104,9 +104,9 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public void setCreationDate(final Date creationDate) {
-        if(creationDate == null && json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
+        if (creationDate == null && json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
             json.remove(AttachmentField.CREATION_DATE_LITERAL.getName());
-        } else if(creationDate != null) {
+        } else if (creationDate != null) {
             try {
                 json.put(AttachmentField.CREATION_DATE_LITERAL.getName(),creationDate.getTime());
             } catch (JSONException e) {
@@ -117,7 +117,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public String getFileMIMEType() {
-        if(!json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())) {
+        if (!json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())) {
             return null;
         }
         return json.optString(AttachmentField.FILE_MIMETYPE_LITERAL.getName());
@@ -125,7 +125,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public void setFileMIMEType(final String fileMIMEType) {
-        if(fileMIMEType == null && json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())){
+        if (fileMIMEType == null && json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())){
             json.remove(AttachmentField.FILE_MIMETYPE_LITERAL.getName());
             return;
         }
@@ -138,7 +138,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public String getFilename() {
-        if(!json.has(AttachmentField.FILENAME_LITERAL.getName())) {
+        if (!json.has(AttachmentField.FILENAME_LITERAL.getName())) {
             return null;
         }
         return json.optString(AttachmentField.FILENAME_LITERAL.getName());
@@ -146,7 +146,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public void setFilename(final String filename) {
-        if(filename == null && json.has(AttachmentField.FILENAME_LITERAL.getName())){
+        if (filename == null && json.has(AttachmentField.FILENAME_LITERAL.getName())){
             json.remove(AttachmentField.FILENAME_LITERAL.getName());
             return;
         }
@@ -159,7 +159,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public long getFilesize() {
-        if(!json.has(AttachmentField.FILE_SIZE_LITERAL.getName())) {
+        if (!json.has(AttachmentField.FILE_SIZE_LITERAL.getName())) {
             return 0;
         }
         return json.optLong(AttachmentField.FILE_SIZE_LITERAL.getName());
@@ -177,7 +177,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public int getAttachedId() {
-        if(!json.has(AttachmentField.ATTACHED_ID_LITERAL.getName())) {
+        if (!json.has(AttachmentField.ATTACHED_ID_LITERAL.getName())) {
             return -1;
         }
         return json.optInt(AttachmentField.ATTACHED_ID_LITERAL.getName());
@@ -209,7 +209,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public int getModuleId() {
-        if(!json.has(AttachmentField.MODULE_ID_LITERAL.getName())) {
+        if (!json.has(AttachmentField.MODULE_ID_LITERAL.getName())) {
             return -1;
         }
         return json.optInt(AttachmentField.MODULE_ID_LITERAL.getName());
@@ -227,7 +227,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public int getId() {
-        if(!json.has(AttachmentField.ID_LITERAL.getName())) {
+        if (!json.has(AttachmentField.ID_LITERAL.getName())) {
             return -1;
         }
         return json.optInt(AttachmentField.ID_LITERAL.getName());
@@ -253,7 +253,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public int getFolderId() {
-        if(!json.has(AttachmentField.FOLDER_ID_LITERAL.getName())) {
+        if (!json.has(AttachmentField.FOLDER_ID_LITERAL.getName())) {
             return -1;
         }
         return json.optInt(AttachmentField.FOLDER_ID_LITERAL.getName());
@@ -270,7 +270,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public void setComment(final String string) {
-        if(null == string) {
+        if (null == string) {
             try {
                 json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
                 return;
@@ -297,7 +297,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     @Override
     public void setFileId(final String string) {
-        if(null == string) {
+        if (null == string) {
             try {
                 json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
                 return;

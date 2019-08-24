@@ -272,7 +272,7 @@ public class Bug12842Test extends AbstractChronosTest {
         
         ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, conflictingEvent, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         assertNull(response.getErrorDesc(), response.getError());
-        if(shouldConflict) {
+        if (shouldConflict) {
             assertFalse(response.getData().getConflicts().isEmpty());
         } else {
             assertTrue(response.getData().getConflicts().isEmpty());

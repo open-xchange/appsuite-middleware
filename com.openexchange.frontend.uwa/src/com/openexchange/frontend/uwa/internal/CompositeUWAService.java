@@ -165,7 +165,7 @@ public class CompositeUWAService implements UWAWidgetService {
 
             for (final UWAWidget widget : all) {
                 final UWAWidget position = positionMap.get(widget.getId());
-                if(position != null) {
+                if (position != null) {
                     for (final Field field : POSITION_FIELDS) {
                         widget.set(field, position.get(field));
                     }

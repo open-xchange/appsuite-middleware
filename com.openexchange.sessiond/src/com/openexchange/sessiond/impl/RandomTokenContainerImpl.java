@@ -90,7 +90,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         while(true) {
             final String token = UUIDSessionIdGenerator.randomUUID();
             final T original = delegate.putIfAbsent(token, value);
-            if(original == null) {
+            if (original == null) {
                 associate(session, token);
                 return token;
             }
@@ -102,10 +102,10 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
     private void associate(final Session session, final String token) {
         final String sessionID = session.getSessionID();
         Queue<String> tokenList = tokensPerSession.get(sessionID);
-        if(tokenList == null) {
+        if (tokenList == null) {
             final Queue<String> tmp = new ConcurrentLinkedQueue<String>();
             tokenList = tokensPerSession.putIfAbsent(sessionID, tmp);
-            if(tokenList == null) {
+            if (tokenList == null) {
                 tokenList = tmp;
             }
         }
@@ -115,7 +115,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
     @Override
     public T remove(final String token) {
         final T removed = delegate.remove(token);
-        if(removed != null && cleanUp != null) {
+        if (removed != null && cleanUp != null) {
             cleanUp.clean(removed);
         }
         return removed;
@@ -127,7 +127,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         final Iterator<T> iterator = values.iterator();
         while(iterator.hasNext()) {
             final T value = iterator.next();
-            if(cleanUp != null) {
+            if (cleanUp != null) {
                 cleanUp.clean(value);
             }
             iterator.remove();
@@ -136,7 +136,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
 
     public void removeForSession(final Session session) {
         final Queue<String> list = tokensPerSession.remove(session.getSessionID());
-        if(list == null) {
+        if (list == null) {
             return;
         }
         for (final String token : list) {

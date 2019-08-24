@@ -89,7 +89,7 @@ public class PreviewResponseRenderer implements ResponseRenderer {
         //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
             final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
-            if(previewDocument==null){
+            if (previewDocument==null){
                 LOG.error("The AJAXRequestResult doesn't contain a result object!");
                 return;
             }

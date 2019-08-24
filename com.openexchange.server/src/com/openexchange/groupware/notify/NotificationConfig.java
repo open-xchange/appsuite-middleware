@@ -112,7 +112,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
     			return overridden;
     		}
     	}
-        if(!INSTANCE.isPropertiesLoadInternal()) {
+        if (!INSTANCE.isPropertiesLoadInternal()) {
             try {
                 INSTANCE.loadPropertiesInternal();
             } catch (OXException e) {
@@ -120,7 +120,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
                 return def;
             }
         }
-        if(!INSTANCE.isPropertiesLoadInternal()) {
+        if (!INSTANCE.isPropertiesLoadInternal()) {
             return def;
         }
         return INSTANCE.getPropertyInternal(prop.getName(), def);
@@ -128,7 +128,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     public static boolean getPropertyAsBoolean(final NotificationProperty prop, final boolean def) {
         final String boolVal = getProperty(prop,null);
-        if(boolVal == null) {
+        if (boolVal == null) {
             return def;
         }
         return Boolean.parseBoolean(boolVal);
@@ -147,7 +147,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     @Override
     public void start() throws OXException {
-        if(!INSTANCE.isPropertiesLoadInternal()) {
+        if (!INSTANCE.isPropertiesLoadInternal()) {
             INSTANCE.loadPropertiesInternal();
         }
         NotificationPool.getInstance().startup();

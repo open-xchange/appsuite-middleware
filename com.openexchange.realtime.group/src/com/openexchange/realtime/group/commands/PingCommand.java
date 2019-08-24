@@ -78,7 +78,7 @@ public class PingCommand implements GroupCommand {
     public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
         ID from = stanza.getFrom();
         ID groupId = groupDispatcher.getId();
-        if(!groupDispatcher.isMember(from)) {
+        if (!groupDispatcher.isMember(from)) {
             LOG.debug("Refusing to send to GroupDispatcher as sender {} is no member of the GroupDispatcher {}", stanza.getFrom(), groupId);
             groupDispatcher.send(new NotMember(groupId, from, stanza.getSelector()));
         }

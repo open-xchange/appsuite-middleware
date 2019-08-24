@@ -82,7 +82,7 @@ public class MessagingServiceWriter {
         object.put(ID, messagingService.getId());
         object.put(DISPLAY_NAME, messagingService.getDisplayName());
         object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
+        if (null != messagingService.getFormDescription()) {
             object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
         }
         return object;
@@ -90,7 +90,7 @@ public class MessagingServiceWriter {
 
     private JSONArray writeCapabilities(final List<MessagingAction> capabilities) {
         final JSONArray array = new JSONArray();
-        if(capabilities == null) {
+        if (capabilities == null) {
             return array;
         }
         for (final MessagingAction action : capabilities) {

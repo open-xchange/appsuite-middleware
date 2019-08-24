@@ -113,7 +113,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         try {
             int pid = 0;
             final Credentials masterCredentials = cache.getMasterCredentials();
-            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
+            if ( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -133,7 +133,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             // if no password mech supplied, use the old one as set in db
             final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { adm })[0];
-            if( pid > 0 && dbadm.getParentId().intValue() != pid ) {
+            if ( pid > 0 && dbadm.getParentId().intValue() != pid ) {
                 LOGGER.error("unathorized access to {} by {}", dbadm.getName(), creds.getLogin());
                 throw new InvalidCredentialsException("authentication failed");
             }
@@ -143,18 +143,18 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             final Integer parentId = adm.getParentId();
             if ( parentId != null && 0 != parentId.intValue() ) {
-                if( !oxresell.existsAdmin(new ResellerAdmin(adm.getParentId().intValue())) ) {
+                if ( !oxresell.existsAdmin(new ResellerAdmin(adm.getParentId().intValue())) ) {
                     throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, "with parentId=" + adm.getParentId());
                 }
                 final ResellerAdmin parentAdmin = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(adm.getParentId().intValue())})[0];
-                if( parentAdmin.getParentId().intValue() > 0 ) {
+                if ( parentAdmin.getParentId().intValue() > 0 ) {
                     throw new OXResellerException(Code.CANNOT_SET_PARENTID_TO_SUBSUBADMIN);
                 }
             }
 
             Restriction[] res = adm.getRestrictions();
-            if( res != null ) {
-                if( res.length > 0 && dbadm.getParentId().intValue() > 0 ) {
+            if ( res != null ) {
+                if ( res.length > 0 && dbadm.getParentId().intValue() > 0 ) {
                     throw new OXResellerException(Code.SUBSUBADMIN_NOT_ALLOWED_TO_CHANGE_RESTRICTIONS);
                 }
             }
@@ -201,7 +201,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         int pid = 0;
         try {
             final Credentials masterCredentials = cache.getMasterCredentials();
-            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
+            if ( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -212,7 +212,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                     Restriction.SUBADMIN_CAN_CREATE_SUBADMINS,
                     Restriction.MAX_SUBADMIN_PER_SUBADMIN
                 );
-                if( oxresell.existsAdmin(new ResellerAdmin(creds.getLogin(), creds.getPassword())) ) {
+                if ( oxresell.existsAdmin(new ResellerAdmin(creds.getLogin(), creds.getPassword())) ) {
                     pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId().intValue();
                 }
             }
@@ -230,8 +230,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
 
             Restriction[] res = adm.getRestrictions();
-            if( res != null ) {
-                if( res.length > 0 && pid > 0 ) {
+            if ( res != null ) {
+                if ( res.length > 0 && pid > 0 ) {
                     throw new OXResellerException(Code.SUBSUBADMIN_NOT_ALLOWED_TO_CHANGE_RESTRICTIONS);
                 }
             }
@@ -271,7 +271,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         try {
             boolean isMaster = false;
             final Credentials masterCredentials = cache.getMasterCredentials();
-            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
+            if ( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
                 isMaster = true;
             } else {
@@ -283,10 +283,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             if (!oxresell.existsAdmin(adm)) {
                 throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, adm.getName());
             }
-            if(! isMaster ) {
+            if (! isMaster ) {
                 ResellerAdmin sadmdata = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
                 ResellerAdmin dadmdata = oxresell.getData(new ResellerAdmin[] { adm })[0];
-                if( !dadmdata.getParentId().equals(sadmdata.getId()) ) {
+                if ( !dadmdata.getParentId().equals(sadmdata.getId()) ) {
                     throw new OXResellerException(Code.SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN, dadmdata.getName(), sadmdata.getName());
                 }
             }
@@ -326,7 +326,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             final Credentials masterCredentials = cache.getMasterCredentials();
-            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin())) {
+            if ( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin())) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -371,7 +371,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         try {
             int pid = 0;
             final Credentials masterCredentials = cache.getMasterCredentials();
-            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
+            if ( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
                 resellerauth.doAuthentication(creds);
@@ -475,7 +475,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             final Credentials masterCredentials = cache.getMasterCredentials();
-            if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
+            if ( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
                 return oxresell.list(search_pattern);
             }

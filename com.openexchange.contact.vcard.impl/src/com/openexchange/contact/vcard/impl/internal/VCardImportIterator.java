@@ -96,7 +96,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         this.parameters = parameters;
         warnings = new ArrayList<OXException>();
         vCardStream = new VCardInputStream(inputStream, parameters.getMaxVCardSize());
-        if(parameters.isEnforceUtf8()) {
+        if (parameters.isEnforceUtf8()) {
             reader = new VCardReader(IOUtils.utf8Reader(vCardStream));
         } else {
             reader = new VCardReader(vCardStream);
@@ -205,7 +205,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
             originalVCard = new ThresholdFileHolder();
             ChainingTextWriter writerChain = Ezvcard.write(vCard).prodId(false);
             try {
-                if(parameters.isEnforceUtf8()) {
+                if (parameters.isEnforceUtf8()) {
                     writerChain.go(IOUtils.utf8Writer(originalVCard.asOutputStream()));
                 } else {
                     writerChain.go(originalVCard.asOutputStream());

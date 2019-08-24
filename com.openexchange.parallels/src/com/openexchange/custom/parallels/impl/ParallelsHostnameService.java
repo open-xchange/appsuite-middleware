@@ -106,9 +106,9 @@ public final class ParallelsHostnameService implements HostnameService {
             // load suffix for branding string dynamically in login-mappings
             final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
             LOG.debug("getHostname: Loaded loginmappings {} for context {}", Arrays.toString(login_mappings), I(contextId));
-            if( null != suffix_branded && suffix_branded.length() != 0) {
+            if ( null != suffix_branded && suffix_branded.length() != 0) {
                 for (final String login_mapping : login_mappings) {
-                    if(login_mapping.startsWith(suffix_branded)){
+                    if (login_mapping.startsWith(suffix_branded)){
                         /**
                          *
                          *  We found our mapping which contains the branded URL!
@@ -134,12 +134,12 @@ public final class ParallelsHostnameService implements HostnameService {
                 // now host was provisioned, load fallback from configuration
                 hostname = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_FALLBACKHOST);
                 // use systems getHostname() if no fallbackhost is set
-                if( null == hostname || hostname.length() == 0 ) {
+                if ( null == hostname || hostname.length() == 0 ) {
                     try {
                         hostname = InetAddress.getLocalHost().getCanonicalHostName();
                     } catch (UnknownHostException e) { }
                 }
-                if( null == hostname || hostname.length() == 0 ) {
+                if ( null == hostname || hostname.length() == 0 ) {
                     LOG.warn("getHostname: Unable to determine any hostname for context {}", I(contextId));
                 }
             }

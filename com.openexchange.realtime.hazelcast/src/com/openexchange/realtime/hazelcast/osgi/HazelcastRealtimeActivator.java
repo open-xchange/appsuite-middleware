@@ -121,7 +121,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         Config config = hazelcastInstance.getConfig();
         String id_map = discoverMapName(config, "rtIDMapping-");
         String resource_map = discoverMapName(config, "rtResourceDirectory-");
-        if(Strings.isEmpty(id_map) || Strings.isEmpty(resource_map)) {
+        if (Strings.isEmpty(id_map) || Strings.isEmpty(resource_map)) {
             String msg = "Distributed directory maps couldn't be found in hazelcast configuration";
             throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
         }

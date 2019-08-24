@@ -85,7 +85,7 @@ public class AllAction extends AbstractMessagingAccountAction {
         final String messagingServiceId = request.getParameter("messagingService");
 
         final List<MessagingService> services = new ArrayList<MessagingService>();
-        if(messagingServiceId != null) {
+        if (messagingServiceId != null) {
             services.add(registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId()));
         } else {
             services.addAll(registry.getAllServices(session.getUserId(), session.getContextId()));

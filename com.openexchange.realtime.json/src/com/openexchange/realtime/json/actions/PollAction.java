@@ -86,7 +86,7 @@ public class PollAction extends RTAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ID id = constructID(requestData, session);
-        if(!stateManager.isConnected(id)) {
+        if (!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
             LOG.error("", stateMissingException);
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);

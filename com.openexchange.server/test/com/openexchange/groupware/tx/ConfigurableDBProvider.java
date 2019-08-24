@@ -81,11 +81,11 @@ public class ConfigurableDBProvider implements DBProvider {
 
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
-        if(con == null) {
+        if (con == null) {
             return;
         }
         try {
-            if(!con.isClosed()) {
+            if (!con.isClosed()) {
                 con.close();
             }
         } catch (SQLException e) {

@@ -115,7 +115,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                     packageScheme = DEFAULT_SCHEME_ID;
                 }
             }
-            if(res.getName().equals(DEFAULT_RESELLER)){
+            if (res.getName().equals(DEFAULT_RESELLER)){
                 containsDefault=true;
             }
             map.put(res.getName(), packageScheme);

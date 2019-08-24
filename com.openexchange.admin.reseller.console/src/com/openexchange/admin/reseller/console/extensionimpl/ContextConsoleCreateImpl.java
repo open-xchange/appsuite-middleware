@@ -197,7 +197,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
         try {
             HashSet<Restriction> ret = getRestrictions(ResellerAbstraction.parseRestrictions(parser, this.addRestrictionsOption));
             Restriction[] restrictions = null;
-            if( ret != null ) {
+            if ( ret != null ) {
                 restrictions = ret.toArray(new Restriction[ret.size()]);
             }
             final String customid = ResellerAbstraction.parseCustomId(parser, customidOption);

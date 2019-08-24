@@ -169,7 +169,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 }
 
                 AJAXActionService actionService = factory.createActionService(action);
-                if(actionService == null) {
+                if (actionService == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
                     return;
                 }
@@ -207,7 +207,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             String callback = req.getParameter("callback");
             if ((isFileUpload || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true"))) && (action != null || callback != null)) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-                if(callback == null) {
+                if (callback == null) {
                     callback = action;
                 }
                 final AllocatingStringWriter w = new AllocatingStringWriter();

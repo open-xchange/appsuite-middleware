@@ -150,7 +150,7 @@ public abstract class AbstractCollection extends AbstractResource implements
 		final List<WebdavProtocolException> exceptions = new ArrayList<WebdavProtocolException>();
 		try {
 			WebdavResource copy = null;
-			if(!noroot) {
+			if (!noroot) {
 				copy = super.copy(dest,noroot, overwrite);
 			} else {
 				copy = getFactory().resolveCollection(dest);
@@ -167,7 +167,7 @@ public abstract class AbstractCollection extends AbstractResource implements
 		} catch (WebdavProtocolException e) {
             exceptions.add(e);
 		}
-		if(exceptions.size() > 0) {
+		if (exceptions.size() > 0) {
 			throw WebdavMultistatusException.create(getUrl(),exceptions);
 		}
 		throw new IllegalStateException("Impossible");
@@ -233,8 +233,8 @@ public abstract class AbstractCollection extends AbstractResource implements
 
 		@Override
         public boolean hasNext() {
-			if(subIterator != null) {
-				if(subIterator.hasNext()) {
+			if (subIterator != null) {
+				if (subIterator.hasNext()) {
 					return true;
 				}
 				subIterator = null;
@@ -244,11 +244,11 @@ public abstract class AbstractCollection extends AbstractResource implements
 
 		@Override
         public WebdavResource next() {
-			if(subIterator != null && subIterator.hasNext()) {
+			if (subIterator != null && subIterator.hasNext()) {
 				return subIterator.next();
 			}
 			final WebdavResource res = childIterator.next();
-			if(res.isCollection()) {
+			if (res.isCollection()) {
 				subIterator = res.toCollection().iterator();
 			}
 			return res;

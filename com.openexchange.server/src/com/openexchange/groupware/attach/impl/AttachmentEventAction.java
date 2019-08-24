@@ -93,7 +93,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
             try {
                 for(final AttachmentListener listener : listeners) {
                     final long mod = listener.attached(event);
-                    if(mod > ts) {
+                    if (mod > ts) {
                         ts = mod;
                     }
                 }
@@ -111,7 +111,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
         for(final AttachmentMetadata attachment : m) {
             final AttachmentAddress addr = new AttachmentAddress(attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
             Set<Integer> ids = collector.get(addr);
-            if(ids == null) {
+            if (ids == null) {
                 ids = new HashSet<Integer>();
                 collector.put(addr, ids);
             }
@@ -222,7 +222,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
         }
 
         public void close() {
-            if(writeCon != null) {
+            if (writeCon != null) {
                 provider.releaseWriteConnection(ctx, writeCon);
             }
             writeCon = null;
@@ -257,7 +257,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
 
         @Override
         public InputStream getAttachedFile() throws OXException {
-            if(attachment != null) {
+            if (attachment != null) {
                 return base.getAttachedFile(session, folderId, attachedId, moduleId, attachment.getId(),    ctx, user, userConfig);
             }
             return null;

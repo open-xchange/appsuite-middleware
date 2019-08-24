@@ -100,7 +100,7 @@ public abstract class CommonRequest {
 
 	protected void handle(final Throwable t, final Session session) {
 		final Response res = new Response();
-		if(t instanceof OXException) {
+		if (t instanceof OXException) {
 		    final OXException e = (OXException) t;
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
@@ -145,7 +145,7 @@ public abstract class CommonRequest {
 
 	protected boolean checkRequired(final SimpleRequest req, final String action, final String ...parameters) {
 		for(final String param : parameters) {
-			if(req.getParameter(param) == null) {
+			if (req.getParameter(param) == null) {
 				missingParameter(param,action);
 				return false;
 			}

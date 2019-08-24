@@ -206,7 +206,7 @@ public final class OXFolderAdminHelper {
                 final boolean update = rs.next();
                 final boolean prevEditable = update && rs.getInt(2) > 0;
                 final int system;
-                if(update) {
+                if (update) {
                     system = rs.getInt(3);
                 } else {
                     system = -1;

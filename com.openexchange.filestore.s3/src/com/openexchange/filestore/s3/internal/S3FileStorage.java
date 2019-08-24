@@ -526,7 +526,7 @@ public class S3FileStorage implements FileStorage {
     }
 
     private ObjectMetadata prepareMetadataForSSE(ObjectMetadata metadata) {
-        if(serverSideEncryption) {
+        if (serverSideEncryption) {
             metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
         }
         return metadata;

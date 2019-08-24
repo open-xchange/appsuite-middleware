@@ -352,7 +352,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         ContactService contactService = Tools.requireService(ContactService.class, services);
         Contact contact = contactService.getContact(session, String.valueOf(decodeEventId[0]), String.valueOf(decodeEventId[1]));
         Event event = null;
-        if(recurrenceId != null) {
+        if (recurrenceId != null) {
             event = eventConverter.getOccurrence(contact, recurrenceId);
         } else {
             event = eventConverter.getSeriesMaster(contact);

@@ -200,7 +200,7 @@ public class MessagingMessageParserTest {
         final MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
 
         for (final MessagingField field : MessagingField.values()) {
-            if(field.getEquivalentHeader() != null) {
+            if (field.getEquivalentHeader() != null) {
                 final Object value = field.doSwitch(get, message);
                 assertNotNull(value);
             }
@@ -236,7 +236,7 @@ public class MessagingMessageParserTest {
     }
 
     private String getStringData(final MessagingContent content) throws OXException, IOException {
-        if(StringContent.class.isInstance(content)) {
+        if (StringContent.class.isInstance(content)) {
             return ((StringContent) content).getData();
         } else if (BinaryContent.class.isInstance(content)) {
             return inputStream2String(((BinaryContent) content).getData());

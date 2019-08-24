@@ -274,7 +274,7 @@ public class ImageComparingTest {
 
             // Converts byte streams to buffered images
             InputStream inAfter = new ByteArrayInputStream(bytesCurrent);
-            assertTrue("Animated GIF image not animated anymore", ImageUtils.isAnimatedGif(inAfter));
+            assertTrue("Animated GIF image not animated anymore", ImageUtils.isAnimatedGif (inAfter));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

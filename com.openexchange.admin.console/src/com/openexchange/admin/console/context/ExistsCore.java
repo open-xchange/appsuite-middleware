@@ -93,12 +93,12 @@ public abstract class ExistsCore extends ContextAbstraction {
                 sysexit(1);
             }
             String ctxident;
-            if( null != ctx.getId() ) {
+            if ( null != ctx.getId() ) {
                 ctxident = String.valueOf(ctx.getId());
             } else {
                 ctxident = ctx.getName();
             }
-            if( maincall(parser, ctx, inServer, auth) ) {
+            if ( maincall(parser, ctx, inServer, auth) ) {
                 System.out.println("Context " + ctxident + " exists" + (inServer ? " in server" : ""));
                 sysexit(0);
             } else {

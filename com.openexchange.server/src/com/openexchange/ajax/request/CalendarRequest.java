@@ -71,7 +71,7 @@ public class CalendarRequest {
 
     protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final org.slf4j.Logger log){
 		final Participant[] participants = appointmentObj.getParticipants();
-		if(participants == null) {
+		if (participants == null) {
             return;
         }
 
@@ -79,11 +79,11 @@ public class CalendarRequest {
 
 		for(int pos = 0; pos < participants.length; pos++){
 			final Participant part = participants[pos];
-			if(part.getType() == Participant.EXTERNAL_USER){
+			if (part.getType() == Participant.EXTERNAL_USER){
 				User foundUser;
 				try {
 					foundUser = us.searchUser(part.getEmailAddress(), ctx);
-					if(foundUser == null) {
+					if (foundUser == null) {
                         continue;
                     }
 					participants[pos] = new UserParticipant(foundUser.getId());

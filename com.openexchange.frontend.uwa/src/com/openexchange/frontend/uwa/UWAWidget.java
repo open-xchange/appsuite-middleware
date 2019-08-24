@@ -198,7 +198,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
         @Override
         public void set(UWAWidget thing, Object value) {
-            if(value == null && ! NULLABLE.contains(this)) {
+            if (value == null && ! NULLABLE.contains(this)) {
                 return ;
             }
             switch(this) {

@@ -457,7 +457,7 @@ public class AdminParser extends CLIParser {
     private String[] extractDynamic(String[] args) {
         List<String> staticArgs = new ArrayList<String>(args.length);
         for(String arg : args) {
-            if(isExtendedOption(arg) && isDynamicOption(arg)) {
+            if (isExtendedOption(arg) && isDynamicOption(arg)) {
                 parseDynamicOption(arg);
             } else {
                 staticArgs.add(arg);
@@ -475,17 +475,17 @@ public class AdminParser extends CLIParser {
         int slashPos = arg.indexOf('/');
 
 
-        if(arg.startsWith("--remove-")) {
+        if (arg.startsWith("--remove-")) {
             namespace = arg.substring(9, slashPos);
             name = arg.substring(slashPos+1);
         } else {
             int equalPos = arg.indexOf('=');
 
-            if(slashPos == -1) {
+            if (slashPos == -1) {
                 return;
             }
 
-            if(equalPos == -1) {
+            if (equalPos == -1) {
                 return;
             }
 
@@ -500,7 +500,7 @@ public class AdminParser extends CLIParser {
 
     private Map<String, String> getDynamicMap(String namespace) {
         Map<String, String> namespacedMap = dynamicMaps.get(namespace);
-        if(namespacedMap == null) {
+        if (namespacedMap == null) {
             namespacedMap = new HashMap<String, String>();
             dynamicMaps.put(namespace, namespacedMap);
         }
@@ -510,7 +510,7 @@ public class AdminParser extends CLIParser {
 
     private boolean isDynamicOption(String arg) {
         int slashPos = arg.indexOf('/');
-        if(slashPos == -1) {
+        if (slashPos == -1) {
             return false;
         }
         return slashPos < arg.indexOf('=') || arg.startsWith("--remove-");
@@ -546,7 +546,7 @@ public class AdminParser extends CLIParser {
     public final void printUsage() {
         System.out.print("Usage: " + this.appname);
         System.out.println(" " + usage);
-        if(Strings.isNotEmpty(cltDescription)){
+        if (Strings.isNotEmpty(cltDescription)){
             System.out.println(cltDescription+"\n");
         }
 
@@ -569,7 +569,7 @@ public class AdminParser extends CLIParser {
     public final void printUsageExtended() {
         System.out.println("Usage: " + this.appname);
         System.out.println(" " + usage);
-        if(Strings.isNotEmpty(cltDescription)){
+        if (Strings.isNotEmpty(cltDescription)){
             System.out.println("Description: "+cltDescription);
         }
 

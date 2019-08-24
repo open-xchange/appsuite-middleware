@@ -85,7 +85,7 @@ public class ToSQLType implements WidgetSwitcher {
 
     @Override
     public Object custom(Object... args) {
-        if(args[0] == null) {
+        if (args[0] == null) {
             return null;
         }
         return args[0].toString();

@@ -129,7 +129,7 @@ public class UpdateAttendeeAction extends ChronosAction {
         }
         if (!attendee.containsUri() && !attendee.containsEntity()) {
             ServerSession session = requestData.getSession();
-            if(session != null) {
+            if (session != null) {
                 attendee.setEntity(session.getUserId());
             }
         }

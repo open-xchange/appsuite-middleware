@@ -86,7 +86,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         this.iterators = new ArrayList<RememberingIterator>(iterators.size());
         this.delegates = iterators;
         for (final SearchIterator<Contact> searchIterator : iterators) {
-            if(searchIterator.hasNext()) {
+            if (searchIterator.hasNext()) {
                 this.iterators.add(new RememberingIterator(searchIterator));
             }
         }
@@ -95,12 +95,12 @@ public class ContactMergerator implements SearchIterator<Contact>{
     }
 
     private void grabNext() throws OXException{
-        if(this.iterators.isEmpty()) {
+        if (this.iterators.isEmpty()) {
             next = null;
             return;
         }
         try {
-            if(this.iterators.size() > 1) {
+            if (this.iterators.size() > 1) {
                 Collections.sort(iterators, new TopMostComparator(comparator));
             }
             next = this.iterators.get(0).currentOrNext();
@@ -111,7 +111,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         } catch (OXException e) {
             this.oxe = e;
         } finally {
-            if(this.iterators.get(0).hasNext()) {
+            if (this.iterators.get(0).hasNext()) {
                 this.iterators.get(0).forgetCurrent();
             } else {
                 this.iterators.remove(0);
@@ -154,10 +154,10 @@ public class ContactMergerator implements SearchIterator<Contact>{
     }
 
     private void throwExceptions() throws OXException {
-        if(e != null) {
+        if (e != null) {
             throw e;
         }
-        if(oxe != null) {
+        if (oxe != null) {
             throw oxe;
         }
     }
