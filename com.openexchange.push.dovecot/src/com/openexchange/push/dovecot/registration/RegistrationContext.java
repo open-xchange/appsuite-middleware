@@ -51,7 +51,12 @@ package com.openexchange.push.dovecot.registration;
 
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.push.dovecot.osgi.Services;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
 
 /**
  * {@link RegistrationContext} - The context to use for registration/unregistration.
@@ -170,6 +175,37 @@ public class RegistrationContext {
      */
     public Session getSession() {
         return session;
+    }
+
+    /**
+     * Checks if the user associated with this registration context has 'Webmail' permission and is active.
+     *
+     * @return <code>true</code> if user holds 'Webmail' permission and is active; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public boolean hasWebMailAndIsActive() throws OXException {
+        return session == null ? hasWebMailAndIsActive(userId, contextId) : hasWebMailAndIsActive(session);
+    }
+
+    private boolean hasWebMailAndIsActive(Session session) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (false == serverSession.getUserPermissionBits().hasWebMail()) {
+            return false;
+        }
+        if (false == serverSession.getUser().isMailEnabled()) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean hasWebMailAndIsActive(int userId, int contextId) throws OXException {
+        if (false == UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, contextId).hasWebMail()) {
+            return false;
+        }
+        if (false == Services.getServiceLookup().getServiceSafe(UserService.class).getUser(userId, contextId).isMailEnabled()) {
+            return false;
+        }
+        return true;
     }
 
 }

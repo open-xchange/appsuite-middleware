@@ -92,6 +92,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PushImplActivator} - The activator for push implementation bundle.
@@ -111,7 +112,8 @@ public final class PushImplActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class, DatabaseService.class, ContextService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class, DatabaseService.class,
+            ContextService.class, UserService.class };
     }
 
     @Override
