@@ -194,7 +194,7 @@ public class FilteredResponse extends IMAPResponse {
         if (null != warnings) {
             int numBytes = warnings.getBytes(StandardCharsets.UTF_8).length;
             sb.append("WARNINGS {").append(numBytes).append(numBytes > 0 ? "+" : "").append("}").append("\r\n");
-            sb.append(errors);
+            sb.append(warnings);
             return sb.toString();
         }
 
