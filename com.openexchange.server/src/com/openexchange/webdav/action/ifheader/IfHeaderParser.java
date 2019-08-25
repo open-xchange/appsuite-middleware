@@ -66,7 +66,7 @@ public class IfHeaderParser {
 		final IfHeader ifHeader = new IfHeader();
 		String tag = null;
 		final int length = cs.length();
-		while(i < length) {
+		while (i < length) {
 			final char c = cs.charAt(i++);
 			switch(c) {
 			case '(' : ifHeader.addList(list(tag, cs)); tag = null; break;
@@ -82,7 +82,7 @@ public class IfHeaderParser {
 		final StringBuffer tag = new StringBuffer();
 		final int start = i;
 		final int length = cs.length();
-		while(i < length) {
+		while (i < length) {
 			final char c = cs.charAt(i++);
 			switch(c) {
 			case '>' : return tag.toString();
@@ -98,7 +98,7 @@ public class IfHeaderParser {
 		boolean matches = true;
 		final int start = i;
 		final int length = cs.length();
-		while(i < length) {
+		while (i < length) {
 			final char c = cs.charAt(i++);
 			switch(c) {
 			case '<' : list.add(lockToken(matches, cs)); matches = true; break;
@@ -140,7 +140,7 @@ public class IfHeaderParser {
 		final StringBuilder etag = new StringBuilder();
 		final int start = i;
 		final int length = cs.length();
-		while(i < length) {
+		while (i < length) {
 			final char c = cs.charAt(i++);
 			switch(c) {
 			case ']' : final IfHeaderEntity entity = new IfHeaderEntity.ETag(etag.toString()); entity.setMatches(matches); return entity;

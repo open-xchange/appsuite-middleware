@@ -191,7 +191,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     private JSONObject toJSON(final HttpServletRequest req, final String action) throws JSONException, IOException {
         final JSONObject request = new JSONObject();
         final Enumeration parameterNames = req.getParameterNames();
-        while(parameterNames.hasMoreElements()) {
+        while (parameterNames.hasMoreElements()) {
             final String parameterName = (String) parameterNames.nextElement();
             final String parameter = req.getParameter(parameterName);
             request.put(parameterName, parameter);

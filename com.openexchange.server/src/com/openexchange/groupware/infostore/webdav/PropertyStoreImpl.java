@@ -106,7 +106,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 
             rs = stmt.executeQuery();
             final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
-            while(rs.next()) {
+            while (rs.next()) {
                 final Integer id = I(rs.getInt(1));
                 List<WebdavProperty> props = retVal.get(id);
                 if (props == null) {
@@ -157,7 +157,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 
             rs = stmt.executeQuery();
             final List<WebdavProperty> props = new ArrayList<WebdavProperty>();
-            while(rs.next()) {
+            while (rs.next()) {
                 props.add(getProperty(rs));
             }
 
@@ -220,7 +220,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 
             rs = stmt.executeQuery();
             final List<WebdavProperty> props = new ArrayList<WebdavProperty>();
-            while(rs.next()) {
+            while (rs.next()) {
                 props.add(getProperty(rs));
             }
 
@@ -253,7 +253,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 
             rs = stmt.executeQuery();
             final Map<Integer, List<WebdavProperty>> retVal = new HashMap<Integer, List<WebdavProperty>>();
-            while(rs.next()) {
+            while (rs.next()) {
                 final Integer id = I(rs.getInt(1));
                 List<WebdavProperty> props = retVal.get(id);
                 if (props == null) {

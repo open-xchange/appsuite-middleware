@@ -2013,7 +2013,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             return false;
         }
         int parentId = Integer.parseInt(folderParentId);
-        while(parentId > 0) {
+        while (parentId > 0) {
             if (parentId == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
                 return true;
             }

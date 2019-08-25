@@ -132,7 +132,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	}
 
 	private String normalize(String url) {
-		while(url.contains("//")){
+		while (url.contains("//")){
 			url = url.replaceAll("//","/");
 		}
 		return url;

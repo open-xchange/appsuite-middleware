@@ -112,7 +112,7 @@ public class UIDSet {
 	long start = -1;
 	UIDSet cur = null;
 	try {
-	    while(st.hasMoreTokens()) {
+	    while (st.hasMoreTokens()) {
 		String s = st.nextToken();
 		if (s.equals(",")) {
 		    if (cur != null)

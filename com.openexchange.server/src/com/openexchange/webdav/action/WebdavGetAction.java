@@ -112,7 +112,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 				}
 				int read = 0;
 				int need = (int) Math.min(chunk.length, range.endOffset - offset + 1);
-				while(need > 0 && (read = in.read(chunk, 0, need)) > 0) {
+				while (need > 0 && (read = in.read(chunk, 0, need)) > 0) {
 					out.write(chunk,0,read);
 					offset += read;
 					need = (int) Math.min(chunk.length, range.endOffset - offset + 1);
@@ -156,7 +156,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 
 		if (range != null) {
 			final Matcher m = RANGE_PATTERN.matcher(range);
-			while(m.find()){
+			while (m.find()){
 				final String br = m.group(1);
 				for(final String r : br.split("\\s*,\\s*")) {
 					range = range.trim();

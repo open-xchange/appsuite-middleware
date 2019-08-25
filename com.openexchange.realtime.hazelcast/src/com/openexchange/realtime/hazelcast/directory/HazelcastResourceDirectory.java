@@ -585,7 +585,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
         IDMap<Resource> foundIds = new IDMap<Resource>();
         Iterator<Entry<PortableID, PortableResource>> iterator = matchingResources.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             try {
                 Entry<PortableID, PortableResource> next = iterator.next();
                 foundIds.put(next.getKey(), next.getValue());

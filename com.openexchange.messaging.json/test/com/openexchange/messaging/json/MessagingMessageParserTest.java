@@ -119,7 +119,7 @@ public class MessagingMessageParserTest {
         assertEquals(3, flags.size());
         final Iterator<String> iterator = flags.iterator();
         final Set<String> expectedFlags = new HashSet<String>(Arrays.asList("flag1", "flag2", "flag3"));
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             assertTrue(expectedFlags.remove(iterator.next()));
         }
         assertTrue(expectedFlags.isEmpty());
@@ -377,7 +377,7 @@ public class MessagingMessageParserTest {
     private String inputStream2String(final InputStream data) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int b = 1;
-        while((b = data.read()) != -1) {
+        while ((b = data.read()) != -1) {
             baos.write(b);
         }
         return new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8);

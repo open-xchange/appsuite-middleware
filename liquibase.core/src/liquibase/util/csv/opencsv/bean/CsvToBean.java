@@ -38,7 +38,7 @@ public class CsvToBean {
             mapper.captureHeader(csv);
             String[] line;
             List list = new ArrayList();
-            while(null != (line = csv.readNext())) {
+            while (null != (line = csv.readNext())) {
                 Object obj = processLine(mapper, line);
                 list.add(obj); 
             }

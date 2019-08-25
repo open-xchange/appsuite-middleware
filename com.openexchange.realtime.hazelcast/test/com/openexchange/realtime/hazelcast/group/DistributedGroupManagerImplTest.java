@@ -420,7 +420,7 @@ public class DistributedGroupManagerImplTest {
         List<ID> recipients = Arrays.asList(to);
         Set<Stanza> stanzas = new HashSet<Stanza>();
         Iterator<Stanza> iterator = sentStanzas.values().iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             Stanza next = iterator.next();
             if (from.equals(next.getFrom()) && recipients.contains(next.getTo())) {
                 stanzas.add(next);

@@ -91,7 +91,7 @@ public class JSONToThrowableConverter extends AbstractJSONConverter {
         List<StackTraceElement> stacktraceList = new ArrayList<StackTraceElement>();
 
         Iterator<Object> iterator = stackTrace.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             Object converted = converter.convert("json", StackTraceElement.class.getSimpleName(), iterator.next(), null);
             stacktraceList.add(StackTraceElement.class.cast(converted));
         }

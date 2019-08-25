@@ -112,7 +112,7 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
             rs = stmt.executeQuery();
 
             List<FolderLock> locks = new ArrayList<FolderLock>();
-            while(rs.next()) {
+            while (rs.next()) {
                 final FolderLock lock = newLock();
                 fillLock(lock, rs);
                 if (lock.getTimeout()<1) {

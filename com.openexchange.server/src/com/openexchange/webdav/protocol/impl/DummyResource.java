@@ -358,7 +358,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 		int b = 0;
 		try {
-			while((b = data.read()) != -1) {
+			while ((b = data.read()) != -1) {
 				bytes.add(I(b));
 			}
 		} catch (IOException e) {

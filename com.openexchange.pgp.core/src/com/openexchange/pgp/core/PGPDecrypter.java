@@ -459,7 +459,7 @@ public class PGPDecrypter {
                                    userIds = masterKey.getUserIDs();
                                    if (userIds != null) {
                                        //Adding user-id so that it is possible for a caller to determine who created this signature
-                                       while(userIds.hasNext()) {
+                                       while (userIds.hasNext()) {
                                            pgpSignatureVerificationResult.addIssuerUserId(userIds.next());
                                        }
                                    }

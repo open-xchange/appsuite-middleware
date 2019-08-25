@@ -78,7 +78,7 @@ public abstract class TimedWriter<T> {
 	public void writeDelta(final SearchIterator<T> iterator, final SearchIterator<T> deleted, final Object[] cols, final boolean ignoreDeleted, final TimeZone tz) throws JSONException, OXException {
 		jsonWriter.array();
 		fillArray(iterator,cols, tz);
-		while(deleted.hasNext() && !ignoreDeleted) {
+		while (deleted.hasNext() && !ignoreDeleted) {
 			final int del = getId(deleted.next());
 			jsonWriter.value(del);
 		}

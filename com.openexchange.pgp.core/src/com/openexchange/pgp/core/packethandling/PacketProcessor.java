@@ -137,7 +137,7 @@ public class PacketProcessor {
                                 //a corrupt data stream, we remember every byte read from the stream and write it to the output
                                 rememberInpuStream.resetBuffer();
                                 rememberInpuStream.startRemembering();
-                                while(inputStream.read(GARBAGE_SINK, 0, STREAM_BUFFER_SIZE) > 0) {
+                                while (inputStream.read(GARBAGE_SINK, 0, STREAM_BUFFER_SIZE) > 0) {
                                     final byte[] buffer = rememberInpuStream.getBuffer();
                                     byte[] modified = handler.handlePacketData(packet, buffer);
                                     if (modified != null) {

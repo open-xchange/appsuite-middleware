@@ -139,7 +139,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         final List<FolderObject> path = new ArrayList<FolderObject>();
         FolderObject folder = getFolder(folderId, session.getContext());
         path.add(folder);
-        while(folder != null) {
+        while (folder != null) {
             if (folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
                 folder = null;
             } else {
@@ -218,7 +218,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                     rs = stmt.executeQuery();
                     boolean found = false;
                     int folderid = 0;
-                    while(rs.next()) {
+                    while (rs.next()) {
                         final String fname = rs.getString(2);
                         if (fname.equals(component)) {
                             if ( found ) {
@@ -242,7 +242,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
                             rs = stmt.executeQuery();
                             found = false;
                             int id = 0;
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 final String name = rs.getString(2);
                                 if (name.equals(component)) {
                                     if (found) {

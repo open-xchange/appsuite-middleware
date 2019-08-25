@@ -127,7 +127,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	public String toString(){
 		final StringBuilder b = new StringBuilder();
 		final Enumeration<?> e = req.getParameterNames();
-		while(e.hasMoreElements()) {
+		while (e.hasMoreElements()) {
 			final String name = e.nextElement().toString();
 			b.append(" | ");
 			b.append(name);

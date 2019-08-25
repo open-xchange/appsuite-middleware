@@ -318,7 +318,7 @@ public final class AttachAction extends AbstractAttachmentAction {
 
         int index = 0;
         for (final AttachmentMetadata attachment : attList) {
-            // while(attIter.hasNext()) {
+            // while (attIter.hasNext()) {
             // final AttachmentMetadata attachment = attIter.next();
             if (attachment == null) {
                 attachments.remove(index);

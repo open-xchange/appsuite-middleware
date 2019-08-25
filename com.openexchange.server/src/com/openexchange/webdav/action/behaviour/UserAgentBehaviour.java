@@ -86,7 +86,7 @@ public class UserAgentBehaviour implements Behaviour{
 		for(final Object object : implementations) {
 
 			Class<? extends Object> addMe = object.getClass();
-			while(addMe != null) {
+			while (addMe != null) {
 				final Class[] interfaces = addMe.getInterfaces();
 				for(final Class<? extends Object> iFace : interfaces) {
 					if (classes.get(iFace) != null) {

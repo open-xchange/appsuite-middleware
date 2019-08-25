@@ -88,7 +88,7 @@ public class BASE64MailboxDecoder {
 	boolean firsttime = true;
 	int leftover = -1;
 
-	while(true) {
+	while (true) {
 	    // get the first byte
 	    byte orig_0 = (byte) iter.next();
 	    if (orig_0 == -1) break; // no more chars

@@ -211,7 +211,7 @@ public abstract class SQLTestCase {
             stmt = con.prepareStatement(sql);
             rs = stmt.executeQuery();
             final ResultSetMetaData metaData = rs.getMetaData();
-            while(rs.next()) {
+            while (rs.next()) {
                 final Map<String, Object> row = new HashMap<String, Object>();
                 for(int i = 1; i <= metaData.getColumnCount(); i++) {
                     final String key = metaData.getColumnName(i);

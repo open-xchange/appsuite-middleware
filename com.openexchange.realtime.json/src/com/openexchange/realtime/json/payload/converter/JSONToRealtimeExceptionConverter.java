@@ -56,7 +56,7 @@ public class JSONToRealtimeExceptionConverter extends AbstractJSONConverter {
         ArrayList<StackTraceElement> stackTraceList = new ArrayList<StackTraceElement>();
         try {
             Iterator<Object> arrayIterator = stackTraceArray.iterator();
-            while(arrayIterator.hasNext()) {
+            while (arrayIterator.hasNext()) {
                 stackTraceList.add(stackTraceElementToJSON((JSONObject)arrayIterator.next()));
             }
         } catch (JSONException e) {

@@ -74,7 +74,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
         try {
             FolderObject folder = getFolder(folderid, ctx);
             path.add(Integer.valueOf(folder.getObjectID()));
-            while(folder != null) {
+            while (folder != null) {
                 if (folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
                     path.add(Integer.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
                     folder = null;

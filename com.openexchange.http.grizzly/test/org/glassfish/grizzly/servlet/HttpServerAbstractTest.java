@@ -68,7 +68,7 @@ public abstract class HttpServerAbstractTest extends TestCase {
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         StringBuilder sb = new StringBuilder();
         String line = null;
-        while((line = reader.readLine())!=null){
+        while ((line = reader.readLine())!=null){
             sb.append(line).append("\n");
         }
         return sb;

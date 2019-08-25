@@ -107,7 +107,7 @@ public class ContactWriter extends CommonWriter {
         Iterator<String> keys = json.keys();
         ContactSetter cs = new ContactSetter();
         //extend: We'll need to nest several specialized setters here, e.g. one for dates
-        while(keys.hasNext()){
+        while (keys.hasNext()){
         	String jsonKey = keys.next();
         	ContactField field = ContactField.getByAjaxName(jsonKey);
         	field.doSwitch(cs, contact, json.get(jsonKey));

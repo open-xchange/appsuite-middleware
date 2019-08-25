@@ -85,9 +85,9 @@ public class Bug17991VulTest extends AbstractSanitizing {
             "setAssoc(C,A,B){C[\"_magicdom_\"+A]=3DB;}function =" +
             "binarySearch(A,E){if (A<1){return 0;" +
             "}if (E(0)){return 0;}if (!E(A-1)){return A;}var D=3D0;var =" +
-            "B=3DA-1;while((B-D)>1){var C=3DMath.floor((D+B)/2);" +
+            "B=3DA-1;while ((B-D)>1){var C=3DMath.floor((D+B)/2);" +
             "if (E(C)){B=3DC;}else{D=3DC;}}return B;}function =" +
-            "binarySearchInfinite(C,B){var A=3D0;while(!B(A)){A+=3DC;}return =" +
+            "binarySearchInfinite(C,B){var A=3D0;while (!B(A)){A+=3DC;}return =" +
             "binarySearch(A,B);" +
             "}function htmlPrettyEscape(A){return =" +
             "A.replace(/&/g,\"&amp;\").replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\").replace(=\n" +

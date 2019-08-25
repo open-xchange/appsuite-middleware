@@ -173,7 +173,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
             @Override
             public List<T> handle(final ResultSet rs) throws SQLException {
                 final LinkedList<T> list = new LinkedList<T>();
-                while(rs.next()) {
+                while (rs.next()) {
                     final T thing = metadata.create();
                     SQLTools.fillObject(rs, thing, attributes, overridesFromDB);
                     list.add(thing);

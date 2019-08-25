@@ -87,7 +87,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
 
     @Override
     public String rememberForSession(final Session session, final T value) {
-        while(true) {
+        while (true) {
             final String token = UUIDSessionIdGenerator.randomUUID();
             final T original = delegate.putIfAbsent(token, value);
             if (original == null) {
@@ -125,7 +125,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         final CleanUp<T> cleanUp = overridingCleanUp == null ? this.cleanUp : overridingCleanUp;
         final Collection<T> values = delegate.values();
         final Iterator<T> iterator = values.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             final T value = iterator.next();
             if (cleanUp != null) {
                 cleanUp.clean(value);

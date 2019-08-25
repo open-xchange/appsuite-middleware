@@ -469,7 +469,7 @@ public class Attachment extends PermissionServlet {
             long timestamp = 0;
 
             for (final AttachmentMetadata attachment : attachments) {
-                // while(attIter.hasNext()) {
+                // while (attIter.hasNext()) {
                 // final AttachmentMetadata attachment = attIter.next();
                 final UploadFile uploadFile = ufIter.next();
 
@@ -528,7 +528,7 @@ public class Attachment extends PermissionServlet {
 
         int index = 0;
         for (final AttachmentMetadata attachment : attList) {
-            // while(attIter.hasNext()) {
+            // while (attIter.hasNext()) {
             // final AttachmentMetadata attachment = attIter.next();
             if (attachment == null) {
                 attachments.remove(index);

@@ -167,7 +167,7 @@ final class POTokenStream {
 
     private void comment() throws OXException {
         /*
-         * StringBuilder data = new StringBuilder(); int c = -1; while((c = read()) != '\n') { data.append((char) c); } nextToken =
+         * StringBuilder data = new StringBuilder(); int c = -1; while ((c = read()) != '\n') { data.append((char) c); } nextToken =
          * POToken.COMMENT; element(data.toString());
          */
         // Ignore comments

@@ -494,7 +494,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         SearchIterator<DocumentMetadata> iter = database.getDocuments(folderId, session).results();
         try {
             final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 final DocumentMetadata docMeta = iter.next();
                 if (null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
                     continue;

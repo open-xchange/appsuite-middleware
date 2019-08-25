@@ -207,7 +207,7 @@ public class PGPSignatureVerifier {
                     verificationResult.setIssuerKey(issuerKey);
                     if (userIds != null) {
                         //Adding user-id so that it is possible for a caller to determine who created this signature
-                        while(userIds.hasNext()) {
+                        while (userIds.hasNext()) {
                             verificationResult.addIssuerUserId(userIds.next());
                         }
                     }

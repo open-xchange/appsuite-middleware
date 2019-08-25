@@ -267,7 +267,7 @@ public class RTProtocolTest {
         ID from = new ID("test@1");
         s.setFrom(from);
         
-        while(i < 21) {
+        while (i < 21) {
             i++;
             s = new Message();
             s.setSequenceNumber(i);

@@ -601,7 +601,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
 //                rsColumnType = selectStatement.executeQuery("DESC "+database.escapeTableName(schemaName, tableName));
 //
-//                while(rsColumnType.next()) {
+//                while (rsColumnType.next()) {
 //                    List<String> colSchema = new ArrayList<String>();
 //                    colSchema.add(rsColumnType.getString("Type"));
 //                    colSchema.add(rsColumnType.getString("Default"));

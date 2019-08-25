@@ -103,7 +103,7 @@ public class ListAction extends AbstractListingAction {
             @Override
             protected boolean accept(File thing) throws OXException {
                 int i = threshhold;
-                while(i < ids.size()) {
+                while (i < ids.size()) {
                     FileID fileID = new FileID(ids.get(i));
                     if (fileID.toUniqueID().equals(thing.getId())) {
                         threshhold = i+1;

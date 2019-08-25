@@ -691,7 +691,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 final String folderId = resultSet.getString(1);
                 retval.put(folderId, Boolean.TRUE);
             }

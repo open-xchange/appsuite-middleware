@@ -129,7 +129,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
      */
     private Collection<TotpMultifactorDevice> createDevicesFrom(ResultSet resultSet) throws SQLException {
         final Collection<TotpMultifactorDevice> ret = new ArrayList<TotpMultifactorDevice>();
-        while(resultSet.next()) {
+        while (resultSet.next()) {
             ret.add(createDeviceFrom(resultSet));
         }
         return ret;
