@@ -247,7 +247,7 @@ public enum MessagingField {
     }
 
     public Object doSwitch(final MessagingMessageSwitcher switcher, final Object...args) throws OXException {
-        switch(this) {
+        switch (this) {
         case ID : return switcher.id(args);
         case FOLDER_ID : return switcher.folderId(args);
         case CONTENT_TYPE : return switcher.contentType(args);

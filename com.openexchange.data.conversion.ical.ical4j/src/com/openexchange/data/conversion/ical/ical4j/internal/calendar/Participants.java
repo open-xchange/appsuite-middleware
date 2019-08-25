@@ -154,7 +154,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
         }
         for(final Participant p : cObj.getParticipants()) {
-            switch(p.getType()) {
+            switch (p.getType()) {
                 case Participant.EXTERNAL_USER:
                     addExternalAttendee(index, (ExternalUserParticipant)p, component, warnings);
                     break;

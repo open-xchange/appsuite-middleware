@@ -95,7 +95,7 @@ public class NoGlobalAddressBookUserCensorshipTest {         @Test
     }
 
     private Object get(final UserField field, final User user) {
-        switch(field) {
+        switch (field) {
         case ALIASES: return user.getAliases();
         case TIME_ZONE: return user.getTimeZone();
         case LOCALE: return user.getLocale();

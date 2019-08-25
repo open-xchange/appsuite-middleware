@@ -423,7 +423,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     }
 
     private Object process(final Metadata m, final Object object) {
-        switch(m.getId()) {
+        switch (m.getId()) {
         default : return object;
         case Metadata.LAST_MODIFIED : case Metadata.CREATION_DATE : case Metadata.LAST_MODIFIED_UTC: return new Date(((Long)object).longValue());
         case Metadata.MODIFIED_BY : case Metadata.CREATED_BY : case Metadata.VERSION : case Metadata.ID:case  Metadata.COLOR_LABEL:

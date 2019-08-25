@@ -132,7 +132,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         public void invalidate(final WebdavPath url, final int id, final Type type) {
 
             lockNull.remove(url);
-            switch(type) {
+            switch (type) {
             case COLLECTION:
                 folders.remove(url);
                 newFolders.remove(url);

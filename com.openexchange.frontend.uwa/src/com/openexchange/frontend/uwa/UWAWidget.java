@@ -175,7 +175,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
         @Override
         public Object get(UWAWidget thing) {
-            switch(this) {
+            switch (this) {
             case ADJ: return thing.getADJ();
             case AUTOREFRESH: return Autoboxing.valueOf(thing.isAutorefresh());
             case ID: return thing.getId();
@@ -201,7 +201,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
             if (value == null && ! NULLABLE.contains(this)) {
                 return ;
             }
-            switch(this) {
+            switch (this) {
             case ADJ: thing.setADJ((String) value); break;
             case AUTOREFRESH:  thing.setAutorefresh(a2b(value)); break;
             case ID:  thing.setId((String) value); break;

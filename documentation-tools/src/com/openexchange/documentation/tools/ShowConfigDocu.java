@@ -141,7 +141,7 @@ public class ShowConfigDocu {
                     if (tag == null) {
                         props = configDocu.getProperties();
                     }
-                    switch(tag) {
+                    switch (tag) {
                         case RELOADABLE_TAG:
                             props = configDocu.getProperties();
                             props = props.stream()

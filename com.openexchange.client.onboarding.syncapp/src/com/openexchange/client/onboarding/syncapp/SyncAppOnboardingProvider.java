@@ -148,7 +148,7 @@ public class SyncAppOnboardingProvider implements OnboardingProvider {
             throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
-        switch(scenario.getType()) {
+        switch (scenario.getType()) {
             case LINK:
                 return doExecuteLink(request, session);
             case MANUAL:

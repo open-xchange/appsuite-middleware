@@ -154,7 +154,7 @@ public class StartsOrEndsWithMatcherUtil {
             return values;
         }
         List<String> result;
-        switch(matchType){
+        switch (matchType){
             case startswith:
                 result = new ArrayList<>(values.size());
                 for (String str : values) {

@@ -1339,7 +1339,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             retval.setPassword(null);
         }
 
-        switch(MailProperties.getInstance().getLoginSource(userId, contextId)){
+        switch (MailProperties.getInstance().getLoginSource(userId, contextId)){
             case PRIMARY_EMAIL:
                 retval.setLogin(UserStorage.getInstance().getUser(userId, contextId).getMail());
                 break;
@@ -1352,7 +1352,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 break;
         }
 
-        switch(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
+        switch (MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
@@ -1376,7 +1376,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
         }
 
-        switch(MailProperties.getInstance().getTransportServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
+        switch (MailProperties.getInstance().getTransportServerSource(userId, contextId, MailAccounts.isGuestAccount(retval))){
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getTransportServer(userId, contextId);

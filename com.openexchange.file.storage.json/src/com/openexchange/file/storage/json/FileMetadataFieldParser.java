@@ -90,7 +90,7 @@ public class FileMetadataFieldParser {
         if (val == JSONObject.NULL) {
             val = null;
         }
-        switch(field) {
+        switch (field) {
         case CATEGORIES: {
             if (val == null) {
                 return null;

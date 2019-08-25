@@ -145,7 +145,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
 
     private String getModuleAsString(final SubscriptionSource source) {
         final int module = source.getFolderModule();
-        switch(module) {
+        switch (module) {
         case FolderObject.CONTACT : return "contacts";
         case FolderObject.CALENDAR : return "calendar";
         case FolderObject.TASK : return "tasks";

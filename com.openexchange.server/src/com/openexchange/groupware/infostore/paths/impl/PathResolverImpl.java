@@ -293,7 +293,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     public void invalidate(final WebdavPath url, final int id , final Type type) {
 
         resolveCache.get().remove(url);
-        switch(type) {
+        switch (type) {
         case COLLECTION :
             folderPathCache.get().remove(id);break;
         case RESOURCE : docPathCache.get().remove(id); break;

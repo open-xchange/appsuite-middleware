@@ -92,7 +92,7 @@ public class ConvertUtils {
                 continue;
             }
 
-            switch(aChar) {
+            switch (aChar) {
                 case ' ':
                     if (k == 0 || escapeSpace) {
                         sb = initBuilderIfNeeded(sb, len, arg, k);

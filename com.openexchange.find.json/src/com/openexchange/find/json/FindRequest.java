@@ -410,7 +410,7 @@ public class FindRequest {
      */
     public String[] getColumns() throws OXException {
         String valueStr = null;
-        switch(requireModule()) {
+        switch (requireModule()) {
             case CALENDAR:
                 valueStr = request.getParameter(AJAXServlet.PARAMETER_CHRONOS_FIELDS);
                 if (null == valueStr) {
@@ -459,7 +459,7 @@ public class FindRequest {
      */
     static FacetType facetTypeFor(Module module, String id) {
         FacetType type = null;
-        switch(module) {
+        switch (module) {
             case MAIL:
                 type = MailFacetType.getById(id);
                 break;

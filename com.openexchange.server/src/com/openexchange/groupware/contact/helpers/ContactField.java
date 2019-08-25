@@ -353,7 +353,7 @@ public enum ContactField{
 
     @Deprecated
     public Object doSwitch(final ContactSwitcher switcher, final Object... objects) throws OXException {
-        switch(this){
+        switch (this){
         case DISPLAY_NAME : return switcher.displayname(objects);
         case SUR_NAME : return switcher.surname(objects);
         case GIVEN_NAME : return switcher.givenname(objects);
