@@ -90,6 +90,8 @@ public class PreviewCacheCreateDataTableTask extends UpdateTaskAdapter {
                     if (!tableExists(writeCon, tableNames[i])) {
                         stmt = writeCon.prepareStatement(createStmts[i]);
                         stmt.executeUpdate();
+                        Databases.closeSQLStuff(stmt);
+                        stmt = null;
                     }
                 } catch (SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
