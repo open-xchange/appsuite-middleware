@@ -108,6 +108,8 @@ public class SproxydCreateTableTask extends UpdateTaskAdapter {
                 if (false == Databases.tableExists(writeCon, tableNames[i])) {
                     stmt = writeCon.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
                 }
             }
         } catch (SQLException e) {
