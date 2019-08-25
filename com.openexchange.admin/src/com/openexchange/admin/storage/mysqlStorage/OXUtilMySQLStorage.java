@@ -2230,11 +2230,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.storage.interfaces.OXUtilStorageInterface#changeServer(int, java.lang.String)
-     */
     @Override
     public void changeServer(int serverId, String schemaName) throws StorageException {
         Connection connection = null;

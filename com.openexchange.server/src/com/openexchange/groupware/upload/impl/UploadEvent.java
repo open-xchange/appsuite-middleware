@@ -158,17 +158,11 @@ public class UploadEvent implements Upload {
         cleanUp();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.upload.impl.Upload#getNumberOfUploadFiles()
-     */
     @Override
     public final int getNumberOfUploadFiles() {
         return createList().size();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.upload.impl.Upload#getUploadFilesIterator()
-     */
     @Override
     public final Iterator<UploadFile> getUploadFilesIterator() {
         return createList().iterator();

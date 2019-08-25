@@ -74,21 +74,11 @@ public class DurationMapping extends AbstractICalMapping<Available, com.openexch
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#export(java.lang.Object, net.fortuna.ical4j.model.Component, com.openexchange.chronos.ical.ICalParameters, java.util.List)
-     */
     @Override
     public void export(com.openexchange.chronos.Available object, Available component, ICalParameters parameters, List<OXException> warnings) {
         removeProperties(component, Property.DURATION); // stick to DTEND for export
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#importICal(net.fortuna.ical4j.model.Component, java.lang.Object, com.openexchange.chronos.ical.ICalParameters, java.util.List)
-     */
     @Override
     public void importICal(Available component, com.openexchange.chronos.Available object, ICalParameters parameters, List<OXException> warnings) {
         Duration duration = (Duration) component.getProperty(Property.DURATION);

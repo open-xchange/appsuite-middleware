@@ -90,21 +90,11 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarFreeSlotId()
-     */
     @Override
     public String nextAvailableId() throws OXException {
         return nextId("calendar_available_sequence");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(com.openexchange.chronos.CalendarFreeSlot)
-     */
     @Override
     public void insertAvailable(List<Available> available) throws OXException {
         Connection connection = null;
@@ -124,9 +114,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#setAvailable(java.util.List)
-     */
     @Override
     public void setAvailable(int userId, List<Available> available) throws OXException {
         Connection connection = null;
@@ -148,11 +135,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAvailable(int)
-     */
     @Override
     public List<Available> loadAvailable(int userId) throws OXException {
         Connection connection = null;
@@ -167,11 +149,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAvailable(java.util.List)
-     */
     @Override
     public List<Available> loadAvailable(List<Integer> userIds) throws OXException {
         Connection connection = null;
@@ -186,11 +163,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(int)
-     */
     @Override
     public void deleteAvailable(int userId) throws OXException {
         Connection connection = null;
@@ -207,11 +179,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(java.lang.String)
-     */
     @Override
     public void deleteAvailable(String availableUid) throws OXException {
         Connection connection = null;
@@ -228,11 +195,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(int)
-     */
     @Override
     public void deleteAvailable(int userId, int availableId) throws OXException {
         Connection connection = null;
@@ -249,11 +211,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(java.util.List)
-     */
     @Override
     public void deleteAvailableByUid(List<String> availableIds) throws OXException {
         Connection connection = null;
@@ -270,11 +227,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailableById(java.util.List)
-     */
     @Override
     public void deleteAvailableById(List<Integer> availableIds) throws OXException {
         Connection connection = null;
@@ -291,11 +243,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailableByUserId(java.util.List)
-     */
     @Override
     public void deleteAvailableByUserId(List<Integer> userIds) throws OXException {
         Connection connection = null;

@@ -92,21 +92,11 @@ public class InternalVisitor implements SieveParserVisitor {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.SimpleNode, java.lang.Object)
-     */
     @Override
     public Object visit(final SimpleNode node, final Object data) throws SieveException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTstart, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTstart node, final Object data) throws SieveException {
         if (data instanceof Boolean) {
@@ -116,11 +106,6 @@ public class InternalVisitor implements SieveParserVisitor {
         return VisitorUtil.visitChildren(node, null, this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTcommands, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTcommands node, final Object data) throws SieveException {
         if (null != data) {
@@ -130,11 +115,6 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTcommand, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTcommand node, final Object data) throws SieveException {
         final String name = node.getName();
@@ -152,31 +132,16 @@ public class InternalVisitor implements SieveParserVisitor {
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTblock, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTblock node, final Object data) throws SieveException {
         return VisitorUtil.visitChildren(node, new ArrayList<ActionCommand>(), this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTarguments, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTarguments node, final Object data) throws SieveException {
         return VisitorUtil.visitChildren(node, new ArrayList<Object>(), this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTargument, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTargument node, final Object data) throws SieveException {
         if (0 < node.jjtGetNumChildren()) {
@@ -200,11 +165,6 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTtest, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTtest node, final Object data) throws SieveException {
         final String name = node.getName();
@@ -220,11 +180,6 @@ public class InternalVisitor implements SieveParserVisitor {
         throw new SieveException("Found not known test name: " + name + " in line " + node.getCoordinate().getStartLineNumber());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTtest_list, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTtest_list node, final Object data) throws SieveException {
         final ArrayList<TestCommand> list = new ArrayList<TestCommand>();
@@ -237,11 +192,6 @@ public class InternalVisitor implements SieveParserVisitor {
         return data;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTstring, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTstring node, final Object data) throws SieveException {
         final Object value = node.getValue();
@@ -256,11 +206,6 @@ public class InternalVisitor implements SieveParserVisitor {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.jsieve.parser.generated.SieveParserVisitor#visit(org.apache.jsieve.parser.generated.ASTstring_list, java.lang.Object)
-     */
     @Override
     public Object visit(final ASTstring_list node, final Object data) throws SieveException {
         final ArrayList<String> list = new ArrayList<String>();

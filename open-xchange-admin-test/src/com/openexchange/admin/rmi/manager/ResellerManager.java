@@ -174,11 +174,6 @@ public class ResellerManager extends AbstractManager {
         resellerInterface.updateDatabaseModuleAccessRestrictions(getMasterCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) throws Exception {
         delete((ResellerAdmin) object);

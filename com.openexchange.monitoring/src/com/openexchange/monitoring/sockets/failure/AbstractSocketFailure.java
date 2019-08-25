@@ -75,17 +75,11 @@ public abstract class AbstractSocketFailure<E extends Exception> implements Sock
         this.millis = millis;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.monitoring.sockets.SocketFailure#getE()
-     */
     @Override
     public E getE() {
         return e;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.monitoring.sockets.SocketFailure#getMillis()
-     */
     @Override
     public long getMillis() {
         return millis;

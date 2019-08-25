@@ -69,11 +69,6 @@ public class GetPictureManagedFileParser extends AbstractAJAXParser<GetPictureMa
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected GetPictureManagedFileResponse createResponse(Response response) throws JSONException {
         return new GetPictureManagedFileResponse(response);

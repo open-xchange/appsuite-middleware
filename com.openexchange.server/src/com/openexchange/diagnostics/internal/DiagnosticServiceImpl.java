@@ -84,11 +84,6 @@ public class DiagnosticServiceImpl implements DiagnosticService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.DiagnosticService#getCharsets()
-     */
     @Override
     public List<String> getCharsets(boolean aliases) {
         SortedMap<String, Charset> availableCharsets = Charset.availableCharsets();
@@ -106,11 +101,6 @@ public class DiagnosticServiceImpl implements DiagnosticService {
         return convertToSortedList(charsets, availableCharsets.size());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.DiagnosticService#getProtocols()
-     */
     @Override
     public List<String> getProtocols() {
         List<String> protocols = new LinkedList<String>();
@@ -121,11 +111,6 @@ public class DiagnosticServiceImpl implements DiagnosticService {
         return Collections.unmodifiableList(protocols);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.DiagnosticService#getCipherSuites()
-     */
     @Override
     public List<String> getCipherSuites() {
         String[] defaultCipherSuites = ((SSLSocketFactory) SSLSocketFactory.getDefault()).getDefaultCipherSuites();
@@ -136,11 +121,6 @@ public class DiagnosticServiceImpl implements DiagnosticService {
         return Collections.unmodifiableList(cipherSuites);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.diagnostics.DiagnosticService#getVersion()
-     */
     @Override
     public String getVersion() {
         return ServerServiceRegistry.getServize(VersionService.class).getVersionString();

@@ -69,31 +69,16 @@ public class UidMapping extends ICalTextMapping<VAvailability, Availability> {
         super(Property.UID);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
-     */
     @Override
     protected String getValue(Availability object) {
         return object.getUid();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
-     */
     @Override
     protected void setValue(Availability object, String value) {
         object.setUid(value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#createProperty()
-     */
     @Override
     protected Property createProperty() {
         return new Uid();

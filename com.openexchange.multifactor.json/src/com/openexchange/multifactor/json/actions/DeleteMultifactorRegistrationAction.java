@@ -145,9 +145,6 @@ public class DeleteMultifactorRegistrationAction extends AbstractMultifactorActi
         return false == devices.stream().anyMatch((device) -> !device.isBackup());
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.multifactor.json.actions.AbstractMultifactorAction#doPerform(com.openexchange.multifactor.json.actions.AJAXMultifactorRequest)
-     */
     @Override
     protected AJAXRequestResult doPerform(AJAXMultifactorRequest request) throws OXException {
         final MultifactorProvider provider = requireProvider(request.getProviderName());

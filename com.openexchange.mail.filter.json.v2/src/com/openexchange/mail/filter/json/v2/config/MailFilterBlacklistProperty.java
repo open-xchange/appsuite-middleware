@@ -176,11 +176,6 @@ public class MailFilterBlacklistProperty implements Property {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         return hashCode;

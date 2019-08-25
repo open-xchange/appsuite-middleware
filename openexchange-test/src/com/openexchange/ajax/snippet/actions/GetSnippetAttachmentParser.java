@@ -69,11 +69,6 @@ public class GetSnippetAttachmentParser extends AbstractAJAXParser<GetSnippetAtt
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected GetSnippetAttachmentResponse createResponse(Response response) throws JSONException {
         return new GetSnippetAttachmentResponse(response);

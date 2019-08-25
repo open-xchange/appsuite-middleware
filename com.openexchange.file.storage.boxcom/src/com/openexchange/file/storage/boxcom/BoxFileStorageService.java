@@ -90,9 +90,6 @@ public final class BoxFileStorageService extends AbstractOAuthFileStorageService
         return new BoxAccountAccess(this, account, session);
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService#getScope()
-     */
     @Override
     protected OAuthScope getScope() {
         return BoxComOAuthScope.drive;

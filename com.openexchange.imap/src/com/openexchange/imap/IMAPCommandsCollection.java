@@ -2561,10 +2561,6 @@ public final class IMAPCommandsCollection {
         try {
             final Boolean val = (Boolean) f.doCommand(new IMAPFolder.ProtocolCommand() {
 
-                /*
-                 * (non-Javadoc)
-                 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com .sun.mail.imap.protocol.IMAPProtocol)
-                 */
                 @Override
                 public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                     /*

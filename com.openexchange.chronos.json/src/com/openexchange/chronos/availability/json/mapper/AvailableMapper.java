@@ -94,31 +94,16 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
         mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
-     */
     @Override
     public Available newInstance() {
         return new Available();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
-     */
     @Override
     public AvailableField[] newArray(int size) {
         return new AvailableField[size];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
-     */
     @Override
     protected EnumMap<AvailableField, ? extends JsonMapping<? extends Object, Available>> createMappings() {
         EnumMap<AvailableField, JsonMapping<? extends Object, Available>> mappings = new EnumMap<AvailableField, JsonMapping<? extends Object, Available>>(AvailableField.class);

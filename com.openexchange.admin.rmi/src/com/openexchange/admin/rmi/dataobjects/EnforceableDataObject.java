@@ -186,11 +186,6 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         return this.unset_members;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#clone()
-     */
     @Override
     protected Object clone() throws CloneNotSupportedException {
         final EnforceableDataObject object = (EnforceableDataObject) super.clone();
@@ -200,11 +195,6 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
 
     /**
      * {@inheritDoc}
-     */
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
@@ -304,9 +294,6 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         this.unset_members = new ArrayList<String>();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -315,9 +302,6 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

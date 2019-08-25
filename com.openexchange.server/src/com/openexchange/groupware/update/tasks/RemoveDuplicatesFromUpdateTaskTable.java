@@ -80,11 +80,6 @@ public class RemoveDuplicatesFromUpdateTaskTable extends UpdateTaskAdapter {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
@@ -106,11 +101,6 @@ public class RemoveDuplicatesFromUpdateTaskTable extends UpdateTaskAdapter {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] { AddUUIDForUpdateTaskTable.class.getName() };

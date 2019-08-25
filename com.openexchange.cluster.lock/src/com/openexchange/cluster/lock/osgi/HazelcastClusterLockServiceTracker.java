@@ -71,32 +71,17 @@ public class HazelcastClusterLockServiceTracker implements ServiceTrackerCustomi
         this.bundleContext = bundleContext;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public HazelcastInstance addingService(ServiceReference<HazelcastInstance> ref) {
         HazelcastInstance hzInstance = bundleContext.getService(ref);
         return hzInstance;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
         // no-op
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
         bundleContext.ungetService(ref);

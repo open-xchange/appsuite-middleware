@@ -80,11 +80,6 @@ public class HeaderTestCommandParser implements CommandParser<TestCommand> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final List<Object> argList = new ArrayList<Object>();
@@ -94,11 +89,6 @@ public class HeaderTestCommandParser implements CommandParser<TestCommand> {
         return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
-     */
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {

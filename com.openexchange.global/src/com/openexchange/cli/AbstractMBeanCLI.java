@@ -305,11 +305,6 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
     @Override
     protected abstract R invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected MBeanServerConnection getContext() {
         return executionContext;

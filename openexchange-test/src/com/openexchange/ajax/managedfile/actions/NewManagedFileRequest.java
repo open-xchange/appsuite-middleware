@@ -89,21 +89,11 @@ public class NewManagedFileRequest extends AbstractManagedFileRequest<NewManaged
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.POST;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> list = new ArrayList<Parameter>();
@@ -114,21 +104,11 @@ public class NewManagedFileRequest extends AbstractManagedFileRequest<NewManaged
         return list.toArray(new Parameter[list.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends NewManagedFileResponse> getParser() {
         return new NewManagedFileParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         return body;

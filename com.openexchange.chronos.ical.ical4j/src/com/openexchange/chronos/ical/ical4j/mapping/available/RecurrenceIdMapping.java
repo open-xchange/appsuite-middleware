@@ -71,42 +71,22 @@ public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, com.open
         super(Property.RECURRENCE_ID);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
-     */
     @Override
     protected DateTime getValue(com.openexchange.chronos.Available object) {
         com.openexchange.chronos.RecurrenceId value = object.getRecurrenceId();
         return null == value ? null : value.getValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
-     */
     @Override
     protected void setValue(com.openexchange.chronos.Available object, DateTime value) {
         object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value) : null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
-     */
     @Override
     protected DateProperty createProperty() {
         return new RecurrenceId();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
-     */
     @Override
     protected DateProperty getProperty(Available component) {
         return (DateProperty) component.getProperty(Property.RECURRENCE_ID);

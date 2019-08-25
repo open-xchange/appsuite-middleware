@@ -351,9 +351,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), onlyOwn, isShared);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.TasksSQLInterface#findTask(com.openexchange.groupware.search.TaskSearchObject, int, com.openexchange.groupware.search.Order, int[])
-     */
     @Override
     public SearchIterator<Task> findTask(TaskSearchObject searchObj, int orderBy, Order order, int[] cols) throws OXException {
         final Context ctx = Tools.getContext(session.getContextId());

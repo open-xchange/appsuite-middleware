@@ -82,71 +82,36 @@ public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountA
         this.calendarAccount = calendarAccount;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getServiceId()
-     */
     @Override
     public String getServiceId() {
         return calendarAccount.getProviderId();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getId()
-     */
     @Override
     public String getId() {
         return Integer.toString(calendarAccount.getAccountId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return getInternalConfigProperty("name");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
-     */
     @Override
     public String getModule() {
         return Module.CALENDAR.getModuleName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
-     */
     @Override
     public String getFolder() {
         return IDMangler.mangle("cal", getId(), ROOT_FOLDER);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
-     */
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
         return new GoogleOAuthAccess(getOAuthAccountId(), session);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(GoogleOAuthScope.calendar);

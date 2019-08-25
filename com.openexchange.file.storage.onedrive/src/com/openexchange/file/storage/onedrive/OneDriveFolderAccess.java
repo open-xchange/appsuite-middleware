@@ -98,11 +98,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#exists(java.lang.String)
-     */
     @Override
     public boolean exists(final String folderId) throws OXException {
         return perform(new OneDriveClosure<Boolean>() {
@@ -114,11 +109,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         }).booleanValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getFolder(java.lang.String)
-     */
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
         return perform(new OneDriveClosure<FileStorageFolder>() {
@@ -130,51 +120,26 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPersonalFolder()
-     */
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getTrashFolder()
-     */
     @Override
     public FileStorageFolder getTrashFolder() throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPublicFolders()
-     */
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         return new FileStorageFolder[0];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getUserSharedFolders()
-     */
     @Override
     public FileStorageFolder[] getUserSharedFolders() throws OXException {
         return new FileStorageFolder[0];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getSubfolders(java.lang.String, boolean)
-     */
     @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         return perform(new OneDriveClosure<FileStorageFolder[]>() {
@@ -186,11 +151,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getRootFolder()
-     */
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
         OneDriveFolder root = driveService.getRootFolder(userId, getAccessToken());
@@ -198,21 +158,11 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return root;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#createFolder(com.openexchange.file.storage.FileStorageFolder)
-     */
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
         return createFolder(toCreate, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#createFolder(com.openexchange.file.storage.FileStorageFolder, boolean)
-     */
     @Override
     public String createFolder(final FileStorageFolder toCreate, final boolean autoRename) throws OXException {
         return perform(new OneDriveClosure<String>() {
@@ -233,42 +183,22 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#updateFolder(java.lang.String, com.openexchange.file.storage.FileStorageFolder)
-     */
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
         // Support for neither subscription nor permissions.
         return identifier;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String)
-     */
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         return moveFolder(folderId, newParentId, newName, true);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String, boolean)
-     */
     @Override
     public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
         return perform(new OneDriveClosure<String>() {
@@ -303,11 +233,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#renameFolder(java.lang.String, java.lang.String)
-     */
     @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
         return perform(new OneDriveClosure<String>() {
@@ -329,21 +254,11 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String)
-     */
     @Override
     public String deleteFolder(String folderId) throws OXException {
         return deleteFolder(folderId, false);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String, boolean)
-     */
     @Override
     public String deleteFolder(final String folderId, boolean hardDelete) throws OXException {
         return perform(new OneDriveClosure<String>() {
@@ -356,11 +271,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String)
-     */
     @Override
     public void clearFolder(String folderId) throws OXException {
         clearFolder(folderId, false);
@@ -378,11 +288,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPath2DefaultFolder(java.lang.String)
-     */
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
         return perform(new OneDriveClosure<FileStorageFolder[]>() {
@@ -405,11 +310,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getStorageQuota(java.lang.String)
-     */
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
         return perform(new OneDriveClosure<Quota>() {
@@ -421,21 +321,11 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getFileQuota(java.lang.String)
-     */
     @Override
     public Quota getFileQuota(String folderId) throws OXException {
         return Type.FILE.getUnlimited();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getQuotas(java.lang.String, com.openexchange.file.storage.Quota.Type[])
-     */
     @Override
     public Quota[] getQuotas(String folder, Type[] types) throws OXException {
         if (null == types) {

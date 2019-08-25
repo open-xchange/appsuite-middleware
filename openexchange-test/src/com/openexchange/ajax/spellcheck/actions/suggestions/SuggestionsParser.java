@@ -71,11 +71,6 @@ public final class SuggestionsParser extends AbstractAJAXParser<SuggestionsRespo
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected SuggestionsResponse createResponse(final Response response) throws JSONException {
         final SuggestionsResponse retval = new SuggestionsResponse(response);

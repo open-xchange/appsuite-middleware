@@ -169,9 +169,6 @@ public class SimMessageAccess implements MessagingMessageAccess {
         called.add(new Call("updateMessage", message, fields));
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.messaging.MessagingMessageAccess#resolveContent(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws OXException {
         // Nothing to do

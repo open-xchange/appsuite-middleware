@@ -83,11 +83,6 @@ public class MigrateMSLiveAccountsTask implements UpdateTaskV2 {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
@@ -108,21 +103,11 @@ public class MigrateMSLiveAccountsTask implements UpdateTaskV2 {
         // Also rename accounts with numerical index, e.g. 'My MS Live account (1)' ?
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getAttributes()
-     */
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes(UpdateConcurrency.BLOCKING);

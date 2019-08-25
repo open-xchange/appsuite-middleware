@@ -67,21 +67,11 @@ public class SchedJoulesJsonActivator extends AJAXModuleActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { SchedJoulesService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         registerModule(new SchedJoulesActionFactory(this), "chronos/schedjoules");

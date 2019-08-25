@@ -123,11 +123,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.dropbox.useOptimisticSubfolderDetection", true, view);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#exists(java.lang.String)
-     */
     @Override
     public boolean exists(String folderId) throws OXException {
         try {
@@ -148,11 +143,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getFolder(java.lang.String)
-     */
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
         try {
@@ -176,41 +166,21 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPersonalFolder()
-     */
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getTrashFolder()
-     */
     @Override
     public FileStorageFolder getTrashFolder() throws OXException {
         throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPublicFolders()
-     */
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
         return new FileStorageFolder[0];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getSubfolders(java.lang.String, boolean)
-     */
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
         try {
@@ -234,21 +204,11 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getUserSharedFolders()
-     */
     @Override
     public FileStorageFolder[] getUserSharedFolders() throws OXException {
         return new FileStorageFolder[0];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getRootFolder()
-     */
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
         DropboxFolder rootFolder = new DropboxFolder(userId);
@@ -319,21 +279,11 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#updateFolder(java.lang.String, com.openexchange.file.storage.FileStorageFolder)
-     */
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
         return identifier;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String)
-     */
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
@@ -398,11 +348,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#renameFolder(java.lang.String, java.lang.String)
-     */
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
         int lastIndex = folderId.lastIndexOf('/');
@@ -427,11 +372,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String)
-     */
     @Override
     public String deleteFolder(String folderId) throws OXException {
         try {
@@ -444,21 +384,11 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String, boolean)
-     */
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
         return deleteFolder(folderId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String)
-     */
     @Override
     public void clearFolder(String folderId) throws OXException {
         try {
@@ -480,21 +410,11 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String, boolean)
-     */
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
         clearFolder(folderId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPath2DefaultFolder(java.lang.String)
-     */
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
         String parentId = folderId;
@@ -520,11 +440,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         return path.toArray(new String[path.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getStorageQuota(java.lang.String)
-     */
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
         try {
@@ -546,21 +461,11 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getFileQuota(java.lang.String)
-     */
     @Override
     public Quota getFileQuota(String folderId) throws OXException {
         return Type.FILE.getUnlimited();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getQuotas(java.lang.String, com.openexchange.file.storage.Quota.Type[])
-     */
     @Override
     public Quota[] getQuotas(String folder, Type[] types) throws OXException {
         if (null == types) {

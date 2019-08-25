@@ -156,11 +156,6 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.plugin.hosting.console.ObjectNamingAbstraction#getObjectName()
-     */
     @Override
     protected String getObjectName() {
         return "upgradeschemata";

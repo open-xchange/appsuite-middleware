@@ -74,11 +74,6 @@ public class StructuredPostalAddressConsumer implements BiConsumer<ContactEntry,
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
-     */
     @Override
     public void accept(ContactEntry t, Contact u) {
         if (!t.hasStructuredPostalAddresses()) {

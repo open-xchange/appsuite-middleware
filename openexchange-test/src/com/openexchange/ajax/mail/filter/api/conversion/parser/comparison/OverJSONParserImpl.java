@@ -67,11 +67,6 @@ public class OverJSONParserImpl implements ComparisonParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public OverComparison parse(JSONObject jsonObject) throws JSONException {
         int size = jsonObject.getInt("size");

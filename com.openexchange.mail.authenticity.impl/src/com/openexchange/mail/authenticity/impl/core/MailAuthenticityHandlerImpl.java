@@ -193,31 +193,16 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         trustedMailService.handle(session, mailMessage);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#getRequiredFields()
-     */
     @Override
     public Collection<MailField> getRequiredFields() {
         return requiredMailFields;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#getRequiredHeaders()
-     */
     @Override
     public Collection<String> getRequiredHeaders() {
         return Collections.emptyList();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#isEnabled(com.openexchange.session.Session)
-     */
     @Override
     public boolean isEnabled(Session session) {
         // MailAuthenticityProperty.enabled is already checked in MailAuthenticityHandlerRegistryImpl
@@ -225,11 +210,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#getRanking()
-     */
     @Override
     public int getRanking() {
         return ranking;

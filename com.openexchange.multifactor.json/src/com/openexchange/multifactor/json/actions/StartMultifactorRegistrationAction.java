@@ -77,11 +77,6 @@ public class StartMultifactorRegistrationAction extends AbstractMultifactorActio
         super(serviceLookup);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.multifactor.json.actions.AbstractMultifactorAction#doPerform(com.openexchange.multifactor.json.actions.AJAXMultifactorRequest)
-     */
     @Override
     protected AJAXRequestResult doPerform(AJAXMultifactorRequest request) throws OXException {
         MultifactorDevice device = request.parseDevice();

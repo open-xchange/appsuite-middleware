@@ -79,11 +79,6 @@ public class PhotoConsumer implements BiConsumer<JSONObject, Contact> {
         this.accessToken = accessToken;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
-     */
     @Override
     public void accept(JSONObject t, Contact u) {
         String id = t.optString("id");

@@ -72,11 +72,6 @@ public class PriorityMapping extends AbstractICalMapping<VAvailability, Availabi
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#export(java.lang.Object, net.fortuna.ical4j.model.Component, com.openexchange.chronos.ical.ICalParameters, java.util.List)
-     */
     @Override
     public void export(Availability object, VAvailability component, ICalParameters parameters, List<OXException> warnings) {
         if (object.getPriority() >= 0 && object.getPriority() <= 9) {
@@ -84,11 +79,6 @@ public class PriorityMapping extends AbstractICalMapping<VAvailability, Availabi
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#importICal(net.fortuna.ical4j.model.Component, java.lang.Object, com.openexchange.chronos.ical.ICalParameters, java.util.List)
-     */
     @Override
     public void importICal(VAvailability component, Availability object, ICalParameters parameters, List<OXException> warnings) {
         Priority priority = (Priority) component.getProperty(Property.PRIORITY);

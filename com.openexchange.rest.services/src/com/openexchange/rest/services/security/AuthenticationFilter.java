@@ -210,11 +210,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.ws.rs.container.ContainerRequestFilter#filter(javax.ws.rs.container.ContainerRequestContext)
-     */
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // Check if all is permitted

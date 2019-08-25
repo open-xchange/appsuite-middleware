@@ -68,19 +68,11 @@ public class BitXOR extends BinaryBitFunction {
         super(left, right);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.sql.grammar.Expression#getSqlKeyword()
-     */
     @Override
     public String getSqlKeyword() {
         return "^";
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.sql.grammar.Element#build(com.openexchange.sql.builder.IStatementBuilder)
-     */
     @Override
     public void build(IStatementBuilder builder) {
         builder.buildBitXOR(this);

@@ -69,11 +69,6 @@ public class ListSnippetParser extends AbstractAJAXParser<ListSnippetResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected ListSnippetResponse createResponse(Response response) throws JSONException {
         return new ListSnippetResponse(response);

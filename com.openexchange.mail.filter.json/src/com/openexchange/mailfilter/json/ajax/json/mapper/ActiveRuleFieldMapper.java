@@ -70,41 +70,21 @@ public class ActiveRuleFieldMapper implements RuleFieldMapper {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
-     */
     @Override
     public RuleField getAttributeName() {
         return RuleField.active;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
     public boolean isNull(Rule rule) {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
-     */
     @Override
     public Object getAttribute(Rule rule) throws JSONException, OXException {
         return Boolean.valueOf(!rule.isCommented());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
-     */
     @Override
     public void setAttribute(Rule rule, Object attribute, ServerSession session) throws JSONException, SieveException, OXException {
         rule.setCommented(!((Boolean) attribute).booleanValue());

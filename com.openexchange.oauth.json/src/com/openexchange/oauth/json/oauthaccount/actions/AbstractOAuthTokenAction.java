@@ -364,21 +364,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             taskName = builder.toString();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
-         */
         @Override
         public String getTaskName() {
             return taskName;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#perform()
-         */
         @Override
         public Void perform() throws OXException {
             OAuthService oauthService = getOAuthService();
@@ -413,21 +403,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             oauthService.updateAccount(session, Integer.parseInt(accountId), serviceId, OAuthInteractionType.CALLBACK, arguments, scopes);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#getContextId()
-         */
         @Override
         public int getContextId() {
             return session.getContextId();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#getUserId()
-         */
         @Override
         public int getUserId() {
             return session.getUserId();

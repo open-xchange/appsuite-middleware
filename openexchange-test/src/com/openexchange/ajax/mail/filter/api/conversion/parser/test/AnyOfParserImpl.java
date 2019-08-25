@@ -73,11 +73,6 @@ public class AnyOfParserImpl implements TestParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
         final JSONArray jsonTestArray = jsonObject.getJSONArray("tests");

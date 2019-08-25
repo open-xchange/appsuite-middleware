@@ -85,31 +85,16 @@ public class ExponentialBackOffRetryPolicy implements RetryPolicy {
         randomFactor = random.nextDouble();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
-     */
     @Override
     public int getMaxTries() {
         return maxTries;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
-     */
     @Override
     public int retryCount() {
         return retryCount;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
-     */
     @Override
     public boolean isRetryAllowed() {
         if (retryCount++ <= maxTries) {

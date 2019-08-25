@@ -77,11 +77,6 @@ public class UserMailAccountAttributeChangers extends AbstractUserAttributeChang
         super(TABLE, EnumSet.allOf(UserMailAccountAttribute.class));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
-     */
     @Override
     protected Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserMailAccountAttribute, UserAttributeChanger> changers = new HashMap<>();

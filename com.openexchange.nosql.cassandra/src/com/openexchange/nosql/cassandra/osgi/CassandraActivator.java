@@ -164,11 +164,6 @@ public class CassandraActivator extends HousekeepingActivator {
             this.cassandraService = cassandraService;
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Runnable#run()
-         */
         @Override
         public void run() {
             try {

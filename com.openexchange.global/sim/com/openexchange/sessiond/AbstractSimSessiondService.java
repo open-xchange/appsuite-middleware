@@ -173,11 +173,6 @@ public class AbstractSimSessiondService implements SessiondService {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.sessiond.SessiondService#removeContextSessions(int)
-     */
     @Override
     public void removeContextSessions(final int contextId) {
         // Nothing to do

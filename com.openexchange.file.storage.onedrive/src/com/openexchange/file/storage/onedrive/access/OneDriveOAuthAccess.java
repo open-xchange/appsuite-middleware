@@ -97,22 +97,12 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         this.fsAccount = fsAccount;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.AbstractOAuthAccess#dispose()
-     */
     @Override
     public void dispose() {
         // Nothing to dispose
         super.dispose();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#initialize()
-     */
     @Override
     public void initialize() throws OXException {
         synchronized (this) {
@@ -135,11 +125,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#ping()
-     */
     @Override
     public boolean ping() throws OXException {
         OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
@@ -160,11 +145,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         return closure.perform(null, getSession()).booleanValue();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
-     */
     @Override
     public int getAccountId() throws OXException {
         try {
@@ -174,11 +154,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
-     */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
         if (isExpired()) {
@@ -239,11 +214,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             super(Services.getServices(), session, cachedAccount);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#perform()
-         */
         @Override
         public Token reauthorize() throws OXException {
             Session session = getSession();

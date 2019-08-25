@@ -150,11 +150,6 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         new CheckConsistency().execute(args);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractMBeanCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("a", "action", "action", "Defines the action\nAccepted values are: " + prettyPrintEnum(Action.class), false));
@@ -164,21 +159,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         options.addOption(createArgumentOption("i", "source-id", "sourceId", "Defines the source identifier.\nOnly considered if \"--source\" option is specified\nIf \"--source\" is set to \"all\" then this option is simply ignored", false));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         authenticator.doAuthentication(login, password);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         action = checkAndSetOption(Action.class, cmd, 'a');
@@ -198,11 +183,6 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         String policyString = getPolicyString();
@@ -250,21 +230,11 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#requiresAdministrativePermission()
-     */
     @Override
     protected Boolean requiresAdministrativePermission() {
         return Boolean.TRUE;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         StringBuilder sb = new StringBuilder(1024);
@@ -311,11 +281,6 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         return sb.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] " + BASIC_MASTER_ADMIN_USAGE;

@@ -82,9 +82,6 @@ public class ConfirmAction extends TaskAction {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
         final JSONObject data = (JSONObject) req.getRequest().requireData();

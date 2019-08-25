@@ -114,11 +114,6 @@ public class TaskManagementManager extends AbstractManager {
         taskManagementInterface.deleteJob(context, adminCredentials, jobId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) {
         // No clean-up applicable

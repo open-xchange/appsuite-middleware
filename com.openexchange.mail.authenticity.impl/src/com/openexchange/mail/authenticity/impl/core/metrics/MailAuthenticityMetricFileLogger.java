@@ -82,11 +82,6 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
         this.leanConfigService = leanConfigService;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger#log(java.util.List, com.openexchange.mail.dataobjects.MailAuthenticityResult)
-     */
     @Override
     public void log(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult) {
         Object arg = new Object() {

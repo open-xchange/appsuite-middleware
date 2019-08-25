@@ -75,10 +75,6 @@ public class CommentActivityAction extends AbstractXingAction {
 		super(serviceLookup);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.openexchange.xing.json.actions.AbstractXingAction#perform(com.openexchange.xing.json.XingRequest)
-	 */
 	@Override
 	protected AJAXRequestResult perform(XingRequest req) throws OXException, JSONException, XingException {
 		String activityId = getMandatoryStringParameter(req, "activity_id");

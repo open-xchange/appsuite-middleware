@@ -70,11 +70,6 @@ public class XingContactsOAuthAccountAssociationProvider extends AbstractSubscri
         super(XingSubscribeService.SOURCE_ID, services);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#createAssociation(int, int, int, java.lang.String, com.openexchange.subscribe.Subscription)
-     */
     @Override
     public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
         return new XingContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription);

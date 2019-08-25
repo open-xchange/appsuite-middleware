@@ -93,61 +93,31 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
         return s.substring(0, s.length() - 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.MeterMBean#getCount()
-     */
     @Override
     public long getCount() {
         return meter.getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.MeterMBean#getMeanRate()
-     */
     @Override
     public double getMeanRate() {
         return meter.getMeanRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.MeterMBean#getOneMinuteRate()
-     */
     @Override
     public double getOneMinuteRate() {
         return meter.getOneMinuteRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.MeterMBean#getFiveMinuteRate()
-     */
     @Override
     public double getFiveMinuteRate() {
         return meter.getFiveMinuteRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.MeterMBean#getFifteenMinuteRate()
-     */
     @Override
     public double getFifteenMinuteRate() {
         return meter.getFifteenMinuteRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.MeterMBean#getRateUnit()
-     */
     @Override
     public String getRateUnit() {
         return rateUnit;

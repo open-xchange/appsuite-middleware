@@ -72,21 +72,11 @@ public class CounterMetricRegisterer implements MetricRegisterer {
         this.registry = registry;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#register(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public Metric register(MetricDescriptor descriptor) {
         return new DropwizardCounter(registry.counter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#unregister(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public void unregister(MetricDescriptor descriptor) {
         registry.remove(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));

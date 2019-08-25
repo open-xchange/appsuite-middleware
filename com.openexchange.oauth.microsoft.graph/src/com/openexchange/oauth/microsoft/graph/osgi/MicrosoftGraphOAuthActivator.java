@@ -73,11 +73,6 @@ public final class MicrosoftGraphOAuthActivator extends AbstractOAuthActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         super.startBundle();
@@ -86,21 +81,11 @@ public final class MicrosoftGraphOAuthActivator extends AbstractOAuthActivator {
         registerService(UpdateTaskProviderService.class.getName(), providerService);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
-     */
     @Override
     protected OAuthServiceMetaData getOAuthServiceMetaData() {
         return new MicrosoftGraphOAuthServiceMetaData(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
-     */
     @Override
     protected OAuthScope[] getScopes() {
         return MicrosoftGraphOAuthScope.values();

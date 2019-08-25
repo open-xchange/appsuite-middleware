@@ -64,63 +64,42 @@ import com.openexchange.userfeedback.clt.AbstractUserFeedback;
  */
 public class TestUserFeedbackImpl extends AbstractUserFeedback {
 
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractRestCLI#checkArguments(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkArguments(CommandLine cmd) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractRestCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractRestCLI#getEndpoint(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected WebTarget getEndpoint(CommandLine cmd) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
-     */
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         // TODO Auto-generated method stub
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         // TODO Auto-generated method stub

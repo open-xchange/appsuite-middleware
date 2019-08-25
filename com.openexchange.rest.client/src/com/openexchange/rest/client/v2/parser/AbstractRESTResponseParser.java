@@ -81,11 +81,6 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
     private static final String LAST_MODIFIED_DATE_PATTERN = "EEE, dd MMM yyyy HH:mm:ss z";
     private final static ThreadLocal<SimpleDateFormat> LAST_MODIFIED_DATE_PARSER = new ThreadLocal<SimpleDateFormat>() {
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.ThreadLocal#initialValue()
-         */
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat(LAST_MODIFIED_DATE_PATTERN, java.util.Locale.US);
@@ -138,11 +133,6 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
         responseBodyParsers.put(RESTMimeType.TEXT, new TextRESTResponseBodyParser());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseParser#parse(org.apache.http.client.methods.CloseableHttpResponse)
-     */
     @Override
     public RESTResponse parse(HttpResponse response) throws OXException, IOException {
         // Get the response code and assert

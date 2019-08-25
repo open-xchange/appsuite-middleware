@@ -103,11 +103,6 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
-     */
     @Override
     protected Integer invoke(Options option, CommandLine cmd, Void context) throws Exception {
         DocumentBuilder db;
@@ -157,53 +152,28 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
         return Integer.valueOf(0);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("i", "in", "input", "XML document is read from this file. If omitted the input will be read from STDIN.", false));
         options.addOption(createArgumentOption("o", "out", "output", "JUL properties configuration file is written to this file. If this option is omitted the output will be written to STDOUT.", false));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         // nothing to check
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getHeader()
-     */
     @Override
     protected String getHeader() {
         return HEADER;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return "";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return SYNTAX;
@@ -281,11 +251,6 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
         return retval;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected Void getContext() {
         return null;

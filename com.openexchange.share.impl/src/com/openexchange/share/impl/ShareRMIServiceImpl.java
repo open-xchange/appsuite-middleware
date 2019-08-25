@@ -77,11 +77,6 @@ public class ShareRMIServiceImpl implements ShareRMIService {
         this.shareService = shareService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.share.impl.rmi.ShareRMIService#listShares(int)
-     */
     @Override
     public String listShares(int contextId) throws RemoteException {
         try {
@@ -91,11 +86,6 @@ public class ShareRMIServiceImpl implements ShareRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.share.impl.rmi.ShareRMIService#listShares(int, int)
-     */
     @Override
     public String listShares(int contextId, int guestId) throws RemoteException {
         try {
@@ -105,11 +95,6 @@ public class ShareRMIServiceImpl implements ShareRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.share.impl.rmi.ShareRMIService#listShares(java.lang.String)
-     */
     @Override
     public String listShares(String token) throws RemoteException {
         String path = null;
@@ -125,11 +110,6 @@ public class ShareRMIServiceImpl implements ShareRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.share.impl.rmi.ShareRMIService#removeShare(java.lang.String, java.lang.String)
-     */
     @Override
     public int removeShare(String token, String path) throws RemoteException {
         if (null != path && !path.isEmpty() && !EMPTY_STRING.equals(path)) {
@@ -142,11 +122,6 @@ public class ShareRMIServiceImpl implements ShareRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.share.impl.rmi.ShareRMIService#removeShare(java.lang.String, java.lang.String, int)
-     */
     @Override
     public int removeShare(String shareToken, String targetPath, int contextId) throws RemoteException {
         if (null != targetPath && !targetPath.isEmpty() && !EMPTY_STRING.equals(targetPath)) {
@@ -159,11 +134,6 @@ public class ShareRMIServiceImpl implements ShareRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.share.impl.rmi.ShareRMIService#removeShares(int)
-     */
     @Override
     public int removeShares(int contextId) throws RemoteException {
         try {
@@ -173,11 +143,6 @@ public class ShareRMIServiceImpl implements ShareRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.share.impl.rmi.ShareRMIService#removeShares(int, int)
-     */
     @Override
     public int removeShares(int contextId, int guestId) throws RemoteException {
         try {

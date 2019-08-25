@@ -72,51 +72,26 @@ public class SizeTest extends AbstractTest implements Test<SizeTestArgument> {
         this.comparison = comparison;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestCommand()
-     */
     @Override
     public TestCommand getTestCommand() {
         return TestCommand.SIZE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setComparison(com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison)
-     */
     @Override
     public void setComparison(Comparison<? extends ComparisonArgument> comparison) {
         this.comparison = comparison;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getComparison()
-     */
     @Override
     public Comparison<? extends ComparisonArgument> getComparison() {
         return comparison;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument, java.lang.Object)
-     */
     @Override
     public void setTestArgument(SizeTestArgument argument, Object value) {
         addArgument(argument, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument)
-     */
     @Override
     public Object getTestArgument(SizeTestArgument argument) {
         return getArguments().get(argument);

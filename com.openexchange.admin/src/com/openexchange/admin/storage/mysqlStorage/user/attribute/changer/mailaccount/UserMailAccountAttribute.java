@@ -98,41 +98,21 @@ public enum UserMailAccountAttribute implements Attribute {
         this.originalType = originalType;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLFieldName()
-     */
     @Override
     public String getSQLFieldName() {
         return sqlFieldName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getOriginalType()
-     */
     @Override
     public Class<?> getOriginalType() {
         return originalType;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.Attribute#getSQLTableName()
-     */
     @Override
     public String getSQLTableName() {
         return TABLE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attribute#getName()
-     */
     @Override
     public String getName() {
         return attributeName;

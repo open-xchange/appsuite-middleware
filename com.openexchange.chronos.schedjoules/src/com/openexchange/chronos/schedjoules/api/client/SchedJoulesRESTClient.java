@@ -74,11 +74,6 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
     private static final String LAST_MODIFIED_DATE_PATTERN = "EEE, dd MMM yyyy HH:mm:ss z";
     private final static ThreadLocal<SimpleDateFormat> LAST_MODIFIED_DATE_PARSER = new ThreadLocal<SimpleDateFormat>() {
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.ThreadLocal#initialValue()
-         */
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat(LAST_MODIFIED_DATE_PATTERN, java.util.Locale.US);

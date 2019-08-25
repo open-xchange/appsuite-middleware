@@ -83,11 +83,6 @@ public class ContextRMIServiceImpl implements ContextRMIService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.context.rmi.ContextRMIService#checkLogin2ContextMapping()
-     */
     @Override
     public boolean checkLogin2ContextMapping() throws RemoteException {
         DatabaseService databaseService = getDatabaseService();
@@ -143,11 +138,6 @@ public class ContextRMIServiceImpl implements ContextRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.context.rmi.ContextRMIService#checkLogin2ContextMapping(int)
-     */
     @Override
     public boolean checkLogin2ContextMapping(int contextId) throws RemoteException {
         DatabaseService databaseService = getDatabaseService();

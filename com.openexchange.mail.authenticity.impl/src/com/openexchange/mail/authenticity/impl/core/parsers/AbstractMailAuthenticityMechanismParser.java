@@ -79,11 +79,6 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
         this.domainHeaders = domainHeaders;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.util.function.BiFunction#apply(java.lang.Object, java.lang.Object)
-     */
     @Override
     public MailAuthenticityMechanismResult apply(Map<String, String> attributes, MailAuthenticityResult overallResult) {
         String value = attributes.remove(mechanism.getTechnicalName());

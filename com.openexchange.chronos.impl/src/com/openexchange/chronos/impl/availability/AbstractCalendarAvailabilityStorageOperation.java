@@ -75,11 +75,6 @@ abstract class AbstractCalendarAvailabilityStorageOperation<T> extends AbstractS
         super(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.impl.availability.AbstractStorageOperation#initStorage(com.openexchange.database.provider.DBProvider)
-     */
     @Override
     protected CalendarAvailabilityStorage initStorage(DBProvider dbProvider) throws OXException {
         return Services.getService(CalendarAvailabilityStorageFactory.class).create(context, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);

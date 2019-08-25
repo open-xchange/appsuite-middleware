@@ -83,11 +83,6 @@ public final class UpdateTaskForceCLT extends AbstractUpdateTasksCLT<Void> {
         super("forceupdatetask -t <taskName> [-c <contextId> | -n <schemaName>] " + BASIC_MASTER_ADMIN_USAGE, FOOTER);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createArgumentOption("t", "task", "taskName", "The update task's class name", false));
@@ -103,11 +98,6 @@ public final class UpdateTaskForceCLT extends AbstractUpdateTasksCLT<Void> {
         options.addOption(createArgumentOption("n", "name", "schemaName", sb.toString(), false));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
@@ -124,11 +114,6 @@ public final class UpdateTaskForceCLT extends AbstractUpdateTasksCLT<Void> {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         if (!cmd.hasOption('t')) {

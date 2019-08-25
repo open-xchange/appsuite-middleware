@@ -152,11 +152,6 @@ public class ExtendedMDCFilter extends TurboFilter {
         return (levels.size() > 0);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

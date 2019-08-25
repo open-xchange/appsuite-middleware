@@ -121,9 +121,6 @@ public class SimFolderUpdaterService implements FolderUpdaterService<Object> {
         this.handles = handles;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.FolderUpdaterService#completelyOverwritesExistingObjects()
-     */
     @Override
     public boolean usesMultipleStrategy() {
         return usesMultipleStrategy;

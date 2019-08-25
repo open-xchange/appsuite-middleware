@@ -1678,11 +1678,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.name = username;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
-     */
     @Override
     final public String getPassword() {
         return password;
@@ -4555,21 +4550,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
-     */
     @Override
     final public String getPasswordMech() {
         return passwordMech;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
-     */
     @Override
     final public void setPasswordMech(final String passwordMech) {
         if (null == passwordMech) {
@@ -4906,11 +4891,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -5158,11 +5138,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

@@ -68,31 +68,16 @@ public class SummaryMapping extends ICalTextMapping<Available, com.openexchange.
         super(Property.SUMMARY);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
-     */
     @Override
     protected String getValue(com.openexchange.chronos.Available object) {
         return object.getSummary();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
-     */
     @Override
     protected void setValue(com.openexchange.chronos.Available object, String value) {
         object.setSummary(value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#createProperty()
-     */
     @Override
     protected Property createProperty() {
         return new Summary();

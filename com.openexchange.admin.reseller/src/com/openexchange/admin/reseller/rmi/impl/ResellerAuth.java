@@ -69,9 +69,6 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ResellerAuth.class);
 
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXBasicAuthenticatorPluginInterface#doAuthentication(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void doAuthentication(Credentials authdata) throws InvalidCredentialsException {
         try {

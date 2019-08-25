@@ -81,11 +81,6 @@ public class JsonRESTResponseBodyParser implements RESTResponseBodyParser {
         contentTypes = Collections.singleton("application/json");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.v2.parser.RESTResponseBodyParser#parse(org.apache.http.HttpResponse, com.openexchange.rest.client.v2.RESTResponse)
-     */
     @Override
     public void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
         try (InputStream inputStream = Streams.bufferedInputStreamFor(httpResponse.getEntity().getContent())) {
@@ -108,11 +103,6 @@ public class JsonRESTResponseBodyParser implements RESTResponseBodyParser {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#getContentTypes()
-     */
     @Override
     public Set<String> getContentTypes() {
         return contentTypes;

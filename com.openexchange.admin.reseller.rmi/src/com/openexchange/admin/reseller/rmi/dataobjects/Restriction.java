@@ -208,34 +208,22 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
         return id;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.EnforceableDataObject#getMandatoryMembersChange()
-     */
     @Override
     public String[] getMandatoryMembersChange() {
         return new String[]{ "name" };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.EnforceableDataObject#getMandatoryMembersCreate()
-     */
     @Override
     public String[] getMandatoryMembersCreate() {
         return new String[]{ "name" };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.EnforceableDataObject#getMandatoryMembersDelete()
-     */
     @Override
     public String[] getMandatoryMembersDelete() {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.EnforceableDataObject#getMandatoryMembersRegister()
-     */
     @Override
     public String[] getMandatoryMembersRegister() {
         // Nothing to do
@@ -289,17 +277,11 @@ public class Restriction extends EnforceableDataObject implements Cloneable {
         this.value = value;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return "Restriction [id=" + id + ", name=" + name + ", value=" + value + "]";
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#clone()
-     */
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();

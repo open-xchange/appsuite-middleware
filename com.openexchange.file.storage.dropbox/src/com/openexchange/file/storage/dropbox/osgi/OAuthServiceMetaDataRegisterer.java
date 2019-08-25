@@ -73,11 +73,6 @@ public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthSer
         super(context, services, KnownApi.DROPBOX.getServiceId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer#getRegisterer(org.osgi.framework.BundleContext)
-     */
     @Override
     protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer() {
         return new DropboxServiceRegisterer(getContext(), getServiceLookup());

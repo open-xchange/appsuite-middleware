@@ -72,11 +72,6 @@ public class DeleteAllSSLCertificateAction extends AbstractSSLCertificateManagem
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         SSLCertificateManagementService managementService = getService(SSLCertificateManagementService.class);

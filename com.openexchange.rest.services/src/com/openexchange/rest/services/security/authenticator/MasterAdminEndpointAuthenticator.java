@@ -74,11 +74,6 @@ public class MasterAdminEndpointAuthenticator extends AbstractEndpointAuthentica
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.services.EndpointAuthenticator#authenticate(java.lang.String, java.lang.String, java.lang.reflect.Method)
-     */
     @Override
     public boolean authenticate(String login, String password, Method invokedMethod) {
         try {

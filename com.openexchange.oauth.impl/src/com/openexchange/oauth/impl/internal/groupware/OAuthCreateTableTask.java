@@ -68,21 +68,11 @@ public class OAuthCreateTableTask extends AbstractOAuthUpdateTask {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] {};
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
         if (tableExists(connection, CreateOAuthAccountTable.TABLE_NAME)) {

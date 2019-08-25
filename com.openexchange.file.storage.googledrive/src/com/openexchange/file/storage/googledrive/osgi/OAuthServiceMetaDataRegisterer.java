@@ -73,11 +73,6 @@ public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthSer
         super(context, services, KnownApi.GOOGLE.getServiceId());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer#getRegisterer(org.osgi.framework.BundleContext)
-     */
     @Override
     protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer() {
         return new GoogleDriveServiceRegisterer(getContext(), getServiceLookup());

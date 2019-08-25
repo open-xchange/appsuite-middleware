@@ -735,11 +735,6 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         try {
@@ -749,11 +744,6 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.Reloadable#getInterests()
-     */
     @Override
     public Interests getInterests() {
         String[] configFileNames = new String[MailFilterProperty.values().length];

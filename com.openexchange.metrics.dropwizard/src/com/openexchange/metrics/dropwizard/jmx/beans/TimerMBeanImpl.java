@@ -99,181 +99,91 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
         return s.substring(0, s.length() - 1);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getMin()
-     */
     @Override
     public double getMin() {
         return timer.getSnapshot().getMin() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getMax()
-     */
     @Override
     public double getMax() {
         return timer.getSnapshot().getMax() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getMean()
-     */
     @Override
     public double getMean() {
         return timer.getSnapshot().getMean() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getStdDev()
-     */
     @Override
     public double getStdDev() {
         return timer.getSnapshot().getStdDev() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#get50thPercentile()
-     */
     @Override
     public double get50thPercentile() {
         return timer.getSnapshot().getMedian() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#get75thPercentile()
-     */
     @Override
     public double get75thPercentile() {
         return timer.getSnapshot().get75thPercentile() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#get95thPercentile()
-     */
     @Override
     public double get95thPercentile() {
         return timer.getSnapshot().get95thPercentile() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#get98thPercentile()
-     */
     @Override
     public double get98thPercentile() {
         return timer.getSnapshot().get98thPercentile() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#get99thPercentile()
-     */
     @Override
     public double get99thPercentile() {
         return timer.getSnapshot().get99thPercentile() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#get999thPercentile()
-     */
     @Override
     public double get999thPercentile() {
         return timer.getSnapshot().get999thPercentile() * durationFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getCount()
-     */
     @Override
     public long getCount() {
         return timer.getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getMeanRate()
-     */
     @Override
     public double getMeanRate() {
         return timer.getMeanRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getOneMinuteRate()
-     */
     @Override
     public double getOneMinuteRate() {
         return timer.getOneMinuteRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getFiveMinuteRate()
-     */
     @Override
     public double getFiveMinuteRate() {
         return timer.getFiveMinuteRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getFifteenMinuteRate()
-     */
     @Override
     public double getFifteenMinuteRate() {
         return timer.getFifteenMinuteRate() * rateFactor;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#values()
-     */
     @Override
     public long[] values() {
         return timer.getSnapshot().getValues();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.jmx.TimerMBean#getDurationUnit()
-     */
     @Override
     public String getDurationUnit() {
         return durationUnit;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MeterMBean#getRateUnit()
-     */
     @Override
     public String getRateUnit() {
         return rateUnit;

@@ -102,11 +102,6 @@ public class CapabilityServiceTracker implements ServiceTrackerCustomizer<Object
         return Tools.generateServiceFilter(context, neededServices);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public Object addingService(ServiceReference<Object> reference) {
         Object service = context.getService(reference);
@@ -123,22 +118,12 @@ public class CapabilityServiceTracker implements ServiceTrackerCustomizer<Object
         return service;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<Object> reference, Object service) {
         // nothing
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<Object> reference, Object service) {
         if (service instanceof AntiVirusService) {

@@ -123,31 +123,16 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
         this.failOnError = failOnError;
     }
 
-    /*
-     * @Override(non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws JSONException {
         return convert(rule);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() {
         List<Parameter> parameters = new LinkedList<Parameter>();
@@ -158,11 +143,6 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
         return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<InsertResponse> getParser() {
         return new InsertParser(failOnError);

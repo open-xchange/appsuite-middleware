@@ -403,11 +403,6 @@ public class PermissionTest implements SessionHolder {
         return ctx;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.sessiond.impl.SessionHolder#getUser()
-     */
     @Override
     public User getUser() {
         // Nothing to do

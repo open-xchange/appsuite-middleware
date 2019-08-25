@@ -76,21 +76,11 @@ public class AntiVirusServiceActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.osgi.AbstractAntiVirusActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { LeanConfigurationService.class, ICAPClientFactoryService.class, MetricService.class, CapabilityService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AbstractAntiVirusActivator#start()
-     */
     @Override
     protected void startBundle() throws Exception {
         Logger log = LoggerFactory.getLogger(AntiVirusServiceActivator.class);
@@ -102,11 +92,6 @@ public class AntiVirusServiceActivator extends HousekeepingActivator {
         registerService(AntiVirusResultEvaluatorService.class, new AntiVirusResultEvaluatorServiceImpl());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         Logger log = LoggerFactory.getLogger(AntiVirusServiceActivator.class);

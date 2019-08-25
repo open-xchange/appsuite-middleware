@@ -180,9 +180,6 @@ public class ExtractSessionProcessorHandler implements PacketProcessorHandler {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#handlePacket(com.openexchange.pgp.core.packethandling.PGPPacket)
-     */
     @Override
     public PGPPacket[] handlePacket(PGPPacket packet) throws Exception {
         Packet rawPacket = packet.getBcPacket();
@@ -193,9 +190,6 @@ public class ExtractSessionProcessorHandler implements PacketProcessorHandler {
         return new PGPPacket[] {packet};
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
-     */
     @Override
     public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
         return packetData;

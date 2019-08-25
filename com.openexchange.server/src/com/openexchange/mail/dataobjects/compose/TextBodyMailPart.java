@@ -208,10 +208,6 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
         return dataSource;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getContent()
-     */
     @Override
     public Object getContent() throws OXException {
         return getHTMLContent();
@@ -228,37 +224,21 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
         throw MailExceptionCode.UNEXPECTED_ERROR.create("Missing text.");
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
-     */
     @Override
     public DataHandler getDataHandler() throws OXException {
         return new DataHandler(getDataSource());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
-     */
     @Override
     public int getEnclosedCount() throws OXException {
         return NO_ENCLOSED_PARTS;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
-     */
     @Override
     public MailPart getEnclosedMailPart(final int index) throws OXException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
-     */
     @Override
     public InputStream getInputStream() throws OXException {
         try {
@@ -271,26 +251,14 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
-     */
     @Override
     public void loadContent() {
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
-     */
     @Override
     public void prepareForCaching() {
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
-     */
     @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.BODY;

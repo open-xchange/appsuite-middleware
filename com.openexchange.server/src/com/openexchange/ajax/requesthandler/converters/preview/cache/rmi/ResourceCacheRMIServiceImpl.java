@@ -98,11 +98,6 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#clear()
-     */
     @Override
     public void clear() throws RemoteException {
         ResourceCache resourceCache = CACHE_REF.get();
@@ -134,11 +129,6 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#clearFor(int)
-     */
     @Override
     public void clearFor(int contextId) throws RemoteException {
         ResourceCache resourceCache = CACHE_REF.get();
@@ -154,11 +144,6 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#sanitizeMimeTypesInDatabaseFor(int, java.lang.String)
-     */
     @Override
     public String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws RemoteException {
         try {

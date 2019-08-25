@@ -136,21 +136,11 @@ public class Chunk implements Comparable<Chunk> {
         return "Chunk [documentId=" + documentId + ", scalityId=" + scalityId + ", offset=" + offset + ", length=" + length + "]";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         return hashCode;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {

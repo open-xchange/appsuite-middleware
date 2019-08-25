@@ -100,18 +100,12 @@ public class SimUserService implements UserService {
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#authenticate(com.openexchange.groupware.ldap.User, java.lang.String)
-     */
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
         // Nothing to do
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#getUser(int, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public User getUser(final int uid, final Context context) throws OXException {
         return getUser(uid, context.getContextId());
@@ -133,9 +127,6 @@ public class SimUserService implements UserService {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#getUser(com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public User[] getUser(final Context ctx) throws OXException {
         // Nothing to do
@@ -148,27 +139,18 @@ public class SimUserService implements UserService {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#getUserId(java.lang.String, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
         // Nothing to do
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#invalidateUser(com.openexchange.groupware.contexts.Context, int)
-     */
     @Override
     public void invalidateUser(final Context ctx, final int userId) throws OXException {
         // Nothing to do
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#listAllUser(com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public int[] listAllUser(final Context context) throws OXException {
         // Nothing to do
@@ -187,45 +169,30 @@ public class SimUserService implements UserService {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#listModifiedUser(java.util.Date, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#resolveIMAPLogin(java.lang.String, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#searchUser(java.lang.String, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public User searchUser(final String email, final Context context) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#updateUser(com.openexchange.groupware.ldap.User, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
         // Nothing to do
 
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#setAttribute(java.lang.String, java.lang.String, int, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         // Nothing to do
@@ -242,9 +209,6 @@ public class SimUserService implements UserService {
         // Nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.user.UserService#searchUserByName(java.lang.String, com.openexchange.groupware.contexts.Context, int)
-     */
     @Override
     public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
         // Nothing to do

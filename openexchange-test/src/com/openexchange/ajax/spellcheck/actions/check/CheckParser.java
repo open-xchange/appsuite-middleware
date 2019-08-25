@@ -71,11 +71,6 @@ public final class CheckParser extends AbstractAJAXParser<CheckResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected CheckResponse createResponse(final Response response) throws JSONException {
         final CheckResponse retval = new CheckResponse(response);

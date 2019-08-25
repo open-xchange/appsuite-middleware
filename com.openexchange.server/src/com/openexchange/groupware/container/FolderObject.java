@@ -1457,10 +1457,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         return sb.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
     @Override
     public FolderObject clone() {
         try {

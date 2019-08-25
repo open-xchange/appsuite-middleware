@@ -86,21 +86,11 @@ public class GetPictureManagedFileRequest extends AbstractManagedFileRequest<Get
         return "/ajax/image/mfile/picture";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> list = new ArrayList<Parameter>(1);
@@ -108,21 +98,11 @@ public class GetPictureManagedFileRequest extends AbstractManagedFileRequest<Get
         return list.toArray(new Parameter[list.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends GetPictureManagedFileResponse> getParser() {
         return new GetPictureManagedFileParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         return null;

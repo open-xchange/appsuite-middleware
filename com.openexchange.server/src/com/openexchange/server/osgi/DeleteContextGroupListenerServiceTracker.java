@@ -74,11 +74,6 @@ public class DeleteContextGroupListenerServiceTracker implements ServiceTrackerC
         this.context = context;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public DeleteContextGroupListener addingService(ServiceReference<DeleteContextGroupListener> reference) {
         DeleteContextGroupListener listener = context.getService(reference);
@@ -90,21 +85,11 @@ public class DeleteContextGroupListenerServiceTracker implements ServiceTrackerC
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<DeleteContextGroupListener> reference, DeleteContextGroupListener service) {
         // no-op
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<DeleteContextGroupListener> reference, DeleteContextGroupListener service) {
         if (service != null) {

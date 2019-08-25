@@ -93,11 +93,6 @@ public class CassandraNodeMBeanImpl extends AnnotatedDynamicStandardMBean implem
         this.host = host;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.impl.AbstractCassandraMBean#refresh()
-     */
     @Override
     protected void refresh() {
         try {
@@ -121,71 +116,36 @@ public class CassandraNodeMBeanImpl extends AnnotatedDynamicStandardMBean implem
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getNodeName()
-     */
     @Override
     public String getNodeName() {
         return host.getAddress().getHostName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getConnections()
-     */
     @Override
     public int getConnections() {
         return connections;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getInFlightQueries()
-     */
     @Override
     public int getInFlightQueries() {
         return inFlightQueries;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getMaxLoad()
-     */
     @Override
     public int getMaxLoad() {
         return maxLoad;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getState()
-     */
     @Override
     public String getState() {
         return hostState;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getCassandraVersion()
-     */
     @Override
     public String getCassandraVersion() {
         return cassandraVersion;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.nosql.cassandra.CassandraNodeMBean#getTrashedConnections()
-     */
     @Override
     public int getTrashedConnections() {
         return trashedConnections;

@@ -332,11 +332,6 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         this.filestore_nameset = true;
     }
 
-    /*
-     * DO NOT make this final because others might want to extend this
-     * (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#toString()
-     */
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
@@ -562,9 +557,6 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return userAttribtuesset;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -595,9 +587,6 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

@@ -84,11 +84,6 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
             super();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
         @Override
         public int compare(MailFilterInterceptor o1, MailFilterInterceptor o2) {
             return o1.getRank() > o2.getRank() ? -1 : 1;
@@ -103,22 +98,12 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
         interceptors = new TreeSet<>(new MailFilterInterceptorComparator());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#register(com.openexchange.mailfilter.MailFilterInterceptor, int)
-     */
     @Override
     public void register(MailFilterInterceptor interceptor) {
         boolean registered = interceptors.add(interceptor);
         LOGGER.debug("MailFilterInterceptor '{}' with rank {} was {} registered.", interceptor.getClass().getSimpleName(), I(interceptor.getRank()), registered ? "sucessfully" : "not");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#execute(java.util.List)
-     */
     @Override
     public void executeBefore(int userId, int contextId, List<Rule> rules) throws OXException {
         LOGGER.debug("Executing pre-processing mail filter interceptors...");
@@ -128,11 +113,6 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.MailFilterInterceptorRegistry#executeAfter(java.util.List)
-     */
     @Override
     public void executeAfter(int userId, int contextId, List<Rule> rules) throws OXException {
         LOGGER.debug("Executing post-processing mail filter interceptors...");

@@ -101,21 +101,11 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
         this.services = serviceLookup;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
-     */
     @Override
     public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountDeleteListener#onAfterOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
-     */
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
@@ -131,11 +121,6 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.yahoo.YahooService#getContacts(com.openexchange.session.Session, int, int, int)
-     */
     @Override
     public List<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException {
         OAuthAccess yahooAccess = getOAuthAccess(session, accountId);
@@ -194,11 +179,6 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
         return Collections.emptyList();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.yahoo.YahooService#getAccountDisplayName(com.openexchange.session.Session, int, int, int)
-     */
     @Override
     public String getAccountDisplayName(Session session, int user, int contextId, int accountId) {
         String displayName = "";

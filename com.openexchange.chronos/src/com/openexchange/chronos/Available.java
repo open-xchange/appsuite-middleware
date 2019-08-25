@@ -578,21 +578,11 @@ public class Available implements FieldAware, Cloneable {
         fields.remove(AvailableField.exdate);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.FieldAware#contains(com.openexchange.chronos.service.CalendarAvailabilityField)
-     */
     @Override
     public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#clone()
-     */
     @Override
     public Available clone() {
         Available clone;
@@ -654,11 +644,6 @@ public class Available implements FieldAware, Cloneable {
         return clone;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

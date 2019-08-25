@@ -68,11 +68,6 @@ public class DeleteScriptParser extends AbstractAJAXParser<DeleteScriptResponse>
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected DeleteScriptResponse createResponse(Response response) throws JSONException {
         return new DeleteScriptResponse(response);

@@ -66,21 +66,11 @@ public final class GoogleOAuthActivator extends AbstractOAuthActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
-     */
     @Override
     protected OAuthServiceMetaData getOAuthServiceMetaData() {
         return new GoogleOAuthServiceMetaData(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
-     */
     @Override
     protected OAuthScope[] getScopes() {
         return GoogleOAuthScope.values();

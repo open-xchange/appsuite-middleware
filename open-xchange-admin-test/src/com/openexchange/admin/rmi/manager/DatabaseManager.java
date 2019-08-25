@@ -148,11 +148,6 @@ public class DatabaseManager extends AbstractManager {
         return utilInterface.listAllDatabase(getMasterCredentials());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.manager.AbstractManager#clean(java.lang.Object)
-     */
     @Override
     void clean(Object object) throws Exception {
         unregister((Database) object);

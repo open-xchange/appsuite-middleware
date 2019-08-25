@@ -88,21 +88,11 @@ class CassandraServiceInitializer implements Initializer {
         leanConfigurationService = services.getService(LeanConfigurationService.class);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.datastax.driver.core.Cluster.Initializer#getClusterName()
-     */
     @Override
     public String getClusterName() {
         return leanConfigurationService.getProperty(CassandraProperty.clusterName);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.datastax.driver.core.Cluster.Initializer#getContactPoints()
-     */
     @Override
     public List<InetSocketAddress> getContactPoints() {
         int port = leanConfigurationService.getIntProperty(CassandraProperty.port);
@@ -116,11 +106,6 @@ class CassandraServiceInitializer implements Initializer {
         return contactPoints;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.datastax.driver.core.Cluster.Initializer#getConfiguration()
-     */
     @Override
     public Configuration getConfiguration() {
         // Retry Policies
@@ -169,11 +154,6 @@ class CassandraServiceInitializer implements Initializer {
         return Configuration.builder().withPolicies(policies).withPoolingOptions(poolingOptions).withSocketOptions(socketOptions).build();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.datastax.driver.core.Cluster.Initializer#getInitialListeners()
-     */
     @Override
     public Collection<StateListener> getInitialListeners() {
         StateListener sl = new MBeanHostStateListener(services);

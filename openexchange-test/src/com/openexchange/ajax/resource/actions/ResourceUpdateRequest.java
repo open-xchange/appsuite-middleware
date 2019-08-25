@@ -96,41 +96,21 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest<Resourc
         resourceJSON = ResourceWriter.writeResource(resource);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws JSONException {
         return resourceJSON;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() {
         return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE, AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(clientLastModified), AJAXServlet.PARAMETER_ID, String.valueOf(resource.getIdentifier())).toArray();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public ResourceUpdateParser getParser() {
         return new ResourceUpdateParser(failOnError);

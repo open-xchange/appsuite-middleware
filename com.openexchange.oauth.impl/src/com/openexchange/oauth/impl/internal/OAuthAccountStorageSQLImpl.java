@@ -129,11 +129,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         this.contextService = contextService;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#createAccount(com.openexchange.session.Session, com.openexchange.oauth.OAuthAccount)
-     */
     @Override
     public int storeAccount(Session session, OAuthAccount account) throws OXException {
         int contextId = session.getContextId();
@@ -153,11 +148,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         return account.getId();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#getAccount(com.openexchange.session.Session, int)
-     */
     @Override
     public OAuthAccount getAccount(Session session, int accountId) throws OXException {
         Connection connection = (Connection) session.getParameter("__file.storage.delete.connection");
@@ -181,11 +171,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#deleteAccount(com.openexchange.session.Session, int)
-     */
     @Override
     public void deleteAccount(Session session, int accountId) throws OXException {
         int userId = session.getUserId();
@@ -233,11 +218,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#updateAccount(com.openexchange.session.Session, com.openexchange.oauth.OAuthAccount)
-     */
     @Override
     public void updateAccount(Session session, OAuthAccount account) throws OXException {
         // Crypt tokens
@@ -305,11 +285,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountStorage#updateAccount(com.openexchange.session.Session, int, java.util.Map)
-     */
     @Override
     public void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException {
         final List<Setter> list = setterFrom(arguments, accountId);
@@ -337,11 +312,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountStorage#findByUserIdentity(com.openexchange.session.Session, java.lang.String, java.lang.String)
-     */
     @Override
     public OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
@@ -394,21 +364,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthAccountStorage#hasUserIdentity(com.openexchange.session.Session, int, java.lang.String)
-     */
     @Override
     public boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException {
         return Strings.isNotEmpty(getUserIdentity(session, serviceId, accountId, null));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#getAccounts(com.openexchange.session.Session)
-     */
     @Override
     public List<OAuthAccount> getAccounts(Session session) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
@@ -466,11 +426,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthStorage#getAccounts(com.openexchange.session.Session, java.lang.String)
-     */
     @Override
     public List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
@@ -527,11 +482,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.SecretEncryptionStrategy#update(java.lang.String, java.lang.Object)
-     */
     @Override
     public void update(String recrypted, PWUpdate customizationNote) throws OXException {
         final StringBuilder b = new StringBuilder();
@@ -555,11 +505,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.EncryptedItemDetectorService#hasEncryptedItems(com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public boolean hasEncryptedItems(ServerSession session) throws OXException {
         final int contextId = session.getContextId();
@@ -579,11 +524,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.SecretMigrator#migrate(java.lang.String, java.lang.String, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
         final CryptoService cryptoService = Services.getService(CryptoService.class);
@@ -646,11 +586,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.EncryptedItemCleanUpService#cleanUpEncryptedItems(java.lang.String, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
         final CryptoService cryptoService = Services.getService(CryptoService.class);
@@ -720,11 +655,6 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.secret.recovery.EncryptedItemCleanUpService#removeUnrecoverableItems(java.lang.String, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
         final CryptoService cryptoService = Services.getService(CryptoService.class);

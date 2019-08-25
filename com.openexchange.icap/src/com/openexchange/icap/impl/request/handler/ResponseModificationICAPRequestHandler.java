@@ -79,11 +79,6 @@ public class ResponseModificationICAPRequestHandler extends AbstractICAPRequestH
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.icap.request.handler.AbstractICAPRequestHandler#handle(com.openexchange.icap.ICAPRequest, java.net.Socket, java.io.InputStream, java.io.OutputStream)
-     */
     @Override
     public ICAPResponse handle(ICAPRequest request, Socket socket, InputStream inputStream, OutputStream outputStream) throws IOException {
         StringBuilder requestBuilder = new StringBuilder(128);

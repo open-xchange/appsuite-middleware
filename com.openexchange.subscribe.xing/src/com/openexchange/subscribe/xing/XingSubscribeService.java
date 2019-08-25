@@ -190,11 +190,6 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
@@ -272,11 +267,6 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#modifyOutgoing(com.openexchange.subscribe.Subscription)
-     */
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         if (Strings.isNotEmpty(subscription.getSecret())) {
@@ -291,11 +281,6 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
         super.modifyOutgoing(subscription);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
-     */
     @Override
     protected KnownApi getKnownApi() {
         return KnownApi.XING;

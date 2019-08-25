@@ -81,21 +81,11 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.tools.SegmentedUpdateService#getMigrationRedirectURL(java.lang.String)
-     */
     @Override
     public @Nullable String getMigrationRedirectURL(@Nullable String host) throws OXException {
         return getProperty(host, ServerProperty.migrationRedirectURL);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.upgrade.SegmentedUpdateService#getSharingMigrationRedirectURL(java.lang.String)
-     */
     @Override
     public String getSharingMigrationRedirectURL(@Nullable String host) throws OXException {
         String url = getProperty(host, ShareProperty.migrationRedirectURL);

@@ -178,11 +178,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             super(Services.getServices(), session, cachedAccount);
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.openexchange.cluster.lock.ClusterTask#perform()
-         */
         @Override
         public Token reauthorize() throws OXException {
             Session session = getSession();

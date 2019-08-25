@@ -333,19 +333,11 @@ public final class Collections {
             this.iter = iter;
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.Enumeration#hasMoreElements()
-         */
         @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.Enumeration#nextElement()
-         */
         @Override
         public T nextElement() {
             return iter.next();

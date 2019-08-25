@@ -65,55 +65,30 @@ import com.openexchange.session.Session;
  */
 public class MultifactorAutoLoginAwareListener implements AutoLoginAwareLoginListener {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.login.listener.LoginListener#onBeforeAuthentication(com.openexchange.login.LoginRequest, java.util.Map)
-     */
     @Override
     public void onBeforeAuthentication(LoginRequest request, Map<String, Object> properties) throws OXException {
         // nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.login.listener.LoginListener#onSucceededAuthentication(com.openexchange.login.LoginResult)
-     */
     @Override
     public void onSucceededAuthentication(LoginResult result) throws OXException {
         // nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.login.listener.LoginListener#onFailedAuthentication(com.openexchange.login.LoginRequest, java.util.Map, com.openexchange.exception.OXException)
-     */
     @Override
     public void onFailedAuthentication(LoginRequest request, Map<String, Object> properties, OXException e) throws OXException {
         // nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.login.listener.LoginListener#onRedirectedAuthentication(com.openexchange.login.LoginRequest, java.util.Map, com.openexchange.exception.OXException)
-     */
     @Override
     public void onRedirectedAuthentication(LoginRequest request, Map<String, Object> properties, OXException e) throws OXException {
         // nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.login.listener.AutoLoginAwareLoginListener#onSucceededAutoLogin(com.openexchange.login.LoginResult)
-     */
     @Override
     public void onSucceededAutoLogin(LoginResult result) throws OXException {
         // Remove the session parameter stating that the user authorized this session

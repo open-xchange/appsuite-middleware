@@ -211,37 +211,21 @@ public final class CompositeMailMessage extends MailMessage {
         return additionalParts.remove(index);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getContent()
-     */
     @Override
     public Object getContent() throws OXException {
         return delegate.getContent();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
-     */
     @Override
     public DataHandler getDataHandler() throws OXException {
         return delegate.getDataHandler();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
-     */
     @Override
     public int getEnclosedCount() throws OXException {
         return delegateEnclosedCount + additionalParts.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
-     */
     @Override
     public MailPart getEnclosedMailPart(final int index) throws OXException {
         if (delegateEnclosedCount > 0) {
@@ -264,28 +248,16 @@ public final class CompositeMailMessage extends MailMessage {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
-     */
     @Override
     public InputStream getInputStream() throws OXException {
         return delegate.getInputStream();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
-     */
     @Override
     public void loadContent() throws OXException {
         delegate.loadContent();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
-     */
     @Override
     public void prepareForCaching() {
         delegate.prepareForCaching();

@@ -298,11 +298,6 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
     @Override
     protected abstract R invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected String getContext() {
         return executionContext;

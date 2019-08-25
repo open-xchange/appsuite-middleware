@@ -92,11 +92,6 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
         this.registeredMigrations = new ConcurrentHashMap<>(4);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#forceMigration()
-     */
     @Override
     public void forceMigration(String schemaName) throws RemoteException {
         try {
@@ -110,11 +105,6 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#rollbackMigration(java.lang.String)
-     */
     @Override
     public void rollbackMigration(String schemaName, String changeSetTag) throws RemoteException {
         try {
@@ -127,11 +117,6 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#releaseLocks()
-     */
     @Override
     public void releaseLocks(String schemaName) throws RemoteException {
         DBMigration migration = getMigration(schemaName);
@@ -160,11 +145,6 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#getMigrationStatus()
-     */
     @Override
     public String getMigrationStatus(String schemaName) throws RemoteException {
         try {
@@ -174,11 +154,6 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#getLockStatus()
-     */
     @Override
     public String getLockStatus(String schemaName) throws RemoteException {
         try {

@@ -86,21 +86,11 @@ public class OneDriveFolder extends DefaultFileStorageFolder implements TypeAwar
         setOwnPermission(permission);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.TypeAware#getType()
-     */
     @Override
     public FileStorageFolderType getType() {
         return type;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return id == null ? super.toString() : id;

@@ -606,11 +606,6 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.OXUtilInterface#changeServer(com.openexchange.admin.rmi.dataobjects.Server, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void changeServer(Server server, String schemaName, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try {

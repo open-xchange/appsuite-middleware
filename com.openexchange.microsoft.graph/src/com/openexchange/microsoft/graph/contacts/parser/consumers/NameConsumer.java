@@ -69,11 +69,6 @@ public class NameConsumer implements BiConsumer<JSONObject, Contact> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
-     */
     @Override
     public void accept(JSONObject t, Contact u) {
         if (t.hasAndNotNull("displayName")) {

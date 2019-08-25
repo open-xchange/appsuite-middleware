@@ -106,9 +106,6 @@ public class NonCachingIMAPStoreContainer extends AbstractIMAPStoreContainer {
         // Nothing to do
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
-     */
     @Override
     public boolean hasElapsed(long millis) {
         return false;

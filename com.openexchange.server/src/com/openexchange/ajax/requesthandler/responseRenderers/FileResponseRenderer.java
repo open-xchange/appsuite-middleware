@@ -154,9 +154,6 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         tmpDirRef.set(getTmpDirByPath(path));
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResponseRenderer#getRanking()
-     */
     @Override
     public int getRanking() {
         return 0;
@@ -180,17 +177,11 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         imageClientAction.setImageClient(imageClient);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResponseRenderer#handles(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult)
-     */
     @Override
     public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         return (result.getResultObject() instanceof IFileHolder);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.responseRenderers.AbstractListenerCollectingResponseRenderer#actualWrite(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     public void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();

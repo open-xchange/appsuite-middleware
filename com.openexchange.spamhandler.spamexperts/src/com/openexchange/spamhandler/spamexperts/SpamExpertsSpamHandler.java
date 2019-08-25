@@ -159,9 +159,6 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.spamhandler.SpamHandler#handleHam(int, java.lang.String, java.lang.String[], boolean, com.openexchange.session.Session)
-     */
     @Override
     public void handleHam(int accountId, String spamFullName, String[] mailIDs, boolean move, Session session) throws OXException {
         LOG.debug("handleHam");

@@ -72,31 +72,16 @@ public class TestCommandParserRegistry implements CommandParserRegistry<TestComm
         parsers = new HashMap<>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#register(java.lang.String, com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser)
-     */
     @Override
     public void register(String key, CommandParser<TestCommand> parser) {
         parsers.put(key, parser);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#unregister(java.lang.String)
-     */
     @Override
     public void unregister(String key) {
         parsers.remove(key);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#get(java.lang.String)
-     */
     @Override
     public CommandParser<TestCommand> get(String key) throws OXException {
         CommandParser<TestCommand> parser = parsers.get(key);
@@ -106,11 +91,6 @@ public class TestCommandParserRegistry implements CommandParserRegistry<TestComm
         return parser;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#purge()
-     */
     @Override
     public void purge() {
         parsers.clear();

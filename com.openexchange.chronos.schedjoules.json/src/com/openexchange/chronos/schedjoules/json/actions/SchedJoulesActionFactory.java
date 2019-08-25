@@ -79,11 +79,6 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
         this.actions = actions.build();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-     */
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         return actions.get(action);

@@ -69,11 +69,6 @@ public class NewManagedFileParser extends AbstractAJAXParser<NewManagedFileRespo
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected NewManagedFileResponse createResponse(Response response) throws JSONException {
         return new NewManagedFileResponse(response);

@@ -107,22 +107,12 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         this.fileEntityParser = new OneDriveFileParser();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getRootFolderId(java.lang.String)
-     */
     @Override
     public String getRootFolderId(String accessToken) throws OXException {
         JSONObject root = api.getRoot(accessToken, new Builder().withParameter(ParameterName.SELECT, "id").build());
         return root.optString("id");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#existsFolder(java.lang.String, java.lang.String)
-     */
     @Override
     public boolean existsFolder(String accessToken, String folderId) throws OXException {
         try {
@@ -136,31 +126,16 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getRootFolder(java.lang.String)
-     */
     @Override
     public OneDriveFolder getRootFolder(int userId, String accessToken) throws OXException {
         return folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, null), api.getRoot(accessToken));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFolder(int, java.lang.String, java.lang.String)
-     */
     @Override
     public OneDriveFolder getFolder(int userId, String accessToken, String folderId) throws OXException {
         return folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, folderId), api.getFolder(accessToken, folderId));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getSubFolders(java.lang.String, java.lang.String)
-     */
     @Override
     public List<OneDriveFolder> getSubFolders(int userId, String accessToken, String folderId) throws OXException {
         int top = 100;
@@ -178,11 +153,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#createFolder(int, java.lang.String, java.lang.String, java.lang.String, boolean)
-     */
     @Override
     public OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException {
         if (autorename) {
@@ -194,11 +164,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#deleteFolder(java.lang.String, java.lang.String)
-     */
     @Override
     public void deleteFolder(String accessToken, String folderId) throws OXException {
         if (ROOT_ID.equals(folderId)) {
@@ -207,11 +172,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         api.deleteItem(accessToken, folderId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#clearFolder(java.lang.String, java.lang.String)
-     */
     @Override
     public void clearFolder(String accessToken, String folderId) throws OXException {
         JSONObject ids = api.getChildren(accessToken, folderId, new Builder().withParameter(ParameterName.SELECT, "id").build());
@@ -232,11 +192,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#renameFolder(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public void renameFolder(String accessToken, String folderId, String newName) throws OXException {
         try {
@@ -249,11 +204,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFolder(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException {
         try {
@@ -267,11 +217,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFolder(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId) throws OXException {
         try {
@@ -286,11 +231,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /////////////////////////////////////// FILES //////////////////////////////////////
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFiles(int, java.lang.String, java.lang.String)
-     */
     @Override
     public List<OneDriveFile> getFiles(int userId, String accessToken, String folderId) throws OXException {
         int offset = 100;
@@ -307,21 +247,11 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFile(int, java.lang.String, java.lang.String)
-     */
     @Override
     public OneDriveFile getFile(int userId, String accessToken, String itemId) throws OXException {
         return fileEntityParser.parseEntity(userId, api.getItem(accessToken, itemId));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFiles(int, java.lang.String, java.util.List)
-     */
     @Override
     public List<OneDriveFile> getFiles(int userId, String accessToken, List<String> itemIds) throws OXException {
         List<OneDriveFile> files = new LinkedList<>();
@@ -339,31 +269,16 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return files;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#deleteFile(java.lang.String, java.lang.String)
-     */
     @Override
     public void deleteFile(String accessToken, String fileId) throws OXException {
         api.deleteItem(accessToken, fileId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFile(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public String moveFile(String accessToken, String fileId, String parentId) throws OXException {
         return moveItem(accessToken, fileId, parentId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#updateFile(java.lang.String, com.openexchange.file.storage.File, java.lang.String)
-     */
     @Override
     public String updateFile(String accessToken, File file, List<Field> modifiedFields, String parentId) throws OXException {
         JSONObject body = compileUpdateBody(file, modifiedFields, parentId);
@@ -374,51 +289,26 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return response.optString("id");
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#copyFile(java.lang.String, com.openexchange.file.storage.File, java.lang.String)
-     */
     @Override
     public String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException {
         return api.copyItem(accessToken, itemId, compileUpdateBody(file, modifiedFields, parentId));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#copyFile(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public String copyFile(String accessToken, String itemId, String parentId) throws OXException {
         return api.copyItem(accessToken, itemId, compileUpdateBody(parentId));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFile(java.lang.String, java.lang.String)
-     */
     @Override
     public InputStream getFile(String accessToken, String fileId) throws OXException {
         return api.getContent(accessToken, fileId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getThumbnail(java.lang.String, java.lang.String)
-     */
     @Override
     public InputStream getThumbnail(String accessToken, String itemId) throws OXException {
         return api.getThumbnailContent(accessToken, itemId);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getQuota(java.lang.String)
-     */
     @Override
     public Quota getQuota(String accessToken) throws OXException {
         JSONObject drive = api.getDrive(accessToken, new Builder().withParameter(ParameterName.SELECT, "quota").build());
@@ -430,11 +320,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return new Quota(quota.optInt("total"), quota.optInt("used"), Type.STORAGE);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#searchFiles(java.lang.String, java.lang.String, java.lang.String, boolean)
-     */
     @Override
     public List<OneDriveFile> searchFiles(int userId, String accessToken, String query, String folderId, boolean includeSubfolders) throws OXException {
         int top = 100;
@@ -473,11 +358,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return list;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#upload(java.lang.String, com.openexchange.file.storage.File, java.io.InputStream)
-     */
     @Override
     public String upload(String accessToken, File file, InputStream inputStream) throws OXException {
         JSONObject responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getFileName(), file.getFileMIMEType(), file.getFileSize(), inputStream);

@@ -637,11 +637,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
-     */
     @Override
     public boolean existsResourceAddress(final Context ctx, final String address) throws StorageException {
         final int context_id = ctx.getId().intValue();
@@ -3239,11 +3234,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isLastContextInSchema(com.openexchange.admin.rmi.dataobjects.Context)
-     */
     @Override
     public boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException {
         int contextId = context.getId().intValue();

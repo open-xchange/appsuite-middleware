@@ -90,11 +90,6 @@ public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHan
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.guard.pgpcore.commons.PGPPacketProcessorHandler#handlePacket(com.openexchange.guard.pgpcore.commons.GuardBCPacket)
-     */
     @Override
     public PGPPacket[] handlePacket(PGPPacket packet) throws IOException {
         Packet rawPacket = packet.getBcPacket();
@@ -107,9 +102,6 @@ public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHan
         return new PGPPacket[] { packet };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
-     */
     @Override
     public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
         return packetData;

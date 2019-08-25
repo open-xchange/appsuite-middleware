@@ -89,11 +89,6 @@ public class SSLCertificateManagementActionFactory implements AJAXActionServiceF
         supportedServices = Collections.unmodifiableCollection(actions.values());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-     */
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         return actions.get(action);

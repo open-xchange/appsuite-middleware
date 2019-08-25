@@ -106,31 +106,16 @@ public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthS
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
-     */
     @Override
     public String getIdentityURL(String accessToken) {
         return IDENTITY_URL;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
-     */
     @Override
     public Verb getIdentityHTTPMethod() {
         return Verb.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
-     */
     @Override
     public String getIdentityFieldName() {
         return IDENTITY_FIELD_NAME;

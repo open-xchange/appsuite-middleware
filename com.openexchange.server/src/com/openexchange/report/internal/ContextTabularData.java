@@ -140,9 +140,6 @@ public final class ContextTabularData implements TabularData {
         throw new UnsupportedOperationException();
     }
 
-    /* (non-Javadoc)
-     * @see javax.management.openmbean.TabularData#values()
-     */
     @Override
     public Collection values() {
         // Nothing to do

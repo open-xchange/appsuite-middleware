@@ -79,61 +79,31 @@ public class MicrosoftGraphOAuthServiceMetaData extends AbstractExtendedScribeAw
         super(services, KnownApi.MICROSOFT_GRAPH, MicrosoftGraphOAuthScope.values());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.ScribeAware#getScribeService()
-     */
     @Override
     public Class<? extends Api> getScribeService() {
         return MicrosoftGraphApi.class;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL(java.lang.String)
-     */
     @Override
     public String getIdentityURL(String accessToken) {
         return IDENTITY_URL;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityHTTPMethod()
-     */
     @Override
     public Verb getIdentityHTTPMethod() {
         return Verb.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityFieldName()
-     */
     @Override
     public String getIdentityFieldName() {
         return IDENTITY_FIELD_NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
-     */
     @Override
     protected String getPropertyId() {
         return PROPERTY_IDENTIFIER;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
-     */
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         return Collections.singletonList(OAuthPropertyID.redirectUrl);

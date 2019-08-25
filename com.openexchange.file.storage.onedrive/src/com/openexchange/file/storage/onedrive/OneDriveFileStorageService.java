@@ -90,11 +90,6 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
         return new OneDriveAccountAccess(this, account, session);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService#getScope()
-     */
     @Override
     protected OAuthScope getScope() {
         return MicrosoftGraphOAuthScope.drive;

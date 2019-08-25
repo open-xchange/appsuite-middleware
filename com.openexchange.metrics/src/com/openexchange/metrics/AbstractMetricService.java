@@ -119,11 +119,6 @@ public abstract class AbstractMetricService implements MetricService {
         registerers.put(metricType, registerer);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.MetricService#addListener(com.openexchange.metrics.jmx.MetricServiceListener)
-     */
     @Override
     public void addListener(MetricServiceListener listener) {
         if (listeners.offer(listener)) {
@@ -133,11 +128,6 @@ public abstract class AbstractMetricService implements MetricService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.metrics.MetricService#removeListener(com.openexchange.metrics.jmx.MetricServiceListener)
-     */
     @Override
     public void removeListener(MetricServiceListener listener) {
         listeners.remove(listener);

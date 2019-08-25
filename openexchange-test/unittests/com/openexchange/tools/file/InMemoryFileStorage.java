@@ -208,77 +208,42 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
         return deletions.get(context);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.QuotaFileStorage#getUri()
-     */
     @Override
     public URI getUri() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.QuotaFileStorage#getQuota()
-     */
     @Override
     public long getQuota() {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.QuotaFileStorage#getUsage()
-     */
     @Override
     public long getUsage() throws OXException {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage()
-     */
     @Override
     public void recalculateUsage() throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage(java.util.Set)
-     */
     @Override
     public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
         // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.QuotaFileStorage#saveNewFile(java.io.InputStream, long)
-     */
     @Override
     public String saveNewFile(InputStream file, long sizeHint) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.filestore.QuotaFileStorage#appendToFile(java.io.InputStream, java.lang.String, long, long)
-     */
     @Override
     public long appendToFile(InputStream file, String name, long offset, long sizeHint) throws OXException {
         // TODO Auto-generated method stub

@@ -71,22 +71,12 @@ public class DeferredActivatorRMIServiceImpl implements DeferredActivatorRMIServ
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#listMissingServices(java.lang.String)
-     */
     @Override
     public List<String> listMissingServices(String name) throws RemoteException {
         ServiceState serviceState = DeferredActivator.getLookup().determineState(name);
         return serviceState.getMissingServices();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#listAllMissingServices()
-     */
     @Override
     public Map<String, List<String>> listAllMissingServices() throws RemoteException {
         Map<String, List<String>> res = new ConcurrentHashMap<String, List<String>>();
@@ -100,22 +90,12 @@ public class DeferredActivatorRMIServiceImpl implements DeferredActivatorRMIServ
         return res;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#isActive(java.lang.String)
-     */
     @Override
     public boolean isActive(String name) throws RemoteException {
         ServiceState serviceState = DeferredActivator.getLookup().determineState(name);
         return serviceState.getMissingServices().isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#listAvailableBundles()
-     */
     @Override
     public List<String> listAvailableBundles() throws RemoteException {
         return DeferredActivator.getLookup().getNames();

@@ -82,11 +82,6 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
         this.identitiesToAdd = identitiesToAdd;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.guard.pgpcore.commons.PacketProcessorHandler#handlePacket(com.openexchange.guard.pgpcore.commons.GuardBCPacket)
-     */
     @Override
     public PGPPacket[] handlePacket(PGPPacket packet) throws Exception {
         Packet rawPacket = packet.getBcPacket();
@@ -119,9 +114,6 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
         return new PGPPacket[] { packet };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
-     */
     @Override
     public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
         return packetData;

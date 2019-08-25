@@ -107,11 +107,6 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
         return Collections.<FileStoragePermission> singletonList(permission);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService#getScope()
-     */
     @Override
     protected OAuthScope getScope() {
         return DropboxOAuthScope.drive;

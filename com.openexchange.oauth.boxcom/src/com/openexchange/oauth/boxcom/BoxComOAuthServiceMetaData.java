@@ -93,31 +93,16 @@ public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwar
         return BoxApi.class;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
-     */
     @Override
     public Verb getIdentityHTTPMethod() {
         return Verb.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
-     */
     @Override
     public String getIdentityURL(String accessToken) {
         return IDENTITY_URL;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
-     */
     @Override
     public String getIdentityFieldName() {
         return IDENTITY_FIELD_NAME;

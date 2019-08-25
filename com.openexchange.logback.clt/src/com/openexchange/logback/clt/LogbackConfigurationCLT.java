@@ -96,11 +96,6 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         super(SYNTAX, FOOTER);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         Option add = createSwitch("a", "add", "Flag to add the filter", true);
@@ -128,11 +123,6 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         LogbackConfigurationRMIService logbackConfigService = getRmiStub(optRmiHostName, LogbackConfigurationRMIService.RMI_NAME);
@@ -141,11 +131,6 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         if (cmd.hasOption('u') && !cmd.hasOption('c')) {

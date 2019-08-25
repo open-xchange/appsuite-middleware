@@ -140,11 +140,6 @@ public abstract class AbstractMultifactorAction implements AJAXActionService {
        return requireProvider(device.getProviderName());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         return doPerform(createaMultifactorRequest(requestData, session));

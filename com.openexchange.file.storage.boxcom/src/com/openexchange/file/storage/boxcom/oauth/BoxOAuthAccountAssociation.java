@@ -86,21 +86,11 @@ public class BoxOAuthAccountAssociation extends AbstractFileStorageOAuthAccountA
         return BoxConstants.ID;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
-     */
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
         return new BoxOAuthAccess(getFileStorageAccount(), session);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(BoxComOAuthScope.drive);

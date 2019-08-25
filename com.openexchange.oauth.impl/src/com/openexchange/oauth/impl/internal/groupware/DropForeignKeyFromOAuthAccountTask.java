@@ -73,21 +73,11 @@ public final class DropForeignKeyFromOAuthAccountTask extends AbstractOAuthUpdat
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] {};
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
         // Drop foreign keys from...

@@ -78,11 +78,6 @@ public class MultifactorProviderCustomizer implements ServiceTrackerCustomizer<M
         this.registry = registry;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public MultifactorProvider addingService(ServiceReference<MultifactorProvider> reference) {
         final MultifactorProvider provider = context.getService(reference);
@@ -90,19 +85,9 @@ public class MultifactorProviderCustomizer implements ServiceTrackerCustomizer<M
         return provider;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<MultifactorProvider> reference, MultifactorProvider service) { /* nothing to do here */ }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<MultifactorProvider> reference, MultifactorProvider service) {
         registry.unRegisterProvider(service);

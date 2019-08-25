@@ -102,31 +102,16 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
-     */
     @Override
     public Available newInstance() {
         return new Available();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
-     */
     @Override
     public AvailableField[] newArray(int size) {
         return new AvailableField[size];
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
-     */
     @Override
     protected EnumMap<AvailableField, ? extends DbMapping<? extends Object, Available>> createMappings() {
         EnumMap<AvailableField, DbMapping<? extends Object, Available>> mappings = new EnumMap<AvailableField, DbMapping<? extends Object, Available>>(AvailableField.class);

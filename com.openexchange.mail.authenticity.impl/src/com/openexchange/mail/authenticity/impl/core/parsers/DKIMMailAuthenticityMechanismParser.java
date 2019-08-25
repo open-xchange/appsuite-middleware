@@ -73,11 +73,6 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
         super(DefaultMailAuthenticityMechanism.DKIM, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#parseMechanismResult(java.lang.String)
-     */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
         try {
@@ -87,11 +82,6 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
-     */
     @Override
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         DKIMAuthMechResult result = new DKIMAuthMechResult(domain, (DKIMResult) mechResult);

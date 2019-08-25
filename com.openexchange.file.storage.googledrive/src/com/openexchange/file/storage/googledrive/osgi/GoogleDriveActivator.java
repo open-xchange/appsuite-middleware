@@ -97,21 +97,11 @@ public final class GoogleDriveActivator extends AbstractCloudStorageActivator {
         Services.setServiceLookup(null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getServiceRegisterer(org.osgi.framework.BundleContext)
-     */
     @Override
     protected ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context) {
         return new OAuthServiceMetaDataRegisterer(context, this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getAPI()
-     */
     @Override
     protected KnownApi getAPI() {
         return KnownApi.GOOGLE;

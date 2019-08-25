@@ -88,11 +88,6 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricMBeanFactory#counter(com.openexchange.metrics.types.Metric)
-     */
     @Override
     public CounterMBean counter(Counter counter, MetricDescriptor metricDescriptor) {
         checkInstance(counter, DropwizardCounter.class);
@@ -103,11 +98,6 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricMBeanFactory#timer(com.openexchange.metrics.types.Metric, com.openexchange.metrics.descriptors.MetricDescriptor)
-     */
     @Override
     public TimerMBean timer(Timer timer, MetricDescriptor metricDescriptor) {
         checkInstance(timer, DropwizardTimer.class);
@@ -118,11 +108,6 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricMBeanFactory#meter(com.openexchange.metrics.types.Metric, com.openexchange.metrics.descriptors.MetricDescriptor)
-     */
     @Override
     public MeterMBean meter(Meter meter, MetricDescriptor metricDescriptor) {
         checkInstance(meter, DropwizardMeter.class);
@@ -133,11 +118,6 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricMBeanFactory#histogram(com.openexchange.metrics.types.Metric)
-     */
     @Override
     public HistogramMBean histogram(Histogram histogram, MetricDescriptor metricDescriptor) {
         checkInstance(histogram, DropwizardHistogram.class);
@@ -148,11 +128,6 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricMBeanFactory#gauge(com.openexchange.metrics.types.Metric)
-     */
     @Override
     public GaugeMBean gauge(Gauge<?> gauge, MetricDescriptor metricDescriptor) {
         try {

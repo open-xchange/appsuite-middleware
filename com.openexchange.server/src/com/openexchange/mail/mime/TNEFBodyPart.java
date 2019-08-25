@@ -76,10 +76,6 @@ public class TNEFBodyPart extends TNEFMimeBodyPart {
         this.size = size;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.mail.internet.MimeBodyPart#getSize()
-     */
     @Override
     public int getSize() {
         return size;

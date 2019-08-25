@@ -93,29 +93,17 @@ public final class ArrayStack<T> implements Stack<T> {
         top = -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.stack.Stack#isEmpty()
-     */
     @Override
     public boolean isEmpty() {
         return top == -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.stack.Stack#makeEmpty()
-     */
     @Override
     public void clear() {
         Arrays.fill(arr, null);
         top = -1;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.stack.Stack#top()
-     */
     @Override
     public T top() {
         if (isEmpty()) {
@@ -124,10 +112,6 @@ public final class ArrayStack<T> implements Stack<T> {
         return arr[top];
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.stack.Stack#pop()
-     */
     @Override
     public void pop() {
         if (isEmpty()) {
@@ -136,10 +120,6 @@ public final class ArrayStack<T> implements Stack<T> {
         arr[top--] = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.stack.Stack#topAndPop()
-     */
     @Override
     public T topAndPop() {
         if (isEmpty()) {
@@ -150,10 +130,6 @@ public final class ArrayStack<T> implements Stack<T> {
         return retval;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.stack.Stack#push(java.lang.Object)
-     */
     @Override
     public void push(final T x) {
         if (top + 1 == arr.length) {
@@ -162,10 +138,6 @@ public final class ArrayStack<T> implements Stack<T> {
         arr[++top] = x;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.tools.stack.Stack#size()
-     */
     @Override
     public int size() {
         return top + 1;
@@ -181,10 +153,6 @@ public final class ArrayStack<T> implements Stack<T> {
         arr = newArr;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         final StringBuilder tmp = new StringBuilder(1024);

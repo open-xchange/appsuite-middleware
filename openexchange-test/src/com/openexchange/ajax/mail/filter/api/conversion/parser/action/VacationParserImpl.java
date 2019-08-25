@@ -72,11 +72,6 @@ public class VacationParserImpl implements ActionParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Action<VacationActionArgument> parse(JSONObject jsonObject) throws JSONException {
         Vacation vacation = new Vacation();

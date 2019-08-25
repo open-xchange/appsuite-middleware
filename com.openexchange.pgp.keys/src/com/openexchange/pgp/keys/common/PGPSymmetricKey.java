@@ -98,9 +98,6 @@ public class PGPSymmetricKey implements AutoCloseable{
         }
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.AutoCloseable#close()
-     */
     @Override
     public void close() throws Exception {
         wipe();

@@ -68,11 +68,6 @@ public class DropwizardGauge implements Gauge<Object> {
         this.delegate = gauge;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Gauge#getValue()
-     */
     @Override
     public Object getValue() {
         return delegate.getValue();

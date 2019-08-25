@@ -86,21 +86,11 @@ public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptR
         this.username = username;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> parameters = new LinkedList<>();
@@ -111,21 +101,11 @@ public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptR
         return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
     public AbstractAJAXParser<? extends DeleteScriptResponse> getParser() {
         return new DeleteScriptParser(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws IOException, JSONException {
         // TODO Auto-generated method stub

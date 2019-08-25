@@ -70,71 +70,36 @@ public class DropwizardMeter implements Meter {
         this.delegate = meter;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Meter#mark()
-     */
     @Override
     public void mark() {
         delegate.mark();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Meter#mark(long)
-     */
     @Override
     public void mark(long n) {
         delegate.mark(n);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Meter#getCount()
-     */
     @Override
     public long getCount() {
         return delegate.getCount();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Meter#getOneMinuteRate()
-     */
     @Override
     public double getOneMinuteRate() {
         return delegate.getOneMinuteRate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Meter#getFiveMinuteRate()
-     */
     @Override
     public double getFiveMinuteRate() {
         return delegate.getFiveMinuteRate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Meter#getFifteenMinuteRate()
-     */
     @Override
     public double getFifteenMinuteRate() {
         return delegate.getFifteenMinuteRate();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.types.Meter#getMeanRate()
-     */
     @Override
     public double getMeanRate() {
         return delegate.getMeanRate();

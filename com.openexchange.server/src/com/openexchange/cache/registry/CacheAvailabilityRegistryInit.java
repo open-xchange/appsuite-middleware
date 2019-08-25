@@ -76,21 +76,11 @@ public final class CacheAvailabilityRegistryInit implements Initialization {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.server.Initialization#start()
-	 */
 	@Override
     public void start() throws OXException {
 		CacheAvailabilityRegistry.initInstance();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
 	@Override
     public void stop() throws OXException {
 		CacheAvailabilityRegistry.releaseInstance();

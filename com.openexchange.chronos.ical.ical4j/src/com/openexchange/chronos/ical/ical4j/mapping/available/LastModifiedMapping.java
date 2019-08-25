@@ -71,31 +71,16 @@ public class LastModifiedMapping extends ICalUtcMapping<Available, com.openexcha
         super(Property.LAST_MODIFIED);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
-     */
     @Override
     protected Date getValue(com.openexchange.chronos.Available object) {
         return object.getLastModified();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
-     */
     @Override
     protected void setValue(com.openexchange.chronos.Available object, Date value) {
         object.setLastModified(value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#createProperty()
-     */
     @Override
     protected UtcProperty createProperty() {
         return new LastModified();

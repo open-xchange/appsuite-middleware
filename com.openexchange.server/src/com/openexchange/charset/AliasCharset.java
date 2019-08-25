@@ -74,37 +74,21 @@ public final class AliasCharset extends Charset {
         this.delegate = delegate;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#contains(java.nio.charset.Charset)
-     */
     @Override
     public boolean contains(final Charset cs) {
         return this.getClass().isInstance(cs) || delegate.contains(cs);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#canEncode()
-     */
     @Override
     public boolean canEncode() {
         return delegate.canEncode();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#newDecoder()
-     */
     @Override
     public CharsetDecoder newDecoder() {
         return delegate.newDecoder();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.Charset#newEncoder()
-     */
     @Override
     public CharsetEncoder newEncoder() {
         return delegate.newEncoder();

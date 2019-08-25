@@ -165,11 +165,6 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         arguments.put(pAuthUrl, authUrl);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#getOAuthToken(java.util.Map)
-     */
     @Override
     public OAuthToken getOAuthToken(Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
@@ -207,11 +202,6 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         return new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#modifyCallbackURL(java.lang.String, java.lang.String, com.openexchange.session.Session)
-     */
     @Override
     public String modifyCallbackURL(final String callbackUrl, final HostInfo currentHost, final Session session) {
         if (null == callbackUrl) {

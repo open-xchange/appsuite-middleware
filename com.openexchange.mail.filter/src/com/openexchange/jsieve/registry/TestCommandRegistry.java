@@ -73,31 +73,16 @@ public class TestCommandRegistry implements CommandRegistry<ITestCommand> {
         testCommands = new HashMap<>();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#register(java.lang.String, com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser)
-     */
     @Override
     public void register(String key, ITestCommand command) {
         testCommands.put(key, command);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#unregister(java.lang.String)
-     */
     @Override
     public void unregister(String key) {
         testCommands.remove(key);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#get(java.lang.String)
-     */
     @Override
     public ITestCommand get(String key) throws OXException {
         ITestCommand testCommand = testCommands.get(key);
@@ -112,11 +97,6 @@ public class TestCommandRegistry implements CommandRegistry<ITestCommand> {
         return testCommands.values();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#purge()
-     */
     @Override
     public void purge() {
         testCommands.clear();

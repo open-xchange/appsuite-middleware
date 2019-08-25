@@ -88,31 +88,16 @@ public class MicrosoftContactsOAuthAccountAssociation extends AbstractSubscribeO
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
-     */
     @Override
     public String getModule() {
         return Module.CONTACTS.getModuleName();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(MicrosoftGraphOAuthScope.contacts_ro);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#getStatus(com.openexchange.session.Session)
-     */
     @Override
     public Status getStatus(Session session) throws OXException {
         String accessToken = null;
@@ -137,11 +122,6 @@ public class MicrosoftContactsOAuthAccountAssociation extends AbstractSubscribeO
         return Status.OK;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
-     */
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
         // nope

@@ -60,21 +60,11 @@ import com.openexchange.net.ssl.management.json.action.SSLCertificateManagementA
  */
 public class SSLCertificateManagementJSONActivator extends AJAXModuleActivator {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { SSLCertificateManagementService.class };
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         registerModule(new SSLCertificateManagementActionFactory(this), "certificate");

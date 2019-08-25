@@ -77,11 +77,6 @@ public class InsertParser extends AbstractAJAXParser<InsertResponse> {
         this.failOnError = failOnError;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected InsertResponse createResponse(final Response response) throws JSONException {
         final InsertResponse retval = new InsertResponse(response);

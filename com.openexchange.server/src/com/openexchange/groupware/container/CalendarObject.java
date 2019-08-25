@@ -1068,12 +1068,6 @@ public abstract class CalendarObject extends CommonObject {
 		return !isPartOfSeries();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.groupware.container.CommonObject#set(int,
-	 * java.lang.Object)
-	 */
 	@Override
 	public void set(final int field, final Object value) {
 		switch (field) {
@@ -1184,11 +1178,6 @@ public abstract class CalendarObject extends CommonObject {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.groupware.container.CommonObject#get(int)
-	 */
 	@Override
 	public Object get(final int field) {
 		switch (field) {
@@ -1255,11 +1244,6 @@ public abstract class CalendarObject extends CommonObject {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.groupware.container.CommonObject#contains(int)
-	 */
 	@Override
 	public boolean contains(final int field) {
 		switch (field) {
@@ -1322,11 +1306,6 @@ public abstract class CalendarObject extends CommonObject {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.openexchange.groupware.container.CommonObject#remove(int)
-	 */
 	@Override
     public void remove(final int field) {
         switch (field) {

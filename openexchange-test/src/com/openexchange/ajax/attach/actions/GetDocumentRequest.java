@@ -107,11 +107,6 @@ public class GetDocumentRequest extends AbstractAttachmentRequest<GetDocumentRes
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> parameters = new ArrayList<Parameter>();

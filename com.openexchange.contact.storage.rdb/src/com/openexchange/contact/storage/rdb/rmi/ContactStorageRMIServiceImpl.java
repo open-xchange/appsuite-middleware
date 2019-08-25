@@ -77,11 +77,6 @@ public class ContactStorageRMIServiceImpl implements ContactStorageRMIService {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.contact.storage.rdb.rmi.ContactStorageRMIService#deduplicateContacts(int, int, long, boolean)
-     */
     @Override
     public int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun) throws RemoteException {
         Collection<Integer> objectIDs = null;

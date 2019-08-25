@@ -97,11 +97,6 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.user.AbstractUserServiceInterceptor#afterUpdate(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.container.Contact, java.util.Map)
-     */
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         if (null == user || null == user.getLocale()) {

@@ -74,28 +74,16 @@ public final class PropertyEventImpl implements PropertyEvent {
         this.value = value;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.PropertyEvent#getType()
-     */
     @Override
     public Type getType() {
         return type;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.PropertyEvent#getName()
-     */
     @Override
     public String getName() {
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.PropertyEvent#getValue()
-     */
     @Override
     public String getValue() {
         return value;

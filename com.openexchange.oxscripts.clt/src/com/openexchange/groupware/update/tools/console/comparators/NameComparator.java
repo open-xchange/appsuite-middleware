@@ -67,11 +67,6 @@ public class NameComparator extends AbstractComparator {
         super(String.class, INDEX_POSITION);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.tools.console.comparators.AbstractComparator#innerCompare(java.lang.Object, java.lang.Object)
-     */
     @Override
     protected int innerCompare(Object o1, Object o2) {
         return ((String) o1).compareTo((String) o2);

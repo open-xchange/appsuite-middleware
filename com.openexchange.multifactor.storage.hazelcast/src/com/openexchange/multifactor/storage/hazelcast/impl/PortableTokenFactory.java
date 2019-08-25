@@ -60,17 +60,11 @@ import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
  */
 public class PortableTokenFactory extends AbstractCustomPortableFactory {
 
-    /* (non-Javadoc)
-     * @see com.openexchange.hazelcast.serialization.CustomPortableFactory#create()
-     */
     @Override
     public Portable create() {
         return new PortableMultifactorToken();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.hazelcast.serialization.CustomPortableFactory#getClassId()
-     */
     @Override
     public int getClassId() {
         return 800;

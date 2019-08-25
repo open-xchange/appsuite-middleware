@@ -176,20 +176,12 @@ public class SimSession implements Session {
         return hash;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.session.Session#setLocalIp(java.lang.String)
-     */
     @Override
     public void setLocalIp(final String ip) {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.session.Session#setHash(java.lang.String)
-     */
     @Override
     public void setHash(final String hash) {
         this.hash = hash;

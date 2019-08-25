@@ -69,11 +69,6 @@ public class SubscriptionsTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf
         super(Arrays.asList("subscriptions", "sequence_subscriptions"), AddFolderIndex.class.getName());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         recreateKey(connection, "subscriptions", new String[] { "cid", "folder_id" }, new int[] { -1, 191 });

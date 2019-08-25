@@ -77,11 +77,6 @@ public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
         this.gauge = gauge;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.GaugeMBean#getValue()
-     */
     @Override
     public Object getValue() {
         return gauge.getValue();

@@ -114,10 +114,6 @@ public final class AJAXFile extends PermissionServlet {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -274,10 +270,6 @@ public final class AJAXFile extends PermissionServlet {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         /*
@@ -457,10 +449,6 @@ public final class AJAXFile extends PermissionServlet {
         return managedFile.getID();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
-     */
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
         return true;

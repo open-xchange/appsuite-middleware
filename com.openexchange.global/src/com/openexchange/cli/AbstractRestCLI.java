@@ -223,11 +223,6 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractCLI#getContext()
-     */
     @Override
     protected Builder getContext() {
         return executionContext;

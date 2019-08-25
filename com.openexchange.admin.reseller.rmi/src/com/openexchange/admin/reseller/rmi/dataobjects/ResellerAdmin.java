@@ -164,21 +164,11 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return name;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
-     */
     @Override
     public String getPassword() {
         return password;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
-     */
     @Override
     public String getPasswordMech() {
         return passwordMech;
@@ -288,11 +278,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         this.password = password;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
-     */
     @Override
     public void setPasswordMech(final String passwordMech) {
         this.passwordMechset = true;
@@ -381,11 +366,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -409,11 +389,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -509,11 +484,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#clone()
-     */
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();

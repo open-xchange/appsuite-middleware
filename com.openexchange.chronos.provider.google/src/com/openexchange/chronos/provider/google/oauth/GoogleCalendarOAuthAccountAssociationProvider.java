@@ -76,11 +76,6 @@ public class GoogleCalendarOAuthAccountAssociationProvider implements OAuthAccou
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider#getAssociationsFor(int, com.openexchange.session.Session)
-     */
     @Override
     public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
         CalendarAccountService accountStorage = Services.getService(CalendarAccountService.class);

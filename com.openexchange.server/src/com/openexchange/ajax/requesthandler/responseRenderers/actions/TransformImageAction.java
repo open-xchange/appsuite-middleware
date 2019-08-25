@@ -152,11 +152,6 @@ public class TransformImageAction implements IFileResponseRendererAction {
         m_scalerReference.set(scaler);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction#call(com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper)
-     */
     @Override
     public void call(final IDataWrapper data) throws Exception {
         // closing of internal resources will be handled by FileHolder set at DataWrapper

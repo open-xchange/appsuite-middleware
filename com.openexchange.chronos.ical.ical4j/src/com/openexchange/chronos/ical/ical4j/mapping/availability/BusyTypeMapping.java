@@ -69,22 +69,12 @@ public class BusyTypeMapping extends ICalTextMapping<VAvailability, Availability
         super(Property.BUSYTYPE);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
-     */
     @Override
     protected String getValue(Availability object) {
         BusyType value = object.getBusyType();
         return value != null ? value.getValue() : null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
-     */
     @Override
     protected void setValue(Availability object, String value) {
         BusyType busyType = null;
@@ -99,11 +89,6 @@ public class BusyTypeMapping extends ICalTextMapping<VAvailability, Availability
         object.setBusyType(busyType);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#createProperty()
-     */
     @Override
     protected Property createProperty() {
         return new net.fortuna.ical4j.model.property.BusyType();

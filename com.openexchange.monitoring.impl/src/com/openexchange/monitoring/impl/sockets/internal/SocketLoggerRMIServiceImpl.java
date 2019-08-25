@@ -79,11 +79,6 @@ public class SocketLoggerRMIServiceImpl implements SocketLoggerRMIService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.monitoring.sockets.SocketLoggerRMIService#unregisterLoggerFor(java.lang.String)
-     */
     @Override
     public void unregisterLoggerFor(String name) throws RemoteException {
         LOGGER.info("Remote invocation: Unregister logger '{}' for socket logging", name);
@@ -94,11 +89,6 @@ public class SocketLoggerRMIServiceImpl implements SocketLoggerRMIService {
         registryService.unregisterLoggerFor(name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.monitoring.sockets.SocketLoggerRMIService#registerLoggerFor(java.lang.String)
-     */
     @Override
     public void registerLoggerFor(String name) throws RemoteException {
         LOGGER.info("Remote invocation: Register logger '{}' for socket logging", name);
@@ -113,11 +103,6 @@ public class SocketLoggerRMIServiceImpl implements SocketLoggerRMIService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.monitoring.sockets.SocketLoggerRMIService#getRegisteredLoggers()
-     */
     @Override
     public Set<String> getRegisteredLoggers() throws RemoteException {
         LOGGER.info("Remote invocation: List registered loggers");
@@ -125,11 +110,6 @@ public class SocketLoggerRMIServiceImpl implements SocketLoggerRMIService {
         return (registryService == null) ? Collections.emptySet() : registryService.getAllLoggerNames();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.monitoring.sockets.SocketLoggerRMIService#getBlacklistedLoggers()
-     */
     @Override
     public Set<String> getBlacklistedLoggers() throws RemoteException {
         LOGGER.info("Remote invocation: List blacklisted loggers");

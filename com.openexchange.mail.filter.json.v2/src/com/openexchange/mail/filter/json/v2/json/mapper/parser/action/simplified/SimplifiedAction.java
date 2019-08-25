@@ -82,21 +82,11 @@ public enum SimplifiedAction implements ISimplifiedAction {
         this.requiredCapabilities = requiredCapabilities;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction#getCommandName()
-     */
     @Override
     public String getCommandName() {
         return commandName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction#requiredCapabilities()
-     */
     @Override
     public Set<String> requiredCapabilities() {
         return requiredCapabilities;

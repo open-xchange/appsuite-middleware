@@ -72,11 +72,6 @@ public class AllParser extends AbstractAJAXParser<AllResponse> {
         super(failOnError);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
-     */
     @Override
     protected AllResponse createResponse(final Response response) throws JSONException {
         final AllResponse retval = instanciateResponse(response);

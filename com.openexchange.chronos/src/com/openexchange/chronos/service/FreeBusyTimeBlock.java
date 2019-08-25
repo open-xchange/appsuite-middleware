@@ -80,20 +80,6 @@ public class FreeBusyTimeBlock extends ArrayList<FreeBusyTime> {
         return busyType;
     }
 
-    /**
-     * Sets the busyType
-     *
-     * @param busyType The busyType to set
-     */
-    public void setBusyType(BusyType busyType) {
-        this.busyType = busyType;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

@@ -242,21 +242,11 @@ public enum MailFilterProperty implements Property {
         return optional;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return fqn + name();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getDefaultValue(java.lang.Class)
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;

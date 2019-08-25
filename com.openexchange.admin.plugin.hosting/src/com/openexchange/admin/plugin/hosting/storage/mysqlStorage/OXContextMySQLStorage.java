@@ -635,11 +635,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface#enableAll()
-     */
     @Override
     public void enableAll() throws StorageException {
         enableAll(null, null);

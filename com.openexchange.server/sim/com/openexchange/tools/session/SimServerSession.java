@@ -238,9 +238,6 @@ public class SimServerSession implements ServerSession {
         // Nothing to do
     }
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.tools.session.ServerSession#isAnonymous()
-	 */
 	@Override
 	public boolean isAnonymous() {
 		// Nothing to do

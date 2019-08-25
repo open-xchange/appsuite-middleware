@@ -149,11 +149,6 @@ public class RememberingInputStream extends InputStream {
         return this.in;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.io.InputStream#read()
-     */
     @Override
     public int read() throws IOException {
         int b = in.read();
@@ -163,11 +158,6 @@ public class RememberingInputStream extends InputStream {
         return b;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.io.InputStream#read(byte[], int, int)
-     */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         int read = in.read(b, off, len);
@@ -177,11 +167,6 @@ public class RememberingInputStream extends InputStream {
         return read;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.io.InputStream#read(byte[])
-     */
     @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);

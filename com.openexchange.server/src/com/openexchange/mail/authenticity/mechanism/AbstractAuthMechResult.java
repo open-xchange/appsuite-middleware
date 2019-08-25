@@ -97,11 +97,6 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult#getProperties()
-     */
     @Override
     public Map<String, String> getProperties() {
         return properties;
@@ -117,11 +112,6 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
         properties.put(key, value);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult#getReason()
-     */
     @Override
     public String getReason() {
         return reason;
@@ -155,11 +145,6 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
         this.domainMatch = domainMatch;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -173,11 +158,6 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {

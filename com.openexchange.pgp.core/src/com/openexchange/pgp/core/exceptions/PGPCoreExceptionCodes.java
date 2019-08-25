@@ -154,61 +154,31 @@ public enum PGPCoreExceptionCodes implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.exception.OXExceptionCode#equals(com.openexchange.exception.OXException)
-     */
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.exception.OXExceptionCode#getNumber()
-     */
     @Override
     public int getNumber() {
         return detailNumber;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.exception.OXExceptionCode#getCategory()
-     */
     @Override
     public Category getCategory() {
         return category;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.exception.OXExceptionCode#getPrefix()
-     */
     @Override
     public String getPrefix() {
         return PREFIX;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.exception.OXExceptionCode#getMessage()
-     */
     @Override
     public String getMessage() {
         return message;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
-     */
     @Override
     public String getDisplayMessage() {
         return displayMessage;

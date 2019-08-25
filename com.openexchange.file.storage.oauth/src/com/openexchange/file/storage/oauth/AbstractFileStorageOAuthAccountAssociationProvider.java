@@ -83,11 +83,6 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
         this.storageService = filestorageService;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider#getAssociationsFor(int, com.openexchange.session.Session)
-     */
     @Override
     public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
         Collection<OAuthAccountAssociation> associations = null;

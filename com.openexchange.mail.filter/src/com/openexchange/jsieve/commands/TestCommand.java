@@ -745,21 +745,11 @@ public class TestCommand extends Command {
         this.testCommands.remove(command);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + ": " + this.command.getCommandName() + " : " + this.tagArguments + " : " + this.arguments + " : " + this.testCommands;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jsieve.commands.Command#getRequired()
-     */
     @Override
     public HashSet<String> getRequired() {
         final HashSet<String> retval = new HashSet<String>();

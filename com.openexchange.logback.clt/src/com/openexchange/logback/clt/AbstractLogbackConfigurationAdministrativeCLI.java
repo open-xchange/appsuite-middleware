@@ -76,21 +76,11 @@ abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends Abstract
         this.footer = footer;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
     @Override
     protected Boolean requiresAdministrativePermission() {
         return Boolean.TRUE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
-     */
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         try {
@@ -101,41 +91,21 @@ abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends Abstract
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getFooter()
-     */
     @Override
     protected String getFooter() {
         return footer;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#getName()
-     */
     @Override
     protected String getName() {
         return syntax;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#printHelp()
-     */
     @Override
     protected void printHelp() {
         printHelp(options);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#printHelp(org.apache.commons.cli.Options)
-     */
     @Override
     protected void printHelp(Options options) {
         printHelp(options, 120, false);

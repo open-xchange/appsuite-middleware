@@ -67,11 +67,6 @@ public class RegexJSONParserImpl implements ComparisonParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @SuppressWarnings("unused")
     @Override
     public RegexComparison parse(JSONObject jsonObject) throws JSONException {

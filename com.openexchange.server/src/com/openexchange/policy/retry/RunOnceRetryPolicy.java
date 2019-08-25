@@ -65,31 +65,16 @@ public class RunOnceRetryPolicy implements RetryPolicy {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
-     */
     @Override
     public int getMaxTries() {
         return 1;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
-     */
     @Override
     public int retryCount() {
         return retryCount;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
-     */
     @Override
     public boolean isRetryAllowed() {
         return false;

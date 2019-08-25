@@ -70,11 +70,6 @@ public class CurrentDateParserImpl implements TestParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
         JSONArray dateValueArray = jsonObject.optJSONArray("datevalue");

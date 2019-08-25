@@ -72,21 +72,11 @@ public class HistogramMetricRegisterer implements MetricRegisterer {
         this.registry = registry;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#register(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public Metric register(MetricDescriptor descriptor) {
         return new DropwizardHistogram(registry.histogram(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegisterer#unregister(com.openexchange.metrics.MetricDescriptor)
-     */
     @Override
     public void unregister(MetricDescriptor descriptor) {
         registry.remove(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));

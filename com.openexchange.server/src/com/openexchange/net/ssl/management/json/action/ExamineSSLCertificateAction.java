@@ -73,11 +73,6 @@ public class ExamineSSLCertificateAction extends AbstractSSLCertificateManagemen
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String fingerprint = requestData.getParameter("fingerprint", String.class, false);

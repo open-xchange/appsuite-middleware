@@ -88,21 +88,11 @@ public final class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void>
         super("listUpdateTaskNamespaces -n " + BASIC_MASTER_ADMIN_USAGE, FOOTER);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
-     */
     @Override
     protected void addOptions(Options options) {
         options.addOption(createSwitch("n", "namespaces-only", "Prints only the available namespaces without their update tasks", false));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
@@ -115,11 +105,6 @@ public final class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void>
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
-     */
     @Override
     protected void checkOptions(CommandLine cmd) {
         printNamespacesOnly = cmd.hasOption('n');

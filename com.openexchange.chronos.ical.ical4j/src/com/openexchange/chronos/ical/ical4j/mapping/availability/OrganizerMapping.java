@@ -68,21 +68,11 @@ public class OrganizerMapping extends ICalOrganizerMapping<VAvailability, Availa
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping#getValue(java.lang.Object)
-     */
     @Override
     protected Organizer getValue(Availability object) {
         return object.getOrganizer();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping#setValue(java.lang.Object, com.openexchange.chronos.Organizer)
-     */
     @Override
     protected void setValue(Availability object, Organizer value) {
         object.setOrganizer(value);

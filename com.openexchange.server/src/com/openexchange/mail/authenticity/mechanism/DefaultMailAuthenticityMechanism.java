@@ -84,41 +84,21 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
         this.resultType = resultType;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getResultType()
-     */
     @Override
     public Class<? extends AuthenticityMechanismResult> getResultType() {
         return resultType;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism#getTechnicalName()
-     */
     @Override
     public String getTechnicalName() {
         return technicalName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism#getCode()
-     */
     @Override
     public int getCode() {
         return ordinal();

@@ -81,11 +81,6 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
-     */
     @Override
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String commandName = Commands.BODY.getCommandName();
@@ -109,11 +104,6 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
         return new TestCommand(TestCommand.Commands.BODY, argList, new ArrayList<TestCommand>());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
-     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {

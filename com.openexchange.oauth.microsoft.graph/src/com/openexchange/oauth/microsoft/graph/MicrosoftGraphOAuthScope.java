@@ -84,21 +84,11 @@ public enum MicrosoftGraphOAuthScope implements OAuthScope {
         this.oxScope = oxScope;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScope#getProviderScopes()
-     */
     @Override
     public String getProviderScopes() {
         return scopes;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.scope.OAuthScope#getOXScope()
-     */
     @Override
     public OXScope getOXScope() {
         return oxScope;
