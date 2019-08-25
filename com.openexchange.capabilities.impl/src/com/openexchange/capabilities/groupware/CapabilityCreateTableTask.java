@@ -92,6 +92,8 @@ public class CapabilityCreateTableTask extends UpdateTaskAdapter {
                     }
                     stmt = con.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
                 } catch (SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
