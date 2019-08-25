@@ -140,7 +140,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
             openTrackers();
             registerService(CharsetService.class, CharsetServiceImpl.newInstance(backupStandardCharsetProvider, backupExtendedCharsetProvider));
             LOG.info("Charset bundle successfully started");
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -164,7 +164,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
             collectionCharsetProvider = null;
             LOG.info("Collection charset provider replaced with former standard/external charset provider. Charset bundle successfully stopped");
             super.stopBundle();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
         } finally {
             collectionCharsetProvider = null;

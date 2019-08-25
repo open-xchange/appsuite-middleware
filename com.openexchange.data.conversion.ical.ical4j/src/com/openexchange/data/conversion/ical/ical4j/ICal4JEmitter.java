@@ -105,7 +105,7 @@ public class ICal4JEmitter implements ICalEmitter {
             try {
                 vtodo = createEvent(mode, i++, task, ctx, warnings);
                 calendar.getComponents().add(vtodo);
-            } catch (final ConversionError conversionError) {
+            } catch (ConversionError conversionError) {
                 errors.add( conversionError );
             }
         }

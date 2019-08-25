@@ -179,7 +179,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.commit();
 
             return w.getObject();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             rollback();
             if (t instanceof OXException) {
                 throw (OXException) t;

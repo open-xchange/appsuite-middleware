@@ -148,7 +148,7 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
             con.commit();
             committed = true;
             return true;
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (java.sql.SQLIntegrityConstraintViolationException e) {
             // Duplicate key conflict; just leave
@@ -345,7 +345,7 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
 
             con.commit();
             committed = true;
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());

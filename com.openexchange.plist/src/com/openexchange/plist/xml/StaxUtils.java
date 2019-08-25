@@ -145,7 +145,7 @@ public final class StaxUtils {
             if (!xifClassName.contains("ctc.wstx") && !xifClassName.contains("xml.xlxp") && !xifClassName.contains("xml.xlxp2") && !xifClassName.contains("bea.core")) {
                 xif = null;
             }
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             // ignore, can always drop down to the pooled factories
             xif = null;
         }
@@ -296,7 +296,7 @@ public final class StaxUtils {
         if (!setRestrictionProperties(factory)) {
             try {
                 factory = createWoodstoxFactory();
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 // ignore for now
             }
             if (!setRestrictionProperties(factory)) {
@@ -339,7 +339,7 @@ public final class StaxUtils {
         try {
             f.setProperty(p, o);
             return true;
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             // ignore
         }
         return false;

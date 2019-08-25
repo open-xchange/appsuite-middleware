@@ -138,7 +138,7 @@ public final class GmailSendActivator extends HousekeepingActivator {
             ListenerChain.releaseInstance();
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }

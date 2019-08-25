@@ -848,7 +848,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
                 throw oxe;
-            } catch (final com.sun.mail.util.MailConnectException e) {
+            } catch (com.sun.mail.util.MailConnectException e) {
                 if (tmpDownEnabled) {
                     /*
                      * Remember a timed-out IMAP server on connect attempt

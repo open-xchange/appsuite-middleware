@@ -240,7 +240,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         try {
             cache.clear();
             postClear();
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
         }
     }
@@ -302,7 +302,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public ElementAttributes getDefaultElementAttributes() throws OXException {
         try {
             return new ElementAttributes2JCS(cache.getDefaultElementAttributes());
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_ATTRIBUTE_RETRIEVAL.create(e, e.getMessage());
         }
     }
@@ -322,7 +322,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void put(final Serializable key, final Serializable obj) throws OXException {
         try {
             cache.put(key, obj);
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }
@@ -339,7 +339,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void put(final Serializable key, final Serializable val, final ElementAttributes attr) throws OXException {
         try {
             cache.put(key, val, new JCSElementAttributesDelegator(attr));
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }
@@ -356,7 +356,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
             cache.putInGroup(key, groupName, value);
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }
@@ -373,7 +373,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }
@@ -392,7 +392,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
             cache.putSafe(key, value);
         } catch (ObjectExistsException e) {
             throw CacheExceptionCode.FAILED_SAFE_PUT.create(e, e.getMessage());
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
     }
@@ -402,7 +402,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         try {
             cache.remove(key);
             postRemove(key, null, false);
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_REMOVE.create(e, e.getMessage());
         }
     }
@@ -463,7 +463,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void setDefaultElementAttributes(final ElementAttributes attr) throws OXException {
         try {
             cache.setDefaultElementAttributes(new JCSElementAttributesDelegator(attr));
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
+        } catch (org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_ATTRIBUTE_ASSIGNMENT.create(e, e.getMessage());
         }
     }

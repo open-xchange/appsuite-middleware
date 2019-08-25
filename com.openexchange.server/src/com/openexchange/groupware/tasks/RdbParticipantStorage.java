@@ -174,7 +174,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);
@@ -468,7 +468,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncated(con, e, type, participants);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);

@@ -113,7 +113,7 @@ public final class ReconnectingInputStreamClosure implements IFileHolder.InputSt
             in.unread(check);
             close = false;
             return in;
-        } catch (final com.sun.mail.util.FolderClosedIOException e) {
+        } catch (com.sun.mail.util.FolderClosedIOException e) {
             // Need to reconnect
             return reconnectAndGetStream();
         } finally {

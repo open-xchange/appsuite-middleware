@@ -629,7 +629,7 @@ public final class MessageUtility {
          */
         try {
             return new String(bytes, Charsets.forName("Big5-HKSCS"));
-        } catch (final Error error) {
+        } catch (Error error) {
             // Huh..?
             final Throwable cause = error.getCause();
             if ((cause instanceof java.io.CharConversionException) || (cause instanceof java.nio.charset.CharacterCodingException)) {
@@ -655,7 +655,7 @@ public final class MessageUtility {
          */
         try {
             return new String(bytes, Charsets.forName("x-windows-iso2022jp"));
-        } catch (final Error error) {
+        } catch (Error error) {
             // Huh..?
             final Throwable cause = error.getCause();
             if ((cause instanceof java.io.CharConversionException) || (cause instanceof java.nio.charset.CharacterCodingException)) {
@@ -719,7 +719,7 @@ public final class MessageUtility {
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
                 final byte[] bytes = tmp.toByteArray();
                 return new String(bytes, Charsets.forName(detectCharset(bytes)));
-            } catch (final Error error) {
+            } catch (Error error) {
                 final Throwable cause = error.getCause();
                 if ((cause instanceof java.io.CharConversionException) || (cause instanceof java.nio.charset.CharacterCodingException)) {
                     final byte[] bytes = tmp.toByteArray();

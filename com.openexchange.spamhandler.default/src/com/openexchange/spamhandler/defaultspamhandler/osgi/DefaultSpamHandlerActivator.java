@@ -88,7 +88,7 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("name", DefaultSpamHandler.getInstance().getSpamHandlerName());
             registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -100,7 +100,7 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
         try {
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }

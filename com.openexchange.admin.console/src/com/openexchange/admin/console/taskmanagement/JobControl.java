@@ -146,10 +146,10 @@ public class JobControl extends BasicCommandlineOptions {
                         .append(")"));
                 parser.printUsage();
             }
-        } catch (final java.rmi.ConnectException neti) {
+        } catch (java.rmi.ConnectException neti) {
             printError(neti.getMessage(), parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
+        } catch (java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (MalformedURLException e) {

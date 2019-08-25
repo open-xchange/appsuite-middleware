@@ -219,7 +219,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final NoClassDefFoundError e) {
+        } catch (NoClassDefFoundError e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             managedFile.delete();

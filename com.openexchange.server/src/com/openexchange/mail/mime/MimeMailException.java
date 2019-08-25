@@ -572,7 +572,7 @@ public class MimeMailException extends OXException {
              * Default case
              */
             return MimeMailExceptionCode.MESSAGING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             LOG.warn("", t);
             /*

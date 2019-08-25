@@ -155,19 +155,19 @@ public class MimeBinaryContent implements BinaryContent {
                     return ((MimeBodyPart) part).getRawInputStream();
                 }
                 throw e;
-            } catch (final javax.mail.MessagingException me) {
+            } catch (javax.mail.MessagingException me) {
                 me.setNextException(e);
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             } catch (IOException ioe) {
                 throw MessagingExceptionCodes.IO_ERROR.create(ioe, ioe.getMessage());
             }
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             try {
                 if (part instanceof MimeMessage) {
                     return ((MimeMessage) part).getRawInputStream();
                 }
                 throw e;
-            } catch (final javax.mail.MessagingException me) {
+            } catch (javax.mail.MessagingException me) {
                 me.setNextException(e);
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }

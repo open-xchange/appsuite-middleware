@@ -137,7 +137,7 @@ final class LogManagerProperties extends Properties {
             }
         } catch (RuntimeException ignore) {
         } catch (Exception ignore) { //No need for specific catch.
-        } catch (final LinkageError ignore) {
+        } catch (LinkageError ignore) {
         } finally {
             if (lrgi == null || zisd == null || zdtoi == null) {
                 lrgi = null; //If any are null then clear all.
@@ -173,7 +173,7 @@ final class LogManagerProperties extends Properties {
         Object m;
         try {
             m = LogManager.getLogManager();
-        } catch (final LinkageError restricted) {
+        } catch (LinkageError restricted) {
             m = readConfiguration();
         } catch (RuntimeException unexpected) {
             m = readConfiguration();
@@ -211,7 +211,7 @@ final class LogManagerProperties extends Properties {
             }
         } catch (RuntimeException permissionsOrMalformed) {
         } catch (Exception ioe) {
-        } catch (final LinkageError unexpected) {
+        } catch (LinkageError unexpected) {
         }
         return props;
     }
@@ -243,7 +243,7 @@ final class LogManagerProperties extends Properties {
                 if (m instanceof LogManager) {
                     return ((LogManager) m).getProperty(name);
                 }
-            } catch (final LinkageError restricted) {
+            } catch (LinkageError restricted) {
             } catch (RuntimeException unexpected) {
             }
         }
@@ -270,7 +270,7 @@ final class LogManagerProperties extends Properties {
                 if (checked) {
                     throw notAllowed;
                 }
-            } catch (final LinkageError restricted) {
+            } catch (LinkageError restricted) {
             } catch (RuntimeException unexpected) {
             }
         }
@@ -738,7 +738,7 @@ final class LogManagerProperties extends Properties {
                 throw new ClassCastException(clazz.getName()
                         + " cannot be cast to " + type.getName());
             }
-        } catch (final NoClassDefFoundError NCDFE) {
+        } catch (NoClassDefFoundError NCDFE) {
             //No class def found can occur on filesystems that are
             //case insensitive (BUG ID 6196068).  In some cases, we allow class
             //names or literal names, this code guards against the case where a

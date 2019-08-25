@@ -265,7 +265,7 @@ public final class EventPool implements Runnable {
                     broadcastEvent(pooledEvent);
                 } while ((pooledEvent = queue.poll()) != null);
             }
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LoggerHolder.LOG.error("", t);
         } finally {
             blocker.unblock();

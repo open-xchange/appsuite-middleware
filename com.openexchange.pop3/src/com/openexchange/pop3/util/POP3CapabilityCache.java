@@ -471,7 +471,7 @@ public final class POP3CapabilityCache {
                         while (true) {
                             try {
                                 i = in.read();
-                            } catch (final java.net.SocketTimeoutException e) {
+                            } catch (java.net.SocketTimeoutException e) {
                                 // Orderly failed reading next byte. Seems CAPA response isn't terminated with '.' character.
                                 break;
                             }

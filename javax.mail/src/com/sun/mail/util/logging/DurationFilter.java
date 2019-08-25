@@ -362,7 +362,7 @@ public class DurationFilter implements Filter {
                     result = LogManagerProperties.parseDurationToMillis(value);
                 } catch (RuntimeException ignore) {
                 } catch (Exception ignore) {
-                } catch (final LinkageError ignore) {
+                } catch (LinkageError ignore) {
                 }
             }
 

@@ -1493,7 +1493,7 @@ public final class MimeMessageUtility {
             for (byte b : bytes) {
                 retval.append('=').append(Integer.toHexString(b & 0xFF).toUpperCase(Locale.ENGLISH));
             }
-        } catch (final java.io.UnsupportedEncodingException e) {
+        } catch (java.io.UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("", e);
         }
@@ -2540,7 +2540,7 @@ public final class MimeMessageUtility {
                 return MessageUtility.simpleHtmlDuplicateRemoval(html);
             }
             return MessageUtility.readMailPart(mailPart, charset, errorOnNoContent, maxSize);
-        } catch (final java.io.CharConversionException e) {
+        } catch (java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
@@ -3204,14 +3204,14 @@ public final class MimeMessageUtility {
                  * Try to parse with JavaMail Content-Type implementation
                  */
                 new javax.mail.internet.ContentType(type);
-            } catch (final javax.mail.internet.ParseException e) {
+            } catch (javax.mail.internet.ParseException e) {
                 /*
                  * Sanitize Content-Type header
                  */
                 final String cts = sanitizer.toString(true);
                 try {
                     new javax.mail.internet.ContentType(cts);
-                } catch (final javax.mail.internet.ParseException pe) {
+                } catch (javax.mail.internet.ParseException pe) {
                     /*
                      * Still not parseable
                      */
@@ -3572,7 +3572,7 @@ public final class MimeMessageUtility {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final javax.mail.internet.ParseException e) {
+        } catch (javax.mail.internet.ParseException e) {
             if (!reparse) {
                 throw MimeMailException.handleMessagingException(e);
             }

@@ -249,7 +249,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             rollback = false;
         } catch (IncorrectStringSQLException e) {
             throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (StringLiteralSQLException e) {
             throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
@@ -480,7 +480,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             rollback = false;
         } catch (IncorrectStringSQLException e) {
             throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (StringLiteralSQLException e) {
             throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
@@ -554,7 +554,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             rollback = false;
         } catch (IncorrectStringSQLException e) {
             throw Tools.getIncorrectStringException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (StringLiteralSQLException e) {
             throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
@@ -1235,7 +1235,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             updateGuestContact(contextId, userId, contactId, contact, connection);
             connectionHelper.commit();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

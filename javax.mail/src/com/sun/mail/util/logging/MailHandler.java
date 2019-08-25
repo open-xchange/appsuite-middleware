@@ -674,7 +674,7 @@ public class MailHandler extends Handler {
                     record.getSourceMethodName(); //Infer caller.
                     publish0(record);
                 }
-            } catch (final LinkageError JDK8152515) {
+            } catch (LinkageError JDK8152515) {
                 reportLinkageError(JDK8152515, ErrorManager.WRITE_FAILURE);
             } finally {
                 releaseMutex();
@@ -922,7 +922,7 @@ public class MailHandler extends Handler {
             if (msg != null) {
                 send(msg, false, ErrorManager.CLOSE_FAILURE);
             }
-        } catch (final LinkageError JDK8152515) {
+        } catch (LinkageError JDK8152515) {
             reportLinkageError(JDK8152515, ErrorManager.CLOSE_FAILURE);
         }
     }
@@ -1701,7 +1701,7 @@ public class MailHandler extends Handler {
                 String name;
                 try {
                     name = k.getSimpleName();
-                } catch (final InternalError JDK8057919) {
+                } catch (InternalError JDK8057919) {
                     name = k.getName();
                 }
                 name = name.toLowerCase(Locale.ENGLISH);
@@ -1790,7 +1790,7 @@ public class MailHandler extends Handler {
             } catch (Exception e) {
                 reportError(toMsgString(e), ex, code);
             }
-        } catch (final LinkageError GLASSFISH_21258) {
+        } catch (LinkageError GLASSFISH_21258) {
             reportLinkageError(GLASSFISH_21258, code);
         }
     }
@@ -2159,7 +2159,7 @@ public class MailHandler extends Handler {
             }
         } catch (Exception skip) {
             reportError(skip.getMessage(), skip, ErrorManager.OPEN_FAILURE);
-        } catch (final LinkageError skip) {
+        } catch (LinkageError skip) {
             reportError(skip.getMessage(), new InvocationTargetException(skip),
                     ErrorManager.OPEN_FAILURE);
         }
@@ -2755,7 +2755,7 @@ public class MailHandler extends Handler {
                 if (msg != null) {
                     send(msg, priority, code);
                 }
-            } catch (final LinkageError JDK8152515) {
+            } catch (LinkageError JDK8152515) {
                 reportLinkageError(JDK8152515, code);
             } finally {
                 releaseMutex();
@@ -3027,7 +3027,7 @@ public class MailHandler extends Handler {
                     }
                 }
             }
-        } catch (final LinkageError JDK8152515) {
+        } catch (LinkageError JDK8152515) {
             reportLinkageError(JDK8152515, ErrorManager.OPEN_FAILURE);
         }
     }

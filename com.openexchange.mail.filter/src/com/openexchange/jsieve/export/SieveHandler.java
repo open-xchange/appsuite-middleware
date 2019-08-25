@@ -367,10 +367,10 @@ public class SieveHandler {
             int effectiveConnectTimeout = getEffectiveConnectTimeout(configuredTimeout);
             try {
                 s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), effectiveConnectTimeout);
-            } catch (final java.net.ConnectException e) {
+            } catch (java.net.ConnectException e) {
                 // Connection refused remotely
                 throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
-            } catch (final java.net.SocketTimeoutException e) {
+            } catch (java.net.SocketTimeoutException e) {
                 // Connection attempt timed out
                 if (tmpDownTimeout > 0 && effectiveConnectTimeout >= configuredTimeout) {
                     TIMED_OUT_SERVERS.put(hostAndPort, Long.valueOf(System.currentTimeMillis()));

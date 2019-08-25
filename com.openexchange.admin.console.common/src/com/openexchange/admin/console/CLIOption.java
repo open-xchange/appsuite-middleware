@@ -277,7 +277,7 @@ public abstract class CLIOption {
             try {
                 final Number num = NumberFormat.getNumberInstance(locale).parse(value);
                 return Double.valueOf(num.doubleValue());
-            } catch (final java.text.ParseException e) {
+            } catch (java.text.ParseException e) {
                 throw new CLIIllegalOptionValueException(this, value, e);
             }
         }

@@ -252,7 +252,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid = ? LIMIT 1");
             stmt.setInt(1, id.intValue());
             return stmt.executeQuery().next();
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (SQLException e) {
@@ -2594,7 +2594,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 del_st.setNull(5, Types.INTEGER);
             }
             del_st.executeUpdate();
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (SQLException sqle) {

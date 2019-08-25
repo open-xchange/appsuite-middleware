@@ -616,7 +616,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     try {
                         return new Renderer(new Segment(new Source(content), 0, content.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(
                             false).toString();
-                    } catch (final StackOverflowError s) {
+                    } catch (StackOverflowError s) {
                         LOG.warn("StackOverflowError while parsing html mail. Returning null...");
                         LOG.trace("", s);
                         return null;
@@ -1307,7 +1307,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         String fileName;
         try {
             fileName = part.getFileName();
-        } catch (final javax.mail.internet.ParseException e) {
+        } catch (javax.mail.internet.ParseException e) {
             // JavaMail failed to parse Content-Disposition header
             LOG.trace("JavaMail failed to parse Content-Disposition header", e);
             fileName = null;
@@ -1382,13 +1382,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 msg = (IMAPMessage) imapFolder.getMessageByUID(uid);
                 imapFolder.fetch(new Message[] {msg}, FETCH_PROFILE_ENVELOPE);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            } catch (final java.lang.NullPointerException e) {
+            } catch (java.lang.NullPointerException e) {
                 /*
                  * Obviously message was removed in the meantime
                  */
                 LOG.trace("Obviously message was removed in the meantime", e);
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(id, fullName);
-            } catch (final java.lang.IndexOutOfBoundsException e) {
+            } catch (java.lang.IndexOutOfBoundsException e) {
                 /*
                  * Obviously message was removed in the meantime
                  */
@@ -1477,13 +1477,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             try {
                 return null != imapFolder.getMessageByUID(msgUID);
-            } catch (final java.lang.NullPointerException e) {
+            } catch (java.lang.NullPointerException e) {
                 /*
                  * Obviously message was removed in the meantime
                  */
                 LOG.trace("Obviously message was removed in the meantime", e);
                 return false;
-            } catch (final java.lang.IndexOutOfBoundsException e) {
+            } catch (java.lang.IndexOutOfBoundsException e) {
                 /*
                  * Obviously message was removed in the meantime
                  */
@@ -1602,13 +1602,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
 
                 mailInterfaceMonitor.addUseTime(duration);
-            } catch (final java.lang.NullPointerException e) {
+            } catch (java.lang.NullPointerException e) {
                 /*
                  * Obviously message was removed in the meantime
                  */
                 LOG.trace("Obviously message was removed in the meantime", e);
                 return null;
-            } catch (final java.lang.IndexOutOfBoundsException e) {
+            } catch (java.lang.IndexOutOfBoundsException e) {
                 /*
                  * Obviously message was removed in the meantime
                  */
@@ -1708,7 +1708,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     LOG.debug("Generic messaging error occurred for mail \"{}\" in folder \"{}\" with login \"{}\" on server \"{}\" (user={}, context={})", Long.valueOf(msgUID), fullName, imapConfig.getLogin(), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 }
                 throw e;
-            } catch (final java.lang.IndexOutOfBoundsException e) {
+            } catch (java.lang.IndexOutOfBoundsException e) {
                 /*
                  * Obviously message was removed in the meantime
                  */

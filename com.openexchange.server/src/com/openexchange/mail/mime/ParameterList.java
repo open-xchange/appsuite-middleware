@@ -220,7 +220,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             while (m.find()) {
                 parseParameter(Strings.toLowerCase(m.group(1)), m.group(2));
             }
-        } catch (final StackOverflowError regexFailed) {
+        } catch (StackOverflowError regexFailed) {
             /*
              * Regex failed for given parameter list. Perform very simple manual parsing.
              */

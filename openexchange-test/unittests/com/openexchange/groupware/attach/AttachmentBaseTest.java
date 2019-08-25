@@ -179,7 +179,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             fail("Got Wrong Exception");
         } catch (OXException x) {
             assertTrue(true);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             fail("Got Wrong Exception: " + t);
         }

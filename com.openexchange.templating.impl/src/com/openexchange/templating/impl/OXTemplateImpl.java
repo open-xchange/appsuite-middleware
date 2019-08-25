@@ -105,7 +105,7 @@ public class OXTemplateImpl implements OXTemplate{
     public void process(final Object rootObject, final Writer writer) throws OXException {
         try {
             template.process(rootObject, writer);
-        } catch (final freemarker.template.TemplateException e) {
+        } catch (freemarker.template.TemplateException e) {
             exceptionHandler.handleTemplateException(TemplateErrorMessage.UnderlyingException.create(e, e.getMessage()), writer);
         } catch (IOException e) {
             final OXException x = TemplateErrorMessage.IOException.create(e);

@@ -62,7 +62,7 @@ public class FolderTest {
             user = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
             final UserStorage uStorage = UserStorage.getInstance();
             return uStorage.getUserId(user, ctx);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return -1;
         }

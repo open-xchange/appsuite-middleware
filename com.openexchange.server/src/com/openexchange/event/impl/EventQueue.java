@@ -487,7 +487,7 @@ public final class EventQueue {
 //            for (final InfostoreEventInterface next : infostoreEventList) {
 //                try {
 //                    next.infoitemCreated(documentMetadata, session);
-//                } catch (final Throwable t) {
+//                } catch (Throwable t) {
 //                    LOG.error("", t);
 //                }
 //            }
@@ -496,7 +496,7 @@ public final class EventQueue {
 //            for (final InfostoreEventInterface next : infostoreEventList) {
 //                try {
 //                    next.infoitemModified(documentMetadata, session);
-//                } catch (final Throwable t) {
+//                } catch (Throwable t) {
 //                    LOG.error("", t);
 //                }
 //            }
@@ -505,7 +505,7 @@ public final class EventQueue {
 //            for (final InfostoreEventInterface next : infostoreEventList) {
 //                try {
 //                    next.infoitemDeleted(documentMetadata, session);
-//                } catch (final Throwable t) {
+//                } catch (Throwable t) {
 //                    LOG.error("", t);
 //                }
 //            }

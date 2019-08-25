@@ -123,7 +123,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             registerService(TransportProvider.class, SMTPProvider.getInstance(), dictionary);
 
             registerService(Reloadable.class, SmtpReloadable.getInstance());
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -136,7 +136,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             ListenerChain.releaseInstance();
             super.stopBundle();
             Services.setServiceLookup(null);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }

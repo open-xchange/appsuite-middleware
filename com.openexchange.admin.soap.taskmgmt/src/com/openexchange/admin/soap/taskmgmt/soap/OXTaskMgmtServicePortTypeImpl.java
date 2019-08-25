@@ -76,7 +76,7 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
             com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException value = new com.openexchange.admin.soap.taskmgmt.exceptions.InvalidDataException();
             faultDetail.setInvalidDataException(value);
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
-        } catch (final java.lang.InterruptedException e) {
+        } catch (java.lang.InterruptedException e) {
             com.openexchange.admin.soap.taskmgmt.soap.InterruptedException faultDetail = new com.openexchange.admin.soap.taskmgmt.soap.InterruptedException();
             throw new InterruptedException_Exception(e.getMessage(), faultDetail, e);
         } catch (ExecutionException e) {

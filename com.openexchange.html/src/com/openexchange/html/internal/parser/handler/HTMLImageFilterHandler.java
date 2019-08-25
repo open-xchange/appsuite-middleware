@@ -233,7 +233,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                     attributes.put(BACKGROUND, BLANK);
                     imageURLFound = true;
                 }
-            } catch (final StackOverflowError e) {
+            } catch (StackOverflowError e) {
                 LOG.error("", e);
                 attributes.remove(BACKGROUND);
             }
@@ -255,7 +255,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                         attributes.put(BACKGROUND, BLANK);
                         imageURLFound = true;
                     }
-                } catch (final StackOverflowError e) {
+                } catch (StackOverflowError e) {
                     LOG.error("", e);
                     attributes.remove(BACKGROUND);
                 }

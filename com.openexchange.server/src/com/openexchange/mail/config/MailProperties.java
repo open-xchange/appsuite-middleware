@@ -951,7 +951,7 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tDefault MIME Charset: {}{}");
                 args.add(defaultMimeCharset);
                 args.add(Strings.getLineSeparator());
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 LOG.debug("", t);
                 defaultMimeCharset = "UTF-8";

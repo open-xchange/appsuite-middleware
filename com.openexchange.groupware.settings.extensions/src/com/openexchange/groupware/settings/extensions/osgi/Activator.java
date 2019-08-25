@@ -130,7 +130,7 @@ public class Activator extends HousekeepingActivator {
                     export(viewFactory, property, propertyName, possiblePath);
                 }
             }
-        } catch (final Throwable x) {
+        } catch (Throwable x) {
             LOG.error("", x);
         }
     }

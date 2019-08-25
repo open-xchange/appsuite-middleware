@@ -123,7 +123,7 @@ public final class DetachAction extends AbstractAttachmentAction {
             timestamp = ATTACHMENT_BASE.detachFromObject(folderId, attachedId, moduleId, ids, session, ctx, user, userConfig);
 
             ATTACHMENT_BASE.commit();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             rollback();
             if (t instanceof OXException) {
                 throw (OXException) t;

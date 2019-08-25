@@ -269,7 +269,7 @@ public class WebserviceCollector implements ServiceListener {
             }
             oldEndpoint = endpoints.replace(name, endpoint);
             LOG.info("Publishing endpoint succeeded. Published \"{}\" under address \"{}\".", name, address);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             LOG.error("Publishing endpoint failed. Couldn't publish \"{}\" under address \"{}\".", name, address, t);
             oldEndpoint = null;

@@ -123,7 +123,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
             throw x;
         } catch (JSONException x) {
             throw x;
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             throw wrapThrowable(t);
         }
     }

@@ -660,7 +660,7 @@ public class RESTUtility {
             synchronized (dateFormat) {
                 return dateFormat.parse(date);
             }
-        } catch (final java.text.ParseException e) {
+        } catch (java.text.ParseException e) {
             return null;
         }
     }

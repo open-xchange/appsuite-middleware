@@ -408,7 +408,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (IOException e) {
             LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             return null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             return null;
         } catch (ClassCastException e) {
@@ -431,7 +431,7 @@ public class MimeMessagingPart implements MessagingPart {
                     }
                     cachedContentType = tmp = new MimeContentType(s[0]);
                     b_cachedContentType = true;
-                } catch (final javax.mail.MessagingException e) {
+                } catch (javax.mail.MessagingException e) {
                     throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
                 }
             }
@@ -444,7 +444,7 @@ public class MimeMessagingPart implements MessagingPart {
     public String getDisposition() throws OXException {
         try {
             return part.getDisposition();
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -453,7 +453,7 @@ public class MimeMessagingPart implements MessagingPart {
     public String getFileName() throws OXException {
         try {
             return part.getFileName();
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -511,7 +511,7 @@ public class MimeMessagingPart implements MessagingPart {
                 }
                 tmp = Collections.unmodifiableMap(tmp);
                 headers = tmp;
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -540,7 +540,7 @@ public class MimeMessagingPart implements MessagingPart {
              */
             try {
                 return part.getSize();
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -560,7 +560,7 @@ public class MimeMessagingPart implements MessagingPart {
     public void writeTo(final OutputStream os) throws IOException, OXException {
         try {
             part.writeTo(os);
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
@@ -598,7 +598,7 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -617,7 +617,7 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -636,7 +636,7 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -658,7 +658,7 @@ public class MimeMessagingPart implements MessagingPart {
             cachedContent = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -711,7 +711,7 @@ public class MimeMessagingPart implements MessagingPart {
             cachedContent = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -728,7 +728,7 @@ public class MimeMessagingPart implements MessagingPart {
         try {
             part.setDisposition(disposition);
             headers = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -745,7 +745,7 @@ public class MimeMessagingPart implements MessagingPart {
         try {
             part.setFileName(filename);
             headers = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -766,7 +766,7 @@ public class MimeMessagingPart implements MessagingPart {
             for (final Enumeration<Header> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
                 part.removeHeader(allHeaders.nextElement().getName());
             }
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -797,7 +797,7 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -816,7 +816,7 @@ public class MimeMessagingPart implements MessagingPart {
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -871,7 +871,7 @@ public class MimeMessagingPart implements MessagingPart {
             cachedContent = null;
             b_cachedContentType = false;
             cachedContentType = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());

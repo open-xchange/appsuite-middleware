@@ -320,7 +320,7 @@ public final class TextProcessing {
         final String charset = getCharset(mailPart, contentType);
         try {
             return MessageUtility.readMailPart(mailPart, charset);
-        } catch (final java.io.CharConversionException e) {
+        } catch (java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);

@@ -64,7 +64,7 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
-        } catch (final java.lang.InterruptedException e) {
+        } catch (java.lang.InterruptedException e) {
             throw new InterruptedException_Exception(e.getMessage(), e);
         } catch (ExecutionException e) {
             throw new ExecutionException_Exception(e.getMessage(), e);

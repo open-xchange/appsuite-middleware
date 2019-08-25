@@ -185,7 +185,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con.commit();
             rollback = false;
             return res_id;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (PoolException pexp) {
@@ -236,7 +236,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             changeDatabase(db, con);
             con.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             rollback(con);
             rollback = false;
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
@@ -775,7 +775,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             configdb_write_con.commit();
             rollback = 2;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (PoolException pe) {
@@ -1718,7 +1718,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             rollback = 2;
 
             return fstore_id;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (PoolException pe) {
@@ -2074,7 +2074,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // None found
             throw new StorageException("No usable or suitable filestore found");
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (SQLException ecp) {
@@ -2205,7 +2205,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             rollback = false;
 
             return srv_id;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (PoolException pe) {

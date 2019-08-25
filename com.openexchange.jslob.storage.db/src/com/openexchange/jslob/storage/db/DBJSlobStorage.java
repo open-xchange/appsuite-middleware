@@ -604,7 +604,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             setBinaryStream(jslob.getJsonObject(), stmt, 5, 6);
             int updated = stmt.executeUpdate();
             return updated == 1;
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             // A BLOB can be 65535 bytes maximum.
             // If you need more consider using a MEDIUMBLOB for 16777215 bytes or a LONGBLOB for 4294967295
             OXException x = JSlobExceptionCodes.JSLOB_TOO_BIG.create(

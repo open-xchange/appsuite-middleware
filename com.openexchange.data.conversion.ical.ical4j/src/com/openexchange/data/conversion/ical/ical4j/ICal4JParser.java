@@ -163,7 +163,7 @@ public class ICal4JParser implements ICalParser {
                     final Component vtodo = (Component) todos.get(i);
                     try {
                         tasks.add(convertTask(i, (VToDo) vtodo, defaultTZ, ctx, warnings ));
-                    } catch (final ConversionError conversionError) {
+                    } catch (ConversionError conversionError) {
                         errors.add(conversionError);
                     }
                 }

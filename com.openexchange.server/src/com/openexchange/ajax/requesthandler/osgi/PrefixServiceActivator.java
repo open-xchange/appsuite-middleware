@@ -79,7 +79,7 @@ public class PrefixServiceActivator extends HousekeepingActivator {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PrefixServiceActivator.class);
             log.error("DispatcherPrefixService could not be registered", e);
             throw e;
-        } catch (final Error e) {
+        } catch (Error e) {
 		    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PrefixServiceActivator.class);
 		    log.error("DispatcherPrefixService could not be registered", e);
 		    throw e;

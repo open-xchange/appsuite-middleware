@@ -132,7 +132,7 @@ public class DefaultThreadPool
                 return true;
             }
         }
-        catch (final Throwable t)
+        catch (Throwable t)
         {
             LogWrapper.getLogger().log(
                     LogWrapper.LOG_WARNING,

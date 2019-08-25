@@ -138,7 +138,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 }
             }
             stmt.executeBatch();
-        } catch (final java.sql.BatchUpdateException e) {
+        } catch (java.sql.BatchUpdateException e) {
             closeSQLStuff(null, stmt);
             stmt = null;
             // One-by-one
@@ -170,7 +170,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             stmt.setString(pos++, pair.getFullname());
             stmt.setString(pos, pair.getMailId());
             stmt.executeUpdate();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw POP3ExceptionCode.UIDL_TOO_BIG.create(e, uidl);
         } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());

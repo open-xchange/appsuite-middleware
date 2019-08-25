@@ -709,7 +709,7 @@ public class CompactFormatter extends java.util.logging.Formatter {
     private static String simpleClassName(final Class<?> k) {
         try {
             return k.getSimpleName();
-        } catch (final InternalError JDK8057919) {
+        } catch (InternalError JDK8057919) {
         }
         return simpleClassName(k.getName());
     }

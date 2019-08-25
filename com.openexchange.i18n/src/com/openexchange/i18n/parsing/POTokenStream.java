@@ -91,7 +91,7 @@ final class POTokenStream {
     public void setCharset(final String charset) {
         try {
             this.charset = Charset.forName(charset);
-        } catch (final java.nio.charset.UnsupportedCharsetException e) {
+        } catch (java.nio.charset.UnsupportedCharsetException e) {
             LOG.warn("Unsupported charset: \"{}\". Therefore using fall-back \"UTF-8\". Forgot to replace header appropriately?", charset);
             this.charset = Charsets.UTF_8;
         }

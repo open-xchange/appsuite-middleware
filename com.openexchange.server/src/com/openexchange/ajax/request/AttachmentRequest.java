@@ -373,7 +373,7 @@ public class AttachmentRequest extends CommonRequest {
          */
         catch (UnknownColumnException e) {
             handle(e, session);
-        } catch (final OXAborted x) {
+        } catch (OXAborted x) {
             return true;
         } catch (JSONException e) {
             handle(e, session);

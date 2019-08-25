@@ -130,7 +130,7 @@ public final class OXFolderDeleteListenerHelper {
                     writeCon.rollback();
                 }
                 throw e;
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 LOG.error("", t);
                 if (performTransaction) {
                     writeCon.rollback();
@@ -178,7 +178,7 @@ public final class OXFolderDeleteListenerHelper {
                     writeCon.rollback();
                 }
                 throw e;
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 LOG.error("", t);
                 if (performTransaction) {
                     writeCon.rollback();

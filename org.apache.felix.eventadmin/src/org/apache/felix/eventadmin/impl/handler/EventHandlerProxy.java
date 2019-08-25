@@ -416,7 +416,7 @@ public class EventHandlerProxy {
         {
             handlerService.handleEvent(event);
         }
-        catch (final Throwable e)
+        catch (Throwable e)
         {
             // The spec says that we must catch exceptions and log them:
             LogWrapper.getLogger().log(

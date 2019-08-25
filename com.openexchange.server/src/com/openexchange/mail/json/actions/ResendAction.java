@@ -160,9 +160,9 @@ public final class ResendAction extends AbstractMailAction {
                     try {
                         mm.setHeader("X-Ignore", "Ignore");
                         mm.removeHeader("X-Ignore");
-                    } catch (final javax.mail.IllegalWriteException e) {
+                    } catch (javax.mail.IllegalWriteException e) {
                         readOnly = true;
-                    } catch (final javax.mail.MessagingException e) {
+                    } catch (javax.mail.MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);
                     }
                     if (readOnly) {
@@ -179,7 +179,7 @@ public final class ResendAction extends AbstractMailAction {
                     sentMail.setAccountId(mailInterface.getAccountID());
                 }
                 return sentMail;
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             } catch (IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());

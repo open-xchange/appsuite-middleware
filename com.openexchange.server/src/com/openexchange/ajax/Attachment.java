@@ -175,7 +175,7 @@ public class Attachment extends PermissionServlet {
                 moduleId = requireNumber(req, res, action, PARAMETER_MODULE, session);
                 id = requireNumber(req, res, action, PARAMETER_ID, session);
 
-            } catch (final OXAborted x) {
+            } catch (OXAborted x) {
                 return;
             }
 

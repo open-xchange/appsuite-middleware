@@ -329,7 +329,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             exc = TaskExceptionCode.NO_CONNECTION.create(e);
         } catch (SQLException e) {
             exc = TaskExceptionCode.SQL_ERROR.create(e);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             exc = TaskExceptionCode.THREAD_ISSUE.create(t);
         } finally {

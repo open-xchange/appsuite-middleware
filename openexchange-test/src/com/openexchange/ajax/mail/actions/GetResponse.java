@@ -332,7 +332,7 @@ public class GetResponse extends AbstractAJAXResponse {
         }
         try {
             return InternetAddress.parse(value, false);
-        } catch (final javax.mail.internet.AddressException e) {
+        } catch (javax.mail.internet.AddressException e) {
             return new InternetAddress[] { new com.openexchange.mail.mime.PlainTextAddress(value) };
         }
     }

@@ -376,7 +376,7 @@ public class StatisticTools extends AbstractJMXTools {
                 "getThreadAllocatedBytes",
                 new Object[] { allThreadIds },
                 new String[] { "[J" });
-        } catch (final javax.management.ReflectionException e) {
+        } catch (javax.management.ReflectionException e) {
             System.err.println("AllocatedBytes is not supported on this JVM");
             // Simple set to an array of 0
             allocatedBytes = new long[threadInfo.length];
@@ -385,7 +385,7 @@ public class StatisticTools extends AbstractJMXTools {
         // First try the new method every time, if not available use the old iteration approach
         try {
             cpuTime = (long[]) mbc.invoke(srvThrdName, "getThreadCpuTime", new Object[] { allThreadIds }, new String[] { "[J" });
-        } catch (final javax.management.ReflectionException e) {
+        } catch (javax.management.ReflectionException e) {
             cpuTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 cpuTime[i] = threadBean.getThreadCpuTime(allThreadIds[i]);
@@ -397,7 +397,7 @@ public class StatisticTools extends AbstractJMXTools {
                 "getThreadUserTime",
                 new Object[] { allThreadIds },
                 new String[] { "[J" });
-        } catch (final javax.management.ReflectionException e) {
+        } catch (javax.management.ReflectionException e) {
             userTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 userTime[i] = threadBean.getThreadUserTime(allThreadIds[i]);

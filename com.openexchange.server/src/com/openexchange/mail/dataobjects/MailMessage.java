@@ -1339,7 +1339,7 @@ public abstract class MailMessage extends MailPart {
                         if (null != parsedDate) {
                             setSentDate(parsedDate);
                         }
-                    } catch (final java.text.ParseException e) {
+                    } catch (java.text.ParseException e) {
                         LOG.warn("Date string could not be parsed: {}", sentDateStr, e);
                     }
                 }

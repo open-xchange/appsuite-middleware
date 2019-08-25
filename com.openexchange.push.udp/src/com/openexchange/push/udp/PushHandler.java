@@ -150,7 +150,7 @@ public class PushHandler implements EventHandler {
             PushOutputQueue.add(new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp));
         } catch (OXException e) {
             LOG.error("", e);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error("", t);
         }
     }

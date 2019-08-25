@@ -256,7 +256,7 @@ public final class NotificationPool {
                         cur = taskQueue.poll();
                     } while (null != cur);
                 }
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 logger.error("", t);
             } finally {
                 taskWriteLock.unlock();

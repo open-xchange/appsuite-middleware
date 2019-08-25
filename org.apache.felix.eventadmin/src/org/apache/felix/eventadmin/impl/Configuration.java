@@ -521,7 +521,7 @@ public class Configuration
                     m_threadPoolSize, m_timeout, m_requireTopic,
                     m_ignoreTimeout, m_ignoreTopics, m_asyncToSyncThreadRatio);
         }
-        catch (final Throwable t)
+        catch (Throwable t)
         {
             // we simply ignore this
         }

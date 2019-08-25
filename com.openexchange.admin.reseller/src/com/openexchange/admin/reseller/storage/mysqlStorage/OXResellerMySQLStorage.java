@@ -199,7 +199,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -270,7 +270,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             adm.setId(I(adm_id));
             return adm;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -317,7 +317,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -618,7 +618,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                     prep = null;
                 }
             }
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -662,7 +662,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -727,7 +727,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             rollback = false;
 
             return subadminId;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -769,7 +769,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return masteradmin;
             }
             return getData(new ResellerAdmin[] { new ResellerAdmin(rs.getInt("sid")) })[0];
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -817,7 +817,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return false;
             }
             return true;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -874,7 +874,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 return false;
             }
             return true;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -931,7 +931,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 firstExtensionByName.setSid(sid);
             }
             return true;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {
@@ -1528,7 +1528,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             oxcon.commit();
             rollback = false;
-        } catch (final DataTruncation dt) {
+        } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (RuntimeException e) {

@@ -181,7 +181,7 @@ public final class XMLUtils {
             try {
                 // sun way of setting indent
                 f.setAttribute("indent-number", Integer.toString(indent));
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 // ignore
             }
             return f.newTransformer();

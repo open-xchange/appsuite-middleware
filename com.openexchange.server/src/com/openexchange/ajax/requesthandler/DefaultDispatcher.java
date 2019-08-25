@@ -411,7 +411,7 @@ public class DefaultDispatcher implements Dispatcher {
                     }
                     outgoing.add(customizer);
                     iterator.remove();
-                } catch (final FlowControl.Later l) {
+                } catch (FlowControl.Later l) {
                     // Remains in list and is therefore retried
                 }
             }
@@ -651,7 +651,7 @@ public class DefaultDispatcher implements Dispatcher {
                         }
                     }
                     iterator.remove();
-                } catch (final FlowControl.Later l) {
+                } catch (FlowControl.Later l) {
                     // Remains in list and is therefore retried
                 }
             }

@@ -271,7 +271,7 @@ public final class HtmlServiceImpl implements HtmlService {
             return targetBuilder.toString();
         } catch (Exception e) {
             LOG.error("", e);
-        } catch (final StackOverflowError error) {
+        } catch (StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
         return content;
@@ -329,7 +329,7 @@ public final class HtmlServiceImpl implements HtmlService {
             return targetBuilder.toString();
         } catch (Exception e) {
             LOG.error("", e);
-        } catch (final StackOverflowError error) {
+        } catch (StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
         return content;

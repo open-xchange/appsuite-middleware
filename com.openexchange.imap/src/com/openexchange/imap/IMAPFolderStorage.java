@@ -1449,7 +1449,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         createMe.delete(true);
                         created = false;
                     }
-                } catch (final Throwable e2) {
+                } catch (Throwable e2) {
                     LOG.error("Temporary created IMAP folder \"{}could not be deleted", createMe.getFullName(),
                         e2);
                 }
@@ -1473,7 +1473,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             createMe.delete(true);
                             created = false;
                         }
-                    } catch (final Throwable e2) {
+                    } catch (Throwable e2) {
                         LOG.error("Temporary created IMAP folder \"{}\" could not be deleted", createMe.getFullName(),
                             e2);
                     }
@@ -1487,7 +1487,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         createMe.delete(true);
                         created = false;
                     }
-                } catch (final Throwable e2) {
+                } catch (Throwable e2) {
                     LOG.error("Temporary created IMAP folder \"{}\" could not be deleted", createMe.getFullName(),
                         e2);
                 }

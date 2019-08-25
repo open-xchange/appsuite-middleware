@@ -336,7 +336,7 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, task.getObjectID());
             stmt.execute();
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);
@@ -486,7 +486,7 @@ public class RdbTaskStorage extends TaskStorage {
             if (0 == updatedRows) {
                 throw TaskExceptionCode.MODIFIED.create();
             }
-        } catch (final DataTruncation e) {
+        } catch (DataTruncation e) {
             throw parseTruncated(con, e, task, type);
         } catch (IncorrectStringSQLException e) {
             throw Tools.parseIncorrectString(e);

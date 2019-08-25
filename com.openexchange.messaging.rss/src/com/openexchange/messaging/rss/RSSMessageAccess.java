@@ -298,7 +298,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     private SyndFeed retrieveFeed(final URL url) throws IOException, FeedException, FetcherException {
         try {
             return feedFetcher.retrieveFeed(url);
-        } catch (final com.sun.syndication.io.ParsingFeedException e) {
+        } catch (com.sun.syndication.io.ParsingFeedException e) {
             // Retry using InputSource class
             InputStream in = null;
             try {

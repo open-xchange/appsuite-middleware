@@ -120,7 +120,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                     try {
                         final Object wrappedObject = dr.read(messagePartInfo, xmlReader);
                         parameters.put(msgInfo.getMessageParts().get(0), wrappedObject);
-                    } catch (final org.apache.cxf.interceptor.Fault fault) {
+                    } catch (org.apache.cxf.interceptor.Fault fault) {
                         final QName typeQName = messagePartInfo.getTypeQName();
                         if (null == typeQName) {
                             /*-

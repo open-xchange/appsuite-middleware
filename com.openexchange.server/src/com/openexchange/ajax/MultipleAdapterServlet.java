@@ -130,7 +130,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             writeResponseSafely(response, null == user ? localeFrom(session) : user.getLocale(), timestamp, handler.getWarnings(), resp, session);
         } catch (OXException x) {
             writeException(x, null == user ? localeFrom(session) : user.getLocale(), resp, session);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             writeException(wrap(t), null == user ? localeFrom(session) : user.getLocale(), resp, session);
         }
     }

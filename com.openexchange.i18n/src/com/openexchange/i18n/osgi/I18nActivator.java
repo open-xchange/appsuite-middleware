@@ -246,7 +246,7 @@ public class I18nActivator extends HousekeepingActivator {
             this.listener = listener;
             csh.addServiceHolderListener(listener);
 
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
 
@@ -276,7 +276,7 @@ public class I18nActivator extends HousekeepingActivator {
              * Stop rest...
              */
             super.stopBundle();
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
             LOG.error("I18nActivator: stop: ", e);
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }

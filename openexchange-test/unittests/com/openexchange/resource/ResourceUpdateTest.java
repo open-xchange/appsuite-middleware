@@ -87,7 +87,7 @@ public final class ResourceUpdateTest {
             int pos = -1;
             final String c = (pos = ctxStr.indexOf('@')) > -1 ? ctxStr.substring(pos + 1) : ctxStr;
             return ContextStorage.getStorageContext(ContextStorage.getInstance().getContextId(c));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return null;
         }
@@ -98,7 +98,7 @@ public final class ResourceUpdateTest {
             int pos = -1;
             final String u = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user;
             return UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(u, ctx), ctx);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return null;
         }

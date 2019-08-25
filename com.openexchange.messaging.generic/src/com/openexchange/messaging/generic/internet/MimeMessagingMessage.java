@@ -142,7 +142,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
         if (null == cachedParsedFlags) {
             try {
                 cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -168,7 +168,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
             newFlags.add(InternalUtility.getColorLabelStringValue(colorLabel));
             mimeMessage.setFlags(newFlags, true);
             cachedParsedFlags = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -180,7 +180,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
         if (null == cachedParsedFlags) {
             try {
                 cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -205,7 +205,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
             final Flags newFlags = InternalUtility.convertMessagingFlags(flags);
             mimeMessage.setFlags(newFlags, true);
             cachedParsedFlags = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
@@ -217,7 +217,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
         if (null == cachedParsedFlags) {
             try {
                 cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
-            } catch (final javax.mail.MessagingException e) {
+            } catch (javax.mail.MessagingException e) {
                 throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
@@ -253,7 +253,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Param
             }
             mimeMessage.setFlags(newFlags, true);
             cachedParsedFlags = null;
-        } catch (final javax.mail.MessagingException e) {
+        } catch (javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (IllegalStateException e) {
             throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());

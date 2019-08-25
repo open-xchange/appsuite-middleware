@@ -230,7 +230,7 @@ public class OAuthServiceImpl implements OAuthService {
             OAuthToken requestToken = scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken);
             OAuthInteractionType interactionType = cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;
             return new OAuthInteractionImpl(requestToken, authURL, interactionType);
-        } catch (final org.scribe.exceptions.OAuthException e) {
+        } catch (org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
         } catch (Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -629,7 +629,7 @@ public class OAuthServiceImpl implements OAuthService {
                 account.setToken(oAuthToken.getToken());
                 account.setSecret(oAuthToken.getSecret());
             }
-        } catch (final org.scribe.exceptions.OAuthException e) {
+        } catch (org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
         } catch (Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

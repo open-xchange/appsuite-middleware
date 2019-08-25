@@ -936,7 +936,7 @@ final class SessionData {
             try {
                 removers.remove(randomToken);
                 removeRandomToken(randomToken);
-            } catch (final Throwable t) {
+            } catch (Throwable t) {
                 LOG.error("", t);
             }
         }

@@ -307,7 +307,7 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         TypeInfo schemaType = null;
         try {
             schemaType = attr.getSchemaTypeInfo();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             //DOM level 2?
             schemaType = null;
         }
@@ -443,7 +443,7 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
             if (o instanceof Location) {
                 return (Location)o;
             }
-        } catch (final Throwable ex) {
+        } catch (Throwable ex) {
             //ignore, probably not DOM level 3
         }
         return super.getLocation();
@@ -461,7 +461,7 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
             return StaxUtils.toString(document);
         } catch (XMLStreamException e) {
             return super.toString();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             return super.toString();
         }

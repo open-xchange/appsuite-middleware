@@ -142,7 +142,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                     }
                     cache = new NotifyingCache(name, cache, eventService);
                 }
-            } catch (final org.apache.jcs.access.exception.CacheException e) {
+            } catch (org.apache.jcs.access.exception.CacheException e) {
                 throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
             } catch (NullPointerException npe) {
                 /*

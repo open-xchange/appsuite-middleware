@@ -268,7 +268,7 @@ public final class UpdateExecutor {
             }
 
             LOG.info("Finished {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
         } finally {

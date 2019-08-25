@@ -209,7 +209,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
                 }
             }
             outputStream.flush();
-        } catch (final java.net.SocketException e) {
+        } catch (java.net.SocketException e) {
             final String lmsg = com.openexchange.java.Strings.toLowerCase(e.getMessage());
             if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                 // Assume client-initiated connection closure
@@ -217,7 +217,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
             } else {
                 LOG.warn("Lost connection to client while trying to output file", e);
             }
-        } catch (final com.sun.mail.util.MessageRemovedIOException e) {
+        } catch (com.sun.mail.util.MessageRemovedIOException e) {
             sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", data.getResponse());
         } catch (IOException e) {
             if (IOs.isConnectionReset(e)) {

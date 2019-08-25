@@ -89,7 +89,7 @@ public final class ModifyCharsetExtendedProvider {
         boolean isFinal = false;
         try {
             extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
-        } catch (final java.lang.NoSuchFieldException e) {
+        } catch (java.lang.NoSuchFieldException e) {
             // Java v8 ?
             Class<?> extendedProviderHolderClass = null;
             final Class<?>[] declaredClasses = java.nio.charset.Charset.class.getDeclaredClasses();

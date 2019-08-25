@@ -31,7 +31,7 @@ public class ResourceTest extends AbstractResourceTest {
     public void setUp() throws Exception {
         try {
             TestWebdavFactoryBuilder.setUp();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
         }
         FACTORY = TestWebdavFactoryBuilder.buildFactory();
