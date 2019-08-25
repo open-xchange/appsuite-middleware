@@ -145,7 +145,7 @@ public final class ParallelsOpenApiServletRequest  {
         // we need the data parameter here
         checkForMissingParameter(jsonObject);
 
-        try{
+        try {
 
 
             final HashMap<String, Object> rpcargs = new HashMap<String, Object>();
@@ -170,7 +170,7 @@ public final class ParallelsOpenApiServletRequest  {
         } catch (ServiceException e) {
             LOG.error("internal configuration error occured");
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(e.getMessage());
-        }finally{
+        } finally {
         }
 
         return null;
@@ -191,7 +191,7 @@ public final class ParallelsOpenApiServletRequest  {
 
         final JSONObject json_response = new JSONObject();
 
-        try{
+        try {
 
 
 
@@ -226,7 +226,7 @@ public final class ParallelsOpenApiServletRequest  {
         } catch (ServiceException e) {
             LOG.error("internal configuration error occured");
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(e.getMessage());
-        }finally{
+        } finally {
         }
 
 

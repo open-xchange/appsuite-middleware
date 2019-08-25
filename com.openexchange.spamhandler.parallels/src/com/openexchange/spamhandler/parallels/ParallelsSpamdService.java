@@ -325,7 +325,7 @@ public class ParallelsSpamdService implements SpamdService {
         } catch (URISyntaxException e) {
             LOG.error("error parsing users smtp server as xmlrpc host",e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
-        }finally{
+        } finally {
             // free http client
             if (http_client!=null){
                 http_client = null;

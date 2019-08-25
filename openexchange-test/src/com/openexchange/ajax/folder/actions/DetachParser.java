@@ -74,7 +74,7 @@ public class DetachParser extends AbstractAJAXParser<DetachResponse> {
     protected DetachResponse createResponse(Response response) throws JSONException {
         JSONObject json = ResponseWriter.getJSON(response);
         JSONArray arr = null;
-        try{
+        try {
             arr = json.getJSONArray("data");
             if (!json.has("error")) {
                 assertNotNull(json.opt(ResponseFields.TIMESTAMP)); // FIXME!

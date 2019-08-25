@@ -89,7 +89,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
 
     @Override
     public void disableSchema(final Credentials auth, String schemaName) throws TargetDatabaseException, StorageException, NoSuchObjectException, MissingServiceException, InvalidCredentialsException, InvalidDataException {
-        try{
+        try {
             doNullCheck(schemaName);
         } catch (InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException(THE_SOURCE_SCHEMA_NAME_IS_NOT_GIVEN);

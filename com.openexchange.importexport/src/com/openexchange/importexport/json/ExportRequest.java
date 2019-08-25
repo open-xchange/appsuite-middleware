@@ -102,7 +102,7 @@ public class ExportRequest {
             String value = request.getParameter("body");
             if (Strings.isNotEmpty(value)) {
                 String ids = value;
-                try{
+                try {
                     batchIds = extractBatchArrayFromRequest(new JSONArray(ids));
                 } catch (JSONException e) {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e);

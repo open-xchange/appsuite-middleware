@@ -232,7 +232,7 @@ public final class CSVLibrary {
      * @throws OXException
      */
     public static int getFolderId(final String folderString) throws OXException {
-        try{
+        try {
             return Integer.parseInt(folderString);
         } catch (NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folderString);
