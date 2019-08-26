@@ -246,7 +246,6 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             Long localLastActive = this.localLastActive;
             writer.writeLong(PARAMETER_LOCAL_LAST_ACTIVE, null != localLastActive ? localLastActive.longValue() : -1L);
         }
-        writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
         {
             Set<String> remoteParameterNames = this.remoteParameterNames;
             JSONObject jRemoteParameters = null;
@@ -284,6 +283,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETERS, jRemoteParameters.toString(true));
             }
         }
+        writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
     }
 
     @Override
@@ -330,11 +330,6 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             this.localLastActive = localLastActive > 0 ? Long.valueOf(localLastActive) : null;
         }
         {
-
-            String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
-            origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
-        }
-        {
             String sRemoteParameters = reader.readUTF(PARAMETER_REMOTE_PARAMETERS);
             if (null != sRemoteParameters) {
                 try {
@@ -350,6 +345,10 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
                     LOG.warn("Failed to decode remote parameters from session {}.", sessionId, je);
                 }
             }
+        }
+        {
+            String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
+            origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
         }
     }
 
