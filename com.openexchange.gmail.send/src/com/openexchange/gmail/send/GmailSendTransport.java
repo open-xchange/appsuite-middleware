@@ -145,6 +145,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.user.User;
@@ -618,9 +619,15 @@ public class GmailSendTransport extends MailTransport {
 
             // Sent date in UTC time
             {
-                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
-                synchronized (mdf) {
-                    mimeMessage.setHeader("Date", mdf.format(new Date()));
+                RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+                if (null != regionalSettingsService) {
+                    DateFormat df = regionalSettingsService.getDateFormat(session.getContextId(), session.getUserId(), locale, DateFormat.DEFAULT);
+                    mimeMessage.setHeader("Date", df.format(new Date()));
+                } else {
+                    final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
+                    synchronized (mdf) {
+                        mimeMessage.setHeader("Date", mdf.format(new Date()));
+                    }
                 }
             }
 

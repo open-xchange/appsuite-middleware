@@ -102,7 +102,6 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
@@ -221,7 +220,7 @@ public class CSVContactImporter extends AbstractImporter {
         {
             final int size = csv.size();
             intentions = new ArrayList<ImportIntention>(size);
-            final ContactSwitcher conSet = getContactSwitcher(sessObj);
+            final ContactSwitcher conSet = getContactSwitcher(sessObj.getUser().getLocale());
             for (int lineNumber = 1; lineNumber < size; lineNumber++) {
                 // ...and writing them
                 final List<String> row = csv.get(lineNumber);
@@ -417,17 +416,7 @@ public class CSVContactImporter extends AbstractImporter {
         result.setEntryNumber(lineNumber);
     }
 
-    public ContactSwitcher getContactSwitcher(ServerSession session) {
-        Locale locale;
-        int contextId = 0;
-        int userId = 0;
-        if (null == session) {
-            locale = Locale.getDefault();
-        } else {
-            locale = session.getUser().getLocale();
-            contextId = session.getContextId();
-            userId = session.getUserId();
-        }
+    public ContactSwitcher getContactSwitcher(Locale locale) {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
 
@@ -441,12 +430,8 @@ public class CSVContactImporter extends AbstractImporter {
         dateSwitch.addDateFormat(df1);
         dateSwitch.addDateFormat(df2);
 
-        DateFormat df3;
-        RegionalSettingsService regionalSettingsService = services.getService(RegionalSettingsService.class);
-        if (null == regionalSettingsService) {
-            df3 = DateFormat.getDateInstance(DateFormat.SHORT, locale);
-        } else {
-            df3 = regionalSettingsService.getDateFormat(contextId, userId, locale, DateFormat.SHORT);
+        if (null != locale) {
+            final DateFormat df3 = DateFormat.getDateInstance(DateFormat.SHORT, locale);
             df3.setTimeZone(utc);
             dateSwitch.addDateFormat(df3);
         }

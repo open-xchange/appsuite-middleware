@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.SortedSet;
@@ -277,6 +278,11 @@ public final class ParticipantsReplacement implements TemplateReplacement {
             this.participantsSet = o.participantsSet;
         }
         return true;
+    }
+
+    @Override
+    public TemplateReplacement setDateFormat(DateFormat dateFormat) {
+        return this;
     }
 
 }

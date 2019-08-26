@@ -50,6 +50,8 @@
 package com.openexchange.groupware.notify;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.text.DateFormat;
+import java.util.Locale;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.groupware.Types;
@@ -134,6 +136,11 @@ public class TaskState extends LinkableState {
 	@Override
     public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
 		// Nothing to do
+	}
+
+	@Override
+    public DateFormat getDateFormat(final Locale locale) {
+		return DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
 	}
 
 	@Override

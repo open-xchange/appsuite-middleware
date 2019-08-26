@@ -236,7 +236,7 @@ public class EventConverter {
             RegionalSettingsService regionalSettingsService = services.getService(RegionalSettingsService.class);
             DateFormat dateFormat;
             if (null != locale && null != regionalSettingsService) {
-                dateFormat = regionalSettingsService.getDateFormat(contact.getContextId(), contact.getCreatedBy(), locale, DateFormat.MEDIUM);
+                dateFormat = regionalSettingsService.getDateFormat(contact.getContextId(), calendarUserId, locale, DateFormat.MEDIUM);
             } else if (null != locale) {
                 dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
             } else {

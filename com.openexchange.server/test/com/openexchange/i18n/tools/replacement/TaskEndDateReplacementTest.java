@@ -75,7 +75,7 @@ public class TaskEndDateReplacementTest {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        EndDateReplacement replacement = new EndDateReplacement(cal.getTime(), true, true, locale, tz, 0, 0);
+        EndDateReplacement replacement = new EndDateReplacement(cal.getTime(), true, true, locale, tz);
         DateFormat format = DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
         String expected = String.format(locale, Notifications.FORMAT_DUE_DATE, format.format(cal.getTime()));
         assertEquals("Due date for tasks is printed wrong in task notification mails.", expected, replacement.getReplacement());

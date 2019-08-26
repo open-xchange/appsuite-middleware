@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.text.DateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.i18n.tools.TemplateReplacement;
@@ -156,5 +157,10 @@ public final class ModuleReplacement implements TemplateReplacement {
         this.repl = o.repl;
         this.changed = true;
         return true;
+    }
+
+    @Override
+    public TemplateReplacement setDateFormat(DateFormat dateFormat) {
+        return this;
     }
 }

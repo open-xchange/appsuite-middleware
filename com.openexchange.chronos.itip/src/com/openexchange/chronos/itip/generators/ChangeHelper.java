@@ -78,7 +78,9 @@ public class ChangeHelper {
 
     private final TimeZone timezone;
 
-    public ChangeHelper(final Context ctx, final Event original, final Event update, final ITipEventUpdate diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper) {
+    private int recipientUserId;
+
+    public ChangeHelper(final Context ctx, final Event original, final Event update, final ITipEventUpdate diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper, int userId) {
         super();
         this.original = original;
         this.update = update;
@@ -87,13 +89,13 @@ public class ChangeHelper {
         this.timezone = tz;
         this.wrapper = wrapper;
         this.ctx = ctx;
-        
+        this.recipientUserId = userId;
         describer = new ChangeDescriber();
 
     }
 
     public List<String> getChanges() throws OXException {
-        return describer.getChanges(ctx, original, update, diff, wrapper, locale, timezone);
+        return describer.getChanges(ctx, original, update, diff, wrapper, locale, timezone, recipientUserId);
     }
 
 }

@@ -176,7 +176,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
         final ChangeDescriber cd = new ChangeDescriber();
 
-        final List<String> descriptions = cd.getChanges(ctx, currentEvent, newEvent, change.getDiff(), wrapper, user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()));
+        final List<String> descriptions = cd.getChanges(ctx, currentEvent, newEvent, change.getDiff(), wrapper, user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()), session.getUserId());
         change.setDiffDescription(descriptions);
 
         // Now let's choose an introduction sentence

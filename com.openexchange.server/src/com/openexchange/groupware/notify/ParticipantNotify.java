@@ -51,6 +51,7 @@ package com.openexchange.groupware.notify;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -113,6 +114,7 @@ import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -489,6 +491,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             return Collections.emptyList();
         }
 
+        RegionalSettingsService regionalSettingsService = ServerServiceRegistry.getInstance().getService(RegionalSettingsService.class);
         final List<MailMessage> messages = new ArrayList<MailMessage>();
         for (final Map.Entry<Locale, List<EmailableParticipant>> entry : receivers.entrySet()) {
             final Locale locale = entry.getKey();
@@ -513,6 +516,10 @@ public class ParticipantNotify implements TaskEventInterface2 {
                         tz = p.timeZone;
                     } catch (OXException e) {
                         log(e);
+                    }
+                    if (null != regionalSettingsService) {
+                        DateFormat df = regionalSettingsService.getDateFormat(p.cid, p.id, locale, DateFormat.DEFAULT);
+                        actionRepl.setDateFormat(df);
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
@@ -953,7 +960,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 isFulltime = false;
             }
             final Date start = newObj.getStartDate();
-            renderMap.put(new StartDateReplacement(start, isFulltime, session.getContextId(), session.getUserId()).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(start, oldObj.getStartDate())) : false));
+            renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(start, oldObj.getStartDate())) : false));
             Date end = newObj.getEndDate();
             /*
              * Determine changed status with original end time
@@ -969,19 +976,19 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 }
             }
 
-            renderMap.put(new EndDateReplacement(end, isFulltime, isTask, session.getContextId(), session.getUserId()).setChanged(endChanged));
+            renderMap.put(new EndDateReplacement(end, isFulltime, isTask).setChanged(endChanged));
         }
-        renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate() : (oldObj == null ? null : oldObj.getCreationDate()), null, session.getContextId(), session.getUserId()));
+        renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate() : (oldObj == null ? null : oldObj.getCreationDate()), null));
         {
             final SeriesReplacement seriesRepl;
             if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
-                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module));
+                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module), session.getContextId(), session.getUserId());
                 seriesRepl.setChanged(isUpdate ? (oldObj == null ? false : !compareRecurrenceInformation(newObj, oldObj)) : false);
             } else if (oldObj != null && oldObj.containsRecurrenceType()) {
-                seriesRepl = new SeriesReplacement(oldObj, (Types.TASK == module));
+                seriesRepl = new SeriesReplacement(oldObj, (Types.TASK == module), session.getContextId(), session.getUserId());
                 seriesRepl.setChanged(false);
             } else {
-                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module));
+                seriesRepl = new SeriesReplacement(newObj, (Types.TASK == module), session.getContextId(), session.getUserId());
                 seriesRepl.setChanged(false);
             }
             renderMap.put(seriesRepl);
@@ -990,13 +997,13 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final DeleteExceptionsReplacement deleteExceptionsReplacement;
             final Date[] deleteExcs = newObj.getDeleteException();
             if (newObj.containsDeleteExceptions() || deleteExcs != null) {
-                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs, session.getContextId(), session.getUserId());
+                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs);
                 deleteExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(deleteExcs, oldObj.getDeleteException())) : false);
             } else if (oldObj != null && oldObj.containsDeleteExceptions()) {
-                deleteExceptionsReplacement = new DeleteExceptionsReplacement(oldObj.getDeleteException(), session.getContextId(), session.getUserId());
+                deleteExceptionsReplacement = new DeleteExceptionsReplacement(oldObj.getDeleteException());
                 deleteExceptionsReplacement.setChanged(false);
             } else {
-                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs, session.getContextId(), session.getUserId());
+                deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs);
                 deleteExceptionsReplacement.setChanged(false);
             }
             renderMap.put(deleteExceptionsReplacement);
@@ -1005,14 +1012,14 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final ChangeExceptionsReplacement changeExceptionsReplacement;
             final Date[] changeExcs = newObj.getChangeException();
             if (newObj.containsChangeExceptions() || changeExcs != null) {
-                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs, session.getContextId(), session.getUserId());
+                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
                 changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(changeExcs, oldObj.getChangeException())) : false);
             } else if (oldObj != null && oldObj.containsChangeExceptions()) {
                 final Date[] oldChangeExcs = oldObj.getChangeException();
-                changeExceptionsReplacement = new ChangeExceptionsReplacement(oldChangeExcs, session.getContextId(), session.getUserId());
+                changeExceptionsReplacement = new ChangeExceptionsReplacement(oldChangeExcs);
                 changeExceptionsReplacement.setChanged(false);
             } else {
-                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs, session.getContextId(), session.getUserId());
+                changeExceptionsReplacement = new ChangeExceptionsReplacement(changeExcs);
                 changeExceptionsReplacement.setChanged(false);
             }
             renderMap.put(changeExceptionsReplacement);

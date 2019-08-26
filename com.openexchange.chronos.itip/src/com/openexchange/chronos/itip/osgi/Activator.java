@@ -76,6 +76,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.timer.TimerService;
@@ -93,7 +94,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class, CalendarService.class,
-            HtmlService.class, TemplateService.class, CalendarUtilities.class, GroupService.class };
+            HtmlService.class, TemplateService.class, CalendarUtilities.class, GroupService.class, RegionalSettingsService.class };
     }
 
     @Override

@@ -79,11 +79,9 @@ public abstract class AbstractFormatMultipleDateReplacement extends AbstractMult
      *
      * @param dates The dates
      * @param format The format string
-     * @param contextId The user's context id
-     * @param userId The id of the user to use the {@link AbstractFormatMultipleDateReplacement}
      */
-    protected AbstractFormatMultipleDateReplacement(final Date[] dates, final String format, int contextId, int userId) {
-        super(dates, contextId, userId);
+    protected AbstractFormatMultipleDateReplacement(final Date[] dates, final String format) {
+        super(dates);
         this.format = format;
     }
 
@@ -94,12 +92,10 @@ public abstract class AbstractFormatMultipleDateReplacement extends AbstractMult
      * @param format The format string
      * @param locale The locale
      * @param timeZone The time zone
-     * @param contextId The user's context id
-     * @param userId The id of the user to use the {@link AbstractFormatMultipleDateReplacement}
      */
     public AbstractFormatMultipleDateReplacement(final Date[] dates, final String format, final Locale locale,
-            final TimeZone timeZone, int contextId, int userId) {
-        super(dates, locale, timeZone, contextId, userId);
+            final TimeZone timeZone) {
+        super(dates, locale, timeZone);
         this.format = format;
     }
 

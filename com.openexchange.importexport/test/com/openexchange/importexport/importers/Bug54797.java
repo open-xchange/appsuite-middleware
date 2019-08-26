@@ -63,19 +63,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.test.mock.MockUtils;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Bug54797}
@@ -206,13 +202,7 @@ public class Bug54797 {
         for (int i = 0; i < locales.length; i++) {     
             Calendar c = Calendar.getInstance();
             c.set(year, month-1, day, 1, 0, 0);
-            User mockedUser = PowerMockito.mock(User.class);
-            Mockito.when(mockedUser.getLocale()).thenReturn(locales[i]);
-            ServerSession mockedSession = PowerMockito.mock(ServerSession.class);
-            Mockito.when(mockedSession.getUser()).thenReturn(mockedUser);
-            Mockito.when(mockedSession.getContextId()).thenReturn(0);
-            Mockito.when(mockedSession.getUserId()).thenReturn(0);
-            ContactSwitcher contactSwitcher = csvContactImporter.getContactSwitcher(mockedSession);
+            ContactSwitcher contactSwitcher = csvContactImporter.getContactSwitcher(locales[i]);
             
             Contact contact = csvContactImporter.convertCsvToContact(fields, csvIt, contactSwitcher, 1, result, atLeastOneFieldInserted);           
             assertEquals(c.getTime().toString(), contact.getBirthday().toString());

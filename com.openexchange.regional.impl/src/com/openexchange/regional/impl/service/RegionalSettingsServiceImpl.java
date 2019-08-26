@@ -99,7 +99,7 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
         try {
             return storage.get(contextId, userId);
         } catch (OXException e) {
-            LOG.error("Unable to load regional settings for user {} in context {}. Assuming no custom settings.", I(userId), I(contextId), e);
+            LOG.info("Unable to load regional settings for user {} in context {}. Assuming no custom settings.", I(userId), I(contextId), e);
         }
         return null;
     }

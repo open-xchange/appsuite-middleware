@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.text.DateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.i18n.tools.StringHelper;
@@ -199,6 +200,11 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
         this.format = o.format;
         this.changed = true;
         return true;
+    }
+
+    @Override
+    public TemplateReplacement setDateFormat(DateFormat dateFormat) {
+        return this;
     }
 
 }

@@ -84,7 +84,7 @@ public class ChangeDescriber {
         this.generators = generators;
     }
 
-    public List<String> getChanges(Context ctx, Event original, Event update, ITipEventUpdate diff, TypeWrapper wrapper, Locale locale, TimeZone timezone) throws OXException {
+    public List<String> getChanges(Context ctx, Event original, Event update, ITipEventUpdate diff, TypeWrapper wrapper, Locale locale, TimeZone timezone, int recipientUserId) throws OXException {
         if (diff == null) {
             return Collections.emptyList();
         }
@@ -92,7 +92,7 @@ public class ChangeDescriber {
         List<String> changeDescriptions = new ArrayList<String>(generators.length);
         for (ChangeDescriptionGenerator generator : generators) {
             if (diff.containsAnyChangeOf(generator.getFields())) {
-                List<Sentence> descriptions = generator.getDescriptions(ctx, original, update, diff, locale, timezone);
+                List<Sentence> descriptions = generator.getDescriptions(ctx, original, update, diff, locale, timezone, recipientUserId);
                 for (Sentence changeDescription : descriptions) {
                     changeDescriptions.add(changeDescription.getMessage(wrapper, locale));
                 }

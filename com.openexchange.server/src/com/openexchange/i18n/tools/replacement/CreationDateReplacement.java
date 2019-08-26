@@ -68,11 +68,9 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
      *
      * @param creationDate The creation date
      * @param locale The locale
-     * @param contextId The user's context id
-     * @param userId The id of the user to use the {@link CreationDateReplacement}
      */
-    public CreationDateReplacement(final Date creationDate, final Locale locale, int contextId, int userId) {
-        this(creationDate, locale, null, contextId, userId);
+    public CreationDateReplacement(final Date creationDate, final Locale locale) {
+        this(creationDate, locale, null);
     }
 
     /**
@@ -81,11 +79,9 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
      * @param creationDate The creation date
      * @param locale The locale
      * @param timeZone The time zone
-     * @param contextId The user's context id
-     * @param userId The id of the user to use the {@link CreationDateReplacement}
      */
-    public CreationDateReplacement(final Date creationDate, final Locale locale, final TimeZone timeZone, int contextId, int userId) {
-        super(trimDateToMinutesOnly(creationDate), true, locale, timeZone, contextId, userId);
+    public CreationDateReplacement(final Date creationDate, final Locale locale, final TimeZone timeZone) {
+        super(trimDateToMinutesOnly(creationDate), true, locale, timeZone);
     }
 
     @Override

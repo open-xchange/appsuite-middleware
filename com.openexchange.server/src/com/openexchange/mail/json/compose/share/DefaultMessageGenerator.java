@@ -539,7 +539,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
             if (null != regionalSettings) {
                 String pattern = regionalSettings.getDateFormatLong();
-                SimpleDateFormat df = new SimpleDateFormat(pattern, locale);
+                DateFormat df;
+                if (Strings.isNotEmpty(pattern)) {
+                    df = new SimpleDateFormat(pattern, locale);
+                } else {
+                    df = DateFormat.getDateInstance(DateFormat.LONG, locale);
+                }
                 translated = String.format(translated, df.format(info.getExpirationDate()));
             } else {
                 translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));
@@ -645,7 +650,12 @@ public class DefaultMessageGenerator implements MessageGenerator {
             String translated = translator.translate(ShareComposeStrings.SHARED_ATTACHMENTS_EXPIRATION);
             if (null != regionalSettings) {
                 String pattern = regionalSettings.getDateFormatLong();
-                SimpleDateFormat df = new SimpleDateFormat(pattern, locale);
+                DateFormat df;
+                if (Strings.isNotEmpty(pattern)) {
+                    df = new SimpleDateFormat(pattern, locale);
+                } else {
+                    df = DateFormat.getDateInstance(DateFormat.LONG, locale);
+                }
                 translated = String.format(translated, df.format(info.getExpirationDate()));
             } else {
                 translated = String.format(translated, DateFormat.getDateInstance(DateFormat.LONG, locale).format(info.getExpirationDate()));

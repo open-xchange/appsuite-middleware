@@ -76,6 +76,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
@@ -98,7 +99,7 @@ public final class GmailSendActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class, ContextService.class, UserService.class,
-            SSLSocketFactoryProvider.class, SSLConfigurationService.class, UserAwareSSLConfigurationService.class };
+            SSLSocketFactoryProvider.class, SSLConfigurationService.class, UserAwareSSLConfigurationService.class, RegionalSettingsService.class };
     }
 
     @Override

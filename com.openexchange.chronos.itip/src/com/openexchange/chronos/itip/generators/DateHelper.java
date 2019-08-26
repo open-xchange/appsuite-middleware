@@ -84,7 +84,7 @@ public class DateHelper {
         this.event = event;
         if (locale != null && tz != null) {
             RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
-            if (null != regionalSettingsService) {
+            if (null != regionalSettingsService && contextId > 0 && userId > 0) {
                 timeFormat = regionalSettingsService.getTimeFormat(contextId, userId, locale, DateFormat.SHORT);
                 dateFormat = regionalSettingsService.getDateFormat(contextId, userId, locale, DateFormat.FULL);
             } else {
@@ -99,10 +99,6 @@ public class DateHelper {
             dateFormat.setTimeZone(timezone);
             weekdayFormat.setTimeZone(timezone);
         }
-    }
-
-    public DateHelper(Event event, Locale locale, TimeZone tz) {
-        this(event, locale, tz, 0, 0);
     }
 
     public String getRecurrenceDatePosition() {
