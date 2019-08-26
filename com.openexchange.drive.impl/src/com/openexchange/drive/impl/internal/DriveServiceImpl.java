@@ -304,7 +304,8 @@ public class DriveServiceImpl implements DriveService {
                 driveSession.trace("syncFolders with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");
             }
-            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, driveSession.getDiagnosticsLog(), quota);
+            String pathToRoot = driveSession.getStorage().getInternalPath(session.getRootFolderID());
+            return new DefaultSyncResult<DirectoryVersion>(actionsForClient, driveSession.getDiagnosticsLog(), quota, pathToRoot);
         }
     }
 
@@ -380,7 +381,8 @@ public class DriveServiceImpl implements DriveService {
                 driveSession.trace("syncFiles with " + syncResult.length() + " resulting action(s) completed after "
                     + (System.currentTimeMillis() - start) + "ms.");
             }
-            return new DefaultSyncResult<FileVersion>(actionsForClient, driveSession.getDiagnosticsLog(), quota);
+            String pathToRoot = driveSession.getStorage().getInternalPath(session.getRootFolderID());
+            return new DefaultSyncResult<FileVersion>(actionsForClient, driveSession.getDiagnosticsLog(), quota, pathToRoot);
         }
     }
 
@@ -489,7 +491,8 @@ public class DriveServiceImpl implements DriveService {
          */
         DriveSettings settings = new DriveSettings();
         ServerSession serverSession = session.getServerSession();
-        Quota[] quota = syncSession.getStorage().getQuota();
+        DriveStorage storage = syncSession.getStorage();
+        Quota[] quota = storage.getQuota();
         LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
         settings.setQuota(new DriveQuotaImpl(quota, syncSession.getLinkGenerator().getQuotaLink()));
         settings.setHelpLink(syncSession.getLinkGenerator().getHelpLink());
@@ -497,13 +500,14 @@ public class DriveServiceImpl implements DriveService {
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion(serverSession.getContextId(), serverSession.getUserId())));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
         settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
-        settings.setHasTrashFolder(syncSession.getStorage().hasTrashFolder());
+        settings.setHasTrashFolder(storage.hasTrashFolder());
+        settings.setPathToRoot(storage.getInternalPath(session.getRootFolderID()));
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */
         Map<String, String> localizedFolders = new HashMap<String, String>();
         int maxDirectories = DriveConfig.getInstance().getMaxDirectories(serverSession.getContextId(), serverSession.getUserId());
-        Map<String, FileStorageFolder> folders = syncSession.getStorage().getFolders(maxDirectories, 2);
+        Map<String, FileStorageFolder> folders = storage.getFolders(maxDirectories, 2);
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String localizedName = entry.getValue().getLocalizedName(session.getLocale());
             if (Strings.isNotEmpty(localizedName) && false == localizedName.equals(entry.getValue().getName())) {

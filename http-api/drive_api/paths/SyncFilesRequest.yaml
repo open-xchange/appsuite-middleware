@@ -16,6 +16,7 @@
       - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/gblQueryParamRoot'
       - $ref: '#/components/parameters/gblQueryParamPath'
+      - $ref: '#/components/parameters/gblQueryApiVersion'
       - in: query
         name: device
         description: >-
@@ -24,15 +25,6 @@
         required: false
         schema:
           type: string
-      - in: query
-        name: apiVersion
-        description: >-
-          The API version that the client is using. If not set, the initial
-          version 0 is assumed.
-        required: false
-        schema:
-          type: integer
-          default: 0
       - in: query
         name: diagnostics
         description: >-

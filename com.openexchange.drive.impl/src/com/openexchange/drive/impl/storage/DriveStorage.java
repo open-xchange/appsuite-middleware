@@ -838,6 +838,16 @@ public class DriveStorage {
     }
 
     /**
+     * Gets the directory path to internal 'real' root folder with id '9'
+     *
+     * @param folderId The folder identifier to get the path for
+     * @return The path
+     */
+    public String getInternalPath(String folderId) throws OXException {
+        return resolveToRoot(folderId, "9", null);
+    }
+
+    /**
      * Gets the identifier of the folder behind the supplied path.
      *
      * @param path The path to get the folder identifier for
@@ -1068,24 +1078,29 @@ public class DriveStorage {
     }
 
     private String resolveToRoot(String folderID) throws OXException {
+        return resolveToRoot(folderID, rootFolderID.toUniqueID(), knownFolders);
+    }
+
+    private String resolveToRoot(String folderID, String rootFolderID, FolderCache folderCache) throws OXException {
         LinkedList<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
         String currentFolderID = folderID;
         do {
             FileStorageFolder folder = getFolderAccess().getFolder(currentFolderID);
             folders.addFirst(folder);
             currentFolderID = folder.getParentId();
-        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.toUniqueID().equals(currentFolderID));
-        if (0 < folders.size() && rootFolderID.toUniqueID().equals(folders.getFirst().getParentId())) {
+        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.equals(currentFolderID));
+        if (0 < folders.size() && rootFolderID.equals(folders.getFirst().getParentId())) {
             StringBuilder pathBuilder = new StringBuilder();
             for (int i = 0; i < folders.size(); i++) {
                 FileStorageFolder folder = folders.get(i);
                 pathBuilder.append(PATH_SEPARATOR).append(PathNormalizer.normalize(folder.getName()));
-                knownFolders.remember(pathBuilder.toString(), folder);
+                if (null != folderCache) {
+                    folderCache.remember(pathBuilder.toString(), folder);
+                }
             }
             return pathBuilder.toString();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

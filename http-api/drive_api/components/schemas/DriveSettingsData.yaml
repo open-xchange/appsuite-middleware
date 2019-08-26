@@ -36,3 +36,6 @@ properties:
       (available since v7.8.1).
     items:
       type: string
+  pathToRoot:
+    type: string
+    description: Path to internal 'real' root folder from given rootFolderId

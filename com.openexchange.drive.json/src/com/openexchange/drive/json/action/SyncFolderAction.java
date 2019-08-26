@@ -110,18 +110,18 @@ public class SyncFolderAction extends AbstractDriveAction {
         try {
             DriveService driveService = Services.getService(DriveService.class, true);
             SyncResult<DirectoryVersion> syncResult = driveService.syncFolder(session, originalVersion, clientVersion);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
+            jsonObject.put("pathToRoot", syncResult.getPathToRoot());
             if (null != session.isDiagnostics() || session.isIncludeQuota()) {
-                JSONObject jsonObject = new JSONObject();
                 if (null != session.isDiagnostics()) { 
                     jsonObject.put("diagnostics", syncResult.getDiagnostics());
                 }
                 if (session.isIncludeQuota()) {
                     jsonObject.put("quota", DriveJSONUtils.serializeQuota(syncResult.getQuota()));
                 }
-                jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
-                return new AJAXRequestResult(jsonObject, "json");
             }
-            return new AJAXRequestResult(JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()), "json");
+            return new AJAXRequestResult(jsonObject, "json");
         } catch (OXException e) {
             if ("DRV".equals(e.getPrefix())) {
                 LOG.debug("Error performing syncFolders request", e);

@@ -1,6 +1,6 @@
-/drive?action=syncfolders:
+/drive?action=syncfolder:
   put:
-    operationId: syncFolders
+    operationId: syncFolder
     tags:
       - Drive
     summary: Synchronizes a single folder.
@@ -10,19 +10,13 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: '#/components/parameters/gblQueryApiVersion'
       - in: query
         name: version
         schema:
           type: string
           default: "0"
         description: The current client version (matching the pattern `^[0-9]+(\\.[0-9]+)*$). If not set, the initial version 0 is assumed.
-        required: false
-      - in: query
-        name: apiVersion
-        schema:
-          type: integer
-          default: 0
-        description: The API version that the client is using. If not set, the initial version 0 is assumed.
         required: false
       - in: query
         name: diagnostics
@@ -52,7 +46,7 @@
         content:
           application/json:
             schema:
-              $ref: "#/definitions/DriveActionsResponse"
+              $ref: '#/components/schemas/DriveActionsResponse'
     x-ox-examples:
       - Example:
         description: Basic example

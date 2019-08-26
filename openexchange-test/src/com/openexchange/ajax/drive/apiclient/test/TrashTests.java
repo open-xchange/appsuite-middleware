@@ -101,7 +101,7 @@ public class TrashTests extends AbstractAPIClientSession {
         driveApi = new DriveApi(client);
         driveApi.emptyTrash(folderApi.getSession(), rootId);
         byte[] body = new byte[4];
-        DriveActionsResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, null, null, I(1), "text/plain", L(0), new Long(4), null, null, null, null, null);
+        DriveActionsResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, I(1), null, null, "text/plain", L(0), new Long(4), null, null, null, null, null);
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
         folderManager.createFolder(trashId, "trashedFolder", "infostore");

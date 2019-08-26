@@ -134,7 +134,7 @@ public class DriveConstants {
      * 5: push for multiple root folders (listen/subscribe), inline .drive-meta, trash stats, empty trash
      * 6: moveFile/moveFolder
      * 7: update directory w/ cascadePermissions
-     * 8: syncfolder action
+     * 8: syncfolder action, path to root
      */
     public static final int SUPPORTED_API_VERSION = 8;
 

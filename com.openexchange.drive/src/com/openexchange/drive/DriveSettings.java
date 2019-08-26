@@ -69,6 +69,7 @@ public class DriveSettings {
     private Long minUploadChunk;
     private int minSearchChars;
     private boolean hasTrashFolder;
+    private String pathToRoot;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -255,6 +256,24 @@ public class DriveSettings {
      */
     public void setHasTrashFolder(boolean hasTrashFolder) {
         this.hasTrashFolder = hasTrashFolder;
+    }
+
+    /**
+     * Gets the path from driveRootFolder to internal 'real' root folder
+     *
+     * @return The path
+     */
+    public String getPathToRoot() {
+        return pathToRoot;
+    }
+
+    /**
+     * Sets the path from driveRootFolder to internal 'real' root folder
+     *
+     * @param pathToRoot The path to set
+     */
+    public void setPathToRoot(String pathToRoot) {
+        this.pathToRoot = pathToRoot;
     }
 
 }

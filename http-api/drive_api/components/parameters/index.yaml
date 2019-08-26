@@ -21,3 +21,13 @@ gblQueryParamPath:
   required: true
   schema:
     type: string
+gblQueryApiVersion:
+  name: apiVersion
+  in: query
+  description: >-
+    The API version that the client is using. If not set, the initial
+    version 0 is assumed.
+  required: false
+  schema:
+    type: integer
+    default: 0

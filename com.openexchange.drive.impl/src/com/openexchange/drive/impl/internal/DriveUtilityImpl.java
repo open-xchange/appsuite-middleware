@@ -97,6 +97,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
