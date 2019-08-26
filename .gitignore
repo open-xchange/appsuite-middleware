@@ -231,3 +231,5 @@ http-api/client-gen/out/http_api_client/*
 http-api/client-gen/out/rest_api_client/*
 !http-api/client-gen/out/rest_api_client/build.gradle
 http-api/client-gen/openapi-generator-cli-4.0.0.jar
+http-api/http_api/openAPI.json
+http-api/package-lock.json
