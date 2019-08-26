@@ -248,8 +248,6 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             Long localLastActive = this.localLastActive;
             writer.writeLong(PARAMETER_LOCAL_LAST_ACTIVE, null != localLastActive ? localLastActive.longValue() : -1L);
         }
-        writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
-        writer.writeBoolean(PARAMETER_STAY_SIGNED_IN, staySignedIn);
         {
             Set<String> remoteParameterNames = this.remoteParameterNames;
             JSONObject jRemoteParameters = null;
@@ -287,6 +285,8 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETERS, jRemoteParameters.toString(true));
             }
         }
+        writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
+        writer.writeBoolean(PARAMETER_STAY_SIGNED_IN, staySignedIn);
     }
 
     @Override
@@ -333,12 +333,6 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             this.localLastActive = localLastActive > 0 ? Long.valueOf(localLastActive) : null;
         }
         {
-
-            String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
-            origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
-        }
-        staySignedIn = reader.readBoolean(PARAMETER_STAY_SIGNED_IN);
-        {
             String sRemoteParameters = reader.readUTF(PARAMETER_REMOTE_PARAMETERS);
             if (null != sRemoteParameters) {
                 try {
@@ -355,6 +349,11 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
                 }
             }
         }
+        {
+            String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
+            origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
+        }
+        staySignedIn = reader.readBoolean(PARAMETER_STAY_SIGNED_IN);
     }
 
     private static final String POJO_PACKAGE = "java.lang.";
