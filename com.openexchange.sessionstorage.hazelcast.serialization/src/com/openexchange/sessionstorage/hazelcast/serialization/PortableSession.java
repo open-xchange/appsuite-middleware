@@ -92,7 +92,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
      * This number should be incremented whenever fields are added;
      * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
      */
-    public static final int CLASS_VERSION = 4;
+    public static final int CLASS_VERSION = 5;
 
     public static final String PARAMETER_LOGIN_NAME = "loginName";
     public static final String PARAMETER_PASSWORD = "password";
