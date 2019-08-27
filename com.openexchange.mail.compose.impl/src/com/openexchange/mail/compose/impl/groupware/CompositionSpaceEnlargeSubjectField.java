@@ -60,17 +60,17 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link CompositionSpaceEnlargeSubjectFields}
+ * {@link CompositionSpaceEnlargeSubjectField}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class CompositionSpaceEnlargeSubjectFields extends UpdateTaskAdapter {
+public class CompositionSpaceEnlargeSubjectField extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link CompositionSpaceEnlargeSubjectFields}.
+     * Initializes a new {@link CompositionSpaceEnlargeSubjectField}.
      */
-    public CompositionSpaceEnlargeSubjectFields() {
+    public CompositionSpaceEnlargeSubjectField() {
         super();
     }
 
