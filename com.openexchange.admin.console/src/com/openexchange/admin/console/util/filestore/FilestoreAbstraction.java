@@ -87,14 +87,14 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
     protected void parseAndSetFilestoreSize(final AdminParser parser, final Filestore fstore) {
         final String store_size = (String) parser.getOptionValue(this.filestoreSizeOption);
         if (store_size != null) {
-            fstore.setSize(Long.parseLong(store_size));
+            fstore.setSize(Long.valueOf(store_size));
         }
     }
 
     protected void parseAndSetFilestoreMaxCtxs(final AdminParser parser, final Filestore fstore) {
         final String store_max_ctx = (String) parser.getOptionValue(this.filestoreMaxContextsOption);
         if (store_max_ctx != null) {
-            fstore.setMaxContexts(Integer.parseInt(store_max_ctx));
+            fstore.setMaxContexts(Integer.valueOf(store_max_ctx));
         }
     }
 
@@ -124,7 +124,7 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
 
     protected void parseAndSetFilestoreID(final AdminParser parser, final Filestore fstore) {
         filestoreid = (String) parser.getOptionValue(this.filestoreIdOption);
-        fstore.setId(Integer.parseInt(filestoreid));
+        fstore.setId(Integer.valueOf(filestoreid));
     }
 
     @Override
