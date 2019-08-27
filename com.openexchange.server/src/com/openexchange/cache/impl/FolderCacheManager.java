@@ -615,17 +615,17 @@ public final class FolderCacheManager {
             } finally {
                 lock.unlock();
             }
-        }
 
-        // Dirty hack
-        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
-                globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
-            } catch (OXException e) {
-                LOG.warn("", e);
+            // Dirty hack
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                    cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
+                    globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
+                } catch (OXException e) {
+                    LOG.warn("", e);
+                }
             }
         }
     }
