@@ -213,3 +213,14 @@ properties:
       file: sockets.properties
       packageName: open-xchange-core
       tags: ["Socket_Monitoring"]      
+    - key: com.openexchange.monitoring.sockets.traffic.file.logging.enabled
+      description: |
+        Defines whether dedicated file logging for socket traffic logger will be enabled
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]      
