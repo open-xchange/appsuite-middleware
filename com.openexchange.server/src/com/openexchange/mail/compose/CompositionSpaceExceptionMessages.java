@@ -82,4 +82,22 @@ public class CompositionSpaceExceptionMessages implements LocalizableStrings {
 
     // Missing key which is required to decrypt the content of a composition space
     public static final String MISSING_KEY_MSG = "Found no suitable key for composition space. Please re-compose your E-Mail.";
+
+    // The user entered a very long subject, which cannot be stored due to data truncation
+    public static final String SUBJECT_TOO_LONG_MSG = "The entered subject is too long. Please use a shorter one.";
+
+    // The user entered a very long From address, which cannot be stored due to data truncation
+    public static final String FROM_TOO_LONG_MSG = "The entered \"from\" address is too long.";
+
+    // The user entered a very long Sender address, which cannot be stored due to data truncation
+    public static final String SENDER_TOO_LONG_MSG = "The entered \"sender\" address is too long.";
+
+    // The user entered a very long To addresses, which cannot be stored due to data truncation
+    public static final String TO_TOO_LONG_MSG = "The entered \"to\" addresses are too long.";
+
+    // The user entered a very long Cc addresses, which cannot be stored due to data truncation
+    public static final String CC_TOO_LONG_MSG = "The entered \"cc\" addresses are too long.";
+
+    // The user entered a very long Bcc addresses, which cannot be stored due to data truncation
+    public static final String BCC_TOO_LONG_MSG = "The entered \"bcc\" addresses are too long.";
 }

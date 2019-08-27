@@ -340,9 +340,9 @@ public final class Databases {
     }
 
     /**
-     * Convenience method to set the autocommit of a connection to <code>true</code>.
+     * Convenience method to set the auto-commit of a connection to <code>true</code>.
      *
-     * @param con connection that should go into autocommit mode.
+     * @param con connection that should go into auto-commit mode.
      */
     public static void autocommit(Connection con) {
         if (null == con) {
@@ -355,24 +355,26 @@ public final class Databases {
         }
     }
 
-    private static final Pattern PAT_TRUNCATED_IDS = Pattern.compile("([^']*')(\\S+)('[^']*)");
+    private static final Pattern PAT_TRUNCATED_IDS = Pattern.compile("[^']*'(\\S+)'[^']*");
 
     /**
-     * This method tries to parse the truncated fields out of the DataTruncation exception. This method has been implemented because mysql
+     * This method tries to parse the truncated fields out of the DataTruncation exception. This method has been implemented because MySQL
      * doesn't return the column identifier of the truncated field through the getIndex() method of the DataTruncation exception. This
-     * method uses the fact that the exception sent by the mysql server encapsulates the truncated fields into single quotes.
+     * method uses the fact that the exception sent by the MySQL server encapsulates the truncated fields into single quotes.
      *
      * @param e DataTruncation exception to parse.
      * @return a string array containing all truncated field from the exception.
      */
     public static String[] parseTruncatedFields(DataTruncation trunc) {
         Matcher matcher = PAT_TRUNCATED_IDS.matcher(trunc.getMessage());
-        List<String> retval = new ArrayList<String>();
-        if (matcher.find()) {
-            for (int i = 2; i < matcher.groupCount(); i++) {
-                retval.add(matcher.group(i));
-            }
+        if (!matcher.find()) {
+            return new String[0];
         }
+
+        List<String> retval = new ArrayList<String>();
+        do {
+            retval.add(matcher.group(1));
+        } while (matcher.find());
         return retval.toArray(new String[retval.size()]);
     }
 
@@ -400,10 +402,10 @@ public final class Databases {
     }
 
     /**
-     * Gets an SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
+     * Gets an SQL clause for the given number of place holders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
      * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
      *
-     * @param count The number of placeholders to append
+     * @param count The number of place holders to append
      * @return The placeholder string
      * @throws IllegalArgumentException if count is <code>0</code> or negative
      */

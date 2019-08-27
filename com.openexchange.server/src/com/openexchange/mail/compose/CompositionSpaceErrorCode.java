@@ -120,6 +120,30 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
      * Composition space could not be opened
      */
     OPEN_FAILED("Composition space could not be opened", null, CATEGORY_ERROR, 14),
+    /**
+     * The entered subject is too long. Please use a shorter one.
+     */
+    SUBJECT_TOO_LONG("The entered subject is too long. Please use a shorter one.", CompositionSpaceExceptionMessages.SUBJECT_TOO_LONG_MSG, CATEGORY_USER_INPUT, 15),
+    /**
+     * The entered "From" address is too long. Please use a shorter one.
+     */
+    FROM_TOO_LONG("The entered \"From\" address is too long.", CompositionSpaceExceptionMessages.FROM_TOO_LONG_MSG, CATEGORY_USER_INPUT, 16),
+    /**
+     * The entered "Sender" address is too long. Please use a shorter one.
+     */
+    SENDER_TOO_LONG("The entered \"Sender\" address is too long.", CompositionSpaceExceptionMessages.SENDER_TOO_LONG_MSG, CATEGORY_USER_INPUT, 17),
+    /**
+     * The entered "To" addresses are too long. Please use a shorter one.
+     */
+    TO_TOO_LONG("The entered \"To\" addresses are too long.", CompositionSpaceExceptionMessages.TO_TOO_LONG_MSG, CATEGORY_USER_INPUT, 18),
+    /**
+     * The entered "Cc" addresses are too long. Please use a shorter one.
+     */
+    CC_TOO_LONG("The entered \"Cc\" addresses are too long.", CompositionSpaceExceptionMessages.CC_TOO_LONG_MSG, CATEGORY_USER_INPUT, 19),
+    /**
+     * The entered "Bcc" addresses are too long. Please use a shorter one.
+     */
+    BCC_TOO_LONG("The entered \"Bcc\" addresses are too long.", CompositionSpaceExceptionMessages.BCC_TOO_LONG_MSG, CATEGORY_USER_INPUT, 20)
 
     ;
 
