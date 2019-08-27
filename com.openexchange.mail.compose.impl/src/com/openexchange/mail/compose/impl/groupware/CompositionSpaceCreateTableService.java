@@ -85,7 +85,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "toAddr TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "ccAddr TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "bccAddr TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
-        + "subject VARCHAR(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
+        + "subject VARCHAR(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "content MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "contentType VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
         + "requestReadReceipt TINYINT(1) DEFAULT NULL,"
