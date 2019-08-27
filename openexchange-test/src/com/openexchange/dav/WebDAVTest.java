@@ -88,7 +88,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import com.meterware.httpunit.dom.NodeListImpl;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
@@ -327,7 +327,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         return ftm.getFolderFromServer(folderID);
     }
 
-    protected void deleteFolder(FolderObject folder) throws OXException, IOException, JSONException, SAXException {
+    protected void deleteFolder(FolderObject folder) throws OXException, IOException, JSONException {
         ftm.deleteFolderOnServer(folder);
     }
 
@@ -436,7 +436,13 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 
     protected Node extractNodeValue(final DavPropertyName propertyName, final MultiStatusResponse response) {
         assertNotEmpty(propertyName, response);
-        final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
+        Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
+        if (value instanceof List<?>) {
+            List<Node> nodeList = removeWhitspaceNodes((List<Node>) value);
+            if (0 < nodeList.size()) {
+                value = nodeList.get(0);
+            }
+        }
         assertTrue("value is not a node in " + propertyName, value instanceof Node);
         return (Node) value;
     }
@@ -445,7 +451,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         assertNotEmpty(propertyName, response);
         final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
         assertTrue("value is not a node list in " + propertyName, value instanceof List<?>);
-        return (List<Node>) value;
+        return removeWhitspaceNodes((List<Node>) value);
     }
 
     protected DavProperty<?> extractProperty(DavPropertyName propertyName, MultiStatusResponse response) {
@@ -541,6 +547,34 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             }
             assertTrue("header element '" + expectedHeader + "'not found in header '" + headerName + "'", found);
         }
+    }
+
+    protected static List<Node> removeWhitspaceNodes(List<Node> nodes) {
+        if (null == nodes || nodes.isEmpty()) {
+            return nodes;
+        }
+        for (Iterator<Node> iterator = nodes.iterator(); iterator.hasNext();) {
+            Node node = iterator.next();
+            if (Node.TEXT_NODE == node.getNodeType() && com.openexchange.java.Strings.isEmpty(node.getTextContent())) {
+                iterator.remove();
+            }
+        }
+        return nodes;
+    }
+
+    protected static NodeList removeWhitspaceNodes(NodeList nodes) {
+        if (null == nodes || 0 == nodes.getLength()) {
+            return nodes;
+        }
+        List<Node> newNodes = new ArrayList<Node>();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            if (Node.TEXT_NODE == node.getNodeType() && com.openexchange.java.Strings.isEmpty(node.getTextContent())) {
+                continue;
+            }
+            newNodes.add(node);
+        }
+        return new NodeListImpl(newNodes);
     }
 
 }

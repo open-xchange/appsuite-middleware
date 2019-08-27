@@ -62,6 +62,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom2.CDATA;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
@@ -150,9 +151,8 @@ public class ScheduleOutboxCollection extends DAVCollection {
     public InputStream getBody() throws WebdavProtocolException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Document document = new Document(getScheduleResponse());
-        XMLOutputter outputter = new XMLOutputter();
         try {
-            outputter.output(document, outputStream);
+            new XMLOutputter(Format.getPrettyFormat()).output(document, outputStream);
         } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }

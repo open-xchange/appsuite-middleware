@@ -61,6 +61,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
@@ -95,8 +96,6 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  * @since v7.8.1
  */
 public abstract class DAVAction extends AbstractAction {
-
-    protected static final XMLOutputter OUTPUTTER = new XMLOutputter();
 
     protected final Protocol protocol;
 
@@ -154,7 +153,7 @@ public abstract class DAVAction extends AbstractAction {
      * @param name The expected name of the root element
      * @return The root element, or <code>null</code> if there is none or no document could be parsed
      */
-    protected Element optRootElement(WebdavRequest request, Namespace namespace, String name) throws WebdavProtocolException {
+    protected Element optRootElement(WebdavRequest request, Namespace namespace, String name) {
         Document requestBody = optRequestBody(request);
         if (null != requestBody) {
             Element rootElement = requestBody.getRootElement();
@@ -248,7 +247,7 @@ public abstract class DAVAction extends AbstractAction {
      * @param requestBody The request body document, or <code>null</code> if not available
      * @return The resource marshaller
      */
-    protected ResourceMarshaller getMarshaller(WebdavRequest request, Document requestBody) throws WebdavProtocolException {
+    protected ResourceMarshaller getMarshaller(WebdavRequest request, Document requestBody) {
         return getMarshaller(request, requestBody, request.getURLPrefix());
     }
 
@@ -260,7 +259,7 @@ public abstract class DAVAction extends AbstractAction {
      * @param urlPrefix The URL prefix to use for marshalling
      * @return The resource marshaller
      */
-    protected ResourceMarshaller getMarshaller(WebdavRequest request, Document requestBody, String urlPrefix) throws WebdavProtocolException {
+    protected ResourceMarshaller getMarshaller(WebdavRequest request, Document requestBody, String urlPrefix) {
         /*
          * prepare loading hints
          */
@@ -321,7 +320,7 @@ public abstract class DAVAction extends AbstractAction {
         try {
             response.setStatus(status);
             response.setContentType("text/xml; charset=UTF-8");
-            OUTPUTTER.output(responseBody, response.getOutputStream());
+            new XMLOutputter(Format.getPrettyFormat()).output(responseBody, response.getOutputStream());
         } catch (IOException e) {
             if ("Connection reset by peer".equals(e.getMessage())) {
                 org.slf4j.LoggerFactory.getLogger(DAVAction.class).debug("Error sending WebDAV response", e);

@@ -56,6 +56,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -122,8 +123,7 @@ public class WebdavLockAction extends AbstractAction {
 
 			responseDoc.setContent(rootElement);
 
-	        final XMLOutputter outputter = new XMLOutputter();
-			outputter.output(responseDoc, res.getOutputStream());
+            new XMLOutputter(Format.getPrettyFormat()).output(responseDoc, res.getOutputStream());
 
 		} catch (JDOMException e) {
 			LOG.error("JDOM Exception",e);
@@ -165,10 +165,9 @@ public class WebdavLockAction extends AbstractAction {
         lock.setType(Type.WRITE_LITERAL);
 
         final Element owner = root.getChild("owner",DAV_NS);
-        final XMLOutputter outputter = new XMLOutputter();
 
         if (owner != null) {
-            lock.setOwner(outputter.outputString(owner.cloneContent()));
+            lock.setOwner(new XMLOutputter().outputString(owner.cloneContent()));
         }
     }
 

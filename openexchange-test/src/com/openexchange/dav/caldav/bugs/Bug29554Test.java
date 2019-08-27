@@ -91,7 +91,7 @@ public class Bug29554Test extends CalDAVTest {
                 List<Node> nodes = extractNodeListValue(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SETS, response);
                 assertNotNull(nodes);
                 for (Node node : nodes) {
-                    comps.add(node.getChildNodes().item(0).getAttributes().getNamedItem("name").getTextContent());
+                    comps.add(removeWhitspaceNodes(node.getChildNodes()).item(0).getAttributes().getNamedItem("name").getTextContent());
                 }
             } else {
                 fail("no multistatus response");

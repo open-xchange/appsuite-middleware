@@ -56,6 +56,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
@@ -74,8 +75,6 @@ public class WebdavPropfindAction extends AbstractAction {
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPropfindAction.class);
-
-	protected final XMLOutputter outputter = new XMLOutputter();
 
     protected Protocol protocol;
 
@@ -134,7 +133,7 @@ public class WebdavPropfindAction extends AbstractAction {
 		try {
 			res.setStatus(Protocol.SC_MULTISTATUS);
 			res.setContentType("text/xml; charset=UTF-8");
-			outputter.output(responseBody, res.getOutputStream());
+            new XMLOutputter(Format.getPrettyFormat()).output(responseBody, res.getOutputStream());
 		} catch (IOException e) {
 			LOG.debug("Client gone?", e);
 		}

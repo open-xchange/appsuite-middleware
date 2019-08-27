@@ -53,6 +53,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -86,7 +87,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class PreconditionException extends WebdavProtocolException {
 
     private static final long serialVersionUID = -6812444499133798978L;
-    private static final XMLOutputter OUTPUTTER = new XMLOutputter();
 
     private final Element preconditionElement;
 
@@ -144,7 +144,7 @@ public class PreconditionException extends WebdavProtocolException {
         try {
             response.setStatus(getStatus());
             response.setContentType("text/xml; charset=UTF-8");
-            OUTPUTTER.output(responseBody, response.getOutputStream());
+            new XMLOutputter(Format.getPrettyFormat()).output(responseBody, response.getOutputStream());
         } catch (IOException e) {
             org.slf4j.LoggerFactory.getLogger(PreconditionException.class).warn("Error sending error response", e);
         }

@@ -193,8 +193,6 @@ public class DAVServlet extends OXServlet {
              * perform
              */
             doIt(request, response, method, session);
-        } catch (ServletException e) {
-            throw e;
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
@@ -207,7 +205,7 @@ public class DAVServlet extends OXServlet {
         }
     }
 
-    private void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method, Session session) throws ServletException, IOException {
+    private void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method, Session session) {
         ServerSession serverSession = null;
         try {
             serverSession = ServerSessionAdapter.valueOf(session);
