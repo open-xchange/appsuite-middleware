@@ -32,4 +32,49 @@
 		<mkdir dir="${binDir}/jar" />
 		<jar destfile="${binDir}/jar/${clientFileName}" basedir="${binDir}/classes" />
 	</target>
+	
+	<!-- set the operating system test properties -->
+    <condition property="isWindows">
+	  <os family="windows" />
+	</condition>
+
+	<condition property="isUnix">
+	  <os family="unix" />
+	</condition>
+	
+	<condition property="isMac">
+	  <and>
+	    <os family="mac"/>
+	    <not>
+	      <os family="unix"/>
+	    </not>
+	  </and>
+	</condition>
+
+	<!-- operating system specific targets -->
+	<target name="doWindows" if="isWindows">
+	  <echo message="Came into the Windows target" />
+	  <exec executable="cmd">
+	    <arg value="/c"/>
+	    <arg value="executeGradleWindows.bat"/>
+	  </exec>
+	</target>
+
+	<target name="doMac" if="isMac">
+	  <echo message="Came into the Mac target" />
+      <exec executable="bin/bash">
+		<arg value="executeGradle.sh"/>
+	  </exec>
+	</target>
+	
+	<target name="doUnix" if="isUnix">
+	  <echo message="Came into the Unix target" />
+	  <exec executable="/bin/bash">
+	  	<arg value="executeGradle.sh"/>
+      </exec>
+	</target>
+
+	<!-- main/default target -->
+	<target name="OS-TEST" depends="doMac, doWindows, doUnix">
+	</target>
 </project>
