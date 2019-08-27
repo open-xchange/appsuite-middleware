@@ -1161,7 +1161,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             try {
                 threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
             } catch (OXException e) {
-                throw new StorageException(e.getMessage(), e);
+                throw StorageException.wrapForRMI(e);
             }
 
             List<ContextSearcher> searchers = new ArrayList<ContextSearcher>();
@@ -1198,7 +1198,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             try {
                 pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
             } catch (OXException e) {
-                throw new StorageException(e.getMessage(), e);
+                throw StorageException.wrapForRMI(e);
             }
             DataSource<Integer> output = pnfService.create(cids);
             for (final Object f : filters.toArray()) {
@@ -1586,7 +1586,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new URI(filestore.getUrl()));
                     FileStorages.getFileStorageService().getFileStorage(uri);
                 } catch (OXException e) {
-                    throw new StorageException(e.getMessage(), e);
+                    throw StorageException.wrapForRMI(e);
                 } catch (URISyntaxException e) {
                     throw new StorageException("Filestore " + filestore.getId() + " contains invalid URI", e);
                 }
@@ -2528,7 +2528,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e);
         } catch (OXException e) {
             LOG.error("Pool Error", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } finally {
             if (null != con) {
                 try {
@@ -2562,7 +2562,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e);
         } catch (OXException e) {
             LOG.error("Pool Error", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } finally {
             if (rollback > 0) {
                 if (rollback == 1) {
@@ -2933,7 +2933,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con = cache.getConnectionForContext(ctx.getId().intValue());
         } catch (OXException e) {
             LOG.error("Can't get groupware context object.", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -2954,7 +2954,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException(e1);
             }
             LOG.error("Internal Error.", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (SQLException e) {
             try {
                 con.rollback();

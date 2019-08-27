@@ -1938,7 +1938,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen", e);
             }
             log.error("Error while checking/updating schema", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -2016,7 +2016,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen", e);
             }
             log.error("Error in checking/updating schema", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -2100,7 +2100,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen", e);
             }
             log.error("Error in checking/updating schema", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         }
 
         return Arrays.asList(needingUpdate, currentlyUpdating, outdatedUpdating);
@@ -2980,7 +2980,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         return;
                     }
                 } catch (OXException e) {
-                    throw new InvalidDataException(e.getMessage(), e);
+                    log.error("", e);
+                    throw new InvalidDataException(e.getMessage());
                 }
 
             }

@@ -119,7 +119,7 @@ public class Utils {
                 if ("file".equalsIgnoreCase(deleteFailure.getKey().getScheme())) {
                     deleteFileStorageDirectory(deleteFailure.getKey(), failOnError);
                 } else if (failOnError) {
-                    throw new StorageException(deleteFailure.getValue());
+                    throw StorageException.wrapForRMI(deleteFailure.getValue());
                 }
             }
         }

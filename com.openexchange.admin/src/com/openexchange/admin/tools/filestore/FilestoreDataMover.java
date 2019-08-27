@@ -466,7 +466,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
             return new CopyResult(prevFileName2newFileName, reverter);
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 

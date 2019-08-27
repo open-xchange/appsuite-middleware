@@ -234,7 +234,7 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                 };
             }
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
 
         // Apply changes to context & clear caches

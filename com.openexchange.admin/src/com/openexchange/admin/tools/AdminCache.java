@@ -642,7 +642,7 @@ public class AdminCache {
         try {
             return passwordMech.encode(user.getPassword());
         } catch (OXException e) {
-            throw new StorageException("Unable to encode password.", e);
+            throw StorageException.wrapForRMI("Unable to encode password.", e);
         }
     }
 
@@ -671,7 +671,7 @@ public class AdminCache {
             return passwordMech;
         } catch (OXException e) {
             log.error("Unable to get password mechanism.", e);
-            throw new StorageException("Unable to get password mechanism.", e);
+            throw StorageException.wrapForRMI("Unable to get password mechanism.", e);
         }
     }
 

@@ -190,7 +190,7 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
                 };
             }
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (SQLException e) {
             throw new StorageException(e);
         }

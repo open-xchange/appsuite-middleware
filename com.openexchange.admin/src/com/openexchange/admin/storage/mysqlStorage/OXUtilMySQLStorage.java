@@ -2709,7 +2709,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(ecp);
         } catch (OXException oxe) {
             LOG.error("OX Error", oxe);
-            throw new StorageException(oxe);
+            throw StorageException.wrapForRMI(oxe);
         } finally {
             closeSQLStuff(stmt);
             if (con != null) {

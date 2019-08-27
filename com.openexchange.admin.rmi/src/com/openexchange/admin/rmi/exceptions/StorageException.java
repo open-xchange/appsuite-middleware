@@ -66,9 +66,7 @@ public class StorageException extends Exception {
      * @return The {@code StorageException} carrying given cause's message and stack trace
      */
     public static StorageException storageExceotionFor(RuntimeException cause) {
-        StorageException se = new StorageException(cause.getMessage());
-        se.setStackTrace(cause.getStackTrace());
-        return se;
+        return wrapForRMI(cause);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -85,7 +83,24 @@ public class StorageException extends Exception {
         super(message, cause);
     }
 
+    /**
+     * Creates a surrounding instance of <code>StorageException</code> wrapping trace from given <code>Throwable</code> instance.
+     *
+     * @param t The code>Throwable</code> instance to wrap
+     * @return The wrapping instance of <code>StorageException</code>
+     */
     public static StorageException wrapForRMI(Throwable t) {
+        return wrapForRMI(null, t);
+    }
+
+    /**
+     * Creates a surrounding instance of <code>StorageException</code> wrapping trace from given <code>Throwable</code> instance.
+     *
+     * @param message The optional message to set; if set to <code>null</code>, then <code>Throwable</code>'s message is used
+     * @param t The code>Throwable</code> instance to wrap
+     * @return The wrapping instance of <code>StorageException</code>
+     */
+    public static StorageException wrapForRMI(String message, Throwable t) {
         Stack<Throwable> causeHierarchy = new Stack<Throwable>();
         Throwable cause = t.getCause();
         while (cause != null) {
@@ -96,15 +111,21 @@ public class StorageException extends Exception {
         Exception finalCause = null;
         while (!causeHierarchy.isEmpty()) {
             cause = causeHierarchy.pop();
-            Exception transformedCause = new Exception(cause.getMessage(), finalCause);
-            StackTraceElement[] stackTrace = cause.getStackTrace();
-            if (stackTrace != null && stackTrace.length > 0) {
-                transformedCause.setStackTrace(stackTrace);
+            Exception transformedCause;
+            if (cause.getClass().getName().startsWith("java.")) {
+                transformedCause = (Exception) cause;
+                transformedCause.initCause(finalCause);
+            } else {
+                transformedCause = new Exception(cause.getMessage(), finalCause);
+                StackTraceElement[] stackTrace = cause.getStackTrace();
+                if (stackTrace != null) {
+                    transformedCause.setStackTrace(stackTrace);
+                }
             }
             finalCause = transformedCause;
         }
 
-        StorageException storageException = new StorageException(t.getMessage(), finalCause);
+        StorageException storageException = new StorageException(message == null ? t.getMessage() : message, finalCause);
         StackTraceElement[] stackTrace = t.getStackTrace();
         if (stackTrace != null && stackTrace.length > 0) {
             storageException.setStackTrace(stackTrace);
@@ -112,4 +133,5 @@ public class StorageException extends Exception {
 
         return storageException;
     }
+
 }

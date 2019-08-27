@@ -128,7 +128,7 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
         try {
             return SettingStorage.getInstance(ServerSessionAdapter.valueOf(userId, contextId));
         } catch (OXException e) {
-            throw new StorageException("Cannot initialise the SettingStorage for user '" + userId + "' in context '" + contextId + "'", e);
+            throw StorageException.wrapForRMI("Cannot initialise the SettingStorage for user '" + userId + "' in context '" + contextId + "'", e);
         }
     }
 }

@@ -191,7 +191,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
             return convert(changed);
         } catch (OXException e) {
             LOG.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 

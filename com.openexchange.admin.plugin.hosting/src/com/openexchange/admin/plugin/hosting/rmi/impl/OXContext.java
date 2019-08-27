@@ -1265,7 +1265,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
                     FileStorages.getFileStorageService().getFileStorage(uri);
                 } catch (OXException e) {
-                    throw new StorageException(e.getMessage(), e);
+                    throw StorageException.wrapForRMI(e);
                 } catch (URISyntaxException e) {
                     throw new StorageException("Invalid file storage URI: " + baseUri, e);
                 }

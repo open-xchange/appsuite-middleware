@@ -351,7 +351,7 @@ public class OXUtilMySQLStorageCommon {
                 }
                 toCreate.remove(next);
             } catch (OXException e) {
-                throw new StorageException("Failed to create tables " + Arrays.toString(next.tablesToCreate()) + ": " + e.getMessage(), e);
+                throw StorageException.wrapForRMI("Failed to create tables " + Arrays.toString(next.tablesToCreate()) + ": " + e.getMessage(), e);
             }
         }
         if (!toCreate.isEmpty()) {
@@ -401,7 +401,7 @@ public class OXUtilMySQLStorageCommon {
 
             store.addExecutedTasks(con, taskNames, true, poolId, schema);
         } catch (OXException e) {
-            throw new StorageException(e.getMessage(), e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 

@@ -300,7 +300,7 @@ public class OXContextMySQLStorageCommon {
         try {
             pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
         } catch (OXException e) {
-            throw new StorageException(e.getMessage(), e);
+            throw StorageException.wrapForRMI(e);
         }
         DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache, failOnMissing));
         if (null != filters && !filters.isEmpty()) {

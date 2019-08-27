@@ -432,7 +432,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
                 FileStorages.getFileStorageService().getFileStorage(uri);
             } catch (OXException e) {
-                throw new StorageException(e.getMessage(), e);
+                throw StorageException.wrapForRMI(e);
             } catch (URISyntaxException e) {
                 throw new StorageException("Invalid file storage URI: " + baseUri, e);
             }
@@ -722,7 +722,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
                 FileStorages.getFileStorageService().getFileStorage(uri);
             } catch (OXException e) {
-                throw new StorageException(e.getMessage(), e);
+                throw StorageException.wrapForRMI(e);
             } catch (URISyntaxException e) {
                 throw new StorageException("Invalid file storage URI: " + baseUri, e);
             }
@@ -857,7 +857,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
                 FileStorages.getFileStorageService().getFileStorage(uri);
             } catch (OXException e) {
-                throw new StorageException(e.getMessage(), e);
+                throw StorageException.wrapForRMI(e);
             } catch (URISyntaxException e) {
                 throw new StorageException("Invalid file storage URI: " + baseUri, e);
             }
@@ -911,7 +911,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new StorageException(e);
         } catch (OXException e) {
             LOGGER.error("", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (IOException e) {
             LOGGER.error("", e);
             throw new StorageException(e);
@@ -1078,7 +1078,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new StorageException(e);
         } catch (OXException e) {
             LOGGER.error("", e);
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (IOException e) {
             LOGGER.error("", e);
             throw new StorageException(e);
@@ -1236,7 +1236,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(filestoreForUser.getId())));
                             FileStorages.getFileStorageService().getFileStorage(uri);
                         } catch (OXException e) {
-                            throw new StorageException(e.getMessage(), e);
+                            throw StorageException.wrapForRMI(e);
                         }
 
                         // (Synchronous) Move from context to individual user file storage
@@ -1256,7 +1256,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(fsId)));
                             FileStorages.getFileStorageService().getFileStorage(uri);
                         } catch (OXException e) {
-                            throw new StorageException(e.getMessage(), e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
                 }
@@ -1331,7 +1331,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
                 } catch (OXException e) {
                     LOGGER.error("Error encrypting password for credential cache.", e);
-                    throw new StorageException(e);
+                    throw StorageException.wrapForRMI(e);
                 }
                 cache.setAdminCredentials(ctx, mech, cauth);
             }

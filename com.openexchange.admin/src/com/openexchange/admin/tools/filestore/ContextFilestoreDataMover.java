@@ -127,7 +127,7 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                     listener.onBeforeContextDataMove(contextId, srcFullUri, dstFullUri);
                 }
             } catch (OXException e) {
-                throw new StorageException(e);
+                throw StorageException.wrapForRMI(e);
             }
 
             File fsDirectory = new File(srcFullUri);
@@ -247,7 +247,7 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                     };
                 }
             } catch (OXException e) {
-                throw new StorageException(e);
+                throw StorageException.wrapForRMI(e);
             }
         }
 

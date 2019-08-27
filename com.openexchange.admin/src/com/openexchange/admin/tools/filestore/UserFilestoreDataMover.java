@@ -178,7 +178,7 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
                     }
                 }
             } catch (OXException e) {
-                throw new StorageException(e);
+                throw StorageException.wrapForRMI(e);
             } catch (SQLException e) {
                 throw new StorageException(e);
             }
@@ -202,7 +202,7 @@ public class UserFilestoreDataMover extends FilestoreDataMover {
             Cache userCache = cacheService.getCache("User");
             userCache.remove(cacheService.newCacheKey(contextId, userId));
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 

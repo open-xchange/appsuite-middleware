@@ -826,7 +826,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(usrdata.getFilestoreId())));
                     FileStorages.getFileStorageService().getFileStorage(uri);
                 } catch (OXException e) {
-                    throw new StorageException(e.getMessage(), e);
+                    throw StorageException.wrapForRMI(e);
                 }
             }
         }
@@ -1300,7 +1300,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (SQLException e) {
             throw new StorageException(e.toString(), e);
         } catch (OXException e) {
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         } catch (IllegalArgumentException e) {
             LOG.error("IllegalArgument Error", e);
             throw new StorageException(e);
@@ -1497,7 +1497,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             mass.insertMailAccount(account, userId, context, null, con);
             lockTable("updateTask", con);
         } catch (OXException e) {
-            throw new StorageException("Problem storing the primary mail account.", e);
+            throw StorageException.wrapForRMI("Problem storing the primary mail account.", e);
         } catch (SQLException e) {
             throw new StorageException("Problem storing the primary mail account.", e);
         }
@@ -2521,7 +2521,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(sqle.toString());
         } catch (OXException e) {
             LOG.error("OX Error ", e);
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         } finally {
             releaseWriteContextConnectionAfterReading(read_ox_con, contextId, cache);
         }
@@ -2735,7 +2735,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (SQLException e) {
             throw new StorageException(e.toString(), e);
         } catch (OXException e) {
-            throw new StorageException(e.toString(), e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 

@@ -731,7 +731,7 @@ public class Filestore2UserUtil {
                 con = null;
             }
         } catch (OXException e) {
-            throw new StorageException(e);
+            throw StorageException.wrapForRMI(e);
         } catch (SQLException e) {
             throw new StorageException(e);
         } catch (RuntimeException e) {
@@ -874,7 +874,7 @@ public class Filestore2UserUtil {
 
                             if (doThrow) {
                                 LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database {}", schema.getSchema(), I(schema.getPoolId()), e);
-                                throw new StorageException(e);
+                                throw StorageException.wrapForRMI(e);
                             }
                         } catch (SQLException e) {
                             LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database 1}", schema.getSchema(), I(schema.getPoolId()), e);

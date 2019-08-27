@@ -996,7 +996,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 quotaFileStorage.recalculateUsage(filesToIgnore);
             }
         } catch (OXException e) {
-            throw new StorageException(e.getMessage(), e);
+            throw StorageException.wrapForRMI(e);
         }
     }
 
@@ -1067,7 +1067,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                 }
             }
         } catch (OXException e) {
-            throw new StorageException(e.getMessage(), e);
+            throw StorageException.wrapForRMI(e);
         } catch (RuntimeException e) {
             log.error("", e);
             throw convertException(e);
