@@ -17,7 +17,7 @@
         name: attachment
         description: >-
           ID of the requested attachment (can be substituted by the parameter
-          `cid` otherwise this parameter is **madatory**).
+          `cid` otherwise this parameter is **mandatory**).
         required: false
         schema:
           type: string
@@ -26,7 +26,7 @@
         description: >-
           Value of header 'Content-ID' of the requested attachment (can be
           substituted by the parameter `attachment` otherwise this parameter is
-          **madatory**).
+          **mandatory**).
         required: false
         schema:
           type: string
