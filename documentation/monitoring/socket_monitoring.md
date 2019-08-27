@@ -101,29 +101,29 @@ Additionally, the tracing and traffic socket listeners allows to enable a dedica
  - ``com.openexchange.monitoring.sockets.tracing.logging.fileLimit`` defines the max. size for file
  - ``com.openexchange.monitoring.sockets.tracing.logging.fileCount`` defines how many individual log files are allowed to be created
 
- The socket traffic logger has a set of similar properties in the ``com.openexchange.monitoring.sockets.traffic.logging.*`` domain. Simply replace all ``tracing`` with ``traffic`` sub-parts in the property names to enable the similar properties for the socket traffic logger.
+ The socket traffic logger has a set of similar properties in the ``com.openexchange.monitoring.sockets.traffic.logging.*`` domain. Simply replace all ``tracing`` with ``traffic`` sub-parts in the property names to enable the similar properties for the socket traffic logger. For the socket traffic logger, the extra property `com.openexchange.monitoring.sockets.traffic.file.logging.enabled` needs to be set to `true` as well to enable traffic logging on a separate file.
 
 # Socket Logging
 
 Since 7.10.3, the OX middleware is offering to administrators the ability to log all incoming and outgoing socket traffic for debugging purposes. The socket logging is based on bundle names, meaning that it can be activated for a specific bundle, e.g. for `com.openexchange.oauth`. To enable socket logging, simply set the property ``com.openexchange.monitoring.sockets.traffic.logging.enabled`` to ``true``.
 
-To enable socket logging for one or more bundles, that are registered for socket logging (more on registering below), the desired bundle name needs to be added to the logback.xml with the DEBUG level set. For example:
+To enable socket logging for one or more bundles, that are registered for socket logging (more on registering below), the desired bundle name needs to be added to the logback.xml with the TRACE level set. For example:
 
 ```xml
-<logger name="com.openexchange.oauth" level="DEBUG" />
-<logger name="com.openexchange.mailfilter" level="DEBUG" />
+<logger name="com.openexchange.oauth" level="TRACE" />
+<logger name="com.openexchange.mailfilter" level="TRACE" />
 ```
 
 To register or unregister a bundle for/from socket logging during operation, use the `socketLogging` command line tool. For example:
 
 ```bash
-$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -r com.openexchange.rss
+$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -r -n com.openexchange.rss
 ```
 
 Registers the specified bundle to the socket logging registry.
 
 ```bash
-$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -u com.openexchange.rss
+$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -u -n com.openexchange.rss
 ```
 
 Unregisters the specified bundle to the socket logging registry.
@@ -134,4 +134,4 @@ $ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -l
 
 Lists all registered bundles for which socket logging is enabled.
 
-Note that you will have to either add the bundle name to the `logback.xml`  (as shown above), or via the `logback` command line tool. Furthermore, the `socketLogging` command line tool can be combined with `logback` to apply the logging only for a specific context or user.
+Note that you will have to either add the bundle name to the `logback.xml`  (as shown above), or via the `logback` command line tool. Furthermore, the `socketLogging` command line tool can be combined with `logback` to apply the logging only for a specific context or user. Also note that enabling socket logging for the entire bundle it won't work. This is a limitation we introduced to prevent excessive I/O and expensive stacktrace analysis. This means that a socket traffic logging filter has to be enabled for a user or a user's session.
