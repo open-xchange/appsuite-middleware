@@ -72,6 +72,7 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.uploaddir.UploadDirService;
 import com.openexchange.user.UserService;
 
 /**
@@ -117,6 +118,7 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
             trackService(ContextService.class);
             trackService(UserService.class);
             trackService(ConfigViewFactory.class);
+            trackService(UploadDirService.class);
 
             openTrackers();
 

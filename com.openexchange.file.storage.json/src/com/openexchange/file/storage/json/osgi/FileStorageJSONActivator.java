@@ -77,6 +77,7 @@ import com.openexchange.rdiff.RdiffService;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.uploaddir.UploadDirService;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -109,6 +110,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             trackService(CryptographicServiceAuthenticationFactory.class);
             trackService(AntiVirusService.class);
             trackService(AntiVirusResultEvaluatorService.class);
+            trackService(UploadDirService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");

@@ -314,6 +314,7 @@ public class Activator implements BundleActivator, Reloadable {
      */
     protected synchronized void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
         ExceptionCategoryFilterRegisterer exceptionCategoryFilterRegisterer = new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl);
+        context.registerService(Reloadable.class, exceptionCategoryFilterRegisterer, null);
         final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, exceptionCategoryFilterRegisterer);
         configurationTracker = tracker;
         tracker.open();

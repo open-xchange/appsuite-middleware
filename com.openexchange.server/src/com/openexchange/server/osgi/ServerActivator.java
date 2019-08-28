@@ -273,6 +273,8 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.oxfolder.GABRestorerRMIServiceImpl;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
+import com.openexchange.uploaddir.UploadDirService;
+import com.openexchange.uploaddir.impl.UploadDirServiceImpl;
 import com.openexchange.user.UserService;
 import com.openexchange.user.interceptor.UserServiceInterceptor;
 import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
@@ -838,6 +840,9 @@ public final class ServerActivator extends HousekeepingActivator {
         // Register SessionHolder
         registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
         ServerServiceRegistry.getInstance().addService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
+
+        // Register upload directory service
+        registerService(UploadDirService.class, new UploadDirServiceImpl());
 
         // Fake bundle start
         activators.add(new FolderStorageActivator());

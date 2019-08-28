@@ -47,28 +47,78 @@
  *
  */
 
-package com.openexchange.config.internal.filewatcher;
+package com.openexchange.filestore.utils.osgi;
 
-import java.io.File;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FileListener}
+ * {@link Services}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface FileListener {
+public class Services {
 
     /**
-     * Invoked if the last modified timestamp has changed
-     *
-     * @param file The changed file
+     * Initializes a new {@link Services}.
      */
-    public void onChange(File file);
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
 
     /**
-     * Invoked if the file has been deleted
+     * Sets the service lookup.
      *
-     * @param file The deleted file
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public void onDelete();
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException If an error occurs while returning the demanded service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.filestore.utils\" not started?");
+        }
+        S service = serviceLookup.getService(clazz);
+        if (service == null) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+
+    }
+
 }

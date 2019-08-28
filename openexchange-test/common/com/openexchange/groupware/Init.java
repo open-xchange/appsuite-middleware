@@ -85,7 +85,6 @@ import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
@@ -1097,7 +1096,6 @@ public final class Init {
     public static void dropConfigBundle() {
         services.remove(ConfigurationService.class);
         TestServiceRegistry.getInstance().removeService(ConfigurationService.class);
-        FileWatcher.dropTimer();
     }
 
     public static void dropI18NBundle() {

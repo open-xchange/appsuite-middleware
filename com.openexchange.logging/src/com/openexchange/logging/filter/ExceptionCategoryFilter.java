@@ -50,14 +50,13 @@
 package com.openexchange.logging.filter;
 
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Marker;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -77,17 +76,17 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
     private static final Object PRESENT = new Object();
 
     /** The map used to manage categories */
-    private static final ConcurrentMap<Category.EnumType, Object> CATEGORIES = new ConcurrentHashMap<Category.EnumType, Object>();
+    private static final AtomicReference<Set<Category.EnumType>> CATEGORIES_REF = new AtomicReference<Set<Category.EnumType>>(EnumSet.noneOf(Category.EnumType.class));
 
     private static String generateName() {
-        final ConcurrentMap<EnumType, Object> categories = CATEGORIES;
+        Set<Category.EnumType> categories = CATEGORIES_REF.get();
         if (categories.isEmpty()) {
             return ExceptionCategoryFilter.class.getSimpleName();
         }
 
-        final StringBuilder nameBuilder = new StringBuilder(1024).append(ExceptionCategoryFilter.class.getSimpleName());
+        StringBuilder nameBuilder = new StringBuilder(1024).append(ExceptionCategoryFilter.class.getSimpleName());
         boolean added = false;
-        for (final Category.EnumType category : categories.keySet()) {
+        for (Category.EnumType category : categories) {
             if (null != category) {
                 if (!added) {
                     nameBuilder.append(':');
@@ -128,7 +127,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
         if (OXException.class.isInstance(t)) {
             Category category = ((OXException) t).getCategory();
-            if (null != category && ExceptionCategoryFilter.CATEGORIES.containsKey(category.getType())) {
+            if (null != category && ExceptionCategoryFilter.CATEGORIES_REF.get().contains(category.getType())) {
                 if (traceService.isEnabled()) {
                     try {
                         final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
@@ -169,14 +168,15 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
     }
 
     public static void setCategories(Set<String> categories) {
-        ExceptionCategoryFilter.CATEGORIES.clear();
+        Set<Category.EnumType> newCategories = EnumSet.noneOf(Category.EnumType.class);
         for (String category : categories) {
             try {
-            ExceptionCategoryFilter.CATEGORIES.put(Category.EnumType.valueOf(Category.EnumType.class, category), PRESENT);
+                newCategories.add(Category.EnumType.valueOf(Category.EnumType.class, category));
             } catch (IllegalArgumentException e) {
                 //Skip this value
             }
         }
+        CATEGORIES_REF.set(newCategories);
     }
 
     public static void setCategories(String categories) {
@@ -189,7 +189,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
     public static String getCategories() {
         StringBuilder sb = new StringBuilder();
-        for (Category.EnumType c : CATEGORIES.keySet()) {
+        for (Category.EnumType c : CATEGORIES_REF.get()) {
             sb.append(c.getName()).append(", ");
         }
         return sb.substring(0, sb.length()-2);

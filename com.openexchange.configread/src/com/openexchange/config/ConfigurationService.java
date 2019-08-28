@@ -71,7 +71,7 @@ public interface ConfigurationService {
      * @param name The property name
      * @return The filter or <code>null</code> if there is no such property
      */
-    public Filter getFilterFromProperty(String name);
+    Filter getFilterFromProperty(String name);
 
     /**
      * Gets all properties that fulfills given filter's acceptance criteria.
@@ -80,7 +80,7 @@ public interface ConfigurationService {
      * @return The appropriate properties
      * @throws OXException If properties cannot be returned
      */
-    public Map<String, String> getProperties(PropertyFilter filter) throws OXException;
+    Map<String, String> getProperties(PropertyFilter filter) throws OXException;
 
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
@@ -89,7 +89,7 @@ public interface ConfigurationService {
      * @param name The property name.
      * @return The value in this property list with the specified key value or <code>null</code>.
      */
-    public String getProperty(String name);
+    String getProperty(String name);
 
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
@@ -100,7 +100,7 @@ public interface ConfigurationService {
      * @param defaultValue The default value
      * @return The value in this property list with the specified key value or given default value argument.
      */
-    public String getProperty(String name, String defaultValue);
+    String getProperty(String name, String defaultValue);
 
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
@@ -115,59 +115,7 @@ public interface ConfigurationService {
      * separator
      * @throws IllegalArgumentException - if defaultValue or the seperator are missing or if the separator isn't a valid pattern
      */
-    public List<String> getProperty(String name, String defaultValue, String separator);
-
-    /**
-     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
-     * property list, and its defaults, recursively, are then checked. The method returns <code>null</code> if the property is not found.
-     * <p>
-     * Furthermore the specified listener will be notified if any changes are noticed on specified property
-     *
-     * @param name The property name.
-     * @param listener The property listener which is notified on property changes
-     * @return The value in this property list with the specified key value or <code>null</code>.
-     */
-    public String getProperty(String name, PropertyListener listener);
-
-    /**
-     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
-     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
-     * found.
-     * <p>
-     * Furthermore the specified listener will be notified if any changes are noticed on specified property
-     *
-     * @param name The property name.
-     * @param defaultValue The default value
-     * @param listener The property listener which is notified on property changes
-     * @return The value in this property list with the specified key value or given default value argument.
-     */
-    public String getProperty(String name, String defaultValue, PropertyListener listener);
-
-    /**
-     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
-     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
-     * found. If the value can be found it will be split at the given separator and trimmed.
-     * <p>
-     * Furthermore the specified listener will be notified if any changes are noticed on specified property
-     *
-     * @param name The property name.
-     * @param defaultValue The default value
-     * @param listener The property listener which is notified on property changes
-     * @param separator the seperator as regular expression used to split the input around this separator
-     * @return The value in this property list with the specified key value or given default value argument split and trimmed at the given
-     * separator
-     * @throws IllegalArgumentException - if defaultValue or the seperator are missing or if the separator isn't a valid pattern
-     */
-    public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator);
-
-    /**
-     * Removes specified property listener previously set by {@link #getProperty(String, PropertyListener)} or
-     * {@link #getProperty(String, String, PropertyListener)}.
-     *
-     * @param name The property name.
-     * @param listener The property listener to remove
-     */
-    public void removePropertyListener(String name, PropertyListener listener);
+    List<String> getProperty(String name, String defaultValue, String separator);
 
     /**
      * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path
@@ -185,7 +133,7 @@ public interface ConfigurationService {
      *             </div>
      */
     @Deprecated
-    public Properties getFile(String fileName);
+    Properties getFile(String fileName);
 
     /**
      * Gets the directory denoted by given directory name.
@@ -223,19 +171,8 @@ public interface ConfigurationService {
      * @param fileName The logical file name of the file to be retrieved.
      * @return The text content of the configuration
      */
-    public String getText(String fileName);
+    String getText(String fileName);
 
-    /**
-     * Returns all properties defined in a specific properties file. The filename of the properties file must not contains any path
-     * segments. If no such property file has been read empty properties will be returned.
-     * <p>
-     * Furthermore the specified listener will be notified if any changes are noticed on properties of that properties file.
-     *
-     * @param filename The filename of the properties file.
-     * @param listener This property listener is notified on changes on properties of that file.
-     * @return the properties from that file or an empty properties if that file was not read.
-     */
-    // public Properties getFile(String filename, PropertyListener listener);
     /**
      * Retrieves and merges all properties files in below the given folder name and its subfolders (recursively). All properties discovered
      * this way are aggregated in the returned properties object.
@@ -243,7 +180,7 @@ public interface ConfigurationService {
      * @param folderName
      * @return Aggregated properties of all properties files below this folder.
      */
-    public Properties getPropertiesInFolder(String folderName);
+    Properties getPropertiesInFolder(String folderName);
 
     /**
      * Searches for the property with the specified name in this property list. If the name is found in this property list, it is supposed
@@ -256,7 +193,7 @@ public interface ConfigurationService {
      * @param defaultValue The default value
      * @return The boolean value in this property list with the specified key value or given default value argument.
      */
-    public boolean getBoolProperty(String name, boolean defaultValue);
+    boolean getBoolProperty(String name, boolean defaultValue);
 
     /**
      * Searches for the property with the specified name in this property list. If the name is found in this property list, it is supposed
@@ -269,21 +206,21 @@ public interface ConfigurationService {
      * @param defaultValue The default value
      * @return The integer value in this property list with the specified key value or given default value argument.
      */
-    public int getIntProperty(String name, int defaultValue);
+    int getIntProperty(String name, int defaultValue);
 
     /**
      * Returns an iterator of all the keys in this property list.
      *
      * @return The iterator of all the keys in this property list.
      */
-    public Iterator<String> propertyNames();
+    Iterator<String> propertyNames();
 
     /**
      * Returns the number of properties in this property list.
      *
      * @return The number of properties in this property list.
      */
-    public int size();
+    int size();
 
     /**
      * Loads a file and parses it with a YAML parser. The type of object returned depends on the layout of the YAML file and should be known
@@ -293,7 +230,7 @@ public interface ConfigurationService {
      * @return The parsed data or <code>null</code> if there is no such YAML file
      * @throws IllegalStateException If YAML file cannot be loaded
      */
-    public Object getYaml(String filename);
+    Object getYaml(String filename);
 
     /**
      * Loads all files in a directory and parses them with a YAML parser. The type of the objects returned depends on the layout of the YAML
@@ -303,34 +240,6 @@ public interface ConfigurationService {
      * @return A map mapping filename to the object that was parsed.
      * @throws IllegalStateException If YAML file cannot be loaded
      */
-    public Map<String, Object> getYamlInFolder(String dirName);
-
-    /**
-     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
-     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
-     * found.
-     * <p>
-     * Furthermore the specified listener will be notified if any changes are noticed on specified property
-     *
-     * @param name The property name.
-     * @param defaultValue The default value
-     * @param listener The property listener which is notified on property changes
-     * @return The value in this property list with the specified key value or given default value argument.
-     */
-    boolean getBoolProperty(String name, boolean defaultValue, PropertyListener propertyListener);
-
-    /**
-     * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default
-     * property list, and its defaults, recursively, are then checked. The method returns the default value argument if the property is not
-     * found.
-     * <p>
-     * Furthermore the specified listener will be notified if any changes are noticed on specified property
-     *
-     * @param name The property name.
-     * @param defaultValue The default value
-     * @param listener The property listener which is notified on property changes
-     * @return The value in this property list with the specified key value or given default value argument.
-     */
-    int getIntProperty(String name, int defaultValue, PropertyListener propertyListener);
+    Map<String, Object> getYamlInFolder(String dirName);
 
 }

@@ -131,24 +131,8 @@ public class SimConfigurationService implements ConfigurationService {
     }
 
     @Override
-    public String getProperty(final String name, final PropertyListener listener) {
-        return stringProperties.get(name);
-    }
-
-    @Override
-    public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        return stringProperties.containsKey(name) ? stringProperties.get(name) : defaultValue;
-    }
-
-    @Override
     public Iterator<String> propertyNames() {
         return stringProperties.keySet().iterator();
-    }
-
-    @Override
-    public void removePropertyListener(final String name, final PropertyListener listener) {
-        // Nothing to do
-
     }
 
     @Override
@@ -187,22 +171,7 @@ public class SimConfigurationService implements ConfigurationService {
     }
 
     @Override
-    public boolean getBoolProperty(String name, boolean defaultValue, PropertyListener propertyListener) {
-        return false;
-    }
-
-    @Override
-    public int getIntProperty(String name, int defaultValue, PropertyListener propertyListener) {
-        return 0;
-    }
-
-    @Override
     public List<String> getProperty(String name, String defaultValue, String separator) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator) {
         return Collections.emptyList();
     }
 

@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
@@ -64,6 +65,7 @@ import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.infostore.InfostoreConfig;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.java.Strings;
+import com.openexchange.uploaddir.UploadDirService;
 
 /**
  * This class handles the configuration parameters read from the configuration property file server.properties.
@@ -72,7 +74,8 @@ import com.openexchange.java.Strings;
  */
 public final class ServerConfig implements Reloadable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerConfig.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerConfig.class);
 
     /**
      * Singleton object.
@@ -88,51 +91,176 @@ public final class ServerConfig implements Reloadable {
         return SINGLETON;
     }
 
+    // ------------------------------------------------------------------------------ //
+
     /**
-     * Name of the properties file.
+     * Creates a new default configuration for "server.properties" file
+     *
+     * @return The newly created default configuration
      */
-    private static final String FILENAME = "server.properties";
+    private static Config newDefaultConfig() {
+        return new ConfigBuilder(new Properties()).init().build();
+    }
+
+    /** Builds an instance of <code>Config</code> from a <code>Properties</code> instance (initialized from "server.properties" file) */
+    private static class ConfigBuilder {
+
+        private final Properties props;
+
+        private String uploadDirectory = "/tmp/";
+        private int maxFileUploadSize = 10000;
+        private int maxUploadIdleTimeMillis = 300000;
+        private boolean prefetchEnabled;
+        private String defaultEncoding;
+        private int jmxPort;
+        private String jmxBindAddress;
+        private Boolean checkIP;
+        private String ipMaskV4;
+        private String ipMaskV6;
+        private final ClientWhitelist clientWhitelist;
+        private String uiWebPath;
+        private int cookieTTL;
+        private boolean cookieHttpOnly;
+        private int maxBodySize;
+        private int defaultMaxConcurrentAJAXRequests;
+
+        ConfigBuilder(Properties props) {
+            super();
+            this.props = props;
+            clientWhitelist = new ClientWhitelist();
+        }
+
+        ConfigBuilder init() {
+            // UPLOAD_DIRECTORY
+            uploadDirectory = getPropertyInternal(Property.UploadDirectory);
+            if (!uploadDirectory.endsWith("/")) {
+                uploadDirectory += "/";
+            }
+            uploadDirectory += ".OX/";
+            try {
+                if (new File(uploadDirectory).mkdir()) {
+                    Runtime.getRuntime().exec("chmod 700 " + uploadDirectory);
+                    Runtime.getRuntime().exec("chown open-xchange:open-xchange " + uploadDirectory);
+                    LOG.info("Temporary upload directory created");
+                }
+            } catch (Exception e) {
+                LOG.error("Temporary upload directory could NOT be properly created", e);
+            }
+            // MAX_FILE_UPLOAD_SIZE
+            try {
+                maxFileUploadSize = Integer.parseInt(getPropertyInternal(Property.MaxFileUploadSize));
+            } catch (NumberFormatException e) {
+                maxFileUploadSize = 10000;
+            }
+            // MAX_UPLOAD_IDLE_TIME_MILLIS
+            try {
+                maxUploadIdleTimeMillis = Integer.parseInt(getPropertyInternal(Property.MaxUploadIdleTimeMillis));
+            } catch (NumberFormatException e) {
+                maxUploadIdleTimeMillis = 300000;
+            }
+            // PrefetchEnabled
+            prefetchEnabled = Boolean.parseBoolean(getPropertyInternal(Property.PrefetchEnabled));
+            // Default encoding
+            defaultEncoding = getPropertyInternal(Property.DefaultEncoding);
+            // JMX port
+            jmxPort = Integer.parseInt(getPropertyInternal(Property.JMX_PORT));
+            // JMX bind address
+            jmxBindAddress = getPropertyInternal(Property.JMX_BIND_ADDRESS);
+            // Check IP
+            checkIP = Boolean.valueOf(getPropertyInternal(Property.IP_CHECK));
+            ipMaskV4 = getPropertyInternal(Property.IP_MASK_V4);
+            ipMaskV6 = getPropertyInternal(Property.IP_MASK_V6);
+            // IP check whitelist
+            clientWhitelist.clear();
+            clientWhitelist.add(getPropertyInternal(Property.IP_CHECK_WHITELIST));
+            // UI web path
+            uiWebPath = getPropertyInternal(Property.UI_WEB_PATH);
+            cookieTTL = (int) ConfigTools.parseTimespan(getPropertyInternal(Property.COOKIE_TTL));
+            cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
+            // The max. body size
+            maxBodySize = Integer.parseInt(getPropertyInternal(Property.MAX_BODY_SIZE));
+            // Default max. concurrent AJAX requests
+            defaultMaxConcurrentAJAXRequests = Integer.parseInt(getPropertyInternal(Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS));
+            return this;
+        }
+
+        private String getPropertyInternal(final Property property) {
+            return props.getProperty(property.getPropertyName(), property.getDefaultValue());
+        }
+
+        Config build() {
+            return new Config(props, uploadDirectory, maxFileUploadSize, maxUploadIdleTimeMillis, prefetchEnabled, defaultEncoding, jmxPort, jmxBindAddress, checkIP, ipMaskV4, ipMaskV6, clientWhitelist, uiWebPath, cookieTTL, cookieHttpOnly, maxBodySize, defaultMaxConcurrentAJAXRequests);
+        }
+    }
+
+    /** Immutable configuration from "server.properties" file */
+    private static class Config {
+
+        final Properties props;
+        final String uploadDirectory;
+        final int maxFileUploadSize;
+        final int maxUploadIdleTimeMillis;
+        final boolean prefetchEnabled;
+        final String defaultEncoding;
+        final int jmxPort;
+        final String jmxBindAddress;
+        final Boolean checkIP;
+        final String ipMaskV4;
+        final String ipMaskV6;
+        final ClientWhitelist clientWhitelist;
+        final String uiWebPath;
+        final int cookieTTL;
+        final boolean cookieHttpOnly;
+        final int maxBodySize;
+        final int defaultMaxConcurrentAJAXRequests;
+
+        Config(Properties props, String uploadDirectory, int maxFileUploadSize, int maxUploadIdleTimeMillis, boolean prefetchEnabled, String defaultEncoding, int jmxPort, String jmxBindAddress, Boolean checkIP, String ipMaskV4, String ipMaskV6, ClientWhitelist clientWhitelist, String uiWebPath, int cookieTTL, boolean cookieHttpOnly, int maxBodySize, int defaultMaxConcurrentAJAXRequests) {
+            super();
+            this.props = props;
+            this.uploadDirectory = uploadDirectory;
+            this.maxFileUploadSize = maxFileUploadSize;
+            this.maxUploadIdleTimeMillis = maxUploadIdleTimeMillis;
+            this.prefetchEnabled = prefetchEnabled;
+            this.defaultEncoding = defaultEncoding;
+            this.jmxPort = jmxPort;
+            this.jmxBindAddress = jmxBindAddress;
+            this.checkIP = checkIP;
+            this.ipMaskV4 = ipMaskV4;
+            this.ipMaskV6 = ipMaskV6;
+            this.clientWhitelist = clientWhitelist;
+            this.uiWebPath = uiWebPath;
+            this.cookieTTL = cookieTTL;
+            this.cookieHttpOnly = cookieHttpOnly;
+            this.maxBodySize = maxBodySize;
+            this.defaultMaxConcurrentAJAXRequests = defaultMaxConcurrentAJAXRequests;
+        }
+    }
 
     // ------------------------------------------------------------------------------ //
 
-    private final Properties props;
-    private String uploadDirectory = "/tmp/";
-    private int maxFileUploadSize = 10000;
-    private int maxUploadIdleTimeMillis = 300000;
-    private boolean prefetchEnabled;
-    private String defaultEncoding;
-    private int jmxPort;
-    private String jmxBindAddress;
-    private Boolean checkIP;
-    private String ipMaskV4;
-    private String ipMaskV6;
-    private final ClientWhitelist clientWhitelist;
-    private String uiWebPath;
-    private int cookieTTL;
-    private boolean cookieHttpOnly;
-    private int maxBodySize;
-    private int defaultMaxConcurrentAJAXRequests;
+    private final AtomicReference<Config> configReference;
 
     private ServerConfig() {
         super();
-        props = new Properties();
-        clientWhitelist = new ClientWhitelist();
+        configReference = new AtomicReference<>(newDefaultConfig());
     }
 
+    /** The name of the properties file. */
+    private static final String FILENAME = "server.properties";
+
     @Override
-    public void reloadConfiguration(final ConfigurationService configService) {
-        final Properties newProps = configService.getFile(FILENAME);
-        this.props.clear();
+    public void reloadConfiguration(ConfigurationService configService) {
+        Properties newProps = configService.getFile(FILENAME);
         if (null == newProps) {
             LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
+            configReference.set(newDefaultConfig());
         } else {
-            this.props.putAll(newProps);
-            LOG.info("Read configuration file {}.", FILENAME);
+            configReference.set(new ConfigBuilder(newProps).init().build());
+            LOG.info("Successfully read configuration file {}.", FILENAME);
         }
-        reinit();
 
         try {
-            final AttachmentConfig attachmentConfig = AttachmentConfig.getInstance();
+            AttachmentConfig attachmentConfig = AttachmentConfig.getInstance();
             attachmentConfig.stop();
             attachmentConfig.start();
         } catch (Exception e) {
@@ -140,7 +268,7 @@ public final class ServerConfig implements Reloadable {
         }
 
         try {
-            final InfostoreConfig infostoreConfig = InfostoreConfig.getInstance();
+            InfostoreConfig infostoreConfig = InfostoreConfig.getInstance();
             infostoreConfig.stop();
             infostoreConfig.start();
         } catch (Exception e) {
@@ -148,7 +276,7 @@ public final class ServerConfig implements Reloadable {
         }
 
         try {
-            final NotificationConfig notificationConfig = NotificationConfig.getInstance();
+            NotificationConfig notificationConfig = NotificationConfig.getInstance();
             notificationConfig.stop();
             notificationConfig.start();
         } catch (Exception e) {
@@ -158,78 +286,30 @@ public final class ServerConfig implements Reloadable {
         LoginWriter.invalidateRandomTokenEnabled();
     }
 
-    public void initialize(final ConfigurationService confService) {
-        final Properties newProps = confService.getFile(FILENAME);
+    public void initialize(ConfigurationService confService) {
+        Properties newProps = confService.getFile(FILENAME);
         if (null == newProps) {
             LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
+            configReference.set(newDefaultConfig());
         } else {
-            this.props.clear();
-            this.props.putAll(newProps);
-            LOG.info("Read configuration file {}.", FILENAME);
+            configReference.set(new ConfigBuilder(newProps).init().build());
+            LOG.info("Successfully read configuration file {}.", FILENAME);
         }
-        reinit();
     }
 
     public void shutdown() {
-        props.clear();
-        reinit();
+        configReference.set(newDefaultConfig());
     }
 
-    private void reinit() {
-        // UPLOAD_DIRECTORY
-        uploadDirectory = getPropertyInternal(Property.UploadDirectory);
-        if (!uploadDirectory.endsWith("/")) {
-            uploadDirectory += "/";
-        }
-        uploadDirectory += ".OX/";
-        try {
-            if (new File(uploadDirectory).mkdir()) {
-                Runtime.getRuntime().exec("chmod 700 " + uploadDirectory);
-                Runtime.getRuntime().exec("chown open-xchange:open-xchange " + uploadDirectory);
-                LOG.info("Temporary upload directory created");
-            }
-        } catch (Exception e) {
-            LOG.error("Temporary upload directory could NOT be properly created", e);
-        }
-        // MAX_FILE_UPLOAD_SIZE
-        try {
-            maxFileUploadSize = Integer.parseInt(getPropertyInternal(Property.MaxFileUploadSize));
-        } catch (NumberFormatException e) {
-            maxFileUploadSize = 10000;
-        }
-        // MAX_UPLOAD_IDLE_TIME_MILLIS
-        try {
-            maxUploadIdleTimeMillis = Integer.parseInt(getPropertyInternal(Property.MaxUploadIdleTimeMillis));
-        } catch (NumberFormatException e) {
-            maxUploadIdleTimeMillis = 300000;
-        }
-        // PrefetchEnabled
-        prefetchEnabled = Boolean.parseBoolean(getPropertyInternal(Property.PrefetchEnabled));
-        // Default encoding
-        defaultEncoding = getPropertyInternal(Property.DefaultEncoding);
-        // JMX port
-        jmxPort = Integer.parseInt(getPropertyInternal(Property.JMX_PORT));
-        // JMX bind address
-        jmxBindAddress = getPropertyInternal(Property.JMX_BIND_ADDRESS);
-        // Check IP
-        checkIP = Boolean.valueOf(getPropertyInternal(Property.IP_CHECK));
-        ipMaskV4 = getPropertyInternal(Property.IP_MASK_V4);
-        ipMaskV6 = getPropertyInternal(Property.IP_MASK_V6);
-        // IP check whitelist
-        clientWhitelist.clear();
-        clientWhitelist.add(getPropertyInternal(Property.IP_CHECK_WHITELIST));
-        // UI web path
-        uiWebPath = getPropertyInternal(Property.UI_WEB_PATH);
-        cookieTTL = (int) ConfigTools.parseTimespan(getPropertyInternal(Property.COOKIE_TTL));
-        cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
-        // The max. body size
-        maxBodySize = Integer.parseInt(getPropertyInternal(Property.MAX_BODY_SIZE));
-        // Default max. concurrent AJAX requests
-        defaultMaxConcurrentAJAXRequests = Integer.parseInt(getPropertyInternal(Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS));
-    }
+    // ------------------------------------------------------------------------------ //
 
-    private String getPropertyInternal(final Property property) {
-        return props.getProperty(property.getPropertyName(), property.getDefaultValue());
+    /**
+     * Gets the currently active configuration.
+     *
+     * @return The currently active configuration
+     */
+    private static Config getCurrentConfig() {
+        return SINGLETON.configReference.get();
     }
 
     /**
@@ -239,7 +319,33 @@ public final class ServerConfig implements Reloadable {
      * @return the value of the property or <code>null</code> if the property is not found.
      */
     private static String getProperty(final String key) {
-        return SINGLETON.props.getProperty(key);
+        return getCurrentConfig().props.getProperty(key);
+    }
+
+    /**
+     * Gets the upload directory to save to.
+     * <p>
+     * <b>Note</b>: If not within "com.openexchange.server" bundle, please prefer to use {@link UploadDirService} instead.
+     *
+     * @return The directory
+     * @throws IllegalArgumentException If upload directory cannot be returned; e.g. property missing or no such directory exists
+     */
+    public static File getTmpDir() {
+        String path = getProperty(Property.UploadDirectory);
+        if (null == path) {
+            throw new IllegalArgumentException("Path is null. Probably property \"UPLOAD_DIRECTORY\" is not set.");
+        }
+        final File tmpDir = new File(path);
+        if (!tmpDir.exists()) {
+            if (!tmpDir.mkdirs()) {
+                throw new IllegalArgumentException("Directory " + path + " does not exist and cannot be created.");
+            }
+            LOG.info("Directory {} did not exist, but could be created.", path);
+        }
+        if (!tmpDir.isDirectory()) {
+            throw new IllegalArgumentException(path + " is not a directory.");
+        }
+        return tmpDir;
     }
 
     /**
@@ -253,52 +359,52 @@ public final class ServerConfig implements Reloadable {
             final Object value;
             switch (property) {
             case UploadDirectory:
-                value = SINGLETON.uploadDirectory;
+                value = getCurrentConfig().uploadDirectory;
                 break;
             case MaxFileUploadSize:
-                value = Integer.valueOf(SINGLETON.maxFileUploadSize);
+                value = Integer.valueOf(getCurrentConfig().maxFileUploadSize);
                 break;
             case MaxUploadIdleTimeMillis:
-                value = Integer.valueOf(SINGLETON.maxUploadIdleTimeMillis);
+                value = Integer.valueOf(getCurrentConfig().maxUploadIdleTimeMillis);
                 break;
             case PrefetchEnabled:
-                value = Boolean.valueOf(SINGLETON.prefetchEnabled);
+                value = Boolean.valueOf(getCurrentConfig().prefetchEnabled);
                 break;
             case DefaultEncoding:
-                value = SINGLETON.defaultEncoding;
+                value = getCurrentConfig().defaultEncoding;
                 break;
             case JMX_PORT:
-                value = Integer.valueOf(SINGLETON.jmxPort);
+                value = Integer.valueOf(getCurrentConfig().jmxPort);
                 break;
             case JMX_BIND_ADDRESS:
-                value = SINGLETON.jmxBindAddress;
+                value = getCurrentConfig().jmxBindAddress;
                 break;
             case UI_WEB_PATH:
-                value = SINGLETON.uiWebPath;
+                value = getCurrentConfig().uiWebPath;
                 break;
             case COOKIE_TTL:
-                value = Integer.valueOf(SINGLETON.cookieTTL);
+                value = Integer.valueOf(getCurrentConfig().cookieTTL);
                 break;
             case COOKIE_HTTP_ONLY:
-                value = Boolean.valueOf(SINGLETON.cookieHttpOnly);
+                value = Boolean.valueOf(getCurrentConfig().cookieHttpOnly);
                 break;
             case IP_CHECK:
-                value = SINGLETON.checkIP;
+                value = getCurrentConfig().checkIP;
                 break;
             case IP_MASK_V4:
-                value = SINGLETON.ipMaskV4;
+                value = getCurrentConfig().ipMaskV4;
                 break;
             case IP_MASK_V6:
-                value = SINGLETON.ipMaskV6;
+                value = getCurrentConfig().ipMaskV6;
                 break;
             case IP_CHECK_WHITELIST:
-                value = SINGLETON.clientWhitelist;
+                value = getCurrentConfig().clientWhitelist;
                 break;
             case MAX_BODY_SIZE:
-                value = Integer.valueOf(SINGLETON.maxBodySize);
+                value = Integer.valueOf(getCurrentConfig().maxBodySize);
                 break;
             case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
-                value = Integer.valueOf(SINGLETON.defaultMaxConcurrentAJAXRequests);
+                value = Integer.valueOf(getCurrentConfig().defaultMaxConcurrentAJAXRequests);
                 break;
             default:
                 value = getProperty(property.getPropertyName());
@@ -318,49 +424,49 @@ public final class ServerConfig implements Reloadable {
         final String value;
         switch (property) {
         case UploadDirectory:
-            value = SINGLETON.uploadDirectory;
+            value = getCurrentConfig().uploadDirectory;
             break;
         case MaxFileUploadSize:
-            value = Integer.toString(SINGLETON.maxFileUploadSize);
+            value = Integer.toString(getCurrentConfig().maxFileUploadSize);
             break;
         case MaxUploadIdleTimeMillis:
-            value = Integer.toString(SINGLETON.maxUploadIdleTimeMillis);
+            value = Integer.toString(getCurrentConfig().maxUploadIdleTimeMillis);
             break;
         case PrefetchEnabled:
-            value = String.valueOf(SINGLETON.prefetchEnabled);
+            value = String.valueOf(getCurrentConfig().prefetchEnabled);
             break;
         case DefaultEncoding:
-            value = SINGLETON.defaultEncoding;
+            value = getCurrentConfig().defaultEncoding;
             break;
         case JMX_PORT:
-            value = Integer.toString(SINGLETON.jmxPort);
+            value = Integer.toString(getCurrentConfig().jmxPort);
             break;
         case JMX_BIND_ADDRESS:
-            value = SINGLETON.jmxBindAddress;
+            value = getCurrentConfig().jmxBindAddress;
             break;
         case UI_WEB_PATH:
-            value = SINGLETON.uiWebPath;
+            value = getCurrentConfig().uiWebPath;
             break;
         case COOKIE_TTL:
-            value = Integer.toString(SINGLETON.cookieTTL);
+            value = Integer.toString(getCurrentConfig().cookieTTL);
             break;
         case COOKIE_HTTP_ONLY:
-            value = String.valueOf(SINGLETON.cookieHttpOnly);
+            value = String.valueOf(getCurrentConfig().cookieHttpOnly);
             break;
         case IP_CHECK:
-            value = SINGLETON.checkIP.toString();
+            value = getCurrentConfig().checkIP.toString();
             break;
         case IP_MASK_V4:
-            value = SINGLETON.ipMaskV4.toString();
+            value = getCurrentConfig().ipMaskV4.toString();
             break;
         case IP_MASK_V6:
-            value = SINGLETON.ipMaskV6.toString();
+            value = getCurrentConfig().ipMaskV6.toString();
             break;
         case MAX_BODY_SIZE:
-            value = Integer.toString(SINGLETON.maxBodySize);
+            value = Integer.toString(getCurrentConfig().maxBodySize);
             break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
-            value = Integer.toString(SINGLETON.defaultMaxConcurrentAJAXRequests);
+            value = Integer.toString(getCurrentConfig().defaultMaxConcurrentAJAXRequests);
             break;
         default:
             value = getProperty(property.getPropertyName());
@@ -380,11 +486,11 @@ public final class ServerConfig implements Reloadable {
     public static boolean getBoolean(final Property property) {
         final boolean value;
         if (Property.PrefetchEnabled == property) {
-            value = SINGLETON.prefetchEnabled;
+            value = getCurrentConfig().prefetchEnabled;
         } else if (Property.COOKIE_HTTP_ONLY == property) {
-            value = SINGLETON.cookieHttpOnly;
+            value = getCurrentConfig().cookieHttpOnly;
         } else {
-            value = Boolean.parseBoolean(SINGLETON.props.getProperty(property.getPropertyName()));
+            value = Boolean.parseBoolean(getCurrentConfig().props.getProperty(property.getPropertyName()));
         }
         return value;
     }
@@ -393,22 +499,22 @@ public final class ServerConfig implements Reloadable {
         final Integer value;
         switch (property) {
         case MaxFileUploadSize:
-            value = I(SINGLETON.maxFileUploadSize);
+            value = I(getCurrentConfig().maxFileUploadSize);
             break;
         case MaxUploadIdleTimeMillis:
-            value = I(SINGLETON.maxUploadIdleTimeMillis);
+            value = I(getCurrentConfig().maxUploadIdleTimeMillis);
             break;
         case JMX_PORT:
-            value = I(SINGLETON.jmxPort);
+            value = I(getCurrentConfig().jmxPort);
             break;
         case COOKIE_TTL:
-            value = I(SINGLETON.cookieTTL);
+            value = I(getCurrentConfig().cookieTTL);
             break;
         case MAX_BODY_SIZE:
-            value = I(SINGLETON.maxBodySize);
+            value = I(getCurrentConfig().maxBodySize);
             break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
-            value = I(SINGLETON.defaultMaxConcurrentAJAXRequests);
+            value = I(getCurrentConfig().defaultMaxConcurrentAJAXRequests);
             break;
         default:
             try {
@@ -433,22 +539,22 @@ public final class ServerConfig implements Reloadable {
         final int value;
         switch (property) {
         case MaxFileUploadSize:
-            value = SINGLETON.maxFileUploadSize;
+            value = getCurrentConfig().maxFileUploadSize;
             break;
         case MaxUploadIdleTimeMillis:
-            value = SINGLETON.maxUploadIdleTimeMillis;
+            value = getCurrentConfig().maxUploadIdleTimeMillis;
             break;
         case JMX_PORT:
-            value = SINGLETON.jmxPort;
+            value = getCurrentConfig().jmxPort;
             break;
         case COOKIE_TTL:
-            value = SINGLETON.cookieTTL;
+            value = getCurrentConfig().cookieTTL;
             break;
         case MAX_BODY_SIZE:
-            value = SINGLETON.maxBodySize;
+            value = getCurrentConfig().maxBodySize;
             break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
-            value = SINGLETON.defaultMaxConcurrentAJAXRequests;
+            value = getCurrentConfig().defaultMaxConcurrentAJAXRequests;
             break;
         default:
             try {
@@ -468,22 +574,22 @@ public final class ServerConfig implements Reloadable {
         final Long value;
         switch (property) {
         case MaxFileUploadSize:
-            value = L(SINGLETON.maxFileUploadSize);
+            value = L(getCurrentConfig().maxFileUploadSize);
             break;
         case MaxUploadIdleTimeMillis:
-            value = L(SINGLETON.maxUploadIdleTimeMillis);
+            value = L(getCurrentConfig().maxUploadIdleTimeMillis);
             break;
         case JMX_PORT:
-            value = L(SINGLETON.jmxPort);
+            value = L(getCurrentConfig().jmxPort);
             break;
         case COOKIE_TTL:
-            value = L(SINGLETON.cookieTTL);
+            value = L(getCurrentConfig().cookieTTL);
             break;
         case MAX_BODY_SIZE:
-            value = L(SINGLETON.maxBodySize);
+            value = L(getCurrentConfig().maxBodySize);
             break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
-            value = L(SINGLETON.defaultMaxConcurrentAJAXRequests);
+            value = L(getCurrentConfig().defaultMaxConcurrentAJAXRequests);
             break;
         default:
             try {
@@ -503,6 +609,10 @@ public final class ServerConfig implements Reloadable {
     public static enum Property {
         /**
          * Upload directory.
+         * <p>
+         * Please prefer {@link ServerConfig#getTmpDir()} to obtain the upload directory.
+         *
+         * @see ServerConfig#getTmpDir()
          */
         UploadDirectory("UPLOAD_DIRECTORY", "/tmp/"),
         /**
@@ -608,7 +718,6 @@ public final class ServerConfig implements Reloadable {
         ;
 
         private final String propertyName;
-
         private final String defaultValue;
 
         private Property(final String propertyName, final String defaultValue) {
@@ -616,10 +725,20 @@ public final class ServerConfig implements Reloadable {
             this.defaultValue = defaultValue;
         }
 
+        /**
+         * Gets the property name; e.g. <code>"com.openexchange.IPCheckWhitelist"</code>
+         *
+         * @return The property name
+         */
         public String getPropertyName() {
             return propertyName;
         }
 
+        /**
+         * Gets the default value to assume for this property if absent in "server.properties" files
+         *
+         * @return The default value
+         */
         public String getDefaultValue() {
             return defaultValue;
         }
@@ -629,4 +748,5 @@ public final class ServerConfig implements Reloadable {
     public Interests getInterests() {
         return Reloadables.interestsForFiles("server.properties");
     }
+
 }

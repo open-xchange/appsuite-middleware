@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.Mail.getSaveAsFileName;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,7 +74,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -286,7 +284,7 @@ public final class AJAXFile extends PermissionServlet {
                  * Set factory constraints
                  */
                 factory.setSizeThreshold(0);
-                factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+                factory.setRepository(ServerConfig.getTmpDir());
                 /*
                  * Create a new file upload handler
                  */

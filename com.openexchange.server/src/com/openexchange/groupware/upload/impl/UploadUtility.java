@@ -276,7 +276,7 @@ public final class UploadUtility {
         DiskFileItemFactory factory = new DiskFileItemFactory();
         // Set factory constraints; threshold for single files
         factory.setSizeThreshold(SIZE_THRESHOLD);
-        factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+        factory.setRepository(ServerConfig.getTmpDir());
         // Create a new file upload handler
         ServletFileUpload sfu = new ServletFileUpload(factory);
         // Set the maximum allowed size of a single uploaded file
@@ -482,7 +482,7 @@ public final class UploadUtility {
                 charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
             }
 
-            String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
+            File uploadDir = ServerConfig.getTmpDir();
             String fileName = req.getParameter("filename");
             long current = 0L;
 
@@ -687,7 +687,7 @@ public final class UploadUtility {
         uploadEvent.setAction(action);
 
         String contentType = req.getHeader("Content-type");
-        String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
+        File uploadDir = ServerConfig.getTmpDir();
         String fileName = req.getParameter("filename");
         boolean error = true;
         try {
@@ -725,7 +725,7 @@ public final class UploadUtility {
         return uploadEvent;
     }
 
-    private static UploadFile processUploadedFile(InputStream stream, String contentType, String uploadDir, String fileName, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
+    private static UploadFile processUploadedFile(InputStream stream, String contentType, File uploadDir, String fileName, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
         UploadFile retval = new UploadFileImpl();
         retval.setFileName(fileName);
 
@@ -752,7 +752,7 @@ public final class UploadUtility {
         // Track size
         long size = 0;
         // Create temporary file
-        File tmpFile = File.createTempFile(PREFIX, null, new File(uploadDir));
+        File tmpFile = File.createTempFile(PREFIX, null, uploadDir);
         tmpFile.deleteOnExit();
 
         // Start upload evicter (if not yet done)
@@ -836,7 +836,7 @@ public final class UploadUtility {
 
     private static final String PREFIX = "openexchange-upload-" + com.openexchange.exception.OXException.getServerId() + "-";
 
-    private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
+    private static UploadFile processUploadedFile(FileItemStream item, File uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
         UploadFile retval = new UploadFileImpl();
         retval.setFieldName(item.getFieldName());
         retval.setFileName(fileName);
@@ -897,7 +897,7 @@ public final class UploadUtility {
         }
 
         // Create temporary file
-        File tmpFile = File.createTempFile(PREFIX, null, new File(uploadDir));
+        File tmpFile = File.createTempFile(PREFIX, null, uploadDir);
         tmpFile.deleteOnExit();
 
         // Start upload evicter (if not yet done)

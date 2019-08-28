@@ -62,7 +62,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.config.mbean.ConfigReloadMBean;
 import com.openexchange.config.mbean.ConfigReloadMBeanImpl;
 import com.openexchange.config.rmi.RemoteConfigurationService;
@@ -159,7 +158,6 @@ public final class ConfigActivator extends HousekeepingActivator {
             }
 
             super.stopBundle();
-            FileWatcher.dropTimer();
             ConfigurationImpl.setConfigReference(null);
         } catch (Throwable t) {
             logger.error("", t);

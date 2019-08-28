@@ -78,6 +78,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewRe
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.Constants;
@@ -155,7 +156,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
     @Override
     public void call(final IDataWrapper data) throws Exception {
         // closing of internal resources will be handled by FileHolder set at DataWrapper
-        final IFileHolder file = transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), data.getTmpDirReference());
+        final IFileHolder file = transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), ServerConfig.getTmpDir());
 
         if (null == file) {
             // Quit with 404
@@ -369,13 +370,13 @@ public class TransformImageAction implements IFileResponseRendererAction {
      * @param result
      * @param file
      * @param delivery
-     * @param tmpDirRef
+     * @param tmpDir
      * @return
      * @throws IOException
      * @throws OXException
      * @throws FileResponseRendererActionException
      */
-    private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder file, final String delivery, AtomicReference<File> tmpDirReference) throws OXException, FileResponseRendererActionException, IOException {
+    private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder file, final String delivery, File tmpDir) throws OXException, FileResponseRendererActionException, IOException {
 
         final String sourceMimeType = getSourceMimeType(file);
         final TransformImageParameters xformParams = new TransformImageParameters(getTargetMimeType(sourceMimeType));
@@ -477,7 +478,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                     } catch (RuntimeException e) {
                         if (LOG.isDebugEnabled()) {
                             try {
-                                LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", repetitiveFile.getName(), writeBrokenImage2Disk(repetitiveFile, tmpDirReference).getPath(), e);
+                                LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", repetitiveFile.getName(), writeBrokenImage2Disk(repetitiveFile, tmpDir).getPath(), e);
                             } catch (IOException | OXException excp) {
                                 LOG.error("Unable to transform image from {}", repetitiveFile.getName(), excp);
                             }
@@ -645,13 +646,13 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
     /**
      * @param inputFile
-     * @param tmpDirRef
+     * @param tmpDir
      * @return
      * @throws IOException
      * @throws OXException
      * @throws FileNotFoundException
      */
-    private static File writeBrokenImage2Disk(final IFileHolder inputFile, AtomicReference<File> tmpDirReference) throws IOException, OXException, FileNotFoundException {
+    private static File writeBrokenImage2Disk(final IFileHolder inputFile, File tmpDir) throws IOException, OXException, FileNotFoundException {
         String suffix = null;
         final String name = inputFile.getName();
 
@@ -674,7 +675,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         }
 
         // copy file
-        final File retFile = File.createTempFile("brokenimage-", (null == suffix) ? ".tmp" : suffix, tmpDirReference.get());
+        final File retFile = File.createTempFile("brokenimage-", (null == suffix) ? ".tmp" : suffix, tmpDir);
 
         try (final InputStream inputStm = inputFile.getStream()) {
             FileUtils.copyInputStreamToFile(inputStm, retFile);

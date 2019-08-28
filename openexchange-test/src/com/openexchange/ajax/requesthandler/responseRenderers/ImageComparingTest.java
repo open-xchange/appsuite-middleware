@@ -121,7 +121,7 @@ public class ImageComparingTest {
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
-        simManagedFileManagement = new ManagedFileManagementImpl(simConfigurationService, timerService, new DefaultDispatcherPrefixService("/ajax/"));
+        simManagedFileManagement = new ManagedFileManagementImpl(timerService, new DefaultDispatcherPrefixService("/ajax/"));
         ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, simManagedFileManagement);
         PowerMockito.when(com.openexchange.imagetransformation.java.osgi.Services.getService(TimerService.class)).thenReturn(timerService);
     }

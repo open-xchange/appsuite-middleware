@@ -47,33 +47,29 @@
  *
  */
 
-package com.openexchange.config.internal.filewatcher;
+package com.openexchange.uploaddir;
 
 import java.io.File;
-import com.openexchange.config.internal.FileProcessor;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link ProcessingFileListener} Reprocess files on change. 
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link UploadDirService} - The singleton service providing up-to-date path to configured upload directory.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class ProcessingFileListener implements FileListener {
+@SingletonService
+public interface UploadDirService {
 
-    FileProcessor processor;
-
-    public ProcessingFileListener(File file, FileProcessor processor) {
-        super();
-        this.processor = processor;
-    }
-
-    @Override
-    public void onChange(File file) {
-        processor.processFile(file);
-    }
-
-    @Override
-    public void onDelete() {
-    }
+    /**
+     * Gets the upload directory to save to.
+     * <p>
+     * <b>Note</b>: This method does honor reloaded configuration.
+     *
+     * @return The upload directory
+     * @throws OXException If upload directory cannot be returned; e.g. property missing or no such directory exists
+     */
+    File getUploadDir() throws OXException;
 
 }

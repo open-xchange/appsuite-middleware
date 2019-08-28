@@ -69,13 +69,16 @@ public final class ManagedFileManagementActivator implements BundleActivator {
 
     private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
+    /**
+     * Initializes a new {@link ManagedFileManagementActivator}.
+     */
     public ManagedFileManagementActivator() {
         super();
     }
 
     @Override
     public void start(BundleContext context) throws Exception {
-        trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new TmpFileCleaner(context)));
+        trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new TmpFileCleaner()));
         DependentServiceRegisterer<ManagedFileManagement> registerer = new DependentServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, ConfigurationService.class, TimerService.class, DispatcherPrefixService.class);
         trackers.add(new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer));
         for (ServiceTracker<?,?> tracker : trackers) {
@@ -89,4 +92,5 @@ public final class ManagedFileManagementActivator implements BundleActivator {
             trackers.pop().close();
         }
     }
+
 }

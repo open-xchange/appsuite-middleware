@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -68,6 +67,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.uploaddir.UploadDirService;
 
 /**
  * {@link DocumentPatchAction}
@@ -172,7 +172,12 @@ public class DocumentPatchAction extends AbstractFileAction {
      */
     private static java.io.File newTempFile() throws OXException {
         try {
-            java.io.File directory = new java.io.File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
+            UploadDirService uploadDirService = Services.getUploadDirService();
+            if (uploadDirService == null) {
+                throw ServiceExceptionCode.absentService(UploadDirService.class);
+            }
+
+            java.io.File directory = uploadDirService.getUploadDir();
             java.io.File tmpFile = java.io.File.createTempFile("open-xchange-dpa-", ".tmp", directory);
             tmpFile.deleteOnExit();
             return tmpFile;

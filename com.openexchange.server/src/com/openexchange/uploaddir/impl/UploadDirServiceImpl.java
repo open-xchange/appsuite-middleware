@@ -47,21 +47,35 @@
  *
  */
 
-package com.openexchange.config;
+package com.openexchange.uploaddir.impl;
 
-import com.openexchange.config.PropertyEvent.Type;
+import java.io.File;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.exception.OXException;
+import com.openexchange.uploaddir.UploadDirService;
 
 /**
- * {@link PropertyListener} - Listener for a certain property.
+ * {@link UploadDirServiceImpl} - The default implementation for upload directory service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface PropertyListener {
+public class UploadDirServiceImpl implements UploadDirService {
 
     /**
-     * Invoked if corresponding property has changed.
-     *
-     * @param event The property event containing property information and event type: either {@link Type#CHANGED} or {@link Type#DELETED}
+     * Initializes a new {@link UploadDirServiceImpl}.
      */
-    public void onPropertyChange(PropertyEvent event);
+    public UploadDirServiceImpl() {
+        super();
+    }
+
+    @Override
+    public File getUploadDir() throws OXException {
+        try {
+            return ServerConfig.getTmpDir();
+        } catch (IllegalArgumentException e) {
+            throw OXException.general(e.getMessage(), e);
+        }
+    }
+
 }

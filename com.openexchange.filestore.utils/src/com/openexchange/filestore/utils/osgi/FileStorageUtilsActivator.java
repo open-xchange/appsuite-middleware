@@ -49,11 +49,8 @@
 
 package com.openexchange.filestore.utils.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.config.Reloadable;
-import com.openexchange.filestore.utils.TempFileHelper;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.uploaddir.UploadDirService;
 
 /**
  * {@link FileStorageUtilsActivator}
@@ -61,9 +58,7 @@ import com.openexchange.filestore.utils.TempFileHelper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class FileStorageUtilsActivator implements BundleActivator {
-
-    private ServiceRegistration<Reloadable> reloadableRegistration;
+public class FileStorageUtilsActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link FileStorageUtilsActivator}.
@@ -73,17 +68,19 @@ public class FileStorageUtilsActivator implements BundleActivator {
     }
 
     @Override
-    public synchronized void start(BundleContext context) throws Exception {
-        reloadableRegistration = context.registerService(Reloadable.class, TempFileHelper.getInstance(), null);
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { UploadDirService.class };
     }
 
     @Override
-    public synchronized void stop(BundleContext context) throws Exception {
-        ServiceRegistration<Reloadable> reloadableRegistration = this.reloadableRegistration;
-        if (reloadableRegistration != null) {
-            this.reloadableRegistration = null;
-            reloadableRegistration.unregister();
-        }
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

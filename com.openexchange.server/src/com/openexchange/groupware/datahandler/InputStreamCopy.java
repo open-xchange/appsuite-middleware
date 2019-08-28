@@ -80,7 +80,7 @@ final class InputStreamCopy implements Closeable {
 
     private final long size;
 
-    private String prefix;
+    private final String prefix;
 
     public InputStreamCopy(final InputStream orig, final String prefix, final boolean createFile) throws IOException {
         super();
@@ -129,7 +129,7 @@ final class InputStreamCopy implements Closeable {
     private long copy2File(final InputStream in) throws IOException {
         long totalBytes = 0;
         {
-            final File tmpFile = File.createTempFile(prefix, null, new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
+            final File tmpFile = File.createTempFile(prefix, null, ServerConfig.getTmpDir());
             tmpFile.deleteOnExit();
             OutputStream out = null;
             try {
