@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -83,22 +84,16 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserFolderNameInterceptor.class);
 
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link UserFolderNameInterceptor}.
-     * 
+     *
      * @param serviceLookup The {@link ServiceLookup}
      */
     public UserFolderNameInterceptor(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
-    }
-
-    @Override
-    public void afterCreate(Context context, User user, Contact contactData) throws OXException {
-        handle(context, user, contactData, UserServiceInterceptor.EMPTY_PROPS);
-        super.afterCreate(context, user, contactData);
     }
 
     @Override
@@ -115,7 +110,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
 
     /**
      * Ensures unique folder name under {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID}
-     * 
+     *
      * @param context The {@link Context} to check the uniqueness in
      * @param user The {@link User} that was created or updated
      * @param contactData The {@link Contact} that was created or updated
@@ -153,19 +148,35 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
         /*
          * Acquire connection and update folder name
          */
-        Connection connection = getConnection(properties);
-        DatabaseService databaseService = serviceLookup.getServiceSafe(DatabaseService.class);
         Context loadedContext = serviceLookup.getServiceSafe(ContextService.class).getContext(context.getContextId());
+        Optional<Connection> optionalConnection = getConnection(properties);
+        if (optionalConnection.isPresent()) {
+            propagateDisplayNameModification(loadedContext, userId, displayName, optionalConnection.get());
+        } else {
+            propagateDisplayNameModification(loadedContext, userId, displayName);
+        }
+    }
+
+    /**
+     * Propagates modifications <b>already</b> performed on an existing user throughout folder module.
+     *
+     * @param context The {@link Context}
+     * @param userId The user identifier
+     * @param displayName The new display name of the user
+     * @throws OXException If user's modifications could not be successfully propagated
+     */
+    // Partly copied from OXFolderAdminCache, written by Thorben
+    private void propagateDisplayNameModification(Context context, int userId, String displayName) throws OXException {
+        DatabaseService databaseService = serviceLookup.getServiceSafe(DatabaseService.class);
+        Connection connection = databaseService.getWritable(context);
         int rollback = 0;
-        boolean close = false;
         try {
-            if (null == connection) {
-                connection = databaseService.getWritable(loadedContext);
-                connection.setAutoCommit(false);
-                close = true;
-            }
+            Databases.startTransaction(connection);
             rollback = 1;
-            propagateDisplayNameModification(loadedContext, userId, displayName, connection);
+
+            propagateDisplayNameModification(context, userId, displayName, connection);
+
+            connection.commit();
             rollback = 2;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -176,17 +187,13 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
                 }
                 Databases.autocommit(connection);
             }
-
-            if (close) {
-                databaseService.backWritable(context, connection);
-            }
+            databaseService.backWritable(context, connection);
         }
-
     }
 
     /**
      * Propagates modifications <b>already</b> performed on an existing user throughout folder module.
-     * 
+     *
      * @param context The {@link Context}
      * @param userId The user identifier
      * @param displayName The new display name of the user
@@ -205,19 +212,19 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
                 LOGGER.debug("Unable to ensure folder name uniqueness", OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME, I(userId), I(context.getContextId())));
                 return;
             }
-            
+
             /*
              * Update folder name
              */
             String folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, connection);
             OXFolderSQL.updateName(defaultInfostoreFolderId, folderName, lastModified, context.getMailadmin(), connection, context);
-            
+
             /*
              * Clear caches
              */
             updateLastModified(context, connection, lastModified);
             clearFolderCache(context, defaultInfostoreFolderId);
-            
+
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -226,7 +233,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
     /**
      * Updates the last modified timestamp of the folder {@link FolderObject#SYSTEM_SHARED_FOLDER_ID} and clears the
      * corresponding cache
-     * 
+     *
      * @param context The {@link Context}
      * @param connection The {@link Connection}
      * @param lastModified The timespamp to set the last modified value too
@@ -235,7 +242,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
     // Extracted from OXFolderAdminCache, written by Thorben
     private void updateLastModified(Context context, Connection connection, long lastModified) throws OXException {
         /*
-         * Update shared folder's last modified timestamp
+         * Update shared folder's last modified time stamp
          */
         try {
             OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, context.getMailadmin(), connection, context);
@@ -244,7 +251,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private void clearFolderCache(Context context, int folderId) throws OXException {
         /*
          * Reload cache entry
@@ -259,7 +266,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
 
     /**
      * Checks a string if it contains invalid characters
-     * 
+     *
      * @param folderName The folder name to check
      * @throws OXException {@link OXFolderExceptionCode#INVALID_DATA} if string contains invalid characters
      */
@@ -271,19 +278,14 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
     }
 
     /**
-     * Does a lookup if the caller provided a connection
+     * Does a look-up if the caller provided a connection
      *
      * @param properties A map with properties
-     * @return The {@link Connection} or <code>null</code> if not provided
+     * @return The optional {@link Connection}
      */
-    private Connection getConnection(Map<String, Object> properties) {
-        if (null != properties && false == properties.isEmpty() && properties.containsKey(UserServiceInterceptor.PROP_CONNECTION)) {
-            Object object = properties.get(UserServiceInterceptor.PROP_CONNECTION);
-            if (object instanceof Connection) {
-                return (Connection) object;
-            }
-        }
-        return null;
+    private Optional<Connection> getConnection(Map<String, Object> properties) {
+        Object object = properties == null ? null : properties.get(UserServiceInterceptor.PROP_CONNECTION);
+        return object instanceof Connection ? Optional.of((Connection) object) : Optional.empty();
     }
 
 }

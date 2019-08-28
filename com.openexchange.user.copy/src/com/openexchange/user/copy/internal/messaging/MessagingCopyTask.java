@@ -61,7 +61,6 @@ import java.util.Map;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
@@ -133,7 +132,7 @@ public class MessagingCopyTask implements CopyUserTaskService {
                 final ObjectMapping<Integer> accountMapping = copyTools.checkAndExtractGenericMapping(OAuthAccount.class.getName());
                 final List<MessagingAccount> accounts = loadMessagingAccountsFromDB(srcCon, i(srcCtxId), i(srcUsrId));
                 fillMessagingAccountsWithConfig(accounts, srcCon, i(srcCtxId));
-                exchangeIds(accounts, copyTools.getDestinationContext());
+                exchangeIds(accounts, dstCon, i(dstCtxId));
                 setAccountIdsForMessagingAccounts(accounts, accountMapping);
                 writeMessagingAccountsToDB(accounts, dstCon, i(dstCtxId), i(dstUsrId));
             }
@@ -175,10 +174,10 @@ public class MessagingCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void exchangeIds(final List<MessagingAccount> accounts, final Context context) throws OXException {
+    private void exchangeIds(final List<MessagingAccount> accounts, final Connection con, final int cid) throws OXException {
         for (final MessagingAccount account : accounts) {
             try {
-                final int newConfigId = IDGenerator.getId(context, Types.GENERIC_CONFIGURATION);
+                final int newConfigId = IDGenerator.getId(cid, Types.GENERIC_CONFIGURATION, con);
                 account.setConfId(newConfigId);
                 account.setId(newConfigId);
             } catch (SQLException e) {

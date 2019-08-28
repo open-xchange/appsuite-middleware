@@ -75,7 +75,6 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -174,7 +173,7 @@ public class ContactCopyTask implements CopyUserTaskService {
 
         if (!contacts.isEmpty()) {
             loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId.intValue());
-            exchangeIds(contacts, folderMapping, copyTools.getDestinationContext(), i(srcUsrId), i(dstUsrId));
+            exchangeIds(contacts, folderMapping, dstCon, i(dstCtxId), i(srcUsrId), i(dstUsrId));
             writeContactsToDB(contacts, contactFields, dstCon, i(dstCtxId), i(dstUsrId));
             writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));
 
@@ -288,10 +287,10 @@ public class ContactCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void exchangeIds(final Map<Integer, Contact> contacts, final ObjectMapping<FolderObject> folderMapping, final Context context, final int oldUid, final int newUid) throws OXException {
+    private void exchangeIds(final Map<Integer, Contact> contacts, final ObjectMapping<FolderObject> folderMapping, final Connection con, final int cid, final int oldUid, final int newUid) throws OXException {
         for (Contact contact : contacts.values()) {
             try {
-                final int newContactId = IDGenerator.getId(context, com.openexchange.groupware.Types.CONTACT);
+                final int newContactId = IDGenerator.getId(cid, com.openexchange.groupware.Types.CONTACT, con);
                 contact.setObjectID(newContactId);
 
                 final int oldParentFolder = contact.getParentFolderID();
@@ -320,7 +319,7 @@ public class ContactCopyTask implements CopyUserTaskService {
 
                 contact.setCreatedBy(newUid);
                 contact.setModifiedBy(newUid);
-                contact.setContextId(context.getContextId());
+                contact.setContextId(cid);
             } catch (SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }

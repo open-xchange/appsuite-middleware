@@ -180,7 +180,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         final List<Integer> taskIds = new ArrayList<>(taskMapping.getSourceKeys());
         final List<Attachment> attachments = loadAttachmentsFromDB(srcCon, i(srcCtxId), appointmentIds, contactIds, taskIds);
         copyFiles(attachments, srcFileStorage, dstFileStorage);
-        exchangeIds(attachments, appointmentMapping, contactMapping, taskMapping, i(dstUsrId), dstCtx);
+        exchangeIds(dstCon, attachments, appointmentMapping, contactMapping, taskMapping, i(dstUsrId), i(dstCtxId));
         writeAttachmentsToDB(dstCon, attachments, dstCtxId.intValue());
 
         return null;
@@ -216,7 +216,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         }
     }
 
-    void exchangeIds(final List<Attachment> attachments, final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<Integer> contactMapping, final ObjectMapping<Integer> taskMapping, final int uid, final Context context) throws OXException {
+    void exchangeIds(final Connection con, final List<Attachment> attachments, final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<Integer> contactMapping, final ObjectMapping<Integer> taskMapping, final int uid, final int cid) throws OXException {
         for (final Attachment attachment : attachments) {
             final int oldAttachedId = attachment.getAttachedId();
             final int module = attachment.getModuleId();
@@ -246,7 +246,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
 
             try {
                 final int newAttachedId = i(mapping.getDestination(I(oldAttachedId)));
-                final int newId = IDGenerator.getId(context, Types.ATTACHMENT);
+                final int newId = IDGenerator.getId(cid, Types.ATTACHMENT, con);
                 attachment.setId(newId);
                 attachment.setCreatedBy(uid);
                 attachment.setAttachedId(newAttachedId);
