@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.impl.groupware;
 
+import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.Databases;
@@ -57,7 +58,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
 
 /**
  * {@link CompositionSpaceEnlargeSubjectField}
@@ -82,10 +82,7 @@ public class CompositionSpaceEnlargeSubjectField extends UpdateTaskAdapter {
             con.setAutoCommit(false);
             rollback = 1;
 
-            if (512 != Tools.getVarcharColumnSize("subject", "compositionSpace", con)) {
-                Column column = new Column("subject", "VARCHAR(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL");
-                Tools.modifyColumns(con, "compositionSpace", column);
-            }
+            checkAndModifyColumns(con, "compositionSpace", new Column("subject", "TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL"));
 
             con.commit();
             rollback = 2;
