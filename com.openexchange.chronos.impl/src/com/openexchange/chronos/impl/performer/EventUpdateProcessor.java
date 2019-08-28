@@ -421,12 +421,7 @@ public class EventUpdateProcessor implements EventUpdate {
                 Check.startAndEndDate(session, updatedEvent);
                 break;
             case RECURRENCE_RULE:
-                try {
-                    Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
-                } catch (Exception e) {
-                    LOG.error("Invalid Recurrence Rule: {}, start: {}, end: {}", updatedEvent.getRecurrenceRule(), updatedEvent.getStartDate(), updatedEvent.getEndDate());
-                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(e, originalEvent.getId(), updatedField);
-                }
+                Check.recurrenceRuleIsValid(session.getRecurrenceService(), updatedEvent);
                 /*
                  * ignore a 'matching' recurrence rule
                  */
