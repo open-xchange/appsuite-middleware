@@ -400,7 +400,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                         account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
                     } catch (OXException e) {
                         // Log for debug purposes and ignore...
-                        LOG.debug("{}", e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                     String scopes = rs.getString(6);
                     if (Strings.isNotEmpty(scopes)) {
