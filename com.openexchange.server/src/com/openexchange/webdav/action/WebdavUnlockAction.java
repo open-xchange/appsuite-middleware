@@ -71,22 +71,22 @@ public class WebdavUnlockAction extends AbstractAction {
          */
         WebdavLock lock = req.getResource().getLock(token);
         if (null == lock) {
-            throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+            throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_CONFLICT);
         }
         /*
          * check if current user holds the lock
          */
-        if (null != lock && WebdavLock.Scope.EXCLUSIVE_LITERAL.equals(lock.getScope())) {
+        if (WebdavLock.Scope.EXCLUSIVE_LITERAL.equals(lock.getScope())) {
             WebdavLock ownLock = req.getResource().getOwnLock(token);
             if (null == ownLock) {
-                throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
+                throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             if (0 < ownLock.getOwnerID()) {
-                InfostoreWebdavFactory factory = (InfostoreWebdavFactory)req.getFactory();
+                InfostoreWebdavFactory factory = (InfostoreWebdavFactory) req.getFactory();
                 int currentUserID = factory.getSessionHolder().getSessionObject().getUserId();
                 if (ownLock.getOwnerID() != currentUserID &&
                     factory.getSessionHolder().getContext().getMailadmin() != currentUserID) {
-                    throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
+                    throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
             }
         }
@@ -94,16 +94,9 @@ public class WebdavUnlockAction extends AbstractAction {
          * perform unlock
          */
         req.getResource().unlock(token);
-        res.setStatus(HttpServletResponse.SC_OK);
+        res.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-//    @Override
-//    public void perform(final WebdavRequest req, final WebdavResponse res)
-//            throws WebdavProtocolException {
-//        req.getResource().unlock(getToken(req.getHeader("Lock-Token")));
-//        res.setStatus(HttpServletResponse.SC_OK);
-//    }
-//
 	private String getToken(final String header) {
 		return header.substring(1,header.length()-1);
 	}
