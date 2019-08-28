@@ -1,3 +1,9 @@
+open-xchange-saml-ucs (7.10.1-18) stable; urgency=medium
+
+  * Build for patch 2019-08-26 (5373)
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Mon, 19 Aug 2019 12:30:07 +0200
+
 open-xchange-saml-ucs (7.10.1-17) stable; urgency=medium
 
   * Build for patch 2019-08-12 (5358)
