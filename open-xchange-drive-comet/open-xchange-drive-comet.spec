@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 BuildRequires: open-xchange-drive
 BuildRequires: open-xchange-grizzly
 Version:       @OXVERSION@
-%define        ox_release 60
+%define        ox_release 61
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,6 +60,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Aug 19 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-08-26 (5372)
 * Tue Jul 23 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-07-29 (5339)
 * Tue Jun 11 2019 Marcus Klein <marcus.klein@open-xchange.com>
