@@ -6,6 +6,10 @@ compileJava{
     dependsOn rootProject.buildJars
 }
 
+build{
+    dependsOn (':rest_api_client:sourcesJar')
+}
+
 group = 'com.openexchange.appsuite.mw'
 version = '1.0-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_1_8

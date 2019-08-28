@@ -24,12 +24,22 @@ tasks.register("buildJars"){
     dependsOn("http_api:buildTestClient", "drive_api:buildTestClient", "rest_api:buildTestClient")    
 }
 
-
 tasks.register("copyClients", Copy::class){
-    from("client-gen/out/http_api_client/build/libs/")
-    from("client-gen/out/rest_api_client/build/libs/")
+    dependsOn("copyJars", "copySources")    
+}
+
+tasks.register("copyJars", Copy::class){
+    from("client-gen/out/http_api_client/build/libs/http_api_client-1.0-SNAPSHOT.jar")
+    from("client-gen/out/rest_api_client/build/libs/rest_api_client-1.0-SNAPSHOT.jar")
     into("../openexchange-test/lib")
 }
+
+tasks.register("copySources", Copy::class){
+    from("client-gen/out/http_api_client/build/libs/http_api_client-1.0-SNAPSHOT-sources.jar")
+    from("client-gen/out/rest_api_client/build/libs/rest_api_client-1.0-SNAPSHOT-sources.jar")
+    into("../openexchange-test/lib/source")
+}
+
 
 allprojects {
     group = "com.openexchange.appsuite.mw"

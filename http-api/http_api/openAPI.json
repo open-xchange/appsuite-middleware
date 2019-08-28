@@ -11284,7 +11284,7 @@
         }, {
           "in" : "query",
           "name" : "attachment",
-          "description" : "ID of the requested attachment (can be substituted by the parameter `cid` otherwise this parameter is **madatory**).",
+          "description" : "ID of the requested attachment (can be substituted by the parameter `cid` otherwise this parameter is **mandatory**).",
           "required" : false,
           "schema" : {
             "type" : "string"
@@ -11292,7 +11292,7 @@
         }, {
           "in" : "query",
           "name" : "cid",
-          "description" : "Value of header 'Content-ID' of the requested attachment (can be substituted by the parameter `attachment` otherwise this parameter is **madatory**).",
+          "description" : "Value of header 'Content-ID' of the requested attachment (can be substituted by the parameter `attachment` otherwise this parameter is **mandatory**).",
           "required" : false,
           "schema" : {
             "type" : "string"
