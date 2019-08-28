@@ -52,6 +52,7 @@ package com.openexchange.dav.mixins;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.java.Strings;
+import com.openexchange.resource.Resource;
 import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -65,6 +66,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class EmailAddressSet extends SingleXMLPropertyMixin {
 
     private final User user;
+    private final Resource resource;
 
     /**
      * Initializes a new {@link EmailAddressSet}.
@@ -74,19 +76,37 @@ public class EmailAddressSet extends SingleXMLPropertyMixin {
     public EmailAddressSet(User user) {
         super("http://calendarserver.org/ns/", "email-address-set");
         this.user = user;
+        this.resource = null;
+    }
+
+    /**
+     * Initializes a new {@link EmailAddressSet}.
+     *
+     * @param resource The resource
+     */
+    public EmailAddressSet(Resource resource) {
+        super("http://calendarserver.org/ns/", "email-address-set");
+        this.user = null;
+        this.resource = resource;
     }
 
     @Override
     protected String getValue() {
         List<String> addresses = new ArrayList<String>();
-        if (Strings.isNotEmpty(user.getMail())) {
-            addresses.add(user.getMail());
-        }
-        if (null != user.getAliases()) {
-            for (String alias : user.getAliases()) {
-                if (Strings.isNotEmpty(alias) && false == addresses.contains(alias)) {
-                    addresses.add(alias);
+        if (null != user) {
+            if (Strings.isNotEmpty(user.getMail())) {
+                addresses.add(user.getMail());
+            }
+            if (null != user.getAliases()) {
+                for (String alias : user.getAliases()) {
+                    if (Strings.isNotEmpty(alias) && false == addresses.contains(alias)) {
+                        addresses.add(alias);
+                    }
                 }
+            }
+        } else if (null != resource) {
+            if (Strings.isNotEmpty(resource.getMail())) {
+                addresses.add(resource.getMail());
             }
         }
         if (addresses.isEmpty()) {

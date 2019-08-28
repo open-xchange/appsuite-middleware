@@ -131,12 +131,12 @@ public class SimpleICal {
             return this.getPropertyValue("DESCRIPTION");
         }
 
-        public Property getAttendee(String email) {
+        public Property getAttendee(String uriOrEmail) {
             List<Property> properties = this.getProperties("ATTENDEE");
             if (null != properties) {
                 for (Property property : properties) {
                     String value = property.getValue();
-                    if (null != value && value.contains("mailto:" + email)) {
+                    if (null != value && (value.equals(uriOrEmail) || value.contains("mailto:" + uriOrEmail))) {
                         return property;
                     }
                 }

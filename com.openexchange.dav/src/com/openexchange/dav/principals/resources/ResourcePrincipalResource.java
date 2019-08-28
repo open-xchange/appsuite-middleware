@@ -55,6 +55,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.mixins.CalendarUserAddressSet;
 import com.openexchange.dav.mixins.DisplayName;
+import com.openexchange.dav.mixins.EmailAddressSet;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.RecordType;
 import com.openexchange.dav.resources.DAVResource;
@@ -85,7 +86,7 @@ public class ResourcePrincipalResource extends DAVResource {
         ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
         includeProperties(new DisplayName(resource.getDisplayName()), new com.openexchange.dav.mixins.CalendarUserType(CalendarUserType.RESOURCE),
             new RecordType(RecordType.RECORD_TYPE_RESOURCES), new PrincipalURL(resource.getIdentifier(), CalendarUserType.RESOURCE, configViewFactory),
-            new CalendarUserAddressSet(factory.getContext().getContextId(), resource, configViewFactory),
+            new CalendarUserAddressSet(factory.getContext().getContextId(), resource, configViewFactory), new EmailAddressSet(resource),
             new com.openexchange.dav.mixins.ResourceId(ResourceId.forResource(factory.getContext().getContextId(), resource.getIdentifier()))
         );
     }
