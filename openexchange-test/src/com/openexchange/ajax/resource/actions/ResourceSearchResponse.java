@@ -75,6 +75,10 @@ public class ResourceSearchResponse extends AbstractAJAXResponse {
             Resource temp = new Resource();
             temp.setIdentifier(obj.getInt("id"));
             temp.setDisplayName(obj.getString("display_name"));
+            temp.setMail(obj.getString("mailaddress"));
+            temp.setSimpleName(obj.getString("name"));
+            temp.setAvailable(obj.getBoolean("availability"));
+            temp.setDescription(obj.getString("description"));
             list.add(temp);
         }
         return list;
