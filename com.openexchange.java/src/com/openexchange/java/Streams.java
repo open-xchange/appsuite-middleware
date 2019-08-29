@@ -54,6 +54,9 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,6 +65,7 @@ import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
+import org.apache.commons.io.FileUtils;
 
 /**
  * {@link Streams} - A utility class for streams.
@@ -646,6 +650,29 @@ public class Streams {
             }
         }
         return isAscci;
+    }
+
+    private static final int BUFFER_SIZE = 65536;
+
+    /**
+     * Transfers content of given source input stream to specified (temporary) file and returns a {@code FileInputStream} reading from that
+     * file.
+     *
+     * @param source The source input stream to transfer to file
+     * @param tmpFile The file to transfer to and create the {@code FileInputStream} from
+     * @return The {@code FileInputStream} reading from given file
+     * @throws IOException If an I/O error occurs
+     * @throws FileNotFoundException If given file does not exist
+     */
+    public static FileInputStream transferToFileAndCreateStream(InputStream source, File tmpFile) throws IOException, FileNotFoundException {
+        try (InputStream in = source; OutputStream out = FileUtils.openOutputStream(tmpFile)) {
+            byte[] buffer = new byte[BUFFER_SIZE];
+            for (int n; (n = in.read(buffer)) > 0;) {
+                out.write(buffer, 0, n);
+            }
+            out.flush();
+        }
+        return new FileInputStream(tmpFile);
     }
 
 }
