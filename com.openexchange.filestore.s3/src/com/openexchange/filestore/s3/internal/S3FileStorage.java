@@ -51,6 +51,9 @@ package com.openexchange.filestore.s3.internal;
 
 import static com.openexchange.filestore.s3.internal.S3ExceptionCode.wrap;
 import static com.openexchange.java.Autoboxing.L;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
@@ -87,6 +90,7 @@ import com.amazonaws.services.s3.model.UploadPartResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.utils.TempFileHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -138,15 +142,28 @@ public class S3FileStorage implements FileStorage {
     }
 
     @Override
-    public String saveNewFile(InputStream file) throws OXException {
+    public String saveNewFile(InputStream input) throws OXException {
         /*
          * perform chunked upload as needed
          */
         String key = generateKey(true);
         S3ChunkedUpload chunkedUpload = null;
         S3UploadChunk chunk = null;
+        File tmpFile = null;
         try {
-            chunkedUpload = new S3ChunkedUpload(file, clientSideEncryption, chunkSize);
+            /*
+             * spool to file
+             */
+            if (!(input instanceof FileInputStream)) {
+                tmpFile = TempFileHelper.getInstance().newTempFile();
+                if (tmpFile != null) {
+                    input = Streams.transferToFileAndCreateStream(input, tmpFile);
+                }
+            }
+            /*
+             * proceed
+             */
+            chunkedUpload = new S3ChunkedUpload(input, clientSideEncryption, chunkSize);
             chunk = chunkedUpload.next();
             if (false == chunkedUpload.hasNext()) {
                 /*
@@ -186,8 +203,11 @@ public class S3FileStorage implements FileStorage {
                     }
                 }
             }
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(chunk, chunkedUpload, file);
+            Streams.close(chunk, chunkedUpload, input);
+            TempFileHelper.deleteQuietly(tmpFile);
         }
         return removePrefix(key);
     }
@@ -323,6 +343,7 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        File tmpFile = null;
         try {
             /*
              * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
@@ -340,6 +361,15 @@ public class S3FileStorage implements FileStorage {
                 long currentLength = s3Object.getObjectMetadata().getContentLength();
                 if (currentLength != offset) {
                     throw FileStorageCodes.INVALID_OFFSET.create(Long.valueOf(offset), name, Long.valueOf(currentLength));
+                }
+                /*
+                 * spool to file
+                 */
+                if (!(file instanceof FileInputStream)) {
+                    tmpFile = TempFileHelper.getInstance().newTempFile();
+                    if (tmpFile != null) {
+                        file = Streams.transferToFileAndCreateStream(file, tmpFile);
+                    }
                 }
                 /*
                  * append both streams at temporary location
@@ -364,8 +394,11 @@ public class S3FileStorage implements FileStorage {
             } catch (AmazonClientException e) {
                 throw wrap(e, key);
             }
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(file);
+            TempFileHelper.deleteQuietly(tmpFile);
         }
     }
 

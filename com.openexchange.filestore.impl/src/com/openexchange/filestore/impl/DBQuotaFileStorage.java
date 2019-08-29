@@ -52,13 +52,9 @@ package com.openexchange.filestore.impl;
 import static com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils.isUnifiedQuotaEnabledFor;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import com.openexchange.configuration.ServerConfig;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -94,6 +90,7 @@ import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.filestore.unified.KnownContributor;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.filestore.unified.UsageResult;
+import com.openexchange.filestore.utils.TempFileHelper;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
@@ -694,9 +691,9 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
             // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
             if (spool(spoolToFile, source)) {
-                tmpFile = newTempFile();
+                tmpFile = TempFileHelper.getInstance().newTempFile();
                 if (tmpFile != null) {
-                    is = transferToFileAndCreateStream(is, tmpFile);
+                    is = Streams.transferToFileAndCreateStream(is, tmpFile);
                 }
             }
 
@@ -781,9 +778,9 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
             // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
             if (spool(spoolToFile, source)) {
-                tmpFile = newTempFile();
+                tmpFile = TempFileHelper.getInstance().newTempFile();
                 if (tmpFile != null) {
-                    is = transferToFileAndCreateStream(is, tmpFile);
+                    is = Streams.transferToFileAndCreateStream(is, tmpFile);
                 }
             }
 
@@ -1033,72 +1030,6 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
     @Override
     public String toString() {
         return "DBQuotaFileStorage [contextId=" + contextId + ", quota=" + quota + ", ownerId=" + ownerInfo.getOwnerId() + ", uri=" + uri + "]";
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private static final int BUFFER_SIZE = 65536;
-
-    private static InputStream transferToFileAndCreateStream(InputStream source, File tmpFile) throws IOException, FileNotFoundException {
-        try (InputStream in = source; OutputStream out = FileUtils.openOutputStream(tmpFile)) {
-            byte[] buffer = new byte[BUFFER_SIZE];
-            for (int n; (n = in.read(buffer)) > 0;) {
-                out.write(buffer, 0, n);
-            }
-            out.flush();
-        }
-        return new FileInputStream(tmpFile);
-    }
-
-    private static volatile File uploadDirectory;
-    private static File uploadDirectory() {
-        File tmp = uploadDirectory;
-        if (null == tmp) {
-            synchronized (DBQuotaFileStorage.class) {
-                tmp = uploadDirectory;
-                if (null == tmp) {
-                    tmp = new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
-                    uploadDirectory = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
-     * <ol>
-     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
-     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
-     * machine.
-     * </ol>
-     *
-     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
-     */
-    private static File newTempFile() {
-        return newTempFile("open-xchange-spoolfile-");
-    }
-
-    /**
-     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
-     * <ol>
-     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
-     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
-     * machine.
-     * </ol>
-     *
-     * @param prefix The prefix to use for generated file
-     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
-     */
-    private static File newTempFile(String prefix) {
-        try {
-            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-spoolfile-" : prefix, ".tmp", uploadDirectory());
-            tmpFile.deleteOnExit();
-            return tmpFile;
-        } catch (Exception e) {
-            LOGGER.warn("Failed to create new temporary file", e);
-            return null;
-        }
     }
 
 }

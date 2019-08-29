@@ -50,6 +50,9 @@
 package com.openexchange.filestore.swift;
 
 import static com.openexchange.java.Autoboxing.L;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +76,7 @@ import com.openexchange.filestore.swift.chunkstorage.Chunk;
 import com.openexchange.filestore.swift.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.swift.impl.SwiftClient;
 import com.openexchange.filestore.utils.DefaultChunkedUpload;
+import com.openexchange.filestore.utils.TempFileHelper;
 import com.openexchange.filestore.utils.UploadChunk;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
@@ -145,7 +149,20 @@ public class SwiftFileStorage implements FileStorage {
 
     @Override
     public String saveNewFile(InputStream file) throws OXException {
+        File tmpFile = null;
         try {
+            /*
+             * spool to file
+             */
+            if (!(file instanceof FileInputStream)) {
+                tmpFile = TempFileHelper.getInstance().newTempFile();
+                if (tmpFile != null) {
+                    file = Streams.transferToFileAndCreateStream(file, tmpFile);
+                }
+            }
+            /*
+             * proceed
+             */
             UUID documentId = UUID.randomUUID();
             long length = upload(documentId, file, 0);
             if (length <= 0) {
@@ -153,8 +170,11 @@ public class SwiftFileStorage implements FileStorage {
                 throw SwiftExceptionCode.UNEXPECTED_ERROR.create("Swift storage cannot save an empty file");
             }
             return UUIDs.getUnformattedString(documentId);
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(file);
+            TempFileHelper.deleteQuietly(tmpFile);
         }
     }
 
@@ -262,6 +282,7 @@ public class SwiftFileStorage implements FileStorage {
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        File tmpFile = null;
         try {
             UUID documentId = UUIDs.fromUnformattedString(name);
             Chunk lastChunk = chunkStorage.getLastChunk(documentId);
@@ -272,9 +293,21 @@ public class SwiftFileStorage implements FileStorage {
             if (offset != currentSize) {
                 throw FileStorageCodes.INVALID_OFFSET.create(L(offset), name, L(currentSize));
             }
+            /*
+             * spool to file
+             */
+            if (!(file instanceof FileInputStream)) {
+                tmpFile = TempFileHelper.getInstance().newTempFile();
+                if (tmpFile != null) {
+                    file = Streams.transferToFileAndCreateStream(file, tmpFile);
+                }
+            }
             return upload(documentId, file, offset);
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(file);
+            TempFileHelper.deleteQuietly(tmpFile);
         }
     }
 
