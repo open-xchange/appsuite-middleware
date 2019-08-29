@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite.jobs;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -107,7 +108,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
     @Override
     public Integer call() throws Exception {
-        LOG.debug("Starting context processing ot one schema, for report with uuid: {} and context amount: {}", this.uuid, this.contextIds.size());
+        LOG.debug("Starting context processing ot one schema, for report with uuid: {} and context amount: {}", this.uuid, I(this.contextIds.size()));
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
         currentThread.setPriority(ReportProperties.getThreadPriority());
@@ -122,7 +123,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                 ReportService reportService = Services.getService(ReportService.class);
                 ContextReport contextReport = null;
                 try {
-                    Context ctx = loadContext(ctxId);
+                    Context ctx = loadContext(ctxId.intValue());
                     contextReport = new ContextReport(uuid, reportType, ctx);
 
                     handleContext(contextReport);
@@ -152,7 +153,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
         } finally {
             currentThread.setPriority(previousPriority);
         }
-        return contextIds.size();
+        return I(contextIds.size());
     }
 
     /**
@@ -187,7 +188,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
             if (this.report != null) {
                 userReport.setReportConfig(this.report.getReportConfig());
                 //Add user to context
-                contextReport.getUserList().add(user.getId());
+                contextReport.getUserList().add(I(user.getId()));
                 contextReport.setReportConfig(this.report.getReportConfig());
             }
             if (runUserAnalyzers(contextReport, user, userReport)) {
@@ -211,7 +212,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                     userHandler.runUserReport(userReport);
                 } catch (OXException e) {
                     LOG.error("", e);
-                    contextReport.getUserList().remove((Integer) user.getId());
+                    contextReport.getUserList().remove(I(user.getId()));
                     skip = true;
                     if (this.report != null) {
                         this.report.addError(e);

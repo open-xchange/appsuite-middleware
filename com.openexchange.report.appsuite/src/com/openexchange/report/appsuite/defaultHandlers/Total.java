@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite.defaultHandlers;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.report.appsuite.ContextReport;
@@ -63,7 +64,7 @@ import com.openexchange.report.appsuite.serialization.Report;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class Total implements ContextReportCumulator{
-	
+
     @Override
     public boolean appliesTo(String reportType) {
         return reportType.equals("default") || reportType.equals("extended");
@@ -72,21 +73,21 @@ public class Total implements ContextReportCumulator{
     @Override
     public void merge(ContextReport contextReport, Report report) {
         // Count up one for each context
-        long contexts = report.get(Report.TOTAL, Report.CONTEXTS, 0l, Long.class);
-        long contextsDisabled = report.get(Report.TOTAL, Report.CONTEXTS_DISABLED, 0l, Long.class);
-        
+        long contexts = report.get(Report.TOTAL, Report.CONTEXTS, L(0l), Long.class).longValue();
+        long contextsDisabled = report.get(Report.TOTAL, Report.CONTEXTS_DISABLED, L(0l), Long.class).longValue();
+
         if (!contextReport.getContext().isEnabled()) {
             contextsDisabled++;
         }
-        
-        report.set(Report.TOTAL, Report.CONTEXTS, contexts + 1);
-        report.set(Report.TOTAL, Report.CONTEXTS_DISABLED, contextsDisabled);
+
+        report.set(Report.TOTAL, Report.CONTEXTS, L(contexts + 1));
+        report.set(Report.TOTAL, Report.CONTEXTS_DISABLED, L(contextsDisabled));
         // Sum up the this.TOTALs of the capabilities combinations from the CapabilityHandler
-        long users = report.get(Report.TOTAL, Report.USERS, 0l, Long.class);
-        long guests = report.get(Report.TOTAL, Report.GUESTS, 0l, Long.class);
-        long links = report.get(Report.TOTAL, Report.LINKS, 0l, Long.class);
-        long usersDisabled = report.get(Report.TOTAL, Report.USERS_DISABLED, 0l, Long.class);
-        
+        long users = report.get(Report.TOTAL, Report.USERS, L(0l), Long.class).longValue();
+        long guests = report.get(Report.TOTAL, Report.GUESTS, L(0l), Long.class).longValue();
+        long links = report.get(Report.TOTAL, Report.LINKS, L(0l), Long.class).longValue();
+        long usersDisabled = report.get(Report.TOTAL, Report.USERS_DISABLED, L(0l), Long.class).longValue();
+
         Map<String, Object> macdetail = contextReport.getNamespace(Report.MACDETAIL);
         long contextOnlyUsers = 0l;
 
@@ -94,43 +95,43 @@ public class Total implements ContextReportCumulator{
             HashMap<String, Long> counts = (HashMap) entry.getValue();
             if (counts != null) {
                 if (counts.containsKey(Report.TOTAL)) {
-                    users += counts.get(Report.TOTAL);
-                    contextOnlyUsers += counts.get(Report.TOTAL);
-                    
+                    users += counts.get(Report.TOTAL).longValue();
+                    contextOnlyUsers += counts.get(Report.TOTAL).longValue();
+
                 }
 
 	            if (counts.containsKey(Report.GUESTS)) {
-	                guests += counts.get(Report.GUESTS);
+	                guests += counts.get(Report.GUESTS).longValue();
 	            }
-	            
+
 	            if (counts.containsKey(Report.LINKS)) {
-	                links += counts.get(Report.LINKS);
+	                links += counts.get(Report.LINKS).longValue();
 	            }
-	            
+
 	            if (counts.containsKey(Report.DISABLED)) {
-	                usersDisabled += counts.get(Report.DISABLED);
+	                usersDisabled += counts.get(Report.DISABLED).longValue();
 	            }
 
             }
-            report.set(Report.TOTAL, Report.USERS, users);
-            report.set(Report.TOTAL, Report.USERS_DISABLED, usersDisabled);
-            report.set(Report.TOTAL, Report.GUESTS, guests);
-            report.set(Report.TOTAL, Report.LINKS, links);
-            
+            report.set(Report.TOTAL, Report.USERS, L(users));
+            report.set(Report.TOTAL, Report.USERS_DISABLED, L(usersDisabled));
+            report.set(Report.TOTAL, Report.GUESTS, L(guests));
+            report.set(Report.TOTAL, Report.LINKS, L(links));
+
         }
         report.set(Report.TOTAL, "report-format", "appsuite-short");
-        Long reportMax = report.get(Report.TOTAL, Report.CONTEXT_USERS_MAX, 0l, Long.class);
-        Long reportMin = report.get(Report.TOTAL, Report.CONTEXT_USERS_MIN, 0l, Long.class);
-        
-        if (contextOnlyUsers > reportMax) {
-        	reportMax = contextOnlyUsers;
+        Long reportMax = report.get(Report.TOTAL, Report.CONTEXT_USERS_MAX, L(0l), Long.class);
+        Long reportMin = report.get(Report.TOTAL, Report.CONTEXT_USERS_MIN, L(0l), Long.class);
+
+        if (contextOnlyUsers > reportMax.longValue()) {
+        	reportMax = L(contextOnlyUsers);
 		}
-        if (contextOnlyUsers < reportMin || reportMin == 0l) {
-        	reportMin = contextOnlyUsers;
+        if (contextOnlyUsers < reportMin.longValue() || reportMin.longValue() == 0l) {
+        	reportMin = L(contextOnlyUsers);
 		}
         report.set(Report.TOTAL, Report.CONTEXT_USERS_MAX, reportMax);
         report.set(Report.TOTAL, Report.CONTEXT_USERS_MIN, reportMin);
-        report.set(Report.TOTAL, Report.CONTEXT_USERS_AVG, users / report.get(Report.TOTAL, Report.CONTEXTS, Long.class));
+        report.set(Report.TOTAL, Report.CONTEXT_USERS_AVG, L(users / report.get(Report.TOTAL, Report.CONTEXTS, Long.class).longValue()));
         HashMap<String, Long> timeframeMap = new HashMap<>();
         timeframeMap.put(Report.TIMEFRAME_START, report.getConsideredTimeframeStart());
         timeframeMap.put(Report.TIMEFRAME_END, report.getConsideredTimeframeEnd());

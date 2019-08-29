@@ -192,7 +192,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
             }
             HashMap<String, Long> userLogins = (HashMap<String, Long>) getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId());
-            
+
             userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
         }
     }
@@ -345,7 +345,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                     macdetail.put(currentCapS.getKey(), new HashMap<>());
                     compositionCapSList = new ArrayList<>(Arrays.asList(compositionCapS.split(",")));
                 }
-                addDriveMetricsToCapS((Map<String, Object>) macdetail.get(currentCapS.getKey()), (Map<Integer, List<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report, compositionCapSList);
+                addDriveMetricsToCapS((Map<String, Object>) macdetail.get(currentCapS.getKey()), (Map<Integer, List<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart().longValue()), new Date(report.getConsideredTimeframeEnd().longValue()), report, compositionCapSList);
             }
         }
         // calculate correct drive average values
@@ -464,7 +464,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             if (driveTotalMap.get("file-count-in-timerange-total") != null) {
                 driveTotalMap.put("file-count-in-timerange-avg", L(l(driveTotalMap.get("file-count-in-timerange-total")) / l(totalDriveUsers)));
             }
-            if (driveTotalMap.get("quota-usage-percent-sum") != null && driveTotalMap.get("quota-usage-percent-total") != null && driveTotalMap.get("quota-usage-percent-total") != 0) {
+            if (driveTotalMap.get("quota-usage-percent-sum") != null && driveTotalMap.get("quota-usage-percent-total") != null && driveTotalMap.get("quota-usage-percent-total").longValue() != 0) {
                 driveTotalMap.put("quota-usage-percent-avg", L(l(driveTotalMap.get("quota-usage-percent-sum")) / l(driveTotalMap.get("quota-usage-percent-total"))));
             }
             driveTotalMap.remove("quota-usage-percent-total");

@@ -102,15 +102,15 @@ public class ReportMXBeanImpl implements ReportMXBean {
         Report lastReport = Services.getService(ReportService.class).getLastErrorReport(reportType);
         return null == lastReport ? null : new JMXReport(lastReport);
     }
-    
+
     @Override
     public String run(String reportType, Boolean isSingleDeployment, Boolean isConfigureTimerange, Long timeframeStart, Long timeframeEnd) throws Exception {
         try {
             ReportConfigs reportConfig = new ReportConfigs.ReportConfigsBuilder(reportType)
-                .isSingleDeployment(isSingleDeployment)
-                .isConfigTimerange(isConfigureTimerange)
-                .consideredTimeframeStart(timeframeStart)
-                .consideredTimeframeEnd(timeframeEnd)
+                .isSingleDeployment(isSingleDeployment.booleanValue())
+                .isConfigTimerange(isConfigureTimerange.booleanValue())
+                .consideredTimeframeStart(timeframeStart.longValue())
+                .consideredTimeframeEnd(timeframeEnd.longValue())
                 .build();
             return Services.getService(ReportService.class).run(reportConfig);
         } catch (OXException e) {

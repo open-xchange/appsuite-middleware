@@ -1,6 +1,7 @@
 
 package com.openexchange.report.appsuite.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -25,10 +26,18 @@ public class ReportProperties implements Reloadable {
     private static volatile Integer maxThreadPoolSize;
     private static volatile Integer threadPriority;
 
+    /**
+     * Initializes a new {@link ReportProperties}.
+     */
     public ReportProperties() {
         super();
     }
 
+    /**
+     * Gets the value of the <code>"com.openexchange.report.appsuite.fileStorage"</code> property.
+     *
+     * @return The storage path
+     */
     public static String getStoragePath() {
         String sp = storagePath;
         if (sp == null) {
@@ -43,6 +52,11 @@ public class ReportProperties implements Reloadable {
         return sp;
     }
 
+    /**
+     * Gets the value of the <code>"com.openexchange.report.appsuite.maxChunkSize"</code> property.
+     *
+     * @return The max. chunk size
+     */
     public static int getMaxChunkSize() {
         Integer mcs = maxChunkSize;
         if (mcs == null) {
@@ -57,6 +71,11 @@ public class ReportProperties implements Reloadable {
         return mcs.intValue();
     }
 
+    /**
+     * Gets the value of the <code>"com.openexchange.report.appsuite.maxThreadPoolSize"</code> property.
+     *
+     * @return The max. thread pool size
+     */
     public static int getMaxThreadPoolSize() {
         Integer mtpz = maxThreadPoolSize;
         if (mtpz == null) {
@@ -71,6 +90,11 @@ public class ReportProperties implements Reloadable {
         return mtpz.intValue();
     }
 
+    /**
+     * Gets the value of the <code>"com.openexchange.report.appsuite.threadPriority"</code> property.
+     *
+     * @return The thread priority
+     */
     public static int getThreadPriority() {
         Integer tp = threadPriority;
         if (tp == null) {
@@ -86,17 +110,13 @@ public class ReportProperties implements Reloadable {
     }
 
     private static Integer loadIntegerValue(String key, int defaultValue) {
-        Integer propertyValue = null;
         ConfigurationService service = Services.getService(ConfigurationService.class);
-        propertyValue = service.getIntProperty(key, defaultValue);
-        return propertyValue;
+        return I(service.getIntProperty(key, defaultValue));
     }
 
     private static String loadStringValue(String key, String defaultValue) {
-        String propertyValue = null;
         ConfigurationService service = Services.getService(ConfigurationService.class);
-        propertyValue = service.getProperty(key, defaultValue);
-        return propertyValue;
+        return service.getProperty(key, defaultValue);
     }
 
     @Override
@@ -109,7 +129,7 @@ public class ReportProperties implements Reloadable {
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForProperties(STORAGE_PATH, MAX_CHUNK_SIZE,MAX_THREAD_POOL_SIZE,THREAD_PRIORITY);
+        return Reloadables.interestsForProperties(STORAGE_PATH, MAX_CHUNK_SIZE, MAX_THREAD_POOL_SIZE, THREAD_PRIORITY);
     }
 
 }
