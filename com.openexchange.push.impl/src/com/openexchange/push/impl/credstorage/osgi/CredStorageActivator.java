@@ -49,11 +49,11 @@
 
 package com.openexchange.push.impl.credstorage.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -217,15 +217,11 @@ public class CredStorageActivator extends HousekeepingActivator implements Hazel
         registerService(CredentialStorageProvider.class, storageProvider);
         addService(CredentialStorageProvider.class, storageProvider);
         if (null != hzCredStorage) {
-            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(CredentialStorage.class, hzCredStorage, serviceProperties);
+            registerService(CredentialStorage.class, hzCredStorage, withRanking(0));
         }
         if (null != rdbCredStorage) {
             // Higher ranked
-            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-            registerService(CredentialStorage.class, rdbCredStorage, serviceProperties);
+            registerService(CredentialStorage.class, rdbCredStorage, withRanking(10));
         }
     }
 

@@ -50,11 +50,9 @@
 
 package com.openexchange.subscribe.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
-import org.osgi.framework.Constants;
 import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
@@ -101,13 +99,10 @@ public class DiscoveryActivator extends HousekeepingActivator {
         final UserPermissionService userPermissions = getService(UserPermissionService.class);
         final FolderService folders = getService(FolderService.class);
 
-        final Dictionary<String, Object> discoveryDict = new Hashtable<String, Object>();
-        discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
-
         final OSGiSubscriptionSourceDiscoveryCollector discoveryCollector = new OSGiSubscriptionSourceDiscoveryCollector(context);
         discoveryCollector.addSubscriptionSourceDiscoveryService(collector);
         AutoUpdateActivator.setCollector(discoveryCollector);
-        registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, discoveryDict);
+        registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, withRanking(256));
 
         final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));

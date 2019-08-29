@@ -49,11 +49,11 @@
 
 package com.openexchange.secret.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.Dictionary;
 import java.util.List;
-import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -182,8 +182,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
             final boolean usesPassword = tokenList.isUsesPassword();
             registerService(SecretUsesPasswordChecker.class, new DefaultSecretUsesPasswordChecker(tokenBasedSecretService, usesPassword));
 
-            Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(tokenBasedSecretService.getRanking()));
+            Dictionary<String, Object> properties = withRanking(tokenBasedSecretService.getRanking());
             registerService(SecretService.class, tokenBasedSecretService, properties);
         }
         /*

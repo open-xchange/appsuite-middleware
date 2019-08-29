@@ -49,16 +49,15 @@
 
 package com.openexchange.pns.transport.apn.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -193,9 +192,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
             if (!map.isEmpty()) {
                 Map<String, ApnOptions> options = parseApnOptions(map);
                 if (null != options && !options.isEmpty()) {
-                    Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-                    dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
-                    optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, new DefaultApnOptionsProvider(options), dictionary);
+                    optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, new DefaultApnOptionsProvider(options), withRanking(785));
                     this.optionsProviderRegistration = optionsProviderRegistration;
                 }
             }

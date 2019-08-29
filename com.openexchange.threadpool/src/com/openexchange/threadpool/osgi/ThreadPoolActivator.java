@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -156,8 +157,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             REF_THREAD_POOL.set(threadPool);
             registerService(ThreadPoolService.class, threadPool);
             {
-                final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
-                dict.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
+                final Dictionary<String, Object> dict = withRanking(Integer.valueOf(Integer.MAX_VALUE));
                 dict.put(Constants.SERVICE_DESCRIPTION, "The Open-Xchange ExecutorService");
                 dict.put(Constants.SERVICE_VENDOR, "OX Software GmbH");
                 registerService(ExecutorService.class, threadPool.getExecutor(), dict);

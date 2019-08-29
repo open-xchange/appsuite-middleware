@@ -50,10 +50,9 @@
 package com.openexchange.admin.osgi;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.osgi.Tools.withRanking;
 import java.rmi.Remote;
 import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -259,9 +258,8 @@ public class AdminActivator extends HousekeepingActivator {
 
         // UserServiceInterceptor Bridge
         {
-            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            Dictionary<String, Object> props = withRanking(200);
             props.put("name", "OXUser");
-            props.put(Constants.SERVICE_RANKING, Integer.valueOf(200));
             registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
         }
 

@@ -305,9 +305,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param serviceRanking The value to configure the {@link Constants#SERVICE_RANKING} to
      */
     protected <S> void registerService(final Class<S> clazz, final S service, int serviceRanking) {
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(serviceRanking));
-        registerService(clazz, service, properties);
+        registerService(clazz, service, Tools.withRanking(serviceRanking));
     }
 
     /**

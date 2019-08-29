@@ -49,10 +49,8 @@
 
 package com.openexchange.mailmapping.spi.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import static com.openexchange.osgi.Tools.withRanking;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.spi.ContextResolver;
@@ -101,9 +99,7 @@ public class ContextResolverListing extends RankingAwareNearRegistryServiceTrack
         }
 
         BundleContext context = this.context;
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MAX_VALUE));
-        serviceRegistration = context.registerService(MailResolver.class, new MailResolverImpl(this, services), props);
+        serviceRegistration = context.registerService(MailResolver.class, new MailResolverImpl(this, services), withRanking(Integer.valueOf(Integer.MAX_VALUE)));
     }
 
     private synchronized void unregister() {

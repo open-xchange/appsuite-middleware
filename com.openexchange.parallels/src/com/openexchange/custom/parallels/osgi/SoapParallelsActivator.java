@@ -2,12 +2,11 @@
 package com.openexchange.custom.parallels.osgi;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.osgi.Tools.withRanking;
 import java.rmi.Remote;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -103,9 +102,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         LOG.debug("Trying to register POA hostname/directlinks plugin");
         registerService(HostnameService.class.getName(), new ParallelsHostnameService(), null);
         LOG.debug("Successfully registered POA hostname/directlinks plugin");
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put(Constants.SERVICE_RANKING, I(Integer.MAX_VALUE));
-        registerService(MailResolver.class, new ParallelsMailMappingService(this), props);
+        registerService(MailResolver.class, new ParallelsMailMappingService(this), withRanking(I(Integer.MAX_VALUE)));
         LOG.debug("Successfully registered POA Mailmappings plugin");
         // Register SOAP service
         final OXServerServicePortTypeImpl soapService = new OXServerServicePortTypeImpl();

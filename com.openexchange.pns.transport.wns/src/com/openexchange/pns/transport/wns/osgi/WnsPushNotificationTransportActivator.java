@@ -49,11 +49,10 @@
 
 package com.openexchange.pns.transport.wns.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -172,9 +171,7 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
             if (!map.isEmpty()) {
                 Map<String, WnsOptions> options = parseWnsOptions(map);
                 if (null != options && !options.isEmpty()) {
-                    Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-                    dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
-                    optionsProviderRegistration = context.registerService(WnsOptionsProvider.class, new DefaultWnsOptionsProvider(options), dictionary);
+                    optionsProviderRegistration = context.registerService(WnsOptionsProvider.class, new DefaultWnsOptionsProvider(options), withRanking(785));
                     this.optionsProviderRegistration = optionsProviderRegistration;
                 }
             }

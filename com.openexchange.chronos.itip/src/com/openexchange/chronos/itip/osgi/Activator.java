@@ -49,9 +49,8 @@
 
 package com.openexchange.chronos.itip.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.itip.CalendarITipIntegrationUtility;
 import com.openexchange.chronos.itip.EventNotificationPool;
@@ -124,11 +123,9 @@ public class Activator extends HousekeepingActivator {
             sender = new PoolingMailSenderService(pool, sender);
         }
 
-        Dictionary<String, Object> analyzerProps = new Hashtable<>();
-        analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING); // Default
+        Dictionary<String, Object> analyzerProps = withRanking(DefaultITipAnalyzerService.RANKING); // Default
         registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util), analyzerProps);
-        Dictionary<String, Object> factoryProps = new Hashtable<>();
-        factoryProps.put(Constants.SERVICE_RANKING, DefaultITipActionPerformerFactoryService.RANKING); // Default
+        Dictionary<String, Object> factoryProps = withRanking(DefaultITipActionPerformerFactoryService.RANKING); // Default
         registerService(ITipActionPerformerFactoryService.class, new DefaultITipActionPerformerFactoryService(util, sender, generatorFactory), factoryProps);
 
         registerService(ITipMailGeneratorFactory.class, generatorFactory);

@@ -49,11 +49,11 @@
 
 package com.openexchange.pns.impl.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
@@ -201,9 +201,7 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
         }
 
         // Register client checker
-        Dictionary<String, Object> props = new Hashtable<>(2);
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
-        registrations.add(context.registerService(PushClientChecker.class, new SubscriptionAwarePushClientChecker(registry), props));
+        registrations.add(context.registerService(PushClientChecker.class, new SubscriptionAwarePushClientChecker(registry), withRanking(1)));
 
         // Register other listener, too
         try {

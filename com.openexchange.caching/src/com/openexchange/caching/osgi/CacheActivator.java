@@ -49,9 +49,8 @@
 
 package com.openexchange.caching.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
 import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.CacheInformationMBean;
@@ -119,9 +118,8 @@ public final class CacheActivator extends HousekeepingActivator {
          */
         final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
         {
-            final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
+            final Dictionary<String, Object> dictionary = withRanking(10);
             dictionary.put("name", "oxcache");
-            dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
             registerService(CacheService.class, jcsCacheService, dictionary);
         }
 
