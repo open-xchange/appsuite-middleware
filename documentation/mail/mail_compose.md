@@ -42,7 +42,7 @@ $ registerfilestore -A oxadminmaster -P secret -t file:///var/opt/filestore -s 2
 
 Registers a file-backed file storage mounted to `/var/opt/filestore` and a max. size of 2,000,000 MB (~ 2 TB) having max. number of entities set to `0`(zero). Thus it is not used for e.g. newly created contexts/users.
 
-### Ensure consistency of dedicazed file storage
+### Ensure consistency of dedicated file storage
 
 Once a dedicated file storage is used, the ``checkconsistency`` command-line tool is not effective for caring about orphaned/non-existent references. Instead, there is a dedicated tooling available:
 
