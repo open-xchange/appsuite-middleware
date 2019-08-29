@@ -155,6 +155,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
             }
             return path;
         } catch (UnsupportedEncodingException e) {
+            LOG.trace("Fallback to url: {}", url, e);
             return new WebdavPath(url);
         }
     }
