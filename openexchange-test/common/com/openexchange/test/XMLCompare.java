@@ -48,7 +48,7 @@ public class XMLCompare {
                 e.printStackTrace();
             }
         }
-        if (checkText(nodeName) && !expectedDoc.getText().equals(gotDoc.getText())) {
+        if (checkText(nodeName) && !expectedDoc.getText().trim().equals(gotDoc.getText().trim())) {
             return false;
         }
         return compareChildElems(expectedDoc, gotDoc);
