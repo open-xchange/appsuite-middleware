@@ -72,6 +72,7 @@ public class PolicyResolver {
     private final ProblemSolver fileSolver;
     private final ProblemSolver vCardSolver;
     private final ProblemSolver csReferencesSolver;
+    private final ProblemSolver previewSolver;
 
     /**
      * Initializes a new {@link PolicyResolver}.
@@ -82,14 +83,16 @@ public class PolicyResolver {
      * @param fileSolver The file {@link ProblemSolver}
      * @param vCardSolver The VCard {@link ProblemSolver}
      * @param csAttachmentSolver The composition space references {@link ProblemSolver}
+     * @param previewSolver The preview {@link ProblemSolver}
      */
-    private PolicyResolver(ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, ProblemSolver csAttachmentSolver) {
+    private PolicyResolver(ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, ProblemSolver csAttachmentSolver, ProblemSolver previewSolver) {
         this.dbSolver = dbSolver;
         this.attachmentSolver = attachmentSolver;
         this.snippetSolver = snippetSolver;
         this.fileSolver = fileSolver;
         this.vCardSolver = vCardSolver;
         this.csReferencesSolver = csAttachmentSolver;
+        this.previewSolver = previewSolver;
     }
 
     /**
@@ -117,6 +120,16 @@ public class PolicyResolver {
      */
     public ProblemSolver getSnippetSolver() {
         return snippetSolver;
+    }
+    
+    
+    /**
+     * Gets the previewSolver
+     *
+     * @return The previewSolver
+     */
+    public ProblemSolver getPreviewSolver() {
+        return previewSolver;
     }
 
     /**
@@ -162,6 +175,7 @@ public class PolicyResolver {
         ProblemSolver dbsolver = new DoNothingSolver();
         ProblemSolver attachmentsolver = new DoNothingSolver();
         ProblemSolver snippetsolver = new DoNothingSolver();
+        ProblemSolver previewSolver = new DoNothingSolver();
         ProblemSolver filesolver = new DoNothingSolver();
         ProblemSolver vCardSolver = new DoNothingSolver();
         ProblemSolver csReferencesSolver = new DoNothingSolver();
@@ -185,9 +199,12 @@ public class PolicyResolver {
             case MISSING_ATTACHMENT_FILE_FOR_MAIL_COMPOSE:
                 csReferencesSolver = SolverFactory.createCompositionSpaceAttachmentSolver(action, storage);
                 break;
+            case MISSING_FILE_FOR_PREVIEW:
+                previewSolver= SolverFactory.createPreviewSolver(action);
+                break;
             default:
                 throw ConsistencyExceptionCodes.UNKNOWN_POLICY.create(policy);
         }
-        return new PolicyResolver(dbsolver, attachmentsolver, snippetsolver, filesolver, vCardSolver, csReferencesSolver);
+        return new PolicyResolver(dbsolver, attachmentsolver, snippetsolver, filesolver, vCardSolver, csReferencesSolver, previewSolver);
     }
 }

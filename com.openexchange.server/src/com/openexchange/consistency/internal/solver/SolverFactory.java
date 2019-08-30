@@ -178,4 +178,20 @@ public class SolverFactory {
                 return new DoNothingSolver();
         }
     }
+
+    /**
+     * Creates a preview solver
+     *
+     * @param action The repair action
+     * @return the new {@link ProblemSolver}
+     */
+    public static final ProblemSolver createPreviewSolver(RepairAction action) {
+        switch (action) {
+            case DELETE:
+                return new DeleteBrokenPreviewReferencesSolver();
+            default:
+                return new DoNothingSolver();
+        }
+
+    }
 }

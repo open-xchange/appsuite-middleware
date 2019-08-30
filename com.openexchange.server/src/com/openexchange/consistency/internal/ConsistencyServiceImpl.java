@@ -76,14 +76,13 @@ import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.consistency.EntityImpl;
 import com.openexchange.consistency.RepairAction;
 import com.openexchange.consistency.RepairPolicy;
-import com.openexchange.consistency.internal.solver.DeleteBrokenPreviewReferencesSolver;
 import com.openexchange.consistency.internal.solver.DoNothingSolver;
 import com.openexchange.consistency.internal.solver.PolicyResolver;
 import com.openexchange.consistency.internal.solver.ProblemSolver;
 import com.openexchange.consistency.internal.solver.RecordSolver;
+import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -926,7 +925,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     private void checkOneEntity(Entity entity, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver previewSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, ProblemSolver compositionSpaceReferencesSolver, DatabaseImpl database, AttachmentBase attach, FileStorage fileStorage) throws OXException {
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
-        LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
+        LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {} previews: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description(), previewSolver.description());
 
         try {
             fileStorage.recreateStateFile();
@@ -1056,7 +1055,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             FileStorage storage = getFileStorage(entity);
 
             PolicyResolver resolvers = PolicyResolver.build(repairPolicy, repairAction, database, attachments, storage, getAdmin(entity.getContext()));
-            checkOneEntity(entity, resolvers.getDbSolver(), resolvers.getAttachmentSolver(), resolvers.getSnippetSolver(), new DeleteBrokenPreviewReferencesSolver(), resolvers.getFileSolver(), resolvers.getvCardSolver(), resolvers.getCompositionSpaceReferencesSolver(), database, attachments, storage);
+            checkOneEntity(entity, resolvers.getDbSolver(), resolvers.getAttachmentSolver(), resolvers.getSnippetSolver(), resolvers.getPreviewSolver(), resolvers.getFileSolver(), resolvers.getvCardSolver(), resolvers.getCompositionSpaceReferencesSolver(), database, attachments, storage);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
