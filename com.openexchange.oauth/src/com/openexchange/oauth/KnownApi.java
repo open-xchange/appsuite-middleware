@@ -122,10 +122,10 @@ public enum KnownApi implements API {
     COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom", "api.copy.com", CopyApi.class),
     /**
      * Microsoft Graph
-     * 
+     *
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/overview">Microsoft Graph</a>
      */
-    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", "microsoftgraph", "graph.microsoft.com", MicrosoftGraphApi.class);
+    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", "microsoftgraph", "graph.microsoft.com", MicrosoftGraphApi.class),
     ;
 
     private final String serviceId;
