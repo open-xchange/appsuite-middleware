@@ -945,6 +945,9 @@ public abstract class MailConfig {
             // Do the OAuth dance...
             MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
             TokenInfo tokenInfo = mailOAuthService.getTokenFor(oAuthAccontId, session);
+            if (null == tokenInfo) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create("TokenInfo is null. Are all services started?");
+            }
             return new AuthInfo(login, tokenInfo.getToken(), AuthType.parse(tokenInfo.getAuthMechanism()), oAuthAccontId);
         }
 
