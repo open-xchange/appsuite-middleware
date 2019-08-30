@@ -640,6 +640,14 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * %1$s protocol error occurred: %2$s
      */
     PROTOCOL_ERROR("%1$s protocol error occurred: %2$s", Category.CATEGORY_ERROR, 118),
+    /**
+     * Unsupported OAuth mail access to server %1$s with login %2$s (user=%3$s, context=%4$s)
+     */
+    UNSUPPORTED_OAUTH_MAIL_ACCESS("Unsupported OAuth mail access to server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.UNSUPPORTED_OAUTH_MAIL_ACCESS_MSG, Category.CATEGORY_CONFIGURATION, 119),
+    /**
+     * Unsupported OAuth transport access to server %1$s with login %2$s (user=%3$s, context=%4$s)
+     */
+    UNSUPPORTED_OAUTH_TRANSPORT_ACCESS("Unsupported OAuth transport access to server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.UNSUPPORTED_OAUTH_TRANSPORT_ACCESS_MSG, Category.CATEGORY_CONFIGURATION, 120),
     ;
 
     private static final String PREFIX = "MSG";

@@ -260,4 +260,10 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
     public static final String MAIL_TRANSPORT_DISABLED_OAUTH_MSG = "Your mail transport for %2$s was disabled because of authorization issues. Please reauthorize the account %5$s to enable it again.";
 
+    // User tries to access an OAuth-linked mail server, but required open-xchange-oauth package is not installed
+    public static final String UNSUPPORTED_OAUTH_MAIL_ACCESS_MSG = "Unsupported OAuth mail access to server %1$s";
+
+    // User tries to access an OAuth-linked transport server, but required open-xchange-oauth package is not installed
+    public static final String UNSUPPORTED_OAUTH_TRANSPORT_ACCESS_MSG = "Unsupported OAuth transport access to server %1$s";
+
 }
