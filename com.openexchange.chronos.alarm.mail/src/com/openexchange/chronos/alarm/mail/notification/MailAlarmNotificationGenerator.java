@@ -126,6 +126,11 @@ public class MailAlarmNotificationGenerator {
             this.recipient = new NotificationParticipant(ITipRole.ATTENDEE, false, user.getMail(), user.getId());
         }
         recipient.setFolderId(IDMangling.getUniqueFolderId(accountId, event.getFolderId()));
+        recipient.setTimezone(TimeZone.getTimeZone(user.getTimeZone()));
+        recipient.setLocale(user.getLocale());
+        recipient.setUser(user);
+        recipient.setContext(ctx);
+        recipient.setDisplayName(user.getDisplayName());
 
         List<NotificationParticipant> lResources = getResources(services, event, ctx, user);
         if (!lResources.isEmpty()) {
