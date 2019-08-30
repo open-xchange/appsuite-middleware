@@ -60,6 +60,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.LocaleTools;
 
 /**
  * {@link NotificationParticipant}
@@ -222,7 +223,7 @@ public class NotificationParticipant implements Cloneable {
 
     public Locale getLocale() {
         if (locale == null) {
-            return Locale.getDefault();
+            return LocaleTools.DEFAULT_LOCALE;
         }
         return locale;
     }
