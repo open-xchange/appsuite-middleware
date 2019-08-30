@@ -63,7 +63,7 @@ import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -173,20 +173,20 @@ public class ConsistencyTest {
         ServiceLookup services = PowerMockito.mock(ServiceLookup.class);
 
         consistency = PowerMockito.spy(new ConsistencyServiceImpl(services));
-        PowerMockito.doReturn(ctx).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(1);
-        PowerMockito.doReturn(ctx2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(2);
-        PowerMockito.doReturn(ctx3).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(3);
+        PowerMockito.doReturn(ctx).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(I(1));
+        PowerMockito.doReturn(ctx2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(I(2));
+        PowerMockito.doReturn(ctx3).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContext", int.class)).withArguments(I(3));
 
         PowerMockito.doReturn(database).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getDatabase")).withNoArguments();
         PowerMockito.doReturn(attachments).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getAttachments")).withNoArguments();
 
-        PowerMockito.doReturn(Arrays.asList(ctx, ctx2)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForFilestore", int.class)).withArguments(1);
-        PowerMockito.doReturn(Arrays.asList(ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForFilestore", int.class)).withArguments(2);
+        PowerMockito.doReturn(Arrays.asList(ctx, ctx2)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForFilestore", int.class)).withArguments(I(1));
+        PowerMockito.doReturn(Arrays.asList(ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForFilestore", int.class)).withArguments(I(2));
 
-        PowerMockito.doReturn(Arrays.asList(ctx, ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForDatabase", int.class)).withArguments(Matchers.anyInt());
+        PowerMockito.doReturn(Arrays.asList(ctx, ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getContextsForDatabase", int.class)).withArguments(ArgumentMatchers.any());
         PowerMockito.doReturn(Arrays.asList(ctx, ctx2, ctx3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getAllContexts")).withNoArguments();
 
-        PowerMockito.doReturn(admin).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getAdmin", Context.class)).withArguments(Matchers.any(Context.class));
+        PowerMockito.doReturn(admin).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getAdmin", Context.class)).withArguments(ArgumentMatchers.any(Context.class));
 
         PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class)).withArguments(ctx);
         PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class)).withArguments(ctx2);
@@ -200,17 +200,17 @@ public class ConsistencyTest {
         PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Entity.class)).withArguments(entity2);
         PowerMockito.doReturn(storage2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Entity.class)).withArguments(entity3);
 
-        PowerMockito.doReturn(Arrays.asList(entity, entity2)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getEntitiesForFilestore", int.class)).withArguments(1);
-        PowerMockito.doReturn(Arrays.asList(entity3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getEntitiesForFilestore", int.class)).withArguments(2);
+        PowerMockito.doReturn(Arrays.asList(entity, entity2)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getEntitiesForFilestore", int.class)).withArguments(I(1));
+        PowerMockito.doReturn(Arrays.asList(entity3)).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getEntitiesForFilestore", int.class)).withArguments(I(2));
 
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getCompostionSpaceAttachmentFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
-        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getCompostionSpaceAttachmentFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerContext", Context.class)).withArguments(ArgumentMatchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerContext", Context.class)).withArguments(ArgumentMatchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getCompostionSpaceAttachmentFileStoreLocationsPerContext", Context.class)).withArguments(ArgumentMatchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerContext", Context.class)).withArguments(ArgumentMatchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerUser", Context.class, User.class)).withArguments(ArgumentMatchers.any(Context.class), ArgumentMatchers.any(User.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerUser", Context.class, User.class)).withArguments(ArgumentMatchers.any(Context.class), ArgumentMatchers.any(User.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerUser", Context.class, User.class)).withArguments(ArgumentMatchers.any(Context.class), ArgumentMatchers.any(User.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getCompostionSpaceAttachmentFileStoreLocationsPerUser", Context.class, User.class)).withArguments(ArgumentMatchers.any(Context.class), ArgumentMatchers.any(User.class));
     }
 
     // Tests //
