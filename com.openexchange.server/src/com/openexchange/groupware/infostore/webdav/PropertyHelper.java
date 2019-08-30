@@ -179,10 +179,14 @@ public class PropertyHelper {
 		}
 		changed = false;
 		final ServerSession session = getSession();
-		propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext());
-		changedProps.clear();
-		propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext());
-		removedProperties.clear();
+        if (false == changedProps.isEmpty()) {
+            propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext());
+            changedProps.clear();
+        }
+        if (false == removedProperties.isEmpty()) {
+            propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext());
+            removedProperties.clear();
+        }
 	}
 
 	public void deleteProperties() throws OXException {

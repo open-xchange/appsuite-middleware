@@ -13,6 +13,7 @@ import org.jdom2.Namespace;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -29,6 +30,7 @@ public class LockTest extends ActionTestCase {
 
     private WebdavPath LOCK_HTML_URL;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -46,7 +48,7 @@ public class LockTest extends ActionTestCase {
 
         req.setBodyAsString(body);
         req.setUrl(INDEX_HTML_URL);
-        req.setHeader("Timeout", "infinite");
+        req.setHeader("Timeout", "Infinite");
 
         final WebdavAction action = new WebdavLockAction();
         action.perform(req, res);
@@ -58,9 +60,9 @@ public class LockTest extends ActionTestCase {
         assertNotNull(lock.getToken());
         final String lockToken = lock.getToken();
 
-        assertEquals(lockToken, res.getHeader("Lock-Token"));
+        assertEquals(lockToken, Strings.unchar(res.getHeader("Lock-Token"), '<', '>'));
 
-        final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner><depth>0</depth><locktoken><href>" + lockToken + "</href></locktoken><timeout></timeout></activelock></lockdiscovery></prop>";
+        final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner><depth>0</depth><locktoken><href>" + lockToken + "</href></locktoken><timeout>Infinite</timeout></activelock></lockdiscovery></prop>";
 
         final XMLCompare compare = new XMLCompare();
         compare.setCheckTextNames("owner", "locktoken");
@@ -96,7 +98,7 @@ public class LockTest extends ActionTestCase {
         assertNotNull(lock.getToken());
         final String lockToken = lock.getToken();
 
-        assertEquals(lockToken, res.getHeader("Lock-Token"));
+        assertEquals(lockToken, Strings.unchar(res.getHeader("Lock-Token"), '<', '>'));
 
         final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner><shortName xmlns=\"" + TEST_NS.getURI() + "\">me</shortName></owner><depth>0</depth><locktoken><href>" + lockToken + "</href></locktoken><timeout>Infinite</timeout></activelock></lockdiscovery></prop>";
 
@@ -192,7 +194,7 @@ public class LockTest extends ActionTestCase {
 
         req.setBodyAsString(body);
         req.setUrl(LOCK_HTML_URL);
-        req.setHeader("Timeout", "infinite");
+        req.setHeader("Timeout", "Infinite");
 
         final WebdavAction action = new WebdavLockAction();
         action.perform(req, res);
@@ -205,7 +207,7 @@ public class LockTest extends ActionTestCase {
         final WebdavLock lock = resource.getLocks().get(0);
         final String lockToken = lock.getToken();
 
-        final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner><depth>0</depth><locktoken><href>" + lockToken + "</href></locktoken><timeout></timeout></activelock></lockdiscovery></prop>";
+        final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner><depth>0</depth><locktoken><href>" + lockToken + "</href></locktoken><timeout>Infinite</timeout></activelock></lockdiscovery></prop>";
 
         final XMLCompare compare = new XMLCompare();
         compare.setCheckTextNames("owner", "locktoken");
@@ -234,7 +236,7 @@ public class LockTest extends ActionTestCase {
         assertNotNull(lock.getToken());
         final String lockToken = lock.getToken();
 
-        assertEquals(lockToken, res.getHeader("Lock-Token"));
+        assertEquals(lockToken, Strings.unchar(res.getHeader("Lock-Token"), '<', '>'));
 
         final String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner><depth>0</depth><locktoken><href>" + lockToken + "</href></locktoken><timeout></timeout></activelock></lockdiscovery></prop>";
 
@@ -263,7 +265,7 @@ public class LockTest extends ActionTestCase {
         WebdavAction action = new WebdavLockAction();
         action.perform(req, res);
 
-        String lockToken = res.getHeader("Lock-Token");
+        String lockToken = Strings.unchar(res.getHeader("Lock-Token"), '<', '>');
 
         req = new MockWebdavRequest(factory, "http://localhost/");
         req.setUrl(INDEX_HTML_URL);

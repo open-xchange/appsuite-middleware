@@ -62,7 +62,7 @@ public class WebdavUnlockAction extends AbstractAction {
         /*
          * check lock token
          */
-        String token = getToken(req.getHeader("Lock-Token"));
+        String token = Strings.unchar(req.getHeader("Lock-Token"), '<', '>');
         if (Strings.isEmpty(token)) {
             throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -96,9 +96,5 @@ public class WebdavUnlockAction extends AbstractAction {
         req.getResource().unlock(token);
         res.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
-
-	private String getToken(final String header) {
-		return header.substring(1,header.length()-1);
-	}
 
 }
