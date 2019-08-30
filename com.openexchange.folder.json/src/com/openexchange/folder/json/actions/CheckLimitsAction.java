@@ -52,6 +52,7 @@ package com.openexchange.folder.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,7 +69,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * {@link CheckLimitsAction}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -94,7 +95,8 @@ public class CheckLimitsAction extends AbstractFolderAction {
         FileLimitService limitsService = ServiceRegistry.getInstance().getService(FileLimitService.class, true);
 
         List<OXException> exceededLimits = limitsService.checkLimits(request.getSession(), folderId, getFiles(request), type);
-        JSONObject jsonObject = createResponse(exceededLimits);
+        Locale locale = session.getUser().getLocale();
+        JSONObject jsonObject = createResponse(exceededLimits, locale);
         return new AJAXRequestResult(jsonObject, new Date(), "json");
     }
 
@@ -163,20 +165,19 @@ public class CheckLimitsAction extends AbstractFolderAction {
         return file;
     }
 
-    private JSONObject createResponse(final List<OXException> errors) throws JSONException {
-        JSONObject json = new JSONObject();
+    private JSONObject createResponse(final List<OXException> errors, Locale locale) throws JSONException {
+        JSONArray jErrors;
         if (null == errors || errors.isEmpty()) {
-            json.put("errors", new JSONArray());
-            return json;
+            jErrors = JSONArray.EMPTY_ARRAY;
+        } else {
+            jErrors = new JSONArray(errors.size());
+            for (OXException error : errors) {
+                JSONObject jError = new JSONObject();
+                ResponseWriter.addException(jError, error.setCategory(Category.CATEGORY_ERROR), locale);
+                jErrors.put(jError);
+            }
         }
-        final JSONArray jsonArray = new JSONArray(errors.size());
-        for (final OXException error : errors) {
-            final JSONObject jsonError = new JSONObject();
-            ResponseWriter.addException(jsonError, error.setCategory(Category.CATEGORY_ERROR), false);
-            jsonArray.put(jsonError);
-        }
-        json.put("errors", jsonArray);
-        return json;
+        return new JSONObject(2).put("errors", jErrors);
     }
 
 }
