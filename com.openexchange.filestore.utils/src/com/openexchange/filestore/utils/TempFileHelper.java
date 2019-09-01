@@ -50,6 +50,7 @@
 package com.openexchange.filestore.utils;
 
 import java.io.File;
+import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -135,9 +136,9 @@ public class TempFileHelper implements Reloadable {
      * machine.
      * </ol>
      *
-     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
+     * @return The optional abstract pathname denoting a newly-created empty file
      */
-    public File newTempFile() {
+    public Optional<File> newTempFile() {
         return newTempFile("open-xchange-spoolfile-");
     }
 
@@ -150,16 +151,16 @@ public class TempFileHelper implements Reloadable {
      * </ol>
      *
      * @param prefix The prefix to use for generated file
-     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
+     * @return The optional abstract pathname denoting a newly-created empty file
      */
-    public File newTempFile(String prefix) {
+    public Optional<File> newTempFile(String prefix) {
         try {
             File tmpFile = File.createTempFile(null == prefix ? "open-xchange-spoolfile-" : prefix, ".tmp", uploadDirectory());
             tmpFile.deleteOnExit();
-            return tmpFile;
+            return Optional.of(tmpFile);
         } catch (Exception e) {
             LoggerHolder.LOG.warn("Failed to create new temporary file", e);
-            return null;
+            return Optional.empty();
         }
     }
 

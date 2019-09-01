@@ -61,6 +61,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -155,8 +156,9 @@ public class S3FileStorage implements FileStorage {
              * spool to file
              */
             if (!(input instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     input = Streams.transferToFileAndCreateStream(input, tmpFile);
                 }
             }
@@ -366,8 +368,9 @@ public class S3FileStorage implements FileStorage {
                  * spool to file
                  */
                 if (!(file instanceof FileInputStream)) {
-                    tmpFile = TempFileHelper.getInstance().newTempFile();
-                    if (tmpFile != null) {
+                    Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                    if (optionalTempFile.isPresent()) {
+                        tmpFile = optionalTempFile.get();
                         file = Streams.transferToFileAndCreateStream(file, tmpFile);
                     }
                 }

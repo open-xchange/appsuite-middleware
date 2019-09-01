@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -155,8 +156,9 @@ public class SwiftFileStorage implements FileStorage {
              * spool to file
              */
             if (!(file instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     file = Streams.transferToFileAndCreateStream(file, tmpFile);
                 }
             }
@@ -297,8 +299,9 @@ public class SwiftFileStorage implements FileStorage {
              * spool to file
              */
             if (!(file instanceof FileInputStream)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     file = Streams.transferToFileAndCreateStream(file, tmpFile);
                 }
             }

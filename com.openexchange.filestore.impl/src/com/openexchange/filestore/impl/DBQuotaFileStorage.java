@@ -68,6 +68,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -691,8 +692,9 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
             // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
             if (spool(spoolToFile, source)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     is = Streams.transferToFileAndCreateStream(is, tmpFile);
                 }
             }
@@ -778,8 +780,9 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
 
             // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
             if (spool(spoolToFile, source)) {
-                tmpFile = TempFileHelper.getInstance().newTempFile();
-                if (tmpFile != null) {
+                Optional<File> optionalTempFile = TempFileHelper.getInstance().newTempFile();
+                if (optionalTempFile.isPresent()) {
+                    tmpFile = optionalTempFile.get();
                     is = Streams.transferToFileAndCreateStream(is, tmpFile);
                 }
             }
