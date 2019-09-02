@@ -67,6 +67,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
@@ -103,6 +104,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
@@ -2987,9 +2989,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' + FALLBACK_COUNTRY_CREATE);
         } else {
-            if (lang.indexOf('_') < 0) {
+            /*
+             * Check if locale matches pattern like "en_US"
+             */
+            int underscoreIndex = lang.indexOf('_');
+            if (underscoreIndex < 0 || -1 != lang.indexOf('_', underscoreIndex + 1)) {
                 throw new InvalidDataException("language must contain an underscore, e.g. en_US");
             }
+            Locale locale = LocaleTools.getLocale(lang);
+            user.setLanguage(locale.toString());
         }
     }
 
