@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 61
+%define        ox_release 62
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -101,6 +101,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
+* Mon Sep 02 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-09-09 (5395)
 * Mon Aug 19 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-08-26 (5372)
 * Tue Jul 23 2019 Marcus Klein <marcus.klein@open-xchange.com>
