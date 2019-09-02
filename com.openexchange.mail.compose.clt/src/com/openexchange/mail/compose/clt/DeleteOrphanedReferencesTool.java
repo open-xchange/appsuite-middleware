@@ -127,8 +127,8 @@ public class DeleteOrphanedReferencesTool extends AbstractRmiCLI<Void> {
     }
 
     @Override
-    protected Boolean requiresAdministrativePermission() {
-        return Boolean.TRUE;
+    protected boolean requiresAdministrativePermission() {
+        return true;
     }
 
     @Override
