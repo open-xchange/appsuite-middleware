@@ -244,4 +244,9 @@ public final class MessageHeaders {
 
     public static final HeaderName X_OX_READ_RECEIPT = HeaderName.valueOf(HDR_X_OX_READ_RECEIPT);
 
+    /** "X-OX-Custom-Headers" */
+    public static final String HDR_X_OX_CUSTOM_HEADERS = "X-OX-Custom-Headers";
+
+    public static final HeaderName X_OX_CUSTOM_HEADERS = HeaderName.valueOf(HDR_X_OX_CUSTOM_HEADERS);
+
 }

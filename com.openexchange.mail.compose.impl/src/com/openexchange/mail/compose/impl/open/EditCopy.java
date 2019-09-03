@@ -135,6 +135,12 @@ public class EditCopy extends AbstractOpener {
             if ("true".equalsIgnoreCase(headerValue)) {
                 state.message.setRequestReadReceipt(true);
             }
+
+            headerValue = HeaderUtility.decodeHeaderValue(originalMail.getFirstHeader(HeaderUtility.HEADER_X_OX_CUSTOM_HEADERS));
+            Map<String, String> customHeaders = HeaderUtility.headerValue2CustomHeaders(headerValue);
+            if (customHeaders != null) {
+                state.message.setCustomHeaders(customHeaders);
+            }
         }
 
         // Pre-set subject
