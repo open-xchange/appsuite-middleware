@@ -49,6 +49,8 @@
 
 package com.openexchange.passwordchange;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -64,7 +66,8 @@ import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -216,42 +219,55 @@ public abstract class PasswordChangeService {
             }
             throw e;
         }
-        /*
-         * Check min/max length restrictions
-         */
+
         if (false == user.isGuest()) {
-            final int len = event.getNewPassword().length();
-            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            int property = service.getIntProperty("com.openexchange.passwordchange.minLength", 4);
-            if (property > 0 && len < property) {
-                throw UserExceptionCode.INVALID_MIN_LENGTH.create(Integer.valueOf(property));
+            ConfigViewFactory factory = ServerServiceRegistry.getServize(ConfigViewFactory.class, true);
+            ConfigView view = factory.getView(event.getSession().getUserId(), event.getSession().getContextId());
+            checkLength(event, view);
+            checkPattern(event, view);
+        }
+    }
+
+    /**
+     * Check min/max length restrictions
+     *
+     * @param event The password change event
+     * @param view The user config view
+     * @throws OXException If restrictions aren't met
+     */
+    private void checkLength(PasswordChangeEvent event, ConfigView view) throws OXException {
+        int len = event.getNewPassword().length();
+        Integer min = view.opt("com.openexchange.passwordchange.minLength", Integer.class, I(4));
+        if (i(min) > 0 && len < i(min)) {
+            throw UserExceptionCode.INVALID_MIN_LENGTH.create(min);
+        }
+
+        Integer max = view.opt("com.openexchange.passwordchange.maxLength", Integer.class, I(0));
+        if (i(max) > 0 && len > i(max)) {
+            throw UserExceptionCode.INVALID_MAX_LENGTH.create(max);
+        }
+    }
+
+    /**
+     * Check against "allowed" pattern if defined. However does no
+     * validation of new password since admin daemon does no validation, too
+     *
+     * @param event The password change event
+     * @param view The user config view
+     * @throws OXException If restrictions aren't met
+     */
+    private void checkPattern(PasswordChangeEvent event, ConfigView view) throws OXException {
+        String allowedPattern = view.get("com.openexchange.passwordchange.allowedPattern", String.class);
+        if (Strings.isEmpty(allowedPattern)) {
+            return;
+        }
+        try {
+            if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
+                String allowedPatternHint = view.get("com.openexchange.passwordchange.allowedPatternHint", String.class);
+                throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
             }
-            property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
-            if (property > 0 && len > property) {
-                throw UserExceptionCode.INVALID_MAX_LENGTH.create(Integer.valueOf(property));
-            }
-            /*
-             * Check against "allowed" pattern if defined
-             */
-            String allowedPattern = service.getProperty("com.openexchange.passwordchange.allowedPattern");
-            if (Strings.isNotEmpty(allowedPattern)) {
-                try {
-                    if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
-                        String allowedPatternHint = service.getProperty("com.openexchange.passwordchange.allowedPatternHint");
-                        throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
-                    }
-                } catch (PatternSyntaxException e) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.passwordchange.allowedPattern");
-                }
-            }
-            /*
-             * No validation of new password since admin daemon does no validation, too
-             */
-            /*-
-             * if (!validatePassword(event.getNewPassword())) {
-             *     throw new OXException(OXException.Code.INVALID_PASSWORD);
-             * }
-             */
+        } catch (PatternSyntaxException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.passwordchange.allowedPattern");
         }
     }
 
