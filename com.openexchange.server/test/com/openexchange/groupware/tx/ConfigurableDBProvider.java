@@ -55,12 +55,22 @@ import java.sql.SQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 
+/**
+ * Only used for testing!
+ */
 public class ConfigurableDBProvider implements DBProvider {
 
     private String url;
     private String driver;
     private String login;
     private String password;
+
+    /**
+     * Initializes a new {@link ConfigurableDBProvider}.
+     */
+    public ConfigurableDBProvider() {
+        super();
+    }
 
     @Override
     public Connection getReadConnection(final Context ctx) {
