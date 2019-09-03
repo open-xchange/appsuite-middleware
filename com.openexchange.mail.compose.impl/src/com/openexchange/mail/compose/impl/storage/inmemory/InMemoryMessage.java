@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl.storage.inmemory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -101,6 +102,7 @@ public class InMemoryMessage implements Message {
     private volatile Security security;
     private volatile Priority priority;
     private volatile boolean contentEncrypted;
+    private volatile Map<String, String> customHeaders;
 
     /**
      * Initializes a new {@link InMemoryMessage}.
@@ -242,6 +244,32 @@ public class InMemoryMessage implements Message {
         return contentEncrypted;
     }
 
+    @Override
+    public Map<String, String> getCustomHeaders() {
+        return customHeaders;
+    }
+
+    /**
+     * Sets the custom headers
+     *
+     * @param customHeaders The custom headers
+     */
+    public void setCustomHeaders(Map<String, String> customHeaders) {
+        lock.lock();
+        try {
+            this.customHeaders = customHeaders;
+            MessageDescription md = messageDescription;
+            if (null == md) {
+                md = new MessageDescription();
+                messageDescription = md;
+                bufferingQueue.offerIfAbsentElseReset(this);
+            }
+            md.setCustomHeaders(customHeaders);
+        } finally {
+            lock.unlock();
+        }
+    }
+
     /**
      * Sets the content-encrypted flag
      *
@@ -257,7 +285,7 @@ public class InMemoryMessage implements Message {
                 messageDescription = md;
                 bufferingQueue.offerIfAbsentElseReset(this);
             }
-            md.setFrom(from);
+            md.setContentEncrypted(contentEncrypted);
         } finally {
             lock.unlock();
         }

@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.impl.storage.db.mapping;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -324,6 +325,30 @@ public class MessageMapper extends DefaultDbMapper<MessageDescription, MessageFi
             @Override
             public void remove(MessageDescription object) {
                 object.removeMeta();
+            }
+
+        });
+
+        mappings.put(MessageField.CUSTOM_HEADERS, new VarCharJsonCustomHeadersMapping<MessageDescription>("customHeaders", "Custom Headers") {
+
+            @Override
+            public boolean isSet(MessageDescription object) {
+                return object.containsCustomHeaders();
+            }
+
+            @Override
+            public void set(MessageDescription object, Map<String, String> value) throws OXException {
+                object.setCustomHeaders(value);
+            }
+
+            @Override
+            public Map<String, String> get(MessageDescription object) {
+                return object.getCustomHeaders();
+            }
+
+            @Override
+            public void remove(MessageDescription object) {
+                object.removeCustomHeaders();
             }
 
         });

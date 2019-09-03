@@ -52,7 +52,9 @@ package com.openexchange.mail.compose.impl;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.mail.internet.MimeUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,6 +96,9 @@ public class HeaderUtility {
 
     /** "X-OX-Read-Receipt" */
     public static final String HEADER_X_OX_READ_RECEIPT = MessageHeaders.HDR_X_OX_READ_RECEIPT;
+
+    /** "X-OX-Custom-Headers" */
+    public static final String HEADER_X_OX_CUSTOM_HEADERS = MessageHeaders.HDR_X_OX_CUSTOM_HEADERS;
 
     /**
      * Initializes a new {@link HeaderUtility}.
@@ -231,6 +236,50 @@ public class HeaderUtility {
         } catch (Exception e) {
             LoggerHolder.LOG.warn("Header value cannot be parsed to meta information: {}", headerValue, e);
             return Meta.META_NEW;
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Generates the header value for given custom headers.
+     *
+     * @param customHeaders The custom headers
+     * @return The resulting header value
+     */
+    public static String customHeaders2HeaderValue(Map<String, String> customHeaders) {
+        if (null == customHeaders) {
+            return null;
+        }
+
+        JSONObject jCustomHeaders = new JSONObject(customHeaders.size());
+        for (Map.Entry<String, String> customHeader : customHeaders.entrySet()) {
+            jCustomHeaders.putSafe(customHeader.getKey(), customHeader.getValue());
+        }
+        return jCustomHeaders.toString();
+    }
+
+    /**
+     * Parses given header value to appropriate custom headers.
+     *
+     * @param headerValue The header value
+     * @return The resulting custom headers
+     */
+    public static Map<String, String> headerValue2CustomHeaders(String headerValue) {
+        if (Strings.isEmpty(headerValue)) {
+            return null;
+        }
+
+        try {
+            JSONObject jCustomHeaders = new JSONObject(headerValue);
+            Map<String, String> customHeaders = new LinkedHashMap<>(jCustomHeaders.length());
+            for (Map.Entry<String, Object> jCustomHeader : jCustomHeaders.entrySet()) {
+                customHeaders.put(jCustomHeader.getKey(), jCustomHeader.getValue().toString());
+            }
+            return customHeaders;
+        } catch (JSONException e) {
+            LoggerHolder.LOG.warn("Header value cannot be parsed to custom headers: {}", headerValue, e);
+            return null;
         }
     }
 

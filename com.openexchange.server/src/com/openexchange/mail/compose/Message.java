@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.java.Strings;
 
 /**
@@ -259,6 +260,13 @@ public interface Message {
      * @return The meta information
      */
     Meta getMeta();
+
+    /**
+     * Gets the optional custom headers.
+     *
+     * @return The custom headers or <code>null</code>
+     */
+    Map<String, String> getCustomHeaders();
 
     /**
      * Gets the security information for this message.

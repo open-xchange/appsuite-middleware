@@ -121,7 +121,11 @@ public enum MessageField {
     /**
      * Signals that content is stored encrypted.
      */
-    CONTENT_ENCRYPTED("contentEncrypted");
+    CONTENT_ENCRYPTED("contentEncrypted"),
+    /**
+     * The optional custom headers
+     */
+    CUSTOM_HEADERS("customHeaders");
 
     private final String identifier;
 

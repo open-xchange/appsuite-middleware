@@ -52,7 +52,9 @@ package com.openexchange.mail.compose.json.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -225,12 +227,39 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
                 md.setsharedAttachmentsInfo(toSharedAttachmentsInfo(jSharedAttachments));
             }
         }
+
+        {
+            JSONObject jCustomHeaders = jMessage.optJSONObject("customHeaders");
+            if (null != jCustomHeaders) {
+                md.setCustomHeaders(toCustomHeaders(jCustomHeaders));
+            }
+        }
     }
 
     private static List<Address> toAddresses(JSONArray jAddresses) throws JSONException {
-        List<Address> addresses = new ArrayList<Address>(jAddresses.length());
+        int length = jAddresses.length();
+        if (length <= 0) {
+            return Collections.emptyList();
+        }
+
+        if (length == 1) {
+            Object jAddress = jAddresses.get(0);
+            Address address;
+            if (jAddress instanceof JSONArray) {
+                address = toAddress((JSONArray) jAddress);
+            } else {
+                address = new Address(null, jAddress.toString());
+            }
+            return Collections.singletonList(address);
+        }
+
+        List<Address> addresses = new ArrayList<Address>(length);
         for (Object jAddress : jAddresses) {
-            addresses.add(toAddress((JSONArray) jAddress));
+            if (jAddress instanceof JSONArray) {
+                addresses.add(toAddress((JSONArray) jAddress));
+            } else {
+                addresses.add(new Address(null, jAddress.toString()));
+            }
         }
         return addresses;
     }
@@ -302,7 +331,7 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
     /**
      * Parses given JSON object to shared attachments information
      *
-     * @param jSharedAttachments The JSON object to parse
+     * @param jSharedAttachments The JSON object to parse (must not be <code>null</code>)
      * @return The parsed shared attachments information
      */
     protected static SharedAttachmentsInfo toSharedAttachmentsInfo(JSONObject jSharedAttachments) {
@@ -337,9 +366,23 @@ public abstract class AbstractMailComposeAction implements AJAXActionService {
     }
 
     /**
+     * Parses given JSON object to custom headers
+     *
+     * @param jCustomHeaders The JSON object to parse (must not be <code>null</code>)
+     * @return The parsed custom headers
+     */
+    protected static Map<String, String> toCustomHeaders(JSONObject jCustomHeaders) {
+        Map<String, String> customHeaders = new LinkedHashMap<>(jCustomHeaders.length());
+        for (Map.Entry<String, Object> jCustomHeader : jCustomHeaders.entrySet()) {
+            customHeaders.put(jCustomHeader.getKey(), jCustomHeader.getValue().toString());
+        }
+        return customHeaders;
+    }
+
+    /**
      * Parses given JSON object to security settings
      *
-     * @param jSecurity The JSON object to parse
+     * @param jSecurity The JSON object to parse (must not be <code>null</code>)
      * @return The parsed security settings
      */
     protected static Security toSecurity(JSONObject jSecurity) {

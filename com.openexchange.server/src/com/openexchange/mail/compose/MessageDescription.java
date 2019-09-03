@@ -51,6 +51,7 @@ package com.openexchange.mail.compose;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.mail.compose.Message.ContentType;
 import com.openexchange.mail.compose.Message.Priority;
 
@@ -77,6 +78,7 @@ public class MessageDescription {
     private Security security;
     private Priority priority;
     private boolean contentEncrypted;
+    private Map<String, String> customHeaders;
 
     private boolean bFrom;
     private boolean bSender;
@@ -93,6 +95,7 @@ public class MessageDescription {
     private boolean bSecurity;
     private boolean bPriority;
     private boolean bContentEncrypted;
+    private boolean bCustomHeaders;
 
     /**
      * Initializes a new {@link MessageDescription}.
@@ -307,6 +310,24 @@ public class MessageDescription {
     public void removeContentEncrypted() {
         contentEncrypted = false;
         bContentEncrypted = false;
+    }
+
+    public Map<String, String> getCustomHeaders() {
+        return customHeaders;
+    }
+
+    public void setCustomHeaders(Map<String, String> customHeaders) {
+        this.customHeaders = customHeaders;
+        bCustomHeaders = true;
+    }
+
+    public boolean containsCustomHeaders() {
+        return bCustomHeaders;
+    }
+
+    public void removeCustomHeaders() {
+        customHeaders = null;
+        bCustomHeaders = false;
     }
 
     public boolean isRequestReadReceipt() {
