@@ -87,7 +87,7 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
      * Initialises a new {@link MicrosoftContactsSubscribeService}.
      */
     public MicrosoftContactsSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
-        super(metadata, SOURCE_ID, FolderObject.CONTACT, "Microsoft Graph", services);
+        super(metadata, SOURCE_ID, FolderObject.CONTACT, "Outlook.com", services);
     }
 
     @Override
