@@ -1,4 +1,5 @@
 %define configfiles configfiles.list
+%define manlist manfiles.list
 %define __jar_repack %{nil}
 
 Name:          open-xchange-core
@@ -16,6 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
+BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -76,6 +78,10 @@ perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(autoconfig|mail|configdb|server|filestorage|management|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+rm -f %{manlist} && touch %{manlist}
+test -d %{buildroot}%{_mandir} && find %{buildroot}%{_mandir}/man1 -type f -printf "%%%doc %p.*\n" >> %{manlist}
+sed -i -e 's;%{buildroot};;' %{manlist}
+cat %{manlist} >> %{configfiles}
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh

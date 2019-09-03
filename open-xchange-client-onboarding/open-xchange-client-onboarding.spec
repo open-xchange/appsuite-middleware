@@ -1,4 +1,5 @@
 %define __jar_repack %{nil}
+%define manlist manfiles.list
 
 Name:          open-xchange-client-onboarding
 BuildArch:     noarch
@@ -13,6 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
+BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -40,6 +42,9 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+rm -f %{manlist} && touch %{manlist}
+test -d %{buildroot}%{_mandir} && find %{buildroot}%{_mandir}/man1 -type f -printf "%%%doc %p.*\n" >> %{manlist}
+sed -i -e 's;%{buildroot};;' %{manlist}
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -141,7 +146,7 @@ fi
 %clean
 %{__rm} -rf %{buildroot}
 
-%files
+%files -f %{manlist}
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*

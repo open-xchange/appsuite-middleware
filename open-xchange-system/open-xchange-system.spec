@@ -1,4 +1,5 @@
 %define __jar_repack %{nil}
+%define manlist manfiles.list
 
 Name:          open-xchange-system
 BuildArch:     noarch
@@ -13,6 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: coreutils
+BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -51,6 +53,9 @@ mkdir -p %{buildroot}/opt/open-xchange/lib
 # for %ghost file
 mkdir %{buildroot}/opt/open-xchange/etc
 touch %{buildroot}/opt/open-xchange/etc/scr_db
+rm -f %{manlist} && touch %{manlist}
+test -d %{buildroot}%{_mandir} && find %{buildroot}%{_mandir}/man1 -type f -printf "%%%doc %p.*\n" >> %{manlist}
+sed -i -e 's;%{buildroot};;' %{manlist}
 
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
@@ -61,7 +66,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /usr/sbin/groupadd -r open-xchange 2> /dev/null || :
 /usr/sbin/useradd -r -g open-xchange -r -s /bin/false -c "open-xchange system user" -d /opt/open-xchange open-xchange 2> /dev/null || :
 
-%files
+%files -f %{manlist}
 %defattr(-,root,root)
 %dir /opt/open-xchange/
 %dir /opt/open-xchange/etc
