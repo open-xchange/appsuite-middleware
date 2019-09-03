@@ -190,7 +190,6 @@ public final class DeleteRegistry {
             new UserQuotaUsageDelete(),
             new AttachmentContextDelete(),
             new AttachmentDelDelete(),
-            new CacheClearerOnContextDelete(),
             new SessionClearerOnContextDelete(),
             new InvalidateUserCacheOnContextDelete(),
             new ObjectPermissionDeleteListener(),
