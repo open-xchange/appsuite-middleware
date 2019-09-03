@@ -2,7 +2,7 @@ type: object
 properties:
   id:
     type: string
-    description: An address
+    description: The identifier
   from:
     $ref: Address.yaml
   to:
@@ -53,3 +53,7 @@ properties:
     $ref: SharedAttachments.yaml
   security:
     $ref: Security.yaml
+  customHeaders:
+    type: object
+    additionalProperties:
+      type: string
