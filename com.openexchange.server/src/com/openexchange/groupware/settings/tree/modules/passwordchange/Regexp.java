@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.settings.tree.modules.passwordchange;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -79,8 +80,9 @@ public class Regexp implements PreferencesItemService {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                String property = service.getProperty("com.openexchange.passwordchange.regexp", "[^a-z0-9]");
+                ConfigViewFactory service = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                ConfigView view = service.getView(user.getId(), ctx.getContextId());
+                String property = view.opt("com.openexchange.passwordchange.regexp", String.class, "[^a-z0-9]");
                 setting.setSingleValue(property);
             }
 
