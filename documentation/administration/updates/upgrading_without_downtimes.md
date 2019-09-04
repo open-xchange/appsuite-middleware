@@ -60,7 +60,7 @@ Now that everything is set, you can perform the upgrade to the future release x.
 [install](http://oxpedia.org/wiki/index.php?title=AppSuite:Main_Page_AppSuite#quickinstall)/[update](http://oxpedia.org/wiki/index.php?title=AppSuite:UpdatingOXPackages) documentation.
 
 To avoid any Hazelcast incompatibility issues that future releases might have with their predecessors, make sure that you have [configured](http://oxpedia.org/wiki/index.php?title=AppSuite:Running_a_cluster#Configuration) 
-both versions, 7.10.0 and it's future successor to form different Hazelcast clusters.
+both versions, 7.10.0 and its future successor to form different Hazelcast clusters.
 
 After completing step 2 the setup will look as follows:
 
