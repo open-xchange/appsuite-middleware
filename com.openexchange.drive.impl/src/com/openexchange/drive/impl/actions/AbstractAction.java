@@ -51,11 +51,13 @@ package com.openexchange.drive.impl.actions;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.impl.comparison.Change;
 import com.openexchange.drive.impl.comparison.ThreeWayComparison;
+import com.openexchange.drive.impl.internal.Tracer;
 
 /**
  * {@link AbstractAction}
@@ -112,7 +114,7 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
 
     @Override
     public String toString() {
-        return getAction() + " [version=" + version + ", newVersion=" + newVersion + ", parameters=" + parameters + "]";
+        return getAction() + " [version=" + version + ", newVersion=" + newVersion + ", parameters=" + printParameters(parameters) + "]";
     }
 
     public boolean wasCausedBy(Change clientChange, Change serverChange) {
@@ -149,5 +151,27 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
         this.resultingVersion = version;
     }
 
+    private static String printParameters(Map<String, Object> parameters) {
+        int maxLength = (int) (Tracer.MAX_SIZE * 0.9);
+        StringBuilder stringBuilder = new StringBuilder().append('{');
+        for (Entry<String, Object> entry : parameters.entrySet()) {
+            if (PARAMETER_NAMES.contains(entry.getKey())) {
+                if (1 < stringBuilder.length()) {
+                    stringBuilder.append(',').append(' ');
+                    if (maxLength < stringBuilder.length()) {
+                        stringBuilder.append("...");
+                        break;
+                    }
+                }
+                stringBuilder.append(entry.getKey()).append('=');
+                if (PARAMETER_DATA.equals(entry.getKey())) {
+                    stringBuilder.append("...");
+                } else {
+                    stringBuilder.append(entry.getValue());
+                }
+            }
+        }
+        return stringBuilder.append('}').toString();
+    }
 }
 
