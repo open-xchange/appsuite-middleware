@@ -57,14 +57,14 @@ spec:
             steps {
                 dir('automation') {
                     checkout([
-                            $class: 'GitSCM',
-                            branches: [[name: '*/master']],
-                            browser: [$class: 'GitWeb', repoUrl: 'https://gitweb.open-xchange.com/?p=automation'],
-                            doGenerateSubmoduleConfigurations: false,
-                            extensions: [],
-                            gitTool: 'Linux',
-                            submoduleCfg: [],
-                            userRemoteConfigs: [[credentialsId: '2cb98438-7e92-4038-af72-dad91b4ff6be', url: "https://code.open-xchange.com/git/automation"]]
+                        $class: 'GitSCM',
+                        branches: [[name: '*/master']],
+                        browser: [$class: 'GitWeb', repoUrl: 'https://gitweb.open-xchange.com/?p=automation'],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        gitTool: 'Linux',
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[credentialsId: '2cb98438-7e92-4038-af72-dad91b4ff6be', url: "https://code.open-xchange.com/git/automation"]]
                     ])
                 }
                 dir('automation/backendI18N') {
@@ -102,12 +102,12 @@ spec:
                 allOf {
                     // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
                     expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
-                    expression { null != version4DocProcessor(env.BRANCH_NAME) }
+                    expression { null != version4Documentation(env.BRANCH_NAME) }
                 }
             }
             steps {
                 script {
-                    def targetVersion = version4DocProcessor(env.BRANCH_NAME)
+                    def targetVersion = version4Documentation(env.BRANCH_NAME)
                     def targetDirectory
                     dir('config-doc-processor') {
                         // Need to do some file operation in directory otherwise it is not created.
@@ -191,12 +191,12 @@ spec:
                         triggeredBy 'TimerTrigger'
                         triggeredBy cause: 'UserIdCause'
                     }
-                    expression { null != version4DocProcessor(env.BRANCH_NAME) }
+                    expression { null != version4Documentation(env.BRANCH_NAME) }
                 }
             }
             steps {
                 script {
-                    def targetVersion = version4DocProcessor(env.BRANCH_NAME)
+                    def targetVersion = version4Documentation(env.BRANCH_NAME)
                     container('gradle') {
                         dir('backend/http-api') {
                             sh "gradle resolve insertMarkdown"
@@ -225,7 +225,7 @@ spec:
     }
 }
 
-String version4DocProcessor(String branchName) {
+String version4Documentation(String branchName) {
     if ('develop' == branchName)
         return branchName
     if (branchName.startsWith('master-'))
