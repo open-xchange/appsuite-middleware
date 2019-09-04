@@ -8789,6 +8789,16 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
 
+#. User tries to access an OAuth-linked mail server, but required open-xchange-oauth package is not installed
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:264
+msgid "Unsupported OAuth mail access to server %1$s"
+msgstr ""
+
+#. User tries to access an OAuth-linked transport server, but required open-xchange-oauth package is not installed
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:267
+msgid "Unsupported OAuth transport access to server %1$s"
+msgstr ""
+
 #. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
 #. which is only applicable in case a reply is generated, but in-compose message is not a reply
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:72
