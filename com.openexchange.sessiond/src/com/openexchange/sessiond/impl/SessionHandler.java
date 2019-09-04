@@ -632,6 +632,23 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets all <b>local-only</b> active (short-term-only) sessions associated with given user in specified context
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The wrapper objects for active sessions
+     */
+    public static List<SessionControl> getUserActiveSessions(int userId, int contextId) {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return new LinkedList<SessionControl>();
+        }
+
+        return sessionData.getUserActiveSessions(userId, contextId);
+    }
+
+    /**
      * Gets all sessions associated with given user in specified context
      *
      * @param userId The user ID

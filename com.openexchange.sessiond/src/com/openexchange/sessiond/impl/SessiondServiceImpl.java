@@ -187,6 +187,20 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public Collection<Session> getActiveSessions(int userId, int contextId) {
+        List<SessionControl> sessionControls = SessionHandler.getUserActiveSessions(userId, contextId);
+        if (null == sessionControls) {
+            return Collections.emptyList();
+        }
+
+        List<Session> list = new ArrayList<Session>(sessionControls.size());
+        for (SessionControl sc : sessionControls) {
+            list.add(sc.getSession());
+        }
+        return list;
+    }
+
+    @Override
     public Collection<Session> getSessions(int userId, int contextId) {
         return getSessions(userId, contextId, false);
     }

@@ -50,7 +50,6 @@
 package com.openexchange.push.dovecot;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +80,9 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleActiveSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
 
@@ -236,17 +236,24 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         // Look-up sessions
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (null != sessiondService) {
-            String oldSessionId = null == optOldSession ? null : optOldSession.getSessionID();
+            final String oldSessionId = null == optOldSession ? null : optOldSession.getSessionID();
 
             // Query local ones
-            Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-            for (Session session : sessions) {
-                if ((null == oldSessionId || false == oldSessionId.equals(session.getSessionID())) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                    Session ses = sessiondService.getSession(session.getSessionID());
-                    if (ses != null) {
-                        return ses;
-                    }
+            SessionMatcher matcher = new SessionMatcher() {
+
+                @Override
+                public Set<Flag> flags() {
+                    return SessionMatcher.ALL_FLAGS;
                 }
+
+                @Override
+                public boolean accepts(Session session) {
+                    return (oldSessionId == null || !oldSessionId.equals(session.getSessionID())) && PushUtility.allowedClient(session.getClient(), session, true);
+                }
+            };
+            Session anotherActiveSession = sessiondService.findFirstMatchingSessionForUser(userId, contextId, matcher);
+            if (anotherActiveSession != null) {
+                return anotherActiveSession;
             }
 
             // Look-up remote sessions, too, if possible
@@ -293,7 +300,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             }
         };
         try {
-            return Hazelcasts.executeByMembersAndFilter(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
+            return Hazelcasts.executeByMembersAndFilter(new PortableMultipleActiveSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException) {

@@ -181,6 +181,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 402 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp
      *   &bull; 403 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection
      *   &bull; 404 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteRetrieval
+     *   &bull; 405 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleActiveSessionRemoteLookUp
      *   &bull; 500 --> com.openexchange.sms.tools.internal.SMSBucket
      *   &bull; 600 --> com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor
      *   &bull; 700 --> com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch

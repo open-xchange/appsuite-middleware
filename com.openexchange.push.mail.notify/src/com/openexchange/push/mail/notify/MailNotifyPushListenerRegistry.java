@@ -60,12 +60,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.java.Strings;
 import com.openexchange.lock.LockService;
 import com.openexchange.push.PushListenerService;
@@ -77,9 +81,13 @@ import com.openexchange.push.mail.notify.util.DelayedNotification;
 import com.openexchange.push.mail.notify.util.MailNotifyDelayQueue;
 import com.openexchange.push.mail.notify.util.SimpleKey;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleActiveSessionRemoteLookUp;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -467,36 +475,85 @@ public final class MailNotifyPushListenerRegistry {
                 String oldSessionId = optionalOldSession.getSessionID();
 
                 // Query local ones first
-                Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-                for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                        Session ses = sessiondService.getSession(session.getSessionID());
-                        if (ses != null) {
-                            MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(ses, false);
-                            mboxId2Listener.put(mboxId, newListener);
-                            return newListener;
-                        }
+                SessionMatcher matcher = new SessionMatcher() {
+
+                    @Override
+                    public Set<Flag> flags() {
+                        return SessionMatcher.ALL_FLAGS;
                     }
+
+                    @Override
+                    public boolean accepts(Session session) {
+                        return !oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true);
+                    }
+                };
+                Session anotherActiveSession = sessiondService.findFirstMatchingSessionForUser(userId, contextId, matcher);
+                if (anotherActiveSession != null) {
+                    MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(anotherActiveSession, false);
+                    mboxId2Listener.put(mboxId, newListener);
+                    return newListener;
                 }
 
                 // Look-up remote sessions, too, if possible
-                if (sessiondService instanceof SessiondServiceExtended) {
-                    sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
-                    for (Session session : sessions) {
-                        if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                            Session ses = sessiondService.getSession(session.getSessionID());
-                            if (ses != null) {
-                                MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(ses, false);
-                                mboxId2Listener.put(mboxId, newListener);
-                                return newListener;
-                            }
-                        }
+                Session session = lookUpRemoteSessionFor(optionalOldSession);
+                if (null != session) {
+                    Session ses = sessiondService.getSession(session.getSessionID());
+                    if (ses != null) {
+                        MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(ses, false);
+                        mboxId2Listener.put(mboxId, newListener);
+                        return newListener;
                     }
                 }
             }
         }
 
         return null;
+    }
+
+    private Session lookUpRemoteSessionFor(Session oldSession) {
+        HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
+        ObfuscatorService obfuscatorService = Services.optService(ObfuscatorService.class);
+        if (null == hzInstance || null == obfuscatorService) {
+            return null;
+        }
+
+        // Determine other cluster members
+        Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
+        if (otherMembers.isEmpty()) {
+            return null;
+        }
+
+        int contextId = oldSession.getContextId();
+        int userId = oldSession.getUserId();
+        final String oldSessionId = oldSession.getSessionID();
+        Hazelcasts.Filter<PortableSessionCollection, PortableSession> filter = new Hazelcasts.Filter<PortableSessionCollection, PortableSession>() {
+
+            @Override
+            public PortableSession accept(PortableSessionCollection portableSessionCollection) {
+                PortableSession[] portableSessions = portableSessionCollection.getSessions();
+                if (null != portableSessions) {
+                    for (PortableSession portableSession : portableSessions) {
+                        if ((null == oldSessionId || false == oldSessionId.equals(portableSession.getSessionID())) && PushUtility.allowedClient(portableSession.getClient(), portableSession, true)) {
+                            portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
+                            return portableSession;
+                        }
+                    }
+                }
+                return null;
+            }
+        };
+        try {
+            return Hazelcasts.executeByMembersAndFilter(new PortableMultipleActiveSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw ((RuntimeException) cause);
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
+        }
     }
 
     /**
