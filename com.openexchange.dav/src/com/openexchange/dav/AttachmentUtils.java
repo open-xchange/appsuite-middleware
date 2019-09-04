@@ -49,8 +49,9 @@
 
 package com.openexchange.dav;
 
-import static com.openexchange.tools.dav.DAVTools.removePathPrefixFromPath;
-import static com.openexchange.tools.dav.DAVTools.removePrefixFromPath;
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.dav.DAVTools.removePrefixFromPath;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,7 +59,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -75,7 +75,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
-import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -154,13 +153,15 @@ public class AttachmentUtils {
      *
      * @param hostData The host data to use for generating the link
      * @param metadata The attachment metadata to build the URI for
+     * @param configViewFactory The configuration view
      * @return The URI
+     * @throws URISyntaxException 
      */
-    public static URI buildURI(HostData hostData, AttachmentMetadata metadata) throws URISyntaxException {
+    public static URI buildURI(HostData hostData, AttachmentMetadata metadata, ConfigViewFactory configViewFactory) throws URISyntaxException {
         return new URI(new URIBuilder()
             .setScheme(hostData.isSecure() ? "https" : "http")
             .setHost(hostData.getHost())
-            .setPath(new StringBuilder(DAVTools.adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class), "/attachments/"))
+            .setPath(new StringBuilder(getExternalPath(configViewFactory, "/attachments/"))
                 .append(encodeName(metadata))
                 .append('/')
                 .append(metadata.getFilename()).toString())
@@ -171,15 +172,16 @@ public class AttachmentUtils {
      * Decodes attachment metadata from the given URI.
      *
      * @param uri The URI to decode
+     * @param configViewFactory The configuration view
      * @return The decoded attachment metadata
      * @throws IllegalArgumentException If path isn't valid
      */
-    public static AttachmentMetadata decodeURI(URI uri) throws IllegalArgumentException {
+    public static AttachmentMetadata decodeURI(URI uri, ConfigViewFactory configViewFactory) throws IllegalArgumentException {
         String path = uri.getPath();
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        path = removePathPrefixFromPath(Services.getServiceLookup().getService(ConfigViewFactory.class), path);
+        path = removePathPrefixFromPath(configViewFactory, path);
         path = removePrefixFromPath("/attachments", path);
         int index = path.indexOf('/');
         if (-1 != index) {

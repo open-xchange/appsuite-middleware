@@ -49,10 +49,12 @@
 
 package com.openexchange.dav.push.mixins;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.dav.push.apn.DAVApnOptions;
 import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
+import com.openexchange.dav.push.osgi.Services;
 import com.openexchange.dav.push.subscribe.PushSubscribeFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -92,15 +94,14 @@ public class PushTransports extends SingleResourcePropertyMixin {
         return null;
     }
 
-    private String getValue(String clientId) {
+    private String getValue(String clientId) throws OXException {
         DAVApnOptions options = getOptions(clientId);
         if (null == options) {
             return null;
         }
         return new StringBuilder()
-            .append("<transport type='APSD'>")
-            .append(  "<subscription-url>")
-            .append(    "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId) + "</href>")
+            .append("<transport type='APSD'>")  .append(  "<subscription-url>")
+            .append(    "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId, Services.requireService(ConfigViewFactory.class)) + "</href>")
             .append(  "</subscription-url>")
             .append(  "<apsbundleid>" + options.getBundleId() + "</apsbundleid>")
             .append(  "<env>" + (options.isProduction() ? "PRODUCTION" : "SANDBOX") + "</env>")

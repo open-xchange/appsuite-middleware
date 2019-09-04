@@ -49,11 +49,11 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.DAVFactory;
 import com.openexchange.session.Session;
-import com.openexchange.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
-
 
 /**
  * {@link CurrentUserPrincipal}
@@ -63,25 +63,25 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class CurrentUserPrincipal extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "current-user-principal";
-    private final SessionHolder sessionHolder;
+    private DAVFactory factory;
 
     /**
      * Initializes a new {@link CurrentUserPrincipal}.
      *
-     * @param sessionHolder A session holder reference
+     * @param factory The factory
      */
-    public CurrentUserPrincipal(SessionHolder sessionHolder) {
+    public CurrentUserPrincipal(DAVFactory factory) {
         super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
-        this.sessionHolder = sessionHolder;
+        this.factory = factory;
     }
 
     @Override
     protected String getValue() {
-        Session session = sessionHolder.getSessionObject();
+        Session session = factory.getSessionObject();
         if (null == session) {
             return "<D:href><D:unauthenticated/></D:href>";
         }
-        return "<D:href>" + PrincipalURL.forUser(session.getUserId()) + "</D:href>";
+        return "<D:href>" + PrincipalURL.forUser(session.getUserId(), factory.getService(ConfigViewFactory.class)) + "</D:href>";
     }
 
 }

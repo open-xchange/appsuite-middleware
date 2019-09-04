@@ -51,7 +51,8 @@ package com.openexchange.dav.wellknown;
 
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -71,11 +72,10 @@ public class WellknownFactory extends DAVFactory {
      * Initializes a new {@link WellknownFactory}.
      *
      * @param protocol The protocol
-     * @param services A service lookup reference
      * @param sessionHolder The session holder to use
      */
-    public WellknownFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
-        super(protocol, services, sessionHolder);
+    public WellknownFactory(Protocol protocol, SessionHolder sessionHolder) {
+        super(protocol, null, sessionHolder);
     }
 
     @Override
@@ -91,6 +91,27 @@ public class WellknownFactory extends DAVFactory {
     @Override
     public String getURLPrefix() {
         return "/";
+    }
+    
+    /*
+     * ----------------------------------------
+     *    Avoid service lookup functionality
+     * ----------------------------------------
+     */
+
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return null;
+    }
+
+    @Override
+    public <S> S getServiceSafe(Class<? extends S> clazz) throws OXException {
+        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return null;
     }
 
 }

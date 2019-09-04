@@ -49,10 +49,10 @@
 
 package com.openexchange.dav;
 
-import static com.openexchange.tools.dav.DAVTools.adjustPath;
-import static com.openexchange.tools.dav.DAVTools.removePathPrefixFromPath;
-import static com.openexchange.tools.dav.DAVTools.removePrefixFromPath;
-import static com.openexchange.tools.dav.DAVTools.startsWithPrefix;
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.dav.DAVTools.removePrefixFromPath;
+import static com.openexchange.dav.DAVTools.startsWithPrefix;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -190,7 +190,7 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      * @return The full qualified path considering configuration.
      */
     protected String getURLPrefix(String path) {
-        return adjustPath(getService(ConfigViewFactory.class), path);
+        return getExternalPath(getService(ConfigViewFactory.class), path);
     }
 
 }

@@ -55,6 +55,7 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -77,7 +78,7 @@ public class CookieTest extends CardDAVTest {
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.PRINCIPAL_URL);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         try {
             Assert.assertEquals("unexpected http status", StatusCodes.SC_MULTISTATUS, getWebDAVClient().executeMethod(propFind));
         } finally {

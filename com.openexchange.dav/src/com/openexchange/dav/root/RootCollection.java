@@ -52,6 +52,7 @@ package com.openexchange.dav.root;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
@@ -76,7 +77,8 @@ public class RootCollection extends DAVRootCollection {
      */
     public RootCollection(RootFactory factory) {
         super(factory, "WebDAV Root");
-        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(), new CalendarHomeSet(), new AddressbookHomeSet());
+        ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
+        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(configViewFactory), new CalendarHomeSet(configViewFactory), new AddressbookHomeSet(configViewFactory));
     }
 
     @Override

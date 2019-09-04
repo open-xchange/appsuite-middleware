@@ -70,61 +70,61 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 
     private final HttpServletRequest req;
     private final WebdavPath url;
-	private String urlPrefix;
-	private WebdavPath destUrl;
+    private String urlPrefix;
+    private WebdavPath destUrl;
 
-	/**
-	 * Initializes a new {@link ServletWebdavRequest}.
-	 *
-	 * @param factory The WebDAV factory
-	 * @param req The underlying servlet request
-	 */
-	public ServletWebdavRequest(WebdavFactory factory, HttpServletRequest req) {
-		super(factory);
-		this.req = req;
-        this.urlPrefix = req.getServletPath();
+    /**
+     * Initializes a new {@link ServletWebdavRequest}.
+     *
+     * @param factory The WebDAV factory
+     * @param req The underlying servlet request
+     */
+    public ServletWebdavRequest(WebdavFactory factory, HttpServletRequest req) {
+        super(factory);
+        this.req = req;
+        this.urlPrefix = req.getServletPath().endsWith("/") ? req.getServletPath() : req.getServletPath() + '/';
         LOG.debug("WEBDAV URL PREFIX FROM CONTAINER: {}", this.urlPrefix);
         this.url = toWebdavURL(req.getRequestURI());
-	}
+    }
 
-	@Override
+    @Override
     public InputStream getBody() throws IOException {
-		return req.getInputStream();
-	}
+        return req.getInputStream();
+    }
 
-	@Override
+    @Override
     public String getHeader(String header) {
-		return req.getHeader(header);
-	}
+        return req.getHeader(header);
+    }
 
-	@Override
+    @Override
     public List<String> getHeaderNames() {
         Enumeration<String> headerNames = req.getHeaderNames();
         return null == headerNames ? Collections.emptyList() : Collections.list(headerNames);
-	}
+    }
 
-	@Override
+    @Override
     public String getURLPrefix() {
-		return urlPrefix;
-	}
+        return urlPrefix;
+    }
 
     public void setUrlPrefix(String urlPrefix) {
         this.urlPrefix = urlPrefix;
     }
 
-	@Override
+    @Override
     public WebdavPath getUrl() {
-		return url;
-	}
+        return url;
+    }
 
-	@Override
+    @Override
     public WebdavPath getDestinationUrl() {
-		if (destUrl != null) {
-			return destUrl;
-		}
+        if (destUrl != null) {
+            return destUrl;
+        }
 
-		return destUrl = toWebdavURL(req.getHeader("destination"));
-	}
+        return destUrl = toWebdavURL(req.getHeader("destination"));
+    }
 
     protected WebdavPath toWebdavURL(String url) {
         if (url == null) {
@@ -139,7 +139,11 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
                 LOG.debug("", x);
             }
         }
-
+        
+        if (url.startsWith(req.getServletPath())) {
+            url =  url.substring(req.getServletPath().length());
+        }
+        
         try {
             String encoding = req.getCharacterEncoding();
             if (encoding == null) {
@@ -166,8 +170,8 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 
     @Override
     public String getCharset() {
-		return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
-	}
+        return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+    }
 
     @Override
     public String getParameter(String name) {

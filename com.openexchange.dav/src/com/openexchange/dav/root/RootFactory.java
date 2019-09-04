@@ -49,12 +49,12 @@
 
 package com.openexchange.dav.root;
 
+import static com.openexchange.dav.DAVTools.getInternalPath;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.SessionHolder;
-import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -80,7 +80,7 @@ public class RootFactory extends DAVFactory {
      */
     public RootFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
         super(protocol, services, sessionHolder);
-        urlPrefix = DAVTools.concatPath(getService(ConfigViewFactory.class), null);
+        urlPrefix = getInternalPath(getService(ConfigViewFactory.class), null);
     }
 
     @Override

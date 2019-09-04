@@ -50,6 +50,7 @@
 package com.openexchange.dav.mixins;
 
 import java.util.List;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.Privilege;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.webdav.protocol.Protocol;
@@ -65,15 +66,17 @@ import com.openexchange.webdav.protocol.helpers.SinglePropertyMixin;
 public class ACL extends SinglePropertyMixin {
 
     private final Permission[] permissions;
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link ACL}.
      *
      * @param permissions The permissions
      */
-    public ACL(Permission[] permissions) {
+    public ACL(Permission[] permissions, ConfigViewFactory configViewFactory) {
         super(Protocol.DAV_NS.getURI(), "acl");
         this.permissions = permissions;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -83,7 +86,7 @@ public class ACL extends SinglePropertyMixin {
             StringBuilder stringBuilder = new StringBuilder();
             for (Permission permission : permissions) {
                 stringBuilder.append("<D:ace><D:principal><D:href>")
-                    .append(permission.isGroup() ? PrincipalURL.forGroup(permission.getEntity()) : PrincipalURL.forUser(permission.getEntity()))
+                    .append(permission.isGroup() ? PrincipalURL.forGroup(permission.getEntity(), configViewFactory) : PrincipalURL.forUser(permission.getEntity(), configViewFactory))
                     .append("</D:href></D:principal><D:grant>");
                 List<Privilege> privileges = Privilege.getApplying(permission);
                 if (null != privileges && 0 < privileges.size()) {

@@ -47,43 +47,27 @@
  *
  */
 
-package com.openexchange.dav.push.mixins;
+package com.openexchange.dav;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dav.push.DAVPushUtility;
-import com.openexchange.dav.push.osgi.Services;
-import com.openexchange.exception.OXException;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.SingleResourcePropertyMixin;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link SubscribeURL}
+ * 
+ * {@link UnitTests}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.4
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.3
  */
-public class SubscribeURL extends SingleResourcePropertyMixin {
+@RunWith(Suite.class)
+@SuiteClasses({
+    com.openexchange.dav.DAVToolsTest.class,
+})
+public class UnitTests {
 
-    /**
-     * Initializes a new {@link SubscribeURL}.
-     */
-    public SubscribeURL() {
-        super(DAVPushUtility.PUSH_NS.getURI(), "subscribe-URL");
-    }
-
-    @Override
-    protected WebdavProperty getProperty(WebdavResource resource) throws OXException {
-        if (null != DAVPushUtility.getPushKey(resource)) {
-            String clientId = DAVPushUtility.getClientId(resource);
-            if (null != clientId) {
-                String value = "<href xmlns='DAV:'>" + DAVPushUtility.getSubscriptionURL(clientId, Services.requireService(ConfigViewFactory.class)) + "</href>";
-                WebdavProperty property = prepareProperty(true);
-                property.setValue(value);
-                return property;
-            }
-        }
-        return null;
+    public UnitTests() {
+        super();
     }
 
 }

@@ -52,6 +52,7 @@ package com.openexchange.dav.push.subscribe;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
@@ -81,7 +82,8 @@ public class RootPushSubscribeCollection extends DAVRootCollection {
     public RootPushSubscribeCollection(PushSubscribeFactory factory) {
         super(factory, "Push Subscribe");
         this.factory = factory;
-        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(), new CalendarHomeSet(), new AddressbookHomeSet());
+        ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
+        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(configViewFactory), new CalendarHomeSet(configViewFactory), new AddressbookHomeSet(configViewFactory));
     }
 
     @Override

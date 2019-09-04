@@ -49,8 +49,8 @@
 
 package com.openexchange.caldav.osgi;
 
-import static com.openexchange.tools.dav.DAVTools.adjustPath;
-import static com.openexchange.tools.dav.DAVTools.concatPath;
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.getInternalPath;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.caldav.CalDAVURLField;
@@ -136,9 +136,9 @@ public class CaldavActivator extends HousekeepingActivator {
             final HttpService httpService = getService(HttpService.class);
 
             ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            httpService.registerServlet(concatPath(configViewFactory, SERVLET_PATH), new CalDAV(performer), null, null);
-            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(adjustPath(configViewFactory, SERVLET_PATH), Interface.CALDAV), null, null);
-            httpService.registerServlet(concatPath(configViewFactory, NULL_PATH), new DevNullServlet(), null, null);
+            httpService.registerServlet(getInternalPath(configViewFactory, SERVLET_PATH), new CalDAV(performer), null, null);
+            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(getExternalPath(configViewFactory, SERVLET_PATH), Interface.CALDAV), null, null);
+            httpService.registerServlet(getInternalPath(configViewFactory, NULL_PATH), new DevNullServlet(), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
@@ -233,8 +233,8 @@ public class CaldavActivator extends HousekeepingActivator {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
-            httpService.unregister(concatPath(configViewFactory, SERVLET_PATH));
-            httpService.unregister(concatPath(configViewFactory, NULL_PATH));
+            httpService.unregister(getInternalPath(configViewFactory, SERVLET_PATH));
+            httpService.unregister(getInternalPath(configViewFactory, NULL_PATH));
         }
         final OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {

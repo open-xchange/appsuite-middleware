@@ -49,7 +49,6 @@
 
 package com.openexchange.dav.mixins;
 
-import static com.openexchange.tools.dav.DAVTools.adjustPath;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,7 +56,6 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.group.Group;
 import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
@@ -78,9 +76,10 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
      *
      * @param contextID The context identifier
      * @param user The user
+     * @param configViewFactory The configuration view
      */
-    public CalendarUserAddressSet(int contextID, User user) {
-        this(getAddresses(contextID, user));
+    public CalendarUserAddressSet(int contextID, User user, ConfigViewFactory configViewFactory) {
+        this(getAddresses(contextID, user, configViewFactory));
     }
 
     /**
@@ -88,9 +87,10 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
      *
      * @param contextID The context identifier
      * @param group The group
+     * @param configViewFactory The configuration view
      */
-    public CalendarUserAddressSet(int contextID, Group group) {
-        this(Arrays.asList(PrincipalURL.forGroup(group.getIdentifier()), ResourceId.forGroup(contextID, group.getIdentifier())));
+    public CalendarUserAddressSet(int contextID, Group group, ConfigViewFactory configViewFactory) {
+        this(Arrays.asList(PrincipalURL.forGroup(group.getIdentifier(), configViewFactory), ResourceId.forGroup(contextID, group.getIdentifier())));
     }
 
     /**
@@ -98,12 +98,13 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
      *
      * @param contextID The context identifier
      * @param resource The resource
+     * @param configViewFactory The configuration view
      */
-    public CalendarUserAddressSet(int contextID, Resource resource) {
-        this(Arrays.asList(PrincipalURL.forResource(resource.getIdentifier()), ResourceId.forResource(contextID, resource.getIdentifier())));
+    public CalendarUserAddressSet(int contextID, Resource resource, ConfigViewFactory configViewFactory) {
+        this(Arrays.asList(PrincipalURL.forResource(resource.getIdentifier(), configViewFactory), ResourceId.forResource(contextID, resource.getIdentifier())));
     }
 
-    private static List<String> getAddresses(int contextID, User user) {
+    private static List<String> getAddresses(int contextID, User user, ConfigViewFactory configViewFactory) {
         List<String> addresses = new ArrayList<String>(3);
         if (Strings.isNotEmpty(user.getMail())) {
             addresses.add(CalendarUtils.getURI(user.getMail()));
@@ -118,7 +119,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
                 }
             }
         }
-        addresses.add(PrincipalURL.forUser(user.getId()));
+        addresses.add(PrincipalURL.forUser(user.getId(), configViewFactory));
         addresses.add(ResourceId.forUser(contextID, user.getId()));
         return addresses;
     }
@@ -137,7 +138,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (String address : addresses) {
-            stringBuilder.append("<D:href>").append(adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class), address) + "</D:href>");
+            stringBuilder.append("<D:href>").append(address).append("</D:href>");
         }
         return stringBuilder.toString();
     }

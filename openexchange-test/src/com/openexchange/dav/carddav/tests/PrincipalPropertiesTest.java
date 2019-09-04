@@ -59,6 +59,7 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.groupware.container.Contact;
@@ -93,7 +94,7 @@ public class PrincipalPropertiesTest extends CardDAVTest {
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCE_ID);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
-        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/principals/users/" + getClient().getValues().getUserId() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/principals/users/" + getClient().getValues().getUserId() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         final GetRequest getRequest = new GetRequest(super.getAJAXClient().getValues().getUserId(), super.getAJAXClient().getValues().getTimeZone());
         final GetResponse getResponse = Executor.execute(getClient(), getRequest);
@@ -103,7 +104,7 @@ public class PrincipalPropertiesTest extends CardDAVTest {
         final String principalURL = super.extractHref(PropertyNames.PRINCIPAL_URL, response);
         assertTrue("username not found in href child of " + PropertyNames.PRINCIPAL_URL, principalURL.contains("/" + getClient().getValues().getUserId()));
         final String addressbookHome = super.extractHref(PropertyNames.ADDRESSBOOK_HOME_SET, response);
-        assertEquals(PropertyNames.ADDRESSBOOK_HOME_SET + " wrong", "/carddav/", addressbookHome);
+        assertEquals(PropertyNames.ADDRESSBOOK_HOME_SET + " wrong", Config.getPathPrefix() + "/carddav/", addressbookHome);
 
     }
 }

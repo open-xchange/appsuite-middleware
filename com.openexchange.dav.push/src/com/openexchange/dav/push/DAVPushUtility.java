@@ -49,13 +49,14 @@
 
 package com.openexchange.dav.push;
 
-import static com.openexchange.tools.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.dav.DAVTools.removePathPrefixFromPath;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Namespace;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.DAVTools;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.push.osgi.Services;
@@ -179,13 +180,17 @@ public class DAVPushUtility {
     }
 
     /**
-     * Gets the push subscription URL to indicate to clients.
+     * Gets the push subscription URL to indicate to clients respecting configured DAV path.
      *
      * @param clientId The targeted push client identifier
+     * @param configViewFactory To get additional information about configured DAV path
      * @return The subscription URL, or <code>null</code> if passed client identifier was <code>null</code>
      */
-    public static String getSubscriptionURL(String clientId) {
-        return null != clientId ? "/subscribe/" + clientId : null;
+    public static String getSubscriptionURL(String clientId, ConfigViewFactory configViewFactory) {
+        if (null == clientId) {
+            return null;
+        }
+        return DAVTools.getExternalPath(configViewFactory, "/subscribe/" + clientId);
     }
 
     /**

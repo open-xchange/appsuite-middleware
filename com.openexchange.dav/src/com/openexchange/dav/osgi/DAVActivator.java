@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.osgi;
 
-import static com.openexchange.tools.dav.DAVTools.concatPath;
+import static com.openexchange.dav.DAVTools.getInternalPath;
 import org.osgi.service.http.HttpService;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -88,33 +88,32 @@ public class DAVActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        Services.setServiceLookup(this);
         ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
         HttpService httpService = getService(HttpService.class);
         /*
          * root
          */
         RootPerformer rootPerformer = new RootPerformer(this);
-        httpService.registerServlet(concatPath(configViewFactory, null), new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(getInternalPath(configViewFactory, null), new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
         /*
          * attachments
          */
         AttachmentPerformer attachmentPerformer = new AttachmentPerformer(this);
-        httpService.registerServlet(concatPath(configViewFactory, "attachments"), new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(getInternalPath(configViewFactory, "attachments"), new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
         /*
          * principals
          */
         PrincipalPerformer principalPerformer = new PrincipalPerformer(this);
-        httpService.registerServlet(concatPath(configViewFactory, "principals"), new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
+        httpService.registerServlet(getInternalPath(configViewFactory, "principals"), new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
         OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, principalPerformer);
         principalPerformer.setGlobalMixins(mixin);
         this.mixin = mixin;
         /*
          * OSGi mixins
          */
-        registerService(PropertyMixin.class, new PrincipalCollectionSet());
-        registerService(PropertyMixin.class, new CalendarHomeSet());
-        registerService(PropertyMixin.class, new AddressbookHomeSet());
+        registerService(PropertyMixin.class, new PrincipalCollectionSet(configViewFactory));
+        registerService(PropertyMixin.class, new CalendarHomeSet(configViewFactory));
+        registerService(PropertyMixin.class, new AddressbookHomeSet(configViewFactory));
         /*
          * DAV client info
          */

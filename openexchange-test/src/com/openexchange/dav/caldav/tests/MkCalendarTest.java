@@ -62,6 +62,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -86,7 +87,7 @@ public class MkCalendarTest extends CalDAVTest {
     public void testOptions() throws Exception {
         OptionsMethod options = null;
         try {
-            options = new OptionsMethod(getBaseUri());
+            options = new OptionsMethod(getBaseUri() + Config.getPathPrefix());
             assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
             assertResponseHeaders(new String[] { "MKCALENDAR" }, "Allow", options);
         } finally {
@@ -153,7 +154,7 @@ public class MkCalendarTest extends CalDAVTest {
         props.add(PropertyNames.SYNC_TOKEN);
         props.add(PropertyNames.XMPP_SERVER);
         props.add(PropertyNames.XMPP_URI);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no response", 0 < responses.length);

@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.push.osgi;
 
-import static com.openexchange.tools.dav.DAVTools.concatPath;
+import static com.openexchange.dav.DAVTools.getInternalPath;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -118,7 +118,7 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
              */
             PushSubscribePerformer performer = new PushSubscribePerformer(this);
             this.factory = performer.getFactory();
-            getService(HttpService.class).registerServlet(concatPath(getService(ConfigViewFactory.class), "subscribe"), new DAVServlet(performer, Interface.CALDAV), null, null);
+            getService(HttpService.class).registerServlet(getInternalPath(getService(ConfigViewFactory.class), "subscribe"), new DAVServlet(performer, Interface.CALDAV), null, null);
             /*
              * register push message generators
              */

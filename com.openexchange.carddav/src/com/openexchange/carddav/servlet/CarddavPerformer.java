@@ -56,6 +56,7 @@ import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.action.CardDAVPOSTAction;
 import com.openexchange.carddav.action.CardDAVPUTAction;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.ACLAction;
@@ -99,10 +100,10 @@ public class CarddavPerformer extends DAVPerformer {
     public CarddavPerformer(ServiceLookup services) {
         super();
         this.factory = new GroupwareCarddavFactory(PROTOCOL, services, this);
-        this.actions = initActions();
+        this.actions = initActions(services);
     }
 
-    private EnumMap<WebdavMethod, WebdavAction> initActions() {
+    private EnumMap<WebdavMethod, WebdavAction> initActions(ServiceLookup services) {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
         actions.put(WebdavMethod.UNLOCK, prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.PROPPATCH, prepare(new WebdavProppatchAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
@@ -117,7 +118,7 @@ public class CarddavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL, services.getService(ConfigViewFactory.class)), true, true, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.PUT, prepare(new CardDAVPUTAction(factory), true, true, new WebdavIfMatchAction()));
         actions.put(WebdavMethod.POST, prepare(new CardDAVPOSTAction(factory), true, true, new WebdavIfMatchAction()));
         makeLockNullTolerant(actions);

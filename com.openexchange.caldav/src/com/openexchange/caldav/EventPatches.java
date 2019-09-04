@@ -49,7 +49,16 @@
 
 package com.openexchange.caldav;
 
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getEventID;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -96,6 +105,7 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
@@ -660,7 +670,7 @@ public class EventPatches {
             }
         }
 
-        private static void applyManagedAttachments(Event importedEvent) {
+        private static void applyManagedAttachments(Event importedEvent, ConfigViewFactory configViewFactory) {
             List<Attachment> attachments = importedEvent.getAttachments();
             if (null != attachments && 0 < attachments.size()) {
                 for (Attachment attachment : attachments) {
@@ -669,7 +679,7 @@ public class EventPatches {
                     }
                     if (null != attachment.getUri()) {
                         try {
-                            AttachmentMetadata metadata = AttachmentUtils.decodeURI(new URI(attachment.getUri()));
+                            AttachmentMetadata metadata = AttachmentUtils.decodeURI(new URI(attachment.getUri()), configViewFactory);
                             attachment.setManagedId(metadata.getId());
                         } catch (URISyntaxException e) {
                             LOG.warn("Error decoding attachment URI", e);
@@ -834,7 +844,7 @@ public class EventPatches {
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null, null);
                 adjustAppleTravelAdvisory(resource, importedEvent);
-                applyManagedAttachments(importedEvent);
+                applyManagedAttachments(importedEvent, factory.getConfigViewFactory());
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
@@ -846,7 +856,7 @@ public class EventPatches {
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent, caldavImport.getCalender());
                     adjustAppleTravelAdvisory(resource, importedEvent);
-                    applyManagedAttachments(importedChangeException);
+                    applyManagedAttachments(importedChangeException, factory.getConfigViewFactory());
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
                 }
@@ -1071,16 +1081,17 @@ public class EventPatches {
          *
          * @param resource The parent event resource
          * @param exportedEvent The event being exported
+         * @param configViewFactory The configuration view
          * @return The patched event
          */
-        private static Event prepareManagedAttachments(EventResource resource, Event exportedEvent) {
+        private static Event prepareManagedAttachments(EventResource resource, Event exportedEvent, ConfigViewFactory configViewFactory) {
             List<Attachment> attachments = exportedEvent.getAttachments();
             if (null != attachments && 0 < attachments.size()) {
                 for (Attachment attachment : attachments) {
                     if (0 < attachment.getManagedId() && null == attachment.getUri()) {
                         try {
                             AttachmentMetadata metadata = Tools.getAttachmentMetadata(attachment, resource, exportedEvent);
-                            URI uri = AttachmentUtils.buildURI(resource.getHostData(), metadata);
+                            URI uri = AttachmentUtils.buildURI(resource.getHostData(), metadata, configViewFactory);
                             attachment.setUri(uri.toString());
                         } catch (OXException | URISyntaxException e) {
                             LOG.warn("Error preparing managed attachment", e);
@@ -1105,7 +1116,7 @@ public class EventPatches {
             exportedEvent = applyAttendeeComments(resource, exportedEvent);
             exportedEvent = adjustAlarms(resource, exportedEvent);
             exportedEvent = adjustAppleTravelAdvisory(resource, exportedEvent);
-            exportedEvent = prepareManagedAttachments(resource, exportedEvent);
+            exportedEvent = prepareManagedAttachments(resource, exportedEvent, factory.getConfigViewFactory());
             exportedEvent = removeAttachmentsFromExceptions(resource, exportedEvent);
             return exportedEvent;
         }

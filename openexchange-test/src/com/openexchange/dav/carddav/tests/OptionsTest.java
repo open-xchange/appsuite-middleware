@@ -52,6 +52,7 @@ package com.openexchange.dav.carddav.tests;
 import static org.junit.Assert.assertEquals;
 import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 
@@ -83,7 +84,7 @@ public class OptionsTest extends CardDAVTest {
     public void testAllowHeaders() throws Exception {
         OptionsMethod options = null;
         try {
-            options = new OptionsMethod(getBaseUri());
+            options = new OptionsMethod(getBaseUri() + Config.getPathPrefix());
             assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
             assertResponseHeaders(EXPECTED_ALLOW_HEADERS, "Allow", options);
         } finally {
@@ -100,7 +101,7 @@ public class OptionsTest extends CardDAVTest {
     public void testDAVHeaders() throws Exception {
         OptionsMethod options = null;
         try {
-            options = new OptionsMethod(getBaseUri());
+            options = new OptionsMethod(getBaseUri() + Config.getPathPrefix());
             assertEquals("unexpected http status", StatusCodes.SC_OK, super.getWebDAVClient().executeMethod(options));
             assertResponseHeaders(EXPECTED_DAV_HEADERS, "DAV", options);
         } finally {

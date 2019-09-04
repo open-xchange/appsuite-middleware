@@ -49,7 +49,7 @@
 
 package com.openexchange.caldav.mixins;
 
-import static com.openexchange.tools.dav.DAVTools.adjustPath;
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.server.ServiceLookup;
@@ -79,7 +79,7 @@ public class ScheduleInboxURL extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + adjustPath(serviceLookup.getService(ConfigViewFactory.class), "/caldav/" + SCHEDULE_INBOX) + "</D:href>";
+        return "<D:href>" + getExternalPath(serviceLookup.getService(ConfigViewFactory.class), "/caldav/" + SCHEDULE_INBOX) + "</D:href>";
     }
 
 }

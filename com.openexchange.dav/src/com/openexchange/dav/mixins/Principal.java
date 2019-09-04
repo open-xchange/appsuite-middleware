@@ -49,10 +49,9 @@
 
 package com.openexchange.dav.mixins;
 
-import static com.openexchange.tools.dav.DAVTools.adjustPath;
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -65,20 +64,23 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class Principal extends SingleXMLPropertyMixin {
 
     private final User principal;
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link Principal}.
      * 
      * @param principal The principal
+     * @param configViewFactory The configuration view
      */
-    public Principal(User principal) {
+    public Principal(User principal, ConfigViewFactory configViewFactory) {
         super(DAVProtocol.DAV_NS.getURI(), "principal");
         this.principal = principal;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>" + adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class),  PrincipalURL.forUser(principal.getId())) + "</D:href>";
+        return "<D:href>" + getExternalPath(configViewFactory, PrincipalURL.forUser(principal.getId(), configViewFactory)) + "</D:href>";
     }
 
 }

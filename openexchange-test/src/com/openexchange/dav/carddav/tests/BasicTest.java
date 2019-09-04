@@ -73,6 +73,7 @@ import org.w3c.dom.Node;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -111,7 +112,7 @@ public class BasicTest extends CardDAVTest {
         /*
          * create vCard resource on server
          */
-        String href = "/carddav/" + collection + "/" + uid + ".vcf";
+        String href = Config.getPathPrefix() + "/carddav/" + collection + "/" + uid + ".vcf";
         PutMethod put = null;
         try {
             put = new PutMethod(getBaseUri() + href);
@@ -275,7 +276,7 @@ public class BasicTest extends CardDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        PropFindMethod propFind = new PropFindMethod(getBaseUri() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getBaseUri() + Config.getPathPrefix() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse propFindResponse = assertSingleResponse(getWebDAVClient().doPropFind(propFind));
         String principalURL = extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, propFindResponse);
         assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principalURL.contains("/" + getClient().getValues().getUserId()));

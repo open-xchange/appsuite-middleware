@@ -26,6 +26,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contacts.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.crypto"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database.migration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.datatypes.genericonf"/>

@@ -68,6 +68,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -161,7 +162,7 @@ public class ImageURITest extends CardDAVTest {
          * create contact on client
          */
         String uid = randomUID();
-        String href = "/carddav/Contacts/" + uid + ".vcf";
+        String href = Config.getPathPrefix() + "/carddav/Contacts/" + uid + ".vcf";
         VCardResource vCard = new VCardResource(
             "BEGIN:VCARD" + "\r\n" +
             "PRODID:-//Example Inc.//Example Client 1.0//EN" + "\r\n" +
@@ -360,7 +361,7 @@ public class ImageURITest extends CardDAVTest {
         ReportMethod report = null;
         MultiStatusResponse response = null;
         try {
-            report = new ReportMethod(getWebDAVClient().getBaseURI() + "/carddav/Contacts/", reportInfo);
+            report = new ReportMethod(getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/carddav/Contacts/", reportInfo);
             report.setRequestHeader("Prefer", prefer);
             response = assertSingleResponse(getWebDAVClient().doReport(report, StatusCodes.SC_MULTISTATUS));
         } finally {

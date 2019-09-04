@@ -63,7 +63,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.AttachmentUtils;
+import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -90,6 +92,8 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
 
     protected final FolderCollection<T> parent;
 
+    private DAVFactory factory;
+
     /**
      * Initializes a new {@link CommonResource}.
      *
@@ -97,9 +101,10 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    protected CommonResource(FolderCollection<T> parent, T object, WebdavPath url) throws OXException {
+    protected CommonResource(FolderCollection<T> parent, T object, WebdavPath url, DAVFactory factory) throws OXException {
         super(parent, object, url);
         this.parent = parent;
+        this.factory = factory;
     }
 
     protected abstract void deserialize(InputStream inputStream) throws OXException, IOException;
@@ -140,7 +145,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
      *
      * @param object The groupware object to apply managed attachment properties for
      */
-    protected void applyAttachments(CommonObject object) throws OXException {
+    protected void applyAttachments(CommonObject object, ConfigViewFactory configViewFactory) throws OXException {
         if (0 < object.getNumberOfAttachments()) {
             int moduleId = AttachmentUtils.getModuleId(parent.getFolder().getContentType());
             TimedResult<AttachmentMetadata> attachments = Attachments.getInstance().getAttachments(factory.getSession(),
@@ -153,7 +158,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
                 while (searchIterator.hasNext()) {
                     AttachmentMetadata metadata = AttachmentUtils.newAttachmentMetadata(searchIterator.next());
                     metadata.setFolderId(object.getParentFolderID());
-                    URI uri = AttachmentUtils.buildURI(hostData, metadata);
+                    URI uri = AttachmentUtils.buildURI(hostData, metadata, configViewFactory);
                     managedAttachments.add(new AbstractMap.SimpleEntry<URI, AttachmentMetadata>(uri, metadata));
                 }
             } catch (URISyntaxException e) {
@@ -187,7 +192,8 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
         }
         List<String> linkedAttachments = updatedObject.getProperty("com.openexchange.data.conversion.ical.attach.linkedAttachments");
         updatedObject.removeProperty("com.openexchange.data.conversion.ical.attach.linkedAttachments");
-        List<Entry<URI, AttachmentMetadata>> extractedManagedAttachments = extractManagedAttachments(linkedAttachments);
+        ConfigViewFactory configViewFactory = factory.getServiceSafe(ConfigViewFactory.class);
+        List<Entry<URI, AttachmentMetadata>> extractedManagedAttachments = extractManagedAttachments(linkedAttachments, configViewFactory);
         if (null != extractedManagedAttachments) {
             managedAttachments.addAll(extractedManagedAttachments);
         }
@@ -221,7 +227,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
             List<AttachmentMetadata> referencedAttachments = new ArrayList<AttachmentMetadata>(managedAttachments.size());
             for (Entry<URI, AttachmentMetadata> managedAttachment : managedAttachments) {
                 try {
-                    AttachmentMetadata referencedAttachment = AttachmentUtils.decodeURI(managedAttachment.getKey());
+                    AttachmentMetadata referencedAttachment = AttachmentUtils.decodeURI(managedAttachment.getKey(), configViewFactory);
                     if (originalAttachments.contains(referencedAttachment)) {
                         referencedAttachments.add(referencedAttachment);
                     } else {
@@ -296,15 +302,16 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
      * Extracts any targeted managed attachments from the supplied list of linked attachment URLs.
      *
      * @param linkedAttachments The attachment URLs to extract the managed attachments from
+     * @param configViewFactory The configuration view
      * @return The managed attachments, or an empty list if none could be extracted
      */
-    private static List<Entry<URI, AttachmentMetadata>> extractManagedAttachments(List<String> linkedAttachments) {
+    private static List<Entry<URI, AttachmentMetadata>> extractManagedAttachments(List<String> linkedAttachments, ConfigViewFactory configViewFactory) {
         List<Entry<URI, AttachmentMetadata>> managedAttachments = new ArrayList<Entry<URI, AttachmentMetadata>>();
         if (null != linkedAttachments && 0 < linkedAttachments.size()) {
             for (String linkedAttachment : linkedAttachments) {
                 try {
                     URI uri = new URI(linkedAttachment);
-                    AttachmentMetadata metadata = AttachmentUtils.decodeURI(uri);
+                    AttachmentMetadata metadata = AttachmentUtils.decodeURI(uri, configViewFactory);
                     managedAttachments.add(new AbstractMap.SimpleEntry<URI, AttachmentMetadata>(uri, metadata));
                 } catch (IllegalArgumentException | URISyntaxException e) {
                     LOG.debug("Skipping invalid managed attachment: {}", linkedAttachment, e);

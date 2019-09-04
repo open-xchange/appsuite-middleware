@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.resources;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import java.util.Date;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
@@ -56,12 +57,10 @@ import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -87,10 +86,11 @@ public abstract class DAVRootCollection extends DAVCollection {
      * @param displayName The display name to use
      */
     protected DAVRootCollection(DAVFactory factory, String displayName) {
-        super(factory, new WebdavPath(DAVTools.adjustPath(Services.getService(ConfigViewFactory.class), null)));
+        super(factory, new WebdavPath(getExternalPath(factory.getService(ConfigViewFactory.class), null)));
         this.displayName = displayName;
+        ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
         includeProperties(
-            new CurrentUserPrincipal(factory), new SupportedPrivilegeSet(), new ACL(ROOT_PERMISSIONS), new ACLRestrictions()
+            new CurrentUserPrincipal(factory), new SupportedPrivilegeSet(), new ACL(ROOT_PERMISSIONS, configViewFactory), new ACLRestrictions()
         );
     }
 

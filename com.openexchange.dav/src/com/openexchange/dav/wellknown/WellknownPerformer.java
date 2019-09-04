@@ -53,7 +53,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.RedirectAction;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavMethod;
@@ -72,15 +71,14 @@ public class WellknownPerformer extends DAVPerformer {
     /**
      * Initializes a new {@link WellknownPerformer}.
      *
-     * @param services A service lookup reference for the underlying factory
      * @param location The location to redirect to
      * @param status The status to set in the response (should either be {@link HttpServletResponse#SC_MOVED_PERMANENTLY} or
      *            {@link HttpServletResponse#SC_MOVED_TEMPORARILY}
      */
-    public WellknownPerformer(ServiceLookup services, String location, int status) {
+    public WellknownPerformer(String location, int status) {
         super();
         this.redirectAction = new RedirectAction(location, status);
-        this.factory = new WellknownFactory(new Protocol(), services, this);
+        this.factory = new WellknownFactory(new Protocol(), this);
     }
 
     @Override

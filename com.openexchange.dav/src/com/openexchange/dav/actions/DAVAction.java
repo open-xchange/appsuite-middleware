@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.actions;
 
-import static com.openexchange.tools.dav.DAVTools.removePrefixFromPath;
+import static com.openexchange.dav.DAVTools.removePrefixFromPath;
 import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.IOException;
 import java.net.URI;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.dav;
+package com.openexchange.dav;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.isNotEmpty;
@@ -68,8 +68,8 @@ public class DAVTools {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DAVTools.class);
 
-    public final static String PREFIX_PATH_NAME = "com.openexchange.dav.prefixPath";
-    public final static String DEFAULT_PREFIX_PATH = "/servlet/dav";
+    private final static String PREFIX_PATH_NAME = "com.openexchange.dav.prefixPath";
+    private final static String DEFAULT_PREFIX_PATH = "/servlet/dav";
 
     /**
      * Get the DAV path prefix
@@ -94,8 +94,8 @@ public class DAVTools {
         return DEFAULT_PREFIX_PATH;
     }
 
-    public final static String PROXY_PREFIX_PATH_NAME = "com.openexchange.dav.proxyPrefixPath";
-    public final static String DEFAULT_PROXY_PREFIX_PATH = "/servlet/dav";
+    private final static String PROXY_PREFIX_PATH_NAME = "com.openexchange.dav.proxyPrefixPath";
+    private final static String DEFAULT_PROXY_PREFIX_PATH = "/servlet/dav";
 
     /**
      * Get the DAV proxy path prefix
@@ -122,21 +122,28 @@ public class DAVTools {
     }
 
     /**
-     * 
-     * Concatenates the given path with the path prefix for DAV servlets as per {@link #getPathPrefix(ConfigViewFactory)}
+     * Get the internal used DAV path considering the configured path prefix
      *
      * @param configViewFactory The {@link ConfigViewFactory} to get the path prefix from
      * @param path The path to add after the prefix
      * @return The concatenated path
      */
-    public static String concatPath(ConfigViewFactory configViewFactory, String path) {
-        StringBuilder sb = new StringBuilder();
+    public static String getInternalPath(ConfigViewFactory configViewFactory, String path) {
         String pathPrefix = getPathPrefix(configViewFactory);
+        return concatPath(pathPrefix, path);
+    }
+
+    private static String concatPath(String pathPrefix, String path) {
+        StringBuilder sb = new StringBuilder();
         sb.append(pathPrefix);
 
         if (isEmpty(path)) {
             return sb.toString();
         }
+
+        /*
+         * Avoid multiple prefix invocation & slashes
+         */
         if (false == pathPrefix.endsWith("/") && false == path.startsWith("/")) {
             sb.append("/");
         }
@@ -145,7 +152,7 @@ public class DAVTools {
     }
 
     /**
-     * Adjusts the path according to the configured path prefix for DAV servlets <b>and</b> the proxy path prefix.
+     * Get the configured path for DAV servlets to propagate to the clients.
      * <p>
      * If the path prefix as per {@link #getPathPrefix(ConfigViewFactory)} is {@value #DEFAULT_PREFIX_PATH} and the
      * proxy path prefix as per {@link #getProxyPrefixPath(ConfigViewFactory)} is {@value #DEFAULT_PROXY_PREFIX_PATH}
@@ -161,7 +168,7 @@ public class DAVTools {
      * @param path The path to adjust accordingly
      * @return The adjusted path
      */
-    public static String adjustPath(ConfigViewFactory configViewFactory, String path) {
+    public static String getExternalPath(ConfigViewFactory configViewFactory, String path) {
         if (null == configViewFactory || isEmpty(path)) {
             return formatPath(path);
         }
@@ -176,21 +183,9 @@ public class DAVTools {
         }
 
         /*
-         * Avoid multiple prefix invocation & slashes
-         */
-        StringBuilder sb = new StringBuilder();
-        if (false == path.startsWith(pathPrefix)) {
-            sb.append(pathPrefix);
-            if (false == pathPrefix.endsWith("/") && false == path.startsWith("/")) {
-                sb.append("/");
-            }
-        }
-        sb.append(path);
-        
-        /*
          * Add the prefix and remove the proxy prefix afterwards
          */
-        return removePrefixFromPath(proxyPrefixPath, sb.toString());
+        return removePrefixFromPath(proxyPrefixPath, concatPath(pathPrefix, path));
     }
 
     /**
@@ -218,36 +213,17 @@ public class DAVTools {
         }
 
         String formattedPrefix = formatPath(formatPrefix(prefix));
-        String formattedPath = formatPath(formatPrefix(path));
+        String formattedPath = formatPath(path);
         if (false == formattedPath.startsWith(formattedPrefix)) {
             return formatPath(path);
         }
 
         return formatPath(formattedPath.substring(formattedPrefix.length()));
     }
-    
+
     /**
-     * Get a value whether the given URL is exactly the root path or not 
-     *
-     * @param configViewFactory The {@link ConfigViewFactory}
-     * @param path The path to check
-     * @return <code>true</code> if the provided path equals the root folder as per {@link #getPathPrefix(ConfigViewFactory)}
-     */
-    public static boolean isRoot(ConfigViewFactory configViewFactory, String path) {
-        String pathPrefix = getPathPrefix(configViewFactory);
-        if (isNotEmpty(pathPrefix)) {
-            if (isEmpty(path)) {
-                return false;
-            }
-            return path.endsWith("/") ? pathPrefix.equals(path.substring(0, path.length() - 1)) : pathPrefix.equals(path);
-        }
-        return isEmpty(path);
-    }
-    
-    
-    /**
-     * Asserts that the given path starts with the prefix, ignoring ending <code>/</code> 
-     *  
+     * Asserts that the given path starts with the prefix, ignoring ending <code>/</code>
+     * 
      * @param path The one path
      * @param prefix The prefix path
      * @return <code>true</code> if the path begins with the prefix, <code>false</code> otherwise
@@ -256,8 +232,8 @@ public class DAVTools {
         if (isEmpty(path)) {
             return isEmpty(prefix);
         }
-        String formattedPath = formatPath(formatPrefix(path));
         String formattedPrefix = formatPath(formatPrefix(prefix));
+        String formattedPath = formatPath(formatPrefix(path));
         return formattedPath.startsWith(formattedPrefix);
     }
 
@@ -271,10 +247,11 @@ public class DAVTools {
         if (isEmpty(path)) {
             return "/";
         }
-        if (false == path.startsWith("/")) {
-            return "/" + path;
+        String formatted = path;
+        if (false == formatted.startsWith("/")) {
+            formatted = "/" + path;
         }
-        return path;
+        return formatted.trim();
     }
 
     /**

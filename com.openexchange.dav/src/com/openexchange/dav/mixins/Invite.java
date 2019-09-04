@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.FolderCollection;
@@ -110,14 +111,15 @@ public class Invite extends SingleXMLPropertyMixin {
 
     private String getEntityElements(Permission permission) throws OXException {
         DAVFactory factory = collection.getFactory();
+        ConfigViewFactory configViewFactory = factory.getServiceSafe(ConfigViewFactory.class);
         String commonName;
         String uri;
         if (permission.isGroup()) {
-            uri = PrincipalURL.forGroup(permission.getEntity());
+            uri = PrincipalURL.forGroup(permission.getEntity(), configViewFactory);
             Group group = factory.requireService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
             commonName = " + " + group.getDisplayName();
         } else {
-            uri = PrincipalURL.forUser(permission.getEntity());
+            uri = PrincipalURL.forUser(permission.getEntity(), configViewFactory);
             User user = factory.requireService(UserService.class).getUser(permission.getEntity(), factory.getContext());
             commonName = user.getDisplayName();
             if (Strings.isEmpty(commonName)) {

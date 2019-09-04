@@ -61,6 +61,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
 import org.w3c.dom.Node;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.UserAgents;
@@ -116,7 +117,7 @@ public class CollectionsTest extends CardDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         Node node = super.extractNodeValue(PropertyNames.RESOURCETYPE, response);
         assertMatches(PropertyNames.COLLECTION, node);
@@ -139,10 +140,10 @@ public class CollectionsTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse aggregatedCollectionResponse = null;
         for (MultiStatusResponse response : super.getWebDAVClient().doPropFind(propFind)) {
-            if (response.getHref().equals("/carddav/Contacts/")) {
+            if (response.getHref().equals(Config.getPathPrefix() + "/carddav/Contacts/")) {
                 aggregatedCollectionResponse = response;
                 break;
             }
@@ -175,7 +176,7 @@ public class CollectionsTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         boolean found = false;
         for (MultiStatusResponse response : super.getWebDAVClient().doPropFind(propFind)) {
             String displayName = super.extractTextContent(DavPropertyName.DISPLAYNAME, response);
@@ -212,7 +213,7 @@ public class CollectionsTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         boolean found = false;
         for (MultiStatusResponse response : super.getWebDAVClient().doPropFind(propFind)) {
             String displayName = super.extractTextContent(DavPropertyName.DISPLAYNAME, response);

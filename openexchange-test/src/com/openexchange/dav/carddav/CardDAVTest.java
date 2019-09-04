@@ -282,11 +282,11 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     @Override
     protected Map<String, String> syncCollection(String collection, final String syncToken) throws Exception {
-        return super.syncCollection(syncToken, Config.getPathPrefix() + "/carddav/" + collection);
+        return super.syncCollection(syncToken, "/carddav/" + collection);
     }
 
     protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
-        return super.syncCollection(syncToken, Config.getPathPrefix() + "/carddav/Contacts");
+        return super.syncCollection(syncToken, "/carddav/Contacts");
     }
 
     /**

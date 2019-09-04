@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
@@ -79,13 +80,17 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class ACLAction extends DAVAction {
 
+    private final ConfigViewFactory configViewFactory;
+
     /**
      * Initializes a new {@link ACLAction}.
      *
      * @param protocol The underlying protocol
+     * @param configViewFactory The configuration view
      */
-    public ACLAction(DAVProtocol protocol) {
+    public ACLAction(DAVProtocol protocol, ConfigViewFactory configViewFactory) {
         super(protocol);
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -177,7 +182,7 @@ public class ACLAction extends DAVAction {
         if (null == principalElement) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "missing-required-principal", HttpServletResponse.SC_FORBIDDEN);
         }
-        PrincipalURL principalURL = PrincipalURL.parse(principalElement.getValue());
+        PrincipalURL principalURL = PrincipalURL.parse(principalElement.getValue(), configViewFactory);
         if (null == principalURL) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "recognized-principal", HttpServletResponse.SC_FORBIDDEN);
         }

@@ -92,7 +92,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class PushSubscribeResource extends DAVResource {
 
     private final String clientId;
-    private final PushSubscribeFactory factory;
+    private final PushSubscribeFactory pushSubsribeFactory;
 
     /**
      * Initializes a new {@link PushSubscribeResource}.
@@ -104,7 +104,7 @@ public class PushSubscribeResource extends DAVResource {
     public PushSubscribeResource(PushSubscribeFactory factory, String clientId, WebdavPath url) {
         super(factory, url);
         this.clientId = clientId;
-        this.factory = factory;
+        this.pushSubsribeFactory = factory;
     }
 
     /**
@@ -162,7 +162,7 @@ public class PushSubscribeResource extends DAVResource {
              * perform the registration at push gateway and store the subscribed topics
              */
             try {
-                List<String> topics = DAVPushUtility.extractTopics(pushKeys, factory.getContext().getContextId(), factory.getUser().getId());
+                List<String> topics = DAVPushUtility.extractTopics(pushKeys, pushSubsribeFactory.getContext().getContextId(), pushSubsribeFactory.getUser().getId());
                 String token = pushGateway.subscribe(pushKeys, clientData, expires);
                 registerSubscription(pushGateway.getOptions().getTransportID(), token, topics, expires);
             } catch (OXException e) {
@@ -185,7 +185,7 @@ public class PushSubscribeResource extends DAVResource {
     private boolean handleAPSDSubscribe(String token, String key) throws WebdavProtocolException {
         String topic;
         try {
-            topic = DAVPushUtility.extractTopic(key, factory.getContext().getContextId(), factory.getUser().getId());
+            topic = DAVPushUtility.extractTopic(key, pushSubsribeFactory.getContext().getContextId(), pushSubsribeFactory.getUser().getId());
         } catch (OXException e) {
             throw protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -209,17 +209,17 @@ public class PushSubscribeResource extends DAVResource {
      * @param expires The expiration date of the subscription, or <code>null</code> if not defined
      */
     protected void registerSubscription(String transportId, String token, List<String> topics, Date expires) throws WebdavProtocolException {
-        PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
+        PushSubscriptionRegistry subscriptionRegistry = pushSubsribeFactory.getOptionalService(PushSubscriptionRegistry.class);
         if (null == subscriptionRegistry) {
             throw DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
         }
         DefaultPushSubscription subscription = DefaultPushSubscription.builder()
             .client(clientId)
             .topics(topics)
-            .contextId(factory.getContext().getContextId())
+            .contextId(pushSubsribeFactory.getContext().getContextId())
             .token(token)
             .transportId(transportId)
-            .userId(factory.getUser().getId())
+            .userId(pushSubsribeFactory.getUser().getId())
             .expires(expires)
         .build();
 
@@ -267,7 +267,7 @@ public class PushSubscribeResource extends DAVResource {
     }
 
     protected void unregisterSubscription(String transportId, String token) throws WebdavProtocolException {
-        PushSubscriptionRegistry subscriptionRegistry = factory.getOptionalService(PushSubscriptionRegistry.class);
+        PushSubscriptionRegistry subscriptionRegistry = pushSubsribeFactory.getOptionalService(PushSubscriptionRegistry.class);
         if (null == subscriptionRegistry) {
             throw DAVProtocol.protocolException(getUrl(), ServiceExceptionCode.absentService(PushSubscriptionRegistry.class), HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -284,7 +284,7 @@ public class PushSubscribeResource extends DAVResource {
     }
 
     private DAVApnOptions getApnOptions() {
-        DAVApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
+        DAVApnOptionsProvider optionsProvider = pushSubsribeFactory.getApnOptionsProvider();
         return null != optionsProvider ? optionsProvider.getOptions(clientId) : null;
     }
 
@@ -295,7 +295,7 @@ public class PushSubscribeResource extends DAVResource {
     }
 
     private DavPushGateway getPushGateway(String transportUri) {
-        List<DavPushGateway> pushGateways = factory.getGateways();
+        List<DavPushGateway> pushGateways = pushSubsribeFactory.getGateways();
         if (null != pushGateways && 0 < pushGateways.size()) {
             for (DavPushGateway pushGateway : pushGateways) {
                 if (pushGateway.getOptions().getTransportURI().equals(transportUri)) {
@@ -317,7 +317,7 @@ public class PushSubscribeResource extends DAVResource {
         return null;
     }
 
-    private List<String> extractPushKeys(List<Element> topicElements) throws WebdavProtocolException {
+    private List<String> extractPushKeys(List<Element> topicElements) {
         if (null != topicElements && 0 < topicElements.size()) {
             List<String> pushKeys = new ArrayList<String>(topicElements.size());
             for (Element topicElement : topicElements) {

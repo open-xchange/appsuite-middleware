@@ -121,7 +121,7 @@ public class TaskResource extends CommonResource<Task> {
     private int retryCount;
 
     public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) throws OXException {
-        super(parent, object, url);
+        super(parent, object, url, factory);
         this.parent = parent;
         this.factory = factory;
     }
@@ -411,7 +411,7 @@ public class TaskResource extends CommonResource<Task> {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
         ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
         Task task = parent.load(object);
-        applyAttachments(task);
+        applyAttachments(task, factory.getConfigViewFactory());
         icalEmitter.writeTask(session, task, factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         return serialize(session);
     }
@@ -421,16 +421,15 @@ public class TaskResource extends CommonResource<Task> {
         List<Task> tasks = factory.getIcalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>()).getImportedObjects();
         if (null == tasks || 1 != tasks.size()) {
             throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        taskToSave = tasks.get(0);
+        taskToSave.removeLastModified();
+        if (null != object) {
+            taskToSave.setParentFolderID(object.getParentFolderID());
+            taskToSave.setObjectID(object.getObjectID());
+            taskToSave.removeUid();
         } else {
-            taskToSave = tasks.get(0);
-            taskToSave.removeLastModified();
-            if (null != object) {
-                taskToSave.setParentFolderID(object.getParentFolderID());
-                taskToSave.setObjectID(object.getObjectID());
-                taskToSave.removeUid();
-            } else {
-                taskToSave.setParentFolderID(getId(parent));
-            }
+            taskToSave.setParentFolderID(getId(parent));
         }
     }
 

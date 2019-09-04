@@ -116,11 +116,11 @@ public class Invite extends SingleXMLPropertyMixin {
         String commonName;
         String uri;
         if (permission.isGroup()) {
-            uri = PrincipalURL.forGroup(permission.getEntity());
+            uri = PrincipalURL.forGroup(permission.getEntity(), factory.getConfigViewFactory());
             Group group = factory.requireService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
             commonName = " + " + group.getDisplayName();
         } else {
-            uri = PrincipalURL.forUser(permission.getEntity());
+            uri = PrincipalURL.forUser(permission.getEntity(), factory.getConfigViewFactory());
             User user = factory.resolveUser(permission.getEntity());
             commonName = user.getDisplayName();
             if (Strings.isEmpty(commonName)) {

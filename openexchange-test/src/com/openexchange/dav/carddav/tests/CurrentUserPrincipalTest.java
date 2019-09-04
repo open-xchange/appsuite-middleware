@@ -56,6 +56,7 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
 import org.w3c.dom.Node;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -80,7 +81,7 @@ public class CurrentUserPrincipalTest extends CardDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         final String principal = super.extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
         assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principal.contains("/" + getClient().getValues().getUserId()));
@@ -99,7 +100,7 @@ public class CurrentUserPrincipalTest extends CardDAVTest {
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/gibt/es/nicht", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/gibt/es/nicht", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         super.getWebDAVClient().doPropFind(propFind, StatusCodes.SC_NOT_FOUND);
     }
 }

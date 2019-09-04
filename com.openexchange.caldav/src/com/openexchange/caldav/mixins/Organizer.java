@@ -50,6 +50,7 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
@@ -87,7 +88,7 @@ public class Organizer extends SingleXMLPropertyMixin {
                 LOG.warn("error determining owner from folder collection '{}'", collection.getFolder(), e);
             }
         }
-        return null != user ? "<D:href>" + PrincipalURL.forUser(user.getId()) + "</D:href>": null;
+        return null != user ? "<D:href>" + PrincipalURL.forUser(user.getId(), collection.getFactory().getService(ConfigViewFactory.class)) + "</D:href>": null;
     }
 
 }

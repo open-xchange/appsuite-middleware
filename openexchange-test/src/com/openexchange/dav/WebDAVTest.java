@@ -419,7 +419,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
         ReportInfo reportInfo = new SyncCollectionReportInfo(syncToken, props);
-        MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + relativeUrl);
+        MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + Config.getPathPrefix() + relativeUrl);
         for (final MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
                 String href = response.getHref();
@@ -436,7 +436,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
         SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
-        SyncCollectionResponse syncCollectionResponse = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + relativeUrl);
+        SyncCollectionResponse syncCollectionResponse = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + Config.getPathPrefix() + relativeUrl);
         syncToken.setToken(syncCollectionResponse.getSyncToken());
         return syncCollectionResponse;
     }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.dav;
+package com.openexchange.dav;
 
 import java.util.Arrays;
 import java.util.List;
@@ -65,6 +65,7 @@ import org.powermock.api.mockito.PowerMockito;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.DAVTools;
 
 /**
  * {@link DAVToolsTest}
@@ -75,8 +76,18 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 @RunWith(Parameterized.class)
 public class DAVToolsTest {
 
+    /**
+     * Copied from {@link DAVTools}
+     */
+    private final static String PREFIX_PATH_NAME = "com.openexchange.dav.prefixPath";
+
+    /**
+     * Copied from {@link DAVTools}
+     */
+    private final static String PROXY_PREFIX_PATH_NAME = "com.openexchange.dav.proxyPrefixPath";
+
     @Parameters
-    public static List<Object[]> balanceRates() {
+    public static List<Object[]> testData() {
         //@formatter:off
         return Arrays.asList(new Object[][] {
                 {"/servlet/dav/", "/servlet/dav/", ImmutableMap.<String, String> builder()
@@ -97,6 +108,8 @@ public class DAVToolsTest {
                     .put("caldav/", "/hidden/caldav/")
                     .put("/caldav", "/hidden/caldav")
                     .put("/caldav/", "/hidden/caldav/")
+                    .put("/caldav/principals/foo/bar", "/hidden/caldav/principals/foo/bar")
+                    .put("/caldav/principals/foo/bar/", "/hidden/caldav/principals/foo/bar/")
                     .put("/photos/contactXY/image1.jpg", "/hidden/photos/contactXY/image1.jpg")
                     .build()
                 },
@@ -151,14 +164,14 @@ public class DAVToolsTest {
 
         // Mock used service classes
         PowerMockito.when(factory.getView()).thenReturn(view);
-        PowerMockito.when(view.get(DAVTools.PREFIX_PATH_NAME, String.class)).thenReturn(prefixPath);
-        PowerMockito.when(view.get(DAVTools.PROXY_PREFIX_PATH_NAME, String.class)).thenReturn(proxyprefixPath);
+        PowerMockito.when(view.get(PREFIX_PATH_NAME, String.class)).thenReturn(prefixPath);
+        PowerMockito.when(view.get(PROXY_PREFIX_PATH_NAME, String.class)).thenReturn(proxyprefixPath);
     }
 
     @Test
     public void testCorrectPath() {
         for (Entry<String, String> entry : rawToExpected.entrySet()) {
-            String path = DAVTools.adjustPath(factory, entry.getKey());
+            String path = DAVTools.getExternalPath(factory, entry.getKey());
             Assert.assertEquals("Not the corect path", entry.getValue(), path);
         }
     }

@@ -50,7 +50,6 @@
 package com.openexchange.dav;
 
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.wellknown.WellknownPerformer;
 import com.openexchange.login.Interface;
 
@@ -71,7 +70,7 @@ public class WellKnownServlet extends DAVServlet {
      * @param interfaze The interface the servlet can be associated to
      */
     public WellKnownServlet(String location, Interface interfaze) {
-        super(new WellknownPerformer(Services.getServiceLookup(), location, HttpServletResponse.SC_MOVED_PERMANENTLY), interfaze);
+        super(new WellknownPerformer(location, HttpServletResponse.SC_MOVED_PERMANENTLY), interfaze);
     }
 
 }

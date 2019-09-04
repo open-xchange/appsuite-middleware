@@ -49,9 +49,9 @@
 
 package com.openexchange.carddav.photos;
 
-import static com.openexchange.tools.dav.DAVTools.adjustPath;
-import static com.openexchange.tools.dav.DAVTools.removePathPrefixFromPath;
-import static com.openexchange.tools.dav.DAVTools.removePrefixFromPath;
+import static com.openexchange.dav.DAVTools.getExternalPath;
+import static com.openexchange.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.dav.DAVTools.removePrefixFromPath;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -94,7 +94,7 @@ public class PhotoUtils {
             return new URI(new URIBuilder()
                 .setScheme(hostData.isSecure() ? "https" : "http")
                 .setHost(hostData.getHost())
-                .setPath(adjustPath(configViewFactory, path))
+                .setPath(getExternalPath(configViewFactory, path))
             .toString());
         } catch (URISyntaxException e) {
             throw DAVProtocol.protocolException(new WebdavPath("/photos"), e);

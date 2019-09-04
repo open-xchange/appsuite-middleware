@@ -120,10 +120,11 @@ public abstract class FolderCollection<T> extends DAVCollection {
         this.factory = factory;
         this.folder = folder;
         if (null != folder) {
+            ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
             includeProperties(new CTag(this), new com.openexchange.dav.mixins.SyncToken(this), 
-                new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner()));
+                new ACL(folder.getPermissions(), configViewFactory), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner(), configViewFactory));
             if (supportsPermissions(folder)) {
-                includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this));
+                includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this, factory.getServiceSafe(ConfigViewFactory.class)));
             }
         }
     }

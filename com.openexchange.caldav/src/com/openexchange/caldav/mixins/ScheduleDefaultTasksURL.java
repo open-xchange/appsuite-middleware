@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.mixins;
 
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.exception.OXException;
@@ -60,7 +61,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 /**
  * {@link ScheduleDefaultTasksURL}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
 public class ScheduleDefaultTasksURL extends SingleXMLPropertyMixin {
@@ -90,7 +91,7 @@ public class ScheduleDefaultTasksURL extends SingleXMLPropertyMixin {
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ScheduleDefaultTasksURL.class).warn("Error determining 'schedule-default-tasks-URL'", e);
         }
-        return null == value ? null : "<D:href>/caldav/" + value + "/</D:href>";
+        return null == value ? null : "<D:href>" + getExternalPath(factory.getConfigViewFactory(), "/caldav/" + value + "/") + "</D:href>";
     }
 
 }

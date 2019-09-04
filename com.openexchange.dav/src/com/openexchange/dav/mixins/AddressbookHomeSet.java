@@ -49,9 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
-import static com.openexchange.tools.dav.DAVTools.adjustPath;
+import static com.openexchange.dav.DAVTools.getExternalPath;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -66,17 +65,22 @@ public class AddressbookHomeSet extends SingleXMLPropertyMixin {
 
     /** The static path to a user's addressbook home */
     public static final WebdavPath ADDRESSBOOK_HOME = new WebdavPath("carddav");
+    
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link AddressbookHomeSet}.
+     * 
+     * @param configViewFactory The configuration view
      */
-    public AddressbookHomeSet() {
+    public AddressbookHomeSet(ConfigViewFactory configViewFactory) {
         super("urn:ietf:params:xml:ns:carddav", "addressbook-home-set");
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>" + adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class), ADDRESSBOOK_HOME.toString()+ "/") + "</D:href>";
+        return "<D:href>" + getExternalPath(configViewFactory, ADDRESSBOOK_HOME.toString()+ "/") + "</D:href>";
     }
 
 }

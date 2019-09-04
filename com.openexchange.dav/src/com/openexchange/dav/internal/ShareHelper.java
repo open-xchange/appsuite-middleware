@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.PrincipalURL;
@@ -209,7 +210,8 @@ public class ShareHelper {
         /*
          * try to interpret as principal URL directly
          */
-        PrincipalURL principalURL = PrincipalURL.parse(href);
+        ConfigViewFactory configViewFactory = factory.getServiceSafe(ConfigViewFactory.class);
+        PrincipalURL principalURL = PrincipalURL.parse(href,configViewFactory);
         if (null != principalURL) {
             return principalURL;
         }
@@ -219,9 +221,9 @@ public class ShareHelper {
         ResourceId resourceId = ResourceId.parse(href);
         if (null != resourceId) {
             if (CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
-                return new PrincipalURL(resourceId.getEntity(), CalendarUserType.INDIVIDUAL);
+                return new PrincipalURL(resourceId.getEntity(), CalendarUserType.INDIVIDUAL, configViewFactory);
             } else if (CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
-                return new PrincipalURL(resourceId.getEntity(), CalendarUserType.GROUP);
+                return new PrincipalURL(resourceId.getEntity(), CalendarUserType.GROUP, configViewFactory);
             } else {
                 throw new IllegalArgumentException("Unexpected resource type: " + href);
             }
@@ -237,7 +239,7 @@ public class ShareHelper {
         }
         if (Strings.isNotEmpty(mail)) {
             User user = factory.requireService(UserService.class).searchUser(mail, factory.getContext(), true, true, false);
-            return new PrincipalURL(user.getId(), CalendarUserType.INDIVIDUAL);
+            return new PrincipalURL(user.getId(), CalendarUserType.INDIVIDUAL, configViewFactory);
         }
         return null;
     }
