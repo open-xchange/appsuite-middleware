@@ -57,14 +57,14 @@ spec:
             steps {
                 dir('automation') {
                     checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/master']],
-                        browser: [$class: 'GitWeb', repoUrl: 'https://gitweb.open-xchange.com/?p=automation'],
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [],
-                        gitTool: 'Linux',
-                        submoduleCfg: [],
-                        userRemoteConfigs: [[credentialsId: '2cb98438-7e92-4038-af72-dad91b4ff6be', url: "https://code.open-xchange.com/git/automation"]]
+                            $class: 'GitSCM',
+                            branches: [[name: '*/master']],
+                            browser: [$class: 'GitWeb', repoUrl: 'https://gitweb.open-xchange.com/?p=automation'],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [],
+                            gitTool: 'Linux',
+                            submoduleCfg: [],
+                            userRemoteConfigs: [[credentialsId: '2cb98438-7e92-4038-af72-dad91b4ff6be', url: "https://code.open-xchange.com/git/automation"]]
                     ])
                 }
                 dir('automation/backendI18N') {
@@ -102,12 +102,12 @@ spec:
                 allOf {
                     // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
                     expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
-                    expression { null != version4ConfigDocProcessor(env.BRANCH_NAME) }
+                    expression { null != version4DocProcessor(env.BRANCH_NAME) }
                 }
             }
             steps {
                 script {
-                    def targetVersion = version4ConfigDocProcessor(env.BRANCH_NAME)
+                    def targetVersion = version4DocProcessor(env.BRANCH_NAME)
                     def targetDirectory
                     dir('config-doc-processor') {
                         // Need to do some file operation in directory otherwise it is not created.
@@ -183,18 +183,20 @@ spec:
                 }
             }
         }
-        stage('Http api documentation') {
+        stage('HTTP API documentation') {
             when {
                 allOf {
-                    branch 'develop'
-                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
-                    expression { null != version4HttpApi(env.BRANCH_NAME) }
+                    branch 'buildHtml'
+                    anyOf {
+                        triggeredBy 'TimerTrigger'
+                        triggeredBy cause: 'UserIdCause'
+                    }
+                    expression { null != version4DocProcessor(env.BRANCH_NAME) }
                 }
             }
             steps {
                 script {
-                    def targetVersion = version4HttpApi(env.BRANCH_NAME)
+                    def targetVersion = version4DocProcessor(env.BRANCH_NAME)
                     container('gradle') {
                         dir('backend/http-api') {
                             sh "gradle resolve insertMarkdown"
@@ -203,10 +205,10 @@ spec:
                     dir('documentation-generic/') {
                         sshPublisher(publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation',
                                 transfers: [
-                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/http/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'http_api/documents/html/**/*.*'),
-                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/drive/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'drive_api/documents/html/**/*.*'),
-                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/rest/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'rest_api/documents/html/**/*.*')],
-                                usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/http/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'http_api/documents/html/**'),
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/drive/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'drive_api/documents/html/**'),
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/rest/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'rest_api/documents/html/**')],
+                                usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)
                         ])
                     }
                 }
@@ -223,7 +225,7 @@ spec:
     }
 }
 
-String version4ConfigDocProcessor(String branchName) {
+String version4DocProcessor(String branchName) {
     if ('develop' == branchName)
         return branchName
     if (branchName.startsWith('master-'))
@@ -233,8 +235,3 @@ String version4ConfigDocProcessor(String branchName) {
     return null
 }
 
-String version4HttpApi(String branchName) {
-    if ('develop' == branchName)
-        return branchName
-    return null
-}
