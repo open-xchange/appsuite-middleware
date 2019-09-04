@@ -112,4 +112,15 @@ public interface SessiondServiceExtended extends SessiondService {
      */
     boolean isApplicableForSessionStorage(Session session);
 
+    /**
+     * Gets the <b>local-only</b> active (short-term-only) sessions associated with specified user in given context.
+     * <p>
+     * <b>Note</b>: Remote sessions are not considered by this method.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The <b>local-only</b> active sessions associated with specified user in given context
+     */
+    Collection<Session> getActiveSessions(int userId, int contextId);
+
 }

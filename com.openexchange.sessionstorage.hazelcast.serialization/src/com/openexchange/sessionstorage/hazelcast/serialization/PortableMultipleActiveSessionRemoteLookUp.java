@@ -59,13 +59,14 @@ import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
- * {@link PortableMultipleSessionRemoteLookUp}
+ * {@link PortableMultipleActiveSessionRemoteLookUp}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable implements Callable<PortableSessionCollection> {
+public class PortableMultipleActiveSessionRemoteLookUp extends AbstractCustomPortable implements Callable<PortableSessionCollection> {
 
     private static final AtomicReference<SessiondService> SERVICE_REFERENCE = new AtomicReference<SessiondService>();
 
@@ -91,8 +92,8 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
 
     // ---------------------------------------------------------------------------------------------------------------------
 
-    /** The unique portable class ID of the {@link PortableMultipleSessionRemoteLookUp} */
-    public static final int CLASS_ID = 402;
+    /** The unique portable class ID of the {@link PortableMultipleActiveSessionRemoteLookUp} */
+    public static final int CLASS_ID = 405;
 
     private static final String FIELD_USER_ID = "userId";
     private static final String FIELD_CTX_ID = "contextId";
@@ -103,30 +104,30 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
     private boolean withLocalLastActive;
 
     /**
-     * Initializes a new {@link PortableMultipleSessionRemoteLookUp}.
+     * Initializes a new {@link PortableMultipleActiveSessionRemoteLookUp}.
      */
-    public PortableMultipleSessionRemoteLookUp() {
+    public PortableMultipleActiveSessionRemoteLookUp() {
         super();
     }
 
     /**
-     * Initializes a new {@link PortableMultipleSessionRemoteLookUp}.
+     * Initializes a new {@link PortableMultipleActiveSessionRemoteLookUp}.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public PortableMultipleSessionRemoteLookUp(int userId, int contextId) {
+    public PortableMultipleActiveSessionRemoteLookUp(int userId, int contextId) {
         this(userId, contextId, false);
     }
 
     /**
-     * Initializes a new {@link PortableMultipleSessionRemoteLookUp}.
+     * Initializes a new {@link PortableMultipleActiveSessionRemoteLookUp}.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param withLocalLastActive <code>true</code> to include the local last-active time stamp for a session; otherwise <code>false</code>
      */
-    public PortableMultipleSessionRemoteLookUp(int userId, int contextId, boolean withLocalLastActive) {
+    public PortableMultipleActiveSessionRemoteLookUp(int userId, int contextId, boolean withLocalLastActive) {
         super();
         this.userId = userId;
         this.contextId = contextId;
@@ -136,11 +137,11 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
     @Override
     public PortableSessionCollection call() throws Exception {
         SessiondService service = SERVICE_REFERENCE.get();
-        if (null == service) {
+        if (null == service || !(service instanceof SessiondServiceExtended)) {
             return new PortableSessionCollection(new PortableSession[0]);
         }
 
-        Collection<Session> sessions = service.getSessions(userId, contextId);
+        Collection<Session> sessions = ((SessiondServiceExtended) service).getActiveSessions(userId, contextId);
         if (null == sessions || sessions.isEmpty()) {
             return new PortableSessionCollection(new PortableSession[0]);
         }

@@ -47,63 +47,26 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.sessionstorage.hazelcast.serialization;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
-import com.openexchange.session.Session;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link SessionMatcher}
+ * {@link PortableMultipleActiveSessionRemoteLookupFactory} - The portable factory for {@link PortableMultipleActiveSessionRemoteLookUp} type.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessionMatcher {
+public class PortableMultipleActiveSessionRemoteLookupFactory extends AbstractCustomPortableFactory {
 
-    /**
-     * The constant set indicating no flags.
-     * <p>
-     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
-     * <b>Note</b>: Might be an expensive operation as both - long-term container and session storage - are considered.
-     * </div>
-     */
-    public static final Set<Flag> NO_FLAGS = Collections.unmodifiableSet(EnumSet.noneOf(Flag.class));
-
-    /**
-     * The constant set indicating all flags. Neither long-term container nor session storage are considered.
-     */
-    public static final Set<Flag> ALL_FLAGS = Collections.unmodifiableSet(EnumSet.allOf(Flag.class));
-
-    /**
-     * Flag enumeration for session matcher.
-     */
-    public static enum Flag {
-        /**
-         * Whether to ignore sessions kept in long-term container.
-         */
-        IGNORE_LONG_TERM,
-        /**
-         * Whether to ignore sessions kept in distributed session storage.
-         */
-        IGNORE_SESSION_STORAGE,
+    @Override
+    public CustomPortable create() {
+        return new PortableMultipleActiveSessionRemoteLookUp();
     }
 
-    /**
-     * Gets the matcher's behavioral flags.
-     *
-     * @return The flags or <code>null</code> for no flags at all
-     * @see #NO_FLAGS
-     * @see #ALL_FLAGS
-     */
-    Set<Flag> flags();
+    @Override
+    public int getClassId() {
+        return PortableMultipleActiveSessionRemoteLookUp.CLASS_ID;
+    }
 
-    /**
-     * Checks whether passed session is accepted; meaning it fulfills matcher's condition.
-     *
-     * @param session The session to check
-     * @return <code>true</code> if accepted; otherwise <code>false</code> if not
-     */
-    boolean accepts(Session session);
 }
