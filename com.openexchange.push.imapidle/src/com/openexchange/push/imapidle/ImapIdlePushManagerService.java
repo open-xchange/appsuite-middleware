@@ -280,7 +280,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
     @Override
     public PushListener startPermanentListener(PushUser pushUser) throws OXException {
-        if (null == pushUser) {
+        if (null == pushUser || !supportsPermanentListeners()) {
             return null;
         }
 
@@ -533,7 +533,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int userId = oldSession.getUserId();
 
         // Prefer permanent listener prior to performing look-up for another valid session
-        if (hasPermanentPush(userId, contextId)) {
+        if (supportsPermanentListeners() && hasPermanentPush(userId, contextId)) {
             try {
                 Session session = generateSessionFor(userId, contextId);
                 return injectAnotherListenerUsing(session, true).injectedPushListener;
@@ -551,7 +551,10 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
             for (Session session : sessions) {
                 if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                    return injectAnotherListenerUsing(session, false).injectedPushListener;
+                    Session ses = sessiondService.getSession(session.getSessionID());
+                    if (ses != null) {
+                        return injectAnotherListenerUsing(ses, false).injectedPushListener;
+                    }
                 }
             }
 
@@ -560,7 +563,10 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 // Look-up remote sessions, too, if possible
                 Session session = lookUpRemoteSessionFor(oldSession);
                 if (null != session) {
-                    return injectAnotherListenerUsing(session, false).injectedPushListener;
+                    Session ses = sessiondService.getSession(session.getSessionID());
+                    if (ses != null) {
+                        return injectAnotherListenerUsing(ses, false).injectedPushListener;
+                    }
                 }
             }
         }

@@ -470,9 +470,12 @@ public final class MailNotifyPushListenerRegistry {
                 Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
                 for (Session session : sessions) {
                     if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                        MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(session, false);
-                        mboxId2Listener.put(mboxId, newListener);
-                        return newListener;
+                        Session ses = sessiondService.getSession(session.getSessionID());
+                        if (ses != null) {
+                            MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(ses, false);
+                            mboxId2Listener.put(mboxId, newListener);
+                            return newListener;
+                        }
                     }
                 }
 
@@ -481,9 +484,12 @@ public final class MailNotifyPushListenerRegistry {
                     sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
                     for (Session session : sessions) {
                         if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                            MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(session, false);
-                            mboxId2Listener.put(mboxId, newListener);
-                            return newListener;
+                            Session ses = sessiondService.getSession(session.getSessionID());
+                            if (ses != null) {
+                                MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(ses, false);
+                                mboxId2Listener.put(mboxId, newListener);
+                                return newListener;
+                            }
                         }
                     }
                 }

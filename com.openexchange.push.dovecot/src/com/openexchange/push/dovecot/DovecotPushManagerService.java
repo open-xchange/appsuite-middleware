@@ -242,13 +242,24 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
             for (Session session : sessions) {
                 if ((null == oldSessionId || false == oldSessionId.equals(session.getSessionID())) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                    return session;
+                    Session ses = sessiondService.getSession(session.getSessionID());
+                    if (ses != null) {
+                        return ses;
+                    }
+                }
+            }
+
+            // Look-up remote sessions, too, if possible
+            Session session = lookUpRemoteSessionFor(userId, contextId, optOldSession);
+            if (session != null) {
+                Session ses = sessiondService.getSession(session.getSessionID());
+                if (ses != null) {
+                    return ses;
                 }
             }
         }
 
-        // Look-up remote sessions, too, if possible
-        return lookUpRemoteSessionFor(userId, contextId, optOldSession);
+        return null;
     }
 
     private Session lookUpRemoteSessionFor(int userId, int contextId, Session optOldSession) {
