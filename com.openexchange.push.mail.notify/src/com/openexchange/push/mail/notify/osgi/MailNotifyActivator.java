@@ -52,6 +52,7 @@ package com.openexchange.push.mail.notify.osgi;
 import java.io.IOException;
 import java.util.concurrent.Future;
 import org.osgi.service.event.EventAdmin;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.context.ContextService;
@@ -69,6 +70,7 @@ import com.openexchange.push.mail.notify.MailNotifyPushListenerRegistry;
 import com.openexchange.push.mail.notify.MailNotifyPushMailAccountDeleteListener;
 import com.openexchange.push.mail.notify.MailNotifyPushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushUdpSocketListener;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -141,6 +143,8 @@ public final class MailNotifyActivator extends HousekeepingActivator {
 
             // Track optional services
             trackService(PushNotificationService.class);
+            trackService(HazelcastInstance.class);
+            trackService(ObfuscatorService.class);
             openTrackers();
 
             // Register push manager

@@ -422,6 +422,24 @@ final class SessionData {
     }
 
     /**
+     * Gets the <b>local-only</b> active (short-term-only) sessions associated with specified user in given context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The <b>local-only</b> active sessions or an empty list
+     */
+    List<SessionControl> getUserActiveSessions(int userId, int contextId) {
+        // A read-only access to session list
+        List<SessionControl> retval = new LinkedList<SessionControl>();
+
+        // Short term ones
+        for (SessionContainer container : sessionList) {
+            retval.addAll(container.getSessionsByUser(userId, contextId));
+        }
+        return retval;
+    }
+
+    /**
      * Gets the <b>local-only</b> sessions associated with specified user in given context.
      *
      * @param userId The user identifier

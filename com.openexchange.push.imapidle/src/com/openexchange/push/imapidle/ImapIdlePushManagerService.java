@@ -50,7 +50,6 @@
 package com.openexchange.push.imapidle;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -88,9 +87,10 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleActiveSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -280,7 +280,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
     @Override
     public PushListener startPermanentListener(PushUser pushUser) throws OXException {
-        if (null == pushUser) {
+        if (null == pushUser || !supportsPermanentListeners()) {
             return null;
         }
 
@@ -533,7 +533,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int userId = oldSession.getUserId();
 
         // Prefer permanent listener prior to performing look-up for another valid session
-        if (hasPermanentPush(userId, contextId)) {
+        if (supportsPermanentListeners() && hasPermanentPush(userId, contextId)) {
             try {
                 Session session = generateSessionFor(userId, contextId);
                 return injectAnotherListenerUsing(session, true).injectedPushListener;
@@ -545,14 +545,24 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         // Look-up sessions
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (null != sessiondService) {
-            String oldSessionId = oldSession.getSessionID();
+            final String oldSessionId = oldSession.getSessionID();
 
             // Query local ones first
-            Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-            for (Session session : sessions) {
-                if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
-                    return injectAnotherListenerUsing(session, false).injectedPushListener;
+            SessionMatcher matcher = new SessionMatcher() {
+
+                @Override
+                public Set<Flag> flags() {
+                    return SessionMatcher.ALL_FLAGS;
                 }
+
+                @Override
+                public boolean accepts(Session session) {
+                    return !oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true);
+                }
+            };
+            Session anotherActiveSession = sessiondService.findFirstMatchingSessionForUser(userId, contextId, matcher);
+            if (anotherActiveSession != null) {
+                return injectAnotherListenerUsing(anotherActiveSession, false).injectedPushListener;
             }
 
             // If we're running a node-local lock, there is no need to check for sessions at other nodes
@@ -560,7 +570,10 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 // Look-up remote sessions, too, if possible
                 Session session = lookUpRemoteSessionFor(oldSession);
                 if (null != session) {
-                    return injectAnotherListenerUsing(session, false).injectedPushListener;
+                    Session ses = sessiondService.getSession(session.getSessionID());
+                    if (ses != null) {
+                        return injectAnotherListenerUsing(ses, false).injectedPushListener;
+                    }
                 }
             }
         }
@@ -601,7 +614,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             }
         };
         try {
-            return Hazelcasts.executeByMembersAndFilter(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
+            return Hazelcasts.executeByMembersAndFilter(new PortableMultipleActiveSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException) {
