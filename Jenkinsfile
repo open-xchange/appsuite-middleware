@@ -183,6 +183,35 @@ spec:
                 }
             }
         }
+        stage('Http api documentation') {
+            when {
+                allOf {
+                    branch 'develop'
+                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
+                    expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
+                    expression { null != version4HttpApi(env.BRANCH_NAME) }
+                }
+            }
+            steps {
+                script {
+                    def targetVersion = version4HttpApi(env.BRANCH_NAME)
+                    container('gradle') {
+                        dir('backend/http-api') {
+                            sh "gradle resolve insertMarkdown"
+                        }
+                    }
+                    dir('documentation-generic/') {
+                        sshPublisher(publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation',
+                                transfers: [
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/http/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'http_api/documents/html/**/*.*'),
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/drive/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'drive_api/documents/html/**/*.*'),
+                                        sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'components/middleware/rest/${targetVersion}', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'rest_api/documents/html/**/*.*')],
+                                usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)
+                        ])
+                    }
+                }
+            }
+        }
     }
     post {
         failure {
@@ -201,5 +230,11 @@ String version4ConfigDocProcessor(String branchName) {
         return branchName.substring(7)
     if (branchName.startsWith('release-'))
         return branchName.substring(8)
+    return null
+}
+
+String version4HttpApi(String branchName) {
+    if ('develop' == branchName)
+        return branchName
     return null
 }
