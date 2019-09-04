@@ -226,6 +226,8 @@ spec:
 }
 
 String version4Documentation(String branchName) {
+    if ('buildHtml' == branchName)
+        return branchName
     if ('develop' == branchName)
         return branchName
     if (branchName.startsWith('master-'))
