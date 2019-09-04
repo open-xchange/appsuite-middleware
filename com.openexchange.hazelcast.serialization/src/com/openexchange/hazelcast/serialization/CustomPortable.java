@@ -111,7 +111,9 @@ public interface CustomPortable extends Portable {
      * @return The factory ID.
      */
     @Override
-    int getFactoryId();
+    default int getFactoryId() {
+        return FACTORY_ID;
+    }
 
     /**
      * Gets the class ID of this portable implementation.
