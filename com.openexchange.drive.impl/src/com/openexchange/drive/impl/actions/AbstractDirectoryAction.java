@@ -60,33 +60,31 @@ import com.openexchange.drive.impl.comparison.ThreeWayComparison;
  */
 public abstract class AbstractDirectoryAction extends AbstractAction<DirectoryVersion> {
 
+    private final int hashCode;
+    private final Action action;
+
     /**
      * Initializes a new {@link AbstractDirectoryAction}.
      *
-     * @param version
-     * @param newVersion
+     * @param action The action
+     * @param version The directory version
+     * @param newVersion The new directory version
+     * @param comparison The underlying comparison
      */
-    protected AbstractDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison) {
+    protected AbstractDirectoryAction(Action action, DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison) {
         super(version, newVersion, comparison);
+        this.action = action;
+        this.hashCode = calculateHash();
+    }
+
+    @Override
+    public Action getAction() {
+        return action;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + DirectoryVersion.class.hashCode();
-        Action action = getAction();
-        result = prime * result + ((null == action) ? 0 : action.hashCode());
-        if (null != version) {
-            result = prime * result + version.getChecksum().hashCode();
-            result = prime * result + version.getPath().hashCode();
-        }
-        if (null != newVersion) {
-            result = prime * result + newVersion.getChecksum().hashCode();
-            result = prime * result + newVersion.getPath().hashCode();
-        }
-        result = prime * result + ((null == parameters) ? 0 : parameters.hashCode());
-        return result;
+        return hashCode;
     }
 
     @Override
@@ -123,6 +121,23 @@ public abstract class AbstractDirectoryAction extends AbstractAction<DirectoryVe
             return false;
         }
         return true;
+    }
+
+    private int calculateHash() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + DirectoryVersion.class.hashCode();
+        result = prime * result + ((null == action) ? 0 : action.hashCode());
+        if (null != version) {
+            result = prime * result + version.getChecksum().hashCode();
+            result = prime * result + version.getPath().hashCode();
+        }
+        if (null != newVersion) {
+            result = prime * result + newVersion.getChecksum().hashCode();
+            result = prime * result + newVersion.getPath().hashCode();
+        }
+        result = prime * result + ((null == parameters) ? 0 : parameters.hashCode());
+        return result;
     }
 
 }

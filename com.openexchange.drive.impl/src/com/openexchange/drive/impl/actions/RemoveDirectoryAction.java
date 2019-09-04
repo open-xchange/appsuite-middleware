@@ -62,12 +62,7 @@ import com.openexchange.drive.impl.comparison.ThreeWayComparison;
 public class RemoveDirectoryAction extends AbstractDirectoryAction {
 
     public RemoveDirectoryAction(DirectoryVersion version, ThreeWayComparison<DirectoryVersion> comparison) {
-        super(version, null, comparison);
-    }
-
-    @Override
-    public Action getAction() {
-        return Action.REMOVE;
+        super(Action.REMOVE, version, null, comparison);
     }
 
     @Override

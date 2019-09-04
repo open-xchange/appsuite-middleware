@@ -62,12 +62,7 @@ import com.openexchange.drive.impl.comparison.ThreeWayComparison;
 public class EditDirectoryAction extends AbstractDirectoryAction {
 
     public EditDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison) {
-        super(version, newVersion, comparison);
-    }
-
-    @Override
-    public Action getAction() {
-        return Action.EDIT;
+        super(Action.EDIT, version, newVersion, comparison);
     }
 
     @Override
