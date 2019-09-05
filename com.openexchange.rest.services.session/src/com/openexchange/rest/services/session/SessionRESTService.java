@@ -110,9 +110,12 @@ public class SessionRESTService {
             synchronized (this) {
                 tmp = timeout;
                 if (null == tmp) {
-                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
                     int defaultTimeout = 3000;
-                    tmp = Integer.valueOf(null == service ? defaultTimeout : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
+                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
+                    if (service == null) {
+                        return defaultTimeout;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
                     timeout = tmp;
                 }
             }
