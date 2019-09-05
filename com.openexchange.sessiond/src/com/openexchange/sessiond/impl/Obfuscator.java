@@ -263,7 +263,7 @@ public class Obfuscator implements ObfuscatorService {
             try {
                 return Services.getService(CryptoService.class).decrypt(string, obfuscationKey);
             } catch (OXException e) {
-                LOG.error("Could not obfuscate string", e);
+                LOG.error("Could not unobfuscate string", e);
                 return string;
             }
         }
