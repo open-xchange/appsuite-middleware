@@ -734,16 +734,29 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      * @throws OXException
      */
     private void updateAccount(Session session, int accountId, List<Setter> list, Connection connection) throws SQLException, OXException {
-        final StringBuilder stmtBuilder = new StringBuilder(128).append("UPDATE oauthAccounts SET ");
-        final int size = list.size();
-        list.get(0).appendTo(stmtBuilder);
-        for (int i = 1; i < size; i++) {
-            stmtBuilder.append(", ");
-            list.get(i).appendTo(stmtBuilder);
+        // Compile SQL UPDATE statement
+        StringBuilder stmtBuilder = new StringBuilder(128);
+        {
+            stmtBuilder.append("UPDATE oauthAccounts SET ");
+            int size = list.size();
+            list.get(0).appendTo(stmtBuilder);
+            for (int i = 1; i < size; i++) {
+                stmtBuilder.append(", ");
+                list.get(i).appendTo(stmtBuilder);
+            }
+            stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?");
         }
+
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(stmtBuilder.append(" WHERE cid = ? AND user = ? and id = ?").toString());
+            boolean signalReauthorization = false;
+            {
+                String sql = stmtBuilder.toString();
+                stmtBuilder = null;
+                stmt = connection.prepareStatement(sql);
+                signalReauthorization = sql.indexOf("accessToken") >= 0 || sql.indexOf("accessSecret") >= 0;
+            }
+
             int pos = 1;
             for (final Setter setter : list) {
                 pos = setter.set(pos, stmt);
@@ -756,6 +769,13 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             final int rows = stmt.executeUpdate();
             if (rows <= 0) {
                 throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId), I(userId), I(contextId));
+            }
+            /*
+             * Signal re-authorized event
+             */
+            if (signalReauthorization) {
+                Map<String, Object> properties = Collections.<String, Object> emptyMap();
+                ReauthorizeListenerRegistry.getInstance().onAfterOAuthAccountReauthorized(accountId, properties, userId, contextId, connection);
             }
         } finally {
             closeSQLStuff(stmt);
