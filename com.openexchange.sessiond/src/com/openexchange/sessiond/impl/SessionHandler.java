@@ -224,8 +224,8 @@ public final class SessionHandler {
     /**
      * Removes all sessions associated with given user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The wrapper objects for removed sessions
      */
     public static Session[] removeUserSessions(final int userId, final int contextId) {
@@ -287,8 +287,8 @@ public final class SessionHandler {
     /**
      * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
     public static void removeUserSessionsGlobal(int userId, int contextId) {
         SessionHandler.removeRemoteUserSessions(userId, contextId);
@@ -371,7 +371,7 @@ public final class SessionHandler {
      * Removes all sessions from remote nodes that match the given filter (excluding this node).
      *
      * @param filter The filter
-     * @return The session IDs of all removed sessions
+     * @return The session identifiers of all removed sessions
      */
     public static List<String> removeRemoteSessions(SessionFilter filter) {
         LOG.debug("Trying to remove sessions from remote nodes by filter '{}'", filter);
@@ -392,7 +392,7 @@ public final class SessionHandler {
      * Finds all sessions on remote nodes that match the given filter (excluding this node).
      *
      * @param filter The filter
-     * @return The session IDs of all found sessions
+     * @return The session identifiers of all found sessions
      */
     public static List<String> findRemoteSessions(SessionFilter filter) {
         LOG.debug("Trying to find sessions on remote nodes by filter '{}'", filter);
@@ -410,10 +410,10 @@ public final class SessionHandler {
     }
 
     /**
-     * Finds all local sessions that match the given filter and returns their IDs.
+     * Finds all local sessions that match the given filter and returns their identifiers.
      *
      * @param filter The filter
-     * @return The found session IDs
+     * @return The found session identifiers
      */
     public static List<String> findLocalSessions(SessionFilter filter) {
         final SessionData sessionData = SESSION_DATA_REF.get();
@@ -432,10 +432,10 @@ public final class SessionHandler {
     }
 
     /**
-     * Removes all local sessions that match the given filter and returns their IDs.
+     * Removes all local sessions that match the given filter and returns their identifiers.
      *
      * @param filter The filter
-     * @return The session IDs
+     * @return The session identifiers
      */
     public static List<String> removeLocalSessions(SessionFilter filter) {
         List<String> sessionIds = findLocalSessions(filter);
@@ -547,7 +547,7 @@ public final class SessionHandler {
     /**
      * Removes all sessions associated with given context.
      *
-     * @param contextId The context ID
+     * @param contextId The context identifier
      */
     public static void removeContextSessions(final int contextId) {
         /*
@@ -634,8 +634,8 @@ public final class SessionHandler {
     /**
      * Gets all <b>local-only</b> active (short-term-only) sessions associated with given user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The wrapper objects for active sessions
      */
     public static List<SessionControl> getUserActiveSessions(int userId, int contextId) {
@@ -651,8 +651,8 @@ public final class SessionHandler {
     /**
      * Gets all sessions associated with given user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param considerSessionStorage <code>true</code> to also consider session storage; otherwise <code>false</code>
      * @return The wrapper objects for sessions
      */
@@ -722,8 +722,8 @@ public final class SessionHandler {
     /**
      * Gets an active session of an user if available.
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param includeLongTerm <code>true</code> to also lookup the long term sessions, <code>false</code>, otherwise
      * @param includeStorage <code>true</code> to also lookup the distributed session storage, <code>false</code>, otherwise
      * @return
@@ -813,7 +813,7 @@ public final class SessionHandler {
     /**
      * Adds a new session containing given attributes to session container(s)
      *
-     * @param userId The user ID
+     * @param userId The user identifier
      * @param loginName The user's login name
      * @param password The user's password
      * @param contextId The context identifier
@@ -1169,9 +1169,9 @@ public final class SessionHandler {
     }
 
     /**
-     * Clears the session denoted by given session ID from session container(s)
+     * Clears the session denoted by given session identifier from session container(s)
      *
-     * @param sessionid The session ID
+     * @param sessionid The session identifier
      * @param postEvent <code>true</code> to post an event about session removal; otherwise <code>false</code> for no such event
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
@@ -1193,9 +1193,9 @@ public final class SessionHandler {
     }
 
     /**
-     * Changes the password stored in session denoted by given session ID
+     * Changes the password stored in session denoted by given session identifier
      *
-     * @param sessionid The session ID
+     * @param sessionid The session identifier
      * @param newPassword The new password
      * @throws OXException If changing the password fails
      */
@@ -1508,25 +1508,25 @@ public final class SessionHandler {
     }
 
     /**
-     * Gets the session associated with given session ID
+     * Gets the session associated with given session identifier
      *
-     * @param sessionId The session ID
+     * @param sessionId The session identifier
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
      *            <code>false</code>
-     * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
+     * @return The session associated with given session identifier; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(String sessionId, final boolean considerSessionStorage) {
         return getSession(sessionId, true, considerSessionStorage);
     }
 
     /**
-     * Gets the session associated with given session ID
+     * Gets the session associated with given session identifier
      *
-     * @param sessionId The session ID
+     * @param sessionId The session identifier
      * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
      *            <code>false</code>
-     * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
+     * @return The session associated with given session identifier; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
@@ -2291,7 +2291,7 @@ public final class SessionHandler {
     /**
      * Gets a value indicating whether the supplied client identifier indicates an USM session or not.
      *
-     * @param clientId the client ID to check
+     * @param clientId the client identifier to check
      * @return <code>true</code> if the client denotes an USM client, <code>false</code>, otherwise
      */
     private static boolean isUsmEas(String clientId) {

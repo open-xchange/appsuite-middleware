@@ -215,8 +215,8 @@ final class SessionData {
     /**
      * Checks if given user in specified context has an active session kept in session container(s)
      *
-     * @param userId The user ID
-     * @param contextId The user's context ID
+     * @param userId The user identifier
+     * @param contextId The user's context identifier
      * @param includeLongTerm <code>true</code> to also lookup the long term sessions, <code>false</code>, otherwise
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
