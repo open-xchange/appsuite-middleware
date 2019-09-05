@@ -58,14 +58,19 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.StoredSession;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -92,25 +97,49 @@ public class SessionRESTService {
         this.services = services;
     }
 
+    private volatile Integer timeout;
+
     /**
-     * Checks if the given session is a guest-session
+     * Gets the default timeout for session-storage operations.
+     *
+     * @return The default timeout in milliseconds
+     */
+    private int timeout() {
+        Integer tmp = timeout;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = timeout;
+                if (null == tmp) {
+                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
+                    int defaultTimeout = 3000;
+                    tmp = Integer.valueOf(null == service ? defaultTimeout : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
+                    timeout = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    /**
+     * Checks if the given session is a guest session.
      *
      * @param session The session
-     * @return True, if the session is a guest session, false otherwise
-     * @throws OXException
+     * @return <code>true</code> if the session is a guest session, <code>false</code> otherwise
+     * @throws OXExceptionIf checking for a guest session fails
      */
     private boolean isGuest(Session session) throws OXException {
-        if (session != null) {
+        if (session == null) {
+            return false;
+        }
 
-            if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                return true;
-            }
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            return true;
+        }
 
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-            if (serverSession != null) {
-                User user = serverSession.getUser();
-                return user != null && user.isGuest();
-            }
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (serverSession != null) {
+            User user = serverSession.getUser();
+            return user != null && user.isGuest();
         }
         return false;
     }
@@ -131,7 +160,16 @@ public class SessionRESTService {
                 throw ServiceExceptionCode.absentService(SessiondService.class);
             }
 
-            Session ses = sessiondService.getSession(session);
+            Session ses;
+            if (sessiondService instanceof SessiondServiceExtended) {
+                ses = ((SessiondServiceExtended) sessiondService).getSession(session, false);
+                if (ses == null) {
+                    ses = optFromSessionStorage(session);
+                }
+            } else {
+                ses = sessiondService.getSession(session);
+            }
+
             if (ses == null) {
                 // No such session...
                 return new JSONObject(0);
@@ -155,5 +193,22 @@ public class SessionRESTService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private Session optFromSessionStorage(String sessionId) throws OXException {
+        SessionStorageService sessionStorageService = services.getOptionalService(SessionStorageService.class);
+        if (sessionStorageService == null) {
+            return null;
+        }
+
+        Session session = sessionStorageService.lookupSession(sessionId, timeout());
+        if (session instanceof StoredSession) {
+            ObfuscatorService obfuscator = services.getOptionalService(ObfuscatorService.class);
+            if (obfuscator != null) {
+                StoredSession storedSession = (StoredSession) session;
+                storedSession.setPassword(obfuscator.unobfuscate(storedSession.getPassword()));
+            }
+        }
+        return session;
     }
 }

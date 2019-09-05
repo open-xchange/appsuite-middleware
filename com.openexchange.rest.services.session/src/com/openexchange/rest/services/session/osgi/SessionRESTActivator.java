@@ -50,9 +50,12 @@
 package com.openexchange.rest.services.session.osgi;
 
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.services.session.SessionRESTService;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessionRESTActivator}
@@ -77,6 +80,9 @@ public class SessionRESTActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         // Track optional CryptographicServiceAuthenticationFactory service
         trackService(CryptographicServiceAuthenticationFactory.class);
+        trackService(SessionStorageService.class);
+        trackService(ObfuscatorService.class);
+        trackService(ConfigurationService.class);
         openTrackers();
 
         // Register session REST end-point
