@@ -177,7 +177,7 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
             return Failsafe.with(circuitBreaker).get(new CircuitBreakerReadResponseCallable(protocol));
         } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
             // Circuit is open
-            throw new IOException("Denied reading from IMAP server since circuit is open.");
+            throw new IOException("Denied reading from IMAP server since circuit breaker is open.");
         } catch (FailsafeException e) {
             // Runnable failed with a checked exception
             Throwable failure = e.getCause();
