@@ -153,7 +153,7 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
             return Failsafe.with(circuitBreaker).get(new CircuitBreakerCommandCallable(command, args, protocol));
         } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
             // Circuit is open
-            IOException ioe = new IOException("Denied IMAP command since circuit is open.");
+            IOException ioe = new IOException("Denied IMAP command since circuit breaker is open.");
             return new Response[] { Response.byeResponse(ioe) };
         } catch (FailsafeException e) {
             // Runnable failed with a checked exception
