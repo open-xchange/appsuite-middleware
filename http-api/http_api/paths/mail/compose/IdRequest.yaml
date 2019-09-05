@@ -55,10 +55,44 @@
       '401':
         description: Not authorized
   put:
-    operationId: patchMailComposeById
+    operationId: updateMailComposeById
     tags:
       - MailCompose
     summary: Updates the composition space
+    description: >-
+      Payload is JSON that reflects changes. Response is the current composition
+      space message model after update.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: path
+        name: id
+        description: The ID of the composition space
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: A JSON object containing the updated composition space.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailComposeResponse'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailComposeMessageModel'
+      description: An object containing the attributes to update
+      required: true
+  patch:
+    operationId: patchMailComposeById
+    tags:
+      - MailCompose
+    summary: Patches the composition space
     description: >-
       Payload is JSON that reflects changes. Response is the current composition
       space message model after update.
