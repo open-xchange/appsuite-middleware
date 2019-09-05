@@ -63,8 +63,10 @@ import com.openexchange.database.Databases;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
@@ -89,13 +91,13 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     }
 
     @Override
-    public List<Subscription> subscribe(Session session, String serviceID, String token, List<String> rootFolderIDs) throws OXException {
+    public List<Subscription> subscribe(Session session, String serviceID, String token, List<String> rootFolderIDs, SubscriptionMode mode) throws OXException {
         List<Subscription> subscriptions = new ArrayList<Subscription>(rootFolderIDs.size());
         Connection connection = databaseService.getWritable(session.getContextId());
         try {
             for (String rootFolderID : rootFolderIDs) {
                 Subscription subscription = new Subscription(UUIDs.getUnformattedStringFromRandom(),
-                    session.getContextId(), session.getUserId(), serviceID, token, rootFolderID, System.currentTimeMillis());
+                    session.getContextId(), session.getUserId(), serviceID, token, rootFolderID, mode, System.currentTimeMillis());
                 deleteSubscription(connection, session.getContextId(), serviceID, token, rootFolderID);
                 if (0 == replaceSubscription(connection, subscription)) {
                     throw DriveExceptionCodes.DB_ERROR.create("Subscription not added: " + subscription);
@@ -110,8 +112,8 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     }
 
     @Override
-    public Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException {
-        List<Subscription> subscriptions = subscribe(session, serviceID, token, Collections.singletonList(rootFolderID));
+    public Subscription subscribe(Session session, String serviceID, String token, String rootFolderID, SubscriptionMode mode) throws OXException {
+        List<Subscription> subscriptions = subscribe(session, serviceID, token, Collections.singletonList(rootFolderID), mode);
         return null != subscriptions && 0 < subscriptions.size() ? subscriptions.get(0) : null;
     }
 
@@ -268,7 +270,8 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(4, subscription.getToken());
             stmt.setInt(5, subscription.getUserID());
             stmt.setString(6, SQL.escape(subscription.getRootFolderID()));
-            stmt.setLong(7, subscription.getTimestamp());
+            stmt.setString(7, null != subscription.getMode() ? String.valueOf(subscription.getMode()).toLowerCase() : null);
+            stmt.setLong(8, subscription.getTimestamp());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -378,8 +381,9 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                 String token = resultSet.getString(3);
                 int user = resultSet.getInt(4);
                 String folder = SQL.unescape(resultSet.getString(5));
-                long timestamp = resultSet.getLong(6);
-                subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, timestamp));
+                SubscriptionMode mode = Enums.parse(SubscriptionMode.class, resultSet.getString(6), null);
+                long timestamp = resultSet.getLong(7);
+                subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, mode, timestamp));
             }
         } finally {
             Databases.closeSQLStuff(stmt);
@@ -404,8 +408,9 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                 String token = resultSet.getString(4);
                 int user = resultSet.getInt(5);
                 String folder = SQL.unescape(resultSet.getString(6));
-                long timestamp = resultSet.getLong(7);
-                subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, timestamp));
+                SubscriptionMode mode = Enums.parse(SubscriptionMode.class, resultSet.getString(7), null);
+                long timestamp = resultSet.getLong(8);
+                subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, mode, timestamp));
             }
         } finally {
             Databases.closeSQLStuff(stmt);

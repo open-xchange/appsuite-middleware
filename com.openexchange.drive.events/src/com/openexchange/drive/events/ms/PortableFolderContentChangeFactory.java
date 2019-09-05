@@ -47,73 +47,32 @@
  *
  */
 
-package com.openexchange.drive.events;
+package com.openexchange.drive.events.ms;
 
-import java.util.List;
-import java.util.Set;
-import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveVersion;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
- * {@link DriveEvent}
+ * {@link PortableFolderContentChangeFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveEvent {
+public class PortableFolderContentChangeFactory extends AbstractCustomPortableFactory {
 
-    /**
-     * Gets the consecutive actions to be executed by the client, based on the supplied root folder identifier(s).
-     * <p/>
-     * In case concrete directory versions are included in the actions, a <i>synthetic</i> random checksum may get applied as the actual
-     * value is unknown at this stage.
-     *
-     * @param rootFolderIDs The root folder IDs the client is interested in.
-     * @param useContentChanges <code>true</code> to prefer separate SYNC actions for content changes where possible, <code>false</code>, otherwise
-     * @return The client actions
-     */
-    List<DriveAction<? extends DriveVersion>> getActions(List<String> rootFolderIDs, boolean useContentChanges);
+    @Override
+    public int getClassId() {
+        return PortableFolderContentChange.CLASS_ID;
+    }
 
-    /**
-     * Gets the context ID.
-     *
-     * @return The context ID
-     */
-    int getContextID();
+    @Override
+    public Portable create() {
+        return new PortableFolderContentChange();
+    }
 
-    /**
-     * Gets the IDs of all affected folders.
-     *
-     * @return The folder IDs
-     */
-    Set<String> getFolderIDs();
-
-    /**
-     * Gets all tracked content changes within specific folders.
-     *
-     * @return The folder content changes, or an empty collection if there were none
-     */
-    List<DriveContentChange> getContentChanges();
-
-    /**
-     * Gets a value indicating whether this drive event is about folder content changes only or not.
-     *
-     * @return <code>true</code> if there are content changes only, <code>false</code>, otherwise
-     */
-    boolean isContentChangesOnly();
-
-    /**
-     * Gets a value indicating whether this event is originated from a remote backend node or not.
-     *
-     * @return <code>true</code> it this event is 'remote', <code>false</code>, otherwise
-     */
-    boolean isRemote();
-
-    /**
-     * Gets the drive push token if this event originates in a drive client. Only applicable if available in the drive session. A token
-     * reference is either the push token itself, or the md5 checksum of that token, expressed as a lowercase hexadecimal number string.
-     *
-     * @return The push token reference of the device causing the event, or <code>null</code> if not applicable
-     */
-    String getPushTokenReference();
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableFolderContentChange.CLASS_DEFINITION;
+    }
 
 }

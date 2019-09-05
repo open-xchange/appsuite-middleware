@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.ms;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
@@ -67,6 +68,11 @@ public class PortableDriveEventFactory extends AbstractCustomPortableFactory {
     @Override
     public Portable create() {
         return new PortableDriveEvent();
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableDriveEvent.CLASS_DEFINITION;
     }
 
 }

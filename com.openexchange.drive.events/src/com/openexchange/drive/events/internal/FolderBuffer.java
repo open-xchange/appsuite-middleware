@@ -51,11 +51,14 @@ package com.openexchange.drive.events.internal;
 
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.DriveContentChange;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.IdAndName;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.java.ConcurrentHashSet;
@@ -76,9 +79,10 @@ public class FolderBuffer {
     private final int maxDelayTime ;
     private final int defaultDelayTime;
     private final int contextID;
-
-    private volatile Set<String> folderIDs;
-    private volatile String pushToken;
+    private Set<String> folderIDs;
+    private List<DriveContentChange> folderContentChanges;
+    private boolean contentsChangedOnly;
+    private String pushToken;
     private long lastEventTime;
     private long firstEventTime;
 
@@ -98,6 +102,7 @@ public class FolderBuffer {
         this.consolidationTime = consolidationTime;
         this.maxDelayTime = maxDelayTime;
         this.defaultDelayTime = defaultDelayTime;
+        this.contentsChangedOnly = true;
     }
 
     /**
@@ -135,12 +140,12 @@ public class FolderBuffer {
      *
      * @return The client push token, or <code>null</code> if not unique
      */
-    public String getPushToken() {
+    public synchronized String getPushToken() {
         String pushToken = this.pushToken;
         return UNDEFINED_PUSH_TOKEN.equals(pushToken) ? null : pushToken;
     }
 
-    public synchronized void add(Session session, String folderID, List<String> folderPath) {
+    public synchronized void add(Session session, String folderID, List<String> folderPath, boolean contentsChanged) {
         if (session.getContextId() != this.contextID) {
             throw new IllegalArgumentException("session not in this context");
         }
@@ -157,8 +162,32 @@ public class FolderBuffer {
         /*
          * add folder and all parent folders, resolve to root if not already known
          */
+        List<IdAndName> path2Root = null;
         if (folderIDs.add(folderID)) {
-            folderIDs.addAll(null != folderPath ? folderPath : resolveToRoot(folderID, session));
+            if (null != folderPath) {
+                folderIDs.addAll(folderPath);
+            } else {
+                path2Root = resolveToRoot(folderID, session);
+                folderIDs.addAll(getIds(path2Root));
+            }
+        }
+        /*
+         * track separately if event denotes a change of a folder's contents
+         */
+        if (contentsChanged) {
+            List<DriveContentChange> folderContentChanges = this.folderContentChanges;
+            if (null == folderContentChanges) {
+                folderContentChanges = new ArrayList<DriveContentChange>();
+                this.folderContentChanges = folderContentChanges;
+                folderContentChanges.add(new DriveContentChangeImpl(folderID, path2Root));
+            } else if (false == folderContentChanges.stream().anyMatch(c -> folderID.equals(c.getFolderId()))) {
+                if (null == path2Root) {
+                    path2Root = resolveToRoot(folderID, session);
+                }
+                folderContentChanges.add(new DriveContentChangeImpl(folderID, path2Root));
+            }
+        } else {
+            contentsChangedOnly = false;
         }
         /*
          * check for client push token
@@ -175,26 +204,41 @@ public class FolderBuffer {
         }
     }
 
-    public void add(Session session, String folderID) {
-        add(session, folderID, null);
-    }
-
-    public Set<String> getFolderIDs() {
+    public synchronized Set<String> getFolderIDs() {
         return folderIDs;
     }
 
-    private static List<String> resolveToRoot(String folderID, Session session) {
-        List<String> folderIDs = new ArrayList<String>();
+    public synchronized List<DriveContentChange> getFolderContentChanges() {
+        return folderContentChanges;
+    }
+
+    public synchronized boolean isContentsChangedOnly() {
+        return contentsChangedOnly;
+    }
+
+    private static List<String> getIds(List<IdAndName> idAndNames) {
+        if (null == idAndNames || idAndNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> ids = new ArrayList<String>(idAndNames.size());
+        for (IdAndName idAndName : idAndNames) {
+            ids.add(idAndName.getId());
+        }
+        return ids;
+    }
+
+    private static List<IdAndName> resolveToRoot(String folderID, Session session) {
+        List<IdAndName> idAndNames = new ArrayList<IdAndName>();
         try {
             IDBasedFolderAccess folderAccess = DriveEventServiceLookup.getService(IDBasedFolderAccessFactory.class, true).createAccess(session);
             FileStorageFolder[] path2DefaultFolder = folderAccess.getPath2DefaultFolder(folderID);
             for (FileStorageFolder folder : path2DefaultFolder) {
-                folderIDs.add(folder.getId());
+                idAndNames.add(new IdAndName(folder.getId(), folder.getName()));
             }
         } catch (OXException e) {
             LOG.debug("Error resolving path to rootfolder from event", e);
         }
-        return folderIDs;
+        return idAndNames;
     }
 
 }

@@ -50,11 +50,16 @@
 package com.openexchange.drive.events.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.drive.DefaultDirectoryVersion;
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.events.DriveContentChange;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link DriveEventImpl}
@@ -65,6 +70,8 @@ public class DriveEventImpl implements DriveEvent {
 
     private final int contextID;
     private final Set<String> folderIDs;
+    private final List<DriveContentChange> folderContentChanges;
+    private final boolean contentChangesOnly;
     private final boolean remote;
     private final String pushTokenReference;
 
@@ -73,14 +80,17 @@ public class DriveEventImpl implements DriveEvent {
      *
      * @param contextID the context ID
      * @param folderIDs The affected folder IDs
-     * @param actions The client actions to execute
+     * @param folderContentChanges The tracked folder content changes
+     * @param contentChangesOnly <code>true</code> if there are only folder content changes, <code>false</code>, otherwise
      * @param remote <code>true</code> it this event is 'remote', <code>false</code>, otherwise
      * @param pushTokenReference The push token of the device causing the event, or <code>null</code> if not applicable
      */
-    public DriveEventImpl(int contextID, Set<String> folderIDs, boolean remote, String pushTokenReference) {
+    public DriveEventImpl(int contextID, Set<String> folderIDs, List<DriveContentChange> folderContentChanges, boolean contentChangesOnly, boolean remote, String pushTokenReference) {
         super();
         this.contextID = contextID;
         this.folderIDs = folderIDs;
+        this.folderContentChanges = folderContentChanges;
+        this.contentChangesOnly = contentChangesOnly;
         this.remote = remote;
         this.pushTokenReference = pushTokenReference;
     }
@@ -96,11 +106,37 @@ public class DriveEventImpl implements DriveEvent {
     }
 
     @Override
-    public List<DriveAction<? extends DriveVersion>> getActions(List<String> rootFolderIDs) {
+    public List<DriveContentChange> getContentChanges() {
+        return null == folderContentChanges ? Collections.emptyList() : folderContentChanges;
+    }
+
+    @Override
+    public boolean isContentChangesOnly() {
+        return contentChangesOnly;
+    }
+
+    @Override
+    public List<DriveAction<? extends DriveVersion>> getActions(List<String> rootFolderIDs, boolean useContentChanges) {
         List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(rootFolderIDs.size());
         for (String rootFolderID : rootFolderIDs) {
-            if (folderIDs.contains(rootFolderID)) {
-                actions.add(new SyncDirectoriesAction(rootFolderID));
+            if (useContentChanges && contentChangesOnly) {
+                for (DriveContentChange contentChange : folderContentChanges) {
+                    /*
+                     * add SYNC action for directory with content changes if root folder affected
+                     */
+                    if (contentChange.isSubfolderOf(rootFolderID)) {
+                        String syntheticChecksum = UUIDs.getUnformattedStringFromRandom();
+                        DirectoryVersion version = new DefaultDirectoryVersion(contentChange.getPath(rootFolderID), syntheticChecksum);
+                        actions.add(new SyncDirectoryAction(rootFolderID, version));
+                    }
+                }
+            } else {
+                /*
+                 * add SYNC action for all directories if root folder affected, or separate content changes are not used
+                 */
+                if (folderIDs.contains(rootFolderID)) {
+                    actions.add(new SyncDirectoriesAction(rootFolderID));
+                }
             }
         }
         return actions;
@@ -166,5 +202,4 @@ public class DriveEventImpl implements DriveEvent {
         }
         return true;
     }
-
 }

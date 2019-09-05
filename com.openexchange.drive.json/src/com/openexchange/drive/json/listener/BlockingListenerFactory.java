@@ -55,6 +55,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveProperty;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;
 import com.openexchange.exception.OXException;
@@ -76,11 +77,11 @@ public class BlockingListenerFactory implements LongPollingListenerFactory {
     }
 
     @Override
-    public LongPollingListener create(DriveSession session, List<String> rootFolderIDs) throws OXException {
+    public LongPollingListener create(DriveSession session, List<String> rootFolderIDs, SubscriptionMode mode) throws OXException {
         LeanConfigurationService service = services.getService(LeanConfigurationService.class);
         ServerSession serverSession = session.getServerSession();
         if (service.getBooleanProperty(serverSession.getUserId(), serverSession.getContextId(), DriveProperty.EVENTS_BLOCKING_LONG_POLLING_ENABLED)) {
-            return new BlockingListener(session, rootFolderIDs);
+            return new BlockingListener(session, rootFolderIDs, mode);
         }
         throw DriveExceptionCodes.LONG_POLLING_DISABLED.create(I(serverSession.getUserId()), I(serverSession.getContextId()));
     }

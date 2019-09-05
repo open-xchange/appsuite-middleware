@@ -65,6 +65,7 @@ import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.DriveShareJSONParser;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
@@ -74,6 +75,7 @@ import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -266,6 +268,24 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             localeOverride = LocaleTools.getLocale(requestData.getParameter("language"));
         }
         return localeOverride;
+    }
+
+    /**
+     * Extracts and parses a possible subscription mode from the supplied request data.
+     *
+     * @param requestData The request data
+     * @return The subscription mode, or <code>null</code> if not set
+     */
+    protected static SubscriptionMode extractSubscriptionMode(AJAXRequestData requestData) throws OXException {
+        String mode = requestData.getParameter("mode");
+        if (Strings.isNotEmpty(mode)) {
+            try {
+                return Enums.parse(SubscriptionMode.class, mode);
+            } catch (IllegalArgumentException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "mode");
+            }
+        }
+        return null;
     }
 
     /**

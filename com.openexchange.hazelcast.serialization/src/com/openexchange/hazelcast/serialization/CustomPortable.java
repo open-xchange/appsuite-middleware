@@ -149,6 +149,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 24 ---> com.openexchange.sessiond.serialization.PortableUserSessionsCleaner
      *   &bull; 25 ---> com.openexchange.sessiond.serialization.PortableSessionFilterApplier
      *   &bull; 26 ---> com.openexchange.ms.internal.portable.PortableContextInvalidationCallable
+     *   &bull; 27 ---> com.openexchange.drive.events.ms.PortableFolderContentChange
      *   &bull; 101 --> com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials
      *   &bull; 102 --> com.openexchange.push.impl.portable.PortablePushUser
      *   &bull; 103 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallable

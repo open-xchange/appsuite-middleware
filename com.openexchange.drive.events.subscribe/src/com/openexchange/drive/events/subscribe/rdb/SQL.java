@@ -75,6 +75,7 @@ public class SQL {
             "token VARCHAR(255) NOT NULL," +
             "user INT4 UNSIGNED NOT NULL," +
             "folder VARCHAR(512)," +
+            "mode VARCHAR(32) DEFAULT NULL," +
             "timestamp BIGINT(20) NOT NULL," +
             "PRIMARY KEY (cid,uuid)," +
             "INDEX (cid,service,folder)," +
@@ -83,8 +84,7 @@ public class SQL {
     }
 
     public static final String REPLACE_SUBSCRIPTION_STMT =
-        "REPLACE INTO driveEventSubscriptions (uuid,cid,service,token,user,folder,timestamp) " +
-        "VALUES (UNHEX(?),?,?,?,?,REVERSE(?),?);";
+        "REPLACE INTO driveEventSubscriptions (uuid,cid,service,token,user,folder,mode,timestamp) " + "VALUES (UNHEX(?),?,?,?,?,REVERSE(?),?,?);";
 
     public static final String DELETE_SUBSCRIPTION_STMT =
         "DELETE FROM driveEventSubscriptions " +
@@ -114,9 +114,9 @@ public class SQL {
      * SELECT LOWER(HEX(uuid)),service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
      * WHERE cid=? AND service IN (?,?,...) AND folder IN (?,?,...);"
      */
-    public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount, int folderCount) throws OXException {
+    public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount, int folderCount) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT LOWER(HEX(uuid)),service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),service,token,user,REVERSE(folder),mode,timestamp FROM driveEventSubscriptions ");
         stringBuilder.append("WHERE cid=? AND service");
         appendPlaceholders(stringBuilder, serviceCount);
         stringBuilder.append(" AND folder");
@@ -128,9 +128,9 @@ public class SQL {
      * SELECT LOWER(HEX(uuid)),service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
      * WHERE service IN (?,?,...);"
      */
-    public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount) throws OXException {
+    public static final String SELECT_SUBSCRIPTIONS_STMT(int serviceCount) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT LOWER(HEX(uuid)),cid,service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),cid,service,token,user,REVERSE(folder),mode,timestamp FROM driveEventSubscriptions ");
         stringBuilder.append("WHERE service");
         appendPlaceholders(stringBuilder, serviceCount);
         return stringBuilder.append(';').toString();

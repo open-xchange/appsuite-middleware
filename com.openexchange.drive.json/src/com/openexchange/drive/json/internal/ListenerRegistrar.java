@@ -68,6 +68,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.LongPollingListenerFactory;
 import com.openexchange.exception.OXException;
@@ -130,9 +131,10 @@ public class ListenerRegistrar implements DriveEventPublisher  {
      *
      * @param session The session
      * @param rootFolderIDs The root folder IDs to listen for changes in
+     * @param mode The subscription mode
      * @return The listener
      */
-    public LongPollingListener getOrCreate(final DriveSession session, final List<String> rootFolderIDs) throws ExecutionException {
+    public LongPollingListener getOrCreate(final DriveSession session, final List<String> rootFolderIDs, SubscriptionMode mode) throws ExecutionException {
         final String listenerID = getListenerID(session, rootFolderIDs);
         final int contextID = session.getServerSession().getContextId();
         return listeners.get(listenerID, new Callable<LongPollingListener>() {
@@ -142,7 +144,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
                 /*
                  * create listener & track monitored root folders
                  */
-                LongPollingListener listener = createListener(session, rootFolderIDs);
+                LongPollingListener listener = createListener(session, rootFolderIDs, mode);
                 for (String rootFolderID : rootFolderIDs) {
                     listenersPerFolder.put(getFolderKey(rootFolderID, contextID), listenerID);
                 }
@@ -194,11 +196,11 @@ public class ListenerRegistrar implements DriveEventPublisher  {
         }
     }
 
-    private LongPollingListener createListener(DriveSession session, List<String> rootFolderIDs) throws OXException {
+    private LongPollingListener createListener(DriveSession session, List<String> rootFolderIDs, SubscriptionMode mode) throws OXException {
         if (false == listenerFactories.isEmpty()) {
             LongPollingListenerFactory listenerFactory = listenerFactories.first();
             if (null != listenerFactory) {
-                return listenerFactory.create(session, rootFolderIDs);
+                return listenerFactory.create(session, rootFolderIDs, mode);
             }
         }
         throw DriveExceptionCodes.LONG_POLLING_NOT_AVAILABLE.create(

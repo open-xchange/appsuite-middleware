@@ -71,6 +71,7 @@ import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -165,7 +166,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         if (null != buffer) {
             Set<String> folderIDs = buffer.getFolderIDs();
             if (null != folderIDs && 0 < folderIDs.size()) {
-                notifyPublishers(new DriveEventImpl(buffer.getContexctID(), folderIDs, false, buffer.getPushToken()));
+                notifyPublishers(new DriveEventImpl(buffer.getContexctID(), folderIDs, buffer.getFolderContentChanges(), buffer.isContentsChangedOnly(), false, buffer.getPushToken()));
             }
         }
     }
@@ -173,6 +174,11 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     private static boolean check(Event event) {
         return null != event && event.containsProperty(SESSION) &&
             (event.containsProperty(FOLDER_ID) || event.containsProperty(PARENT_FOLDER_ID));
+    }
+
+    static boolean isAboutChangedContents(Event event) {
+        String topic = event.getTopic();
+        return FileStorageEventConstants.CREATE_TOPIC.equals(topic) || FileStorageEventConstants.UPDATE_TOPIC.equals(topic) || FileStorageEventConstants.DELETE_TOPIC.equals(topic);
     }
 
     @Override
@@ -226,13 +232,9 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                     /*
                      * add to buffer
                      */
-                    if (null != folderPath) {
-                        buffer.add(session, folderID, Arrays.asList(folderPath));
-                    } else {
-                        buffer.add(session, folderID);
-                    }
+                    buffer.add(session, folderID, null != folderPath ? Arrays.asList(folderPath) : null, isAboutChangedContents(event));
                     if (null != oldParentFolderID) {
-                        buffer.add(session, oldParentFolderID);
+                        buffer.add(session, oldParentFolderID, null, false);
                     }
                     return null;
                 }

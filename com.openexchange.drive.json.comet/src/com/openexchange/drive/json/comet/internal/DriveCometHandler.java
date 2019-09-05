@@ -65,6 +65,7 @@ import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.java.Streams;
 
@@ -80,6 +81,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
 
     private final DriveSession session;
     private final List<String> rootFolderIDs;
+    private final SubscriptionMode mode;
     private final AtomicLong initializationTime;
 
     /**
@@ -87,11 +89,13 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
      *
      * @param session The session
      * @param rootFolderIDs The root folder IDs to listen for changes in
+     * @param mode The subscription mode
      */
-    public DriveCometHandler(DriveSession session, List<String> rootFolderIDs) {
+    public DriveCometHandler(DriveSession session, List<String> rootFolderIDs, SubscriptionMode mode) {
         super();
         this.session = session;
         this.rootFolderIDs = rootFolderIDs;
+        this.mode = mode;
         initializationTime = new AtomicLong();
     }
 
@@ -118,7 +122,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
                 if (null != driveEvent && driveEvent.getContextID() == session.getServerSession().getContextId()) {
                     Set<String> folderIDs = driveEvent.getFolderIDs();
                     if (null != folderIDs && null != rootFolderIDs) {
-                        List<DriveAction<? extends DriveVersion>> actions = driveEvent.getActions(rootFolderIDs);
+                        List<DriveAction<? extends DriveVersion>> actions = driveEvent.getActions(rootFolderIDs, SubscriptionMode.SEPARATE.equals(mode));
                         if (null != actions && 0 < actions.size()) {
                             write(actions);
                         }

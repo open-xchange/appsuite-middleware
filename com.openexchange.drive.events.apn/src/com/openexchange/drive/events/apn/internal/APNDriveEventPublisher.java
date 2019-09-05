@@ -52,6 +52,7 @@ package com.openexchange.drive.events.apn.internal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -61,12 +62,14 @@ import java.util.concurrent.ConcurrentMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.drive.events.DriveContentChange;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn.APNAccess;
 import com.openexchange.drive.events.apn.APNCertificateProvider;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -179,7 +182,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
          */
         Map<APNAccess, List<PayloadPerDevice>> payloadsPerAccess = new HashMap<APNAccess, List<PayloadPerDevice>>();
         for (Subscription subscription : subscriptions) {
-            PayloadPerDevice payload = getSilentNotificationPayload(subscription);
+            PayloadPerDevice payload = getSilentNotificationPayload(event, subscription);
             if (null == payload) {
                 LOG.debug("No payload constructed for subscription {}, skipping", subscription);
                 continue;
@@ -300,11 +303,22 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", serviceId, L((System.currentTimeMillis() - start)));
     }
 
-    private PayloadPerDevice getSilentNotificationPayload(Subscription subscription) {
+    private PayloadPerDevice getSilentNotificationPayload(DriveEvent event, Subscription subscription) {
         try {
             PushNotificationPayload payload = new PushNotificationBigPayload();
             payload.addCustomDictionary("root", subscription.getRootFolderID());
             payload.addCustomDictionary("action", "sync");
+            if (event.isContentChangesOnly() && SubscriptionMode.SEPARATE.equals(subscription.getMode())) {
+                List<String> paths = new ArrayList<String>();
+                for (DriveContentChange contentChange : event.getContentChanges()) {
+                    if (contentChange.isSubfolderOf(subscription.getRootFolderID())) {
+                        paths.add(contentChange.getPath(subscription.getRootFolderID()));
+                    }
+                }
+                if (false == paths.isEmpty()) {
+                    payload.addCustomDictionary("paths", new org.json.JSONArray(paths));
+                }
+            }
             JSONObject apsObject = payload.getPayload().getJSONObject("aps");
             if (null == apsObject) {
                 apsObject = new JSONObject();

@@ -47,27 +47,26 @@
  *
  */
 
-package com.openexchange.drive.impl.sync;
-
-import com.openexchange.drive.DirectoryVersion;
+package com.openexchange.drive;
 
 /**
- * {@link SimpleDirectoryVersion}
+ * {@link DefaultDirectoryVersion}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.3
  */
-public class SimpleDirectoryVersion implements DirectoryVersion {
+public class DefaultDirectoryVersion implements DirectoryVersion {
 
     private final String path;
     private final String checksum;
 
     /**
-     * Initializes a new {@link SimpleDirectoryVersion}.
+     * Initializes a new {@link DefaultDirectoryVersion}.
      *
      * @param path The path
      * @param checksum The checksum
      */
-    public SimpleDirectoryVersion(String path, String checksum) {
+    public DefaultDirectoryVersion(String path, String checksum) {
         super();
         this.path = path;
         this.checksum = checksum;

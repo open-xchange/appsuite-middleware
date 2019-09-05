@@ -50,64 +50,55 @@
 package com.openexchange.drive.events.ms;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
+import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.hazelcast.nio.serialization.VersionedPortable;
-import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveContentChange;
-import com.openexchange.drive.events.internal.DriveEventImpl;
+import com.openexchange.drive.events.internal.DriveContentChangeImpl;
+import com.openexchange.file.storage.IdAndName;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
 
 /**
- * {@link PortableDriveEvent}
+ * {@link PortableFolderContentChange}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.3
  */
-public class PortableDriveEvent implements CustomPortable, VersionedPortable {
+public class PortableFolderContentChange implements CustomPortable, VersionedPortable {
 
-    /** The unique portable class ID of the {@link PortableDriveEvent} */
-    static final int CLASS_ID = 2;
+    /** The unique portable class ID of the {@link PortableFolderContentChange} */
+    static final int CLASS_ID = 27;
 
     /**
-     * The class version for {@link PortableDriveEvent}.
+     * The class version for {@link PortableFolderContentChange}.
      * <p>
      * This number should be incremented whenever fields are added;
      * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
      */
-    static final int CLASS_VERSION = 2;
+    static final int CLASS_VERSION = 1;
 
-    private static final String PARAMETER_CONTEXT_ID = "c";
-    private static final String PARAMETER_PUSH_TOKEN = "p";
-    private static final String PARAMETER_FOLDER_IDS = "f";
-    private static final String PARAMETER_CONTENT_CHANGES = "cc";
-    private static final String PARAMETER_CONTENT_CHANGES_ONLY = "cco";
+    private static final String PARAMETER_FOLDER_ID = "f";
+    private static final String PARAMETER_PATH_TO_ROOT = "p";
 
-    /** The class definition for PortableDriveEvent */
+    /** The class definition for PortableFolderContentChange */
     static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
-        .addIntField(PARAMETER_CONTEXT_ID)
-        .addUTFField(PARAMETER_PUSH_TOKEN)
-        .addUTFArrayField(PARAMETER_FOLDER_IDS)
-        .addPortableArrayField(PARAMETER_CONTENT_CHANGES, PortableFolderContentChange.CLASS_DEFINITION)
-        .addBooleanField(PARAMETER_CONTENT_CHANGES_ONLY)
+        .addUTFField(PARAMETER_FOLDER_ID)
+        .addUTFArrayField(PARAMETER_PATH_TO_ROOT)
     .build();
     
-    private Set<String> folderIDs;
-    private int contextID;
-    private String pushToken;
-    private List<DriveContentChange> contentChanges;
-    private boolean contentChangesOnly;
+    private String folderId;
+    private List<IdAndName> pathToRoot;
 
     /**
-     * Initializes a new {@link PortableDriveEvent}.
+     * Initializes a new {@link PortableFolderContentChange}.
      */
-    public PortableDriveEvent() {
+    public PortableFolderContentChange() {
         super();
     }
 
@@ -123,39 +114,67 @@ public class PortableDriveEvent implements CustomPortable, VersionedPortable {
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeInt(PARAMETER_CONTEXT_ID, contextID);
-        writer.writeUTF(PARAMETER_PUSH_TOKEN, pushToken);
-        String[] value = null != folderIDs ? folderIDs.toArray(new String[folderIDs.size()]) : null;
-        writer.writeUTFArray(PARAMETER_FOLDER_IDS, value);
-        writer.writePortableArray(PARAMETER_CONTENT_CHANGES, PortableFolderContentChange.wrap(contentChanges));
-        writer.writeBoolean(PARAMETER_CONTENT_CHANGES_ONLY, contentChangesOnly);
+        writer.writeUTF(PARAMETER_FOLDER_ID, folderId);
+        writer.writeUTFArray(PARAMETER_PATH_TO_ROOT, encode(pathToRoot));
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        contextID = reader.readInt(PARAMETER_CONTEXT_ID);
-        pushToken = reader.readUTF(PARAMETER_PUSH_TOKEN);
-        String[] value = reader.readUTFArray(PARAMETER_FOLDER_IDS);
-        folderIDs = null != value ? new HashSet<String>(Arrays.asList(value)) : null;
-        contentChanges = PortableFolderContentChange.unwrap(reader.readPortableArray(PARAMETER_CONTENT_CHANGES));
-        contentChangesOnly = reader.readBoolean(PARAMETER_CONTENT_CHANGES_ONLY);
+        folderId = reader.readUTF(PARAMETER_FOLDER_ID);
+        pathToRoot = decode(reader.readUTFArray(PARAMETER_PATH_TO_ROOT));
     }
 
-    public static PortableDriveEvent wrap(DriveEvent driveEvent) {
-        if (null == driveEvent) {
+    private static String[] encode(List<IdAndName> pathToRoot) {
+        if (null == pathToRoot) {
             return null;
         }
-        PortableDriveEvent portableEvent = new PortableDriveEvent();
-        portableEvent.contextID = driveEvent.getContextID();
-        portableEvent.pushToken = driveEvent.getPushTokenReference();
-        portableEvent.folderIDs = driveEvent.getFolderIDs();
-        portableEvent.contentChanges = driveEvent.getContentChanges();
-        portableEvent.contentChangesOnly = driveEvent.isContentChangesOnly();
-        return portableEvent;
+        String[] strings = new String[pathToRoot.size() * 2];
+        int i = 0;
+        for (IdAndName idAndName : pathToRoot) {
+            strings[i++] = idAndName.getId();
+            strings[i++] = idAndName.getName();
+        }
+        return strings;
     }
 
-    public static DriveEvent unwrap(PortableDriveEvent portableEvent) {
-        return new DriveEventImpl(portableEvent.contextID, portableEvent.folderIDs, portableEvent.contentChanges, portableEvent.contentChangesOnly, true, portableEvent.pushToken);
+    private static List<IdAndName> decode(String[] strings) {
+        if (null == strings) {
+            return null;
+        }
+        if (0 != strings.length % 2) {
+            throw new IllegalArgumentException("uneven array size");
+        }
+        List<IdAndName> pathToRoot = new ArrayList<IdAndName>(strings.length / 2);
+        for (int i = 0; i < strings.length; i += 2) {
+            pathToRoot.add(new IdAndName(strings[i], strings[i + 1]));
+        }
+        return pathToRoot;
+    }
+
+    public static Portable[] wrap(List<DriveContentChange> contentChanges) {
+        if (null == contentChanges) {
+            return null;
+        }
+        Portable[] portableContentChanges = new Portable[contentChanges.size()];
+        for (int i = 0; i < contentChanges.size(); i++) {
+            PortableFolderContentChange portableContentChange = new PortableFolderContentChange();
+            portableContentChange.folderId = contentChanges.get(i).getFolderId();
+            portableContentChange.pathToRoot = contentChanges.get(i).getPathToRoot();
+            portableContentChanges[i] = portableContentChange;
+        }
+        return portableContentChanges;
+    }
+
+    public static List<DriveContentChange> unwrap(Portable[] portableContentChanges) {
+        if (null == portableContentChanges) {
+            return null;
+        }
+        List<DriveContentChange> folderContentChanges = new ArrayList<DriveContentChange>(portableContentChanges.length);
+        for (Portable portable : portableContentChanges) {
+            PortableFolderContentChange portableContentChange = (PortableFolderContentChange) portable;
+            folderContentChanges.add(new DriveContentChangeImpl(portableContentChange.folderId, portableContentChange.pathToRoot));
+        }
+        return folderContentChanges;
     }
 
 }

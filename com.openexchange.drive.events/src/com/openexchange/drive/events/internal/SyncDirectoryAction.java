@@ -47,68 +47,64 @@
  *
  */
 
-package com.openexchange.drive.events.ms;
+package com.openexchange.drive.events.internal;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
-import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.events.internal.DriveEventImpl;
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
+import com.openexchange.java.Strings;
 
 /**
- * {@link DriveEventWrapper}
+ * {@link SyncDirectoryAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.3
  */
-public class DriveEventWrapper {
+public class SyncDirectoryAction implements DriveAction<DirectoryVersion> {
+
+    private final String rootFolderID;
+    private final DirectoryVersion version;
 
     /**
-     * Wraps the supplied drive event into a pojo map.
+     * Initializes a new {@link SyncDirectoryAction}.
      *
-     * @param driveEvent The drive event to wrap
-     * @return The wrapped drive event
+     * @param rootFolderID The corresponding session's root folder identifier
+     * @param version The directory version to sync
      */
-    public static Map<String, Serializable> wrap(DriveEvent driveEvent) {
-        if (null == driveEvent) {
-            return null;
-        }
-        Map<String, Serializable> map = new LinkedHashMap<String, Serializable>(2);
-        map.put("__contextID", Integer.valueOf(driveEvent.getContextID()));
-        Set<String> folderIDs = driveEvent.getFolderIDs();
-        if (null != folderIDs) {
-            map.put("__folderIDs", driveEvent.getFolderIDs().toArray(new String[folderIDs.size()]));
-        }
-        String pushToken = driveEvent.getPushTokenReference();
-        if (null != pushToken) {
-            map.put("__pushToken", pushToken);
-        }
-        return map;
+    public SyncDirectoryAction(String rootFolderID, DirectoryVersion version) {
+        super();
+        this.rootFolderID = rootFolderID;
+        this.version = version;
     }
 
-    /**
-     * Unwraps a drive event from the supplied pojo map. The <code>remote</code> flag in the event is set to <code>true</code> implicitly.
-     *
-     * @param map The wrapped drive event
-     * @return The drive event
-     */
-    public static DriveEvent unwrap(Map<String, Serializable> map) {
-        if (null == map) {
-            return null;
-        }
-        Integer contextID = (Integer)map.get("__contextID");
-        String[] folderIDs = (String[])map.get("__folderIDs");
-        String pushToken = (String)map.get("__pushToken");
-        if (null != folderIDs && null != contextID) {
-            return new DriveEventImpl(contextID.intValue(), new HashSet<String>(Arrays.asList(folderIDs)), true, pushToken);
-        } 
+    @Override
+    public int compareTo(DriveAction<DirectoryVersion> o) {
+        return 0;
+    }
+
+    @Override
+    public Action getAction() {
+        return Action.SYNC;
+    }
+
+    @Override
+    public DirectoryVersion getVersion() {
+        return version;
+    }
+
+    @Override
+    public DirectoryVersion getNewVersion() {
         return null;
     }
 
-    private DriveEventWrapper() {
-        super();
+    @Override
+    public Map<String, Object> getParameters() {
+        if (Strings.isNotEmpty(rootFolderID)) {
+            return Collections.<String, Object>singletonMap(DriveAction.PARAMETER_ROOT, rootFolderID);
+        }
+        return Collections.emptyMap();
     }
 
 }

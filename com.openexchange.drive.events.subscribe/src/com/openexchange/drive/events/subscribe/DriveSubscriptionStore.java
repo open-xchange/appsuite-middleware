@@ -69,9 +69,10 @@ public interface DriveSubscriptionStore {
      * @param serviceID The service ID
      * @param token The device's registration token
      * @param rootFolderIDs The root folder IDs
+     * @param mode The subscription mode
      * @return The subscriptions
      */
-    List<Subscription> subscribe(Session session, String serviceID, String token, List<String> rootFolderIDs) throws OXException;
+    List<Subscription> subscribe(Session session, String serviceID, String token, List<String> rootFolderIDs, SubscriptionMode mode) throws OXException;
 
     /**
      * Adds a subscription for the device identified by the supplied token to the specified root folder ID. Any previous registrations
@@ -81,9 +82,10 @@ public interface DriveSubscriptionStore {
      * @param serviceID The service ID
      * @param token The device's registration token
      * @param rootFolderID The root folder ID
+     * @param mode The subscription mode
      * @return The subscription
      */
-    Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException;
+    Subscription subscribe(Session session, String serviceID, String token, String rootFolderID, SubscriptionMode mode) throws OXException;
 
     /**
      * Removes all subscriptions of the device with the given registration token.

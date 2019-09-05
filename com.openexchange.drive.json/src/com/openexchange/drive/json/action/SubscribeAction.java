@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.events.subscribe.SubscriptionMode;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
@@ -118,10 +119,14 @@ public class SubscribeAction extends AbstractDriveAction {
             rootFolderIDs = Collections.singletonList(session.getRootFolderID());
         }
         /*
+         * get subscription mode if set
+         */
+        SubscriptionMode mode = extractSubscriptionMode(requestData);
+        /*
          * add subscription
          */
         DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
-        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, rootFolderIDs);
+        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, rootFolderIDs, mode);
         /*
          * return empty json object to indicate success
          */

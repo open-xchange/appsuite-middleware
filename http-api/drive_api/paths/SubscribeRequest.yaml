@@ -35,6 +35,16 @@
         required: true
         schema:
           type: string
+      - in: query
+        name: mode
+        description: >-
+          The subscription mode supported by the client. If set to "separate", SYNC actions for directory versions where changes occurred will be returned if possible.  
+        required: false
+        schema:
+          type: string
+          enum:
+            - default
+            - separate
     responses:
       '200':
         description: >
