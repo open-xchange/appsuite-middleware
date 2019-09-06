@@ -50,6 +50,8 @@
 package com.openexchange.mailfilter.services;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -110,6 +112,25 @@ public final class Services {
     public static <S extends Object> S optService(final Class<? extends S> clazz) {
         ServiceLookup serviceLookup = REF.get();
         return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException If such a service is not available
+     */
+    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
+        ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        S service = serviceLookup.getOptionalService(clazz);
+        if (service == null) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
     }
 
 }

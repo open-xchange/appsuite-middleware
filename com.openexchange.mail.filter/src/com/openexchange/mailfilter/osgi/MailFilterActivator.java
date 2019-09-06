@@ -64,6 +64,7 @@ import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
@@ -73,6 +74,7 @@ import com.openexchange.mailfilter.services.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.user.UserService;
 
 public class MailFilterActivator extends HousekeepingActivator {
 
@@ -87,7 +89,8 @@ public class MailFilterActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, LeanConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, LeanConfigurationService.class, UserService.class,
+            MailAccountStorageService.class };
     }
 
     @Override
