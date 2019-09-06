@@ -93,10 +93,10 @@ final class SessionContainer {
     }
 
     /**
-     * Checks if this container contains an entry for specified session ID
+     * Checks if this container contains an entry for specified session identifier
      *
-     * @param sessionId The session ID
-     * @return <code>true</code> if this container contains an entry for specified session ID; otherwise <code>false</code>
+     * @param sessionId The session identifier
+     * @return <code>true</code> if this container contains an entry for specified session identifier; otherwise <code>false</code>
      */
     protected boolean containsSessionId(final String sessionId) {
         return sessionMap.containsBySessionId(sessionId);
@@ -115,8 +115,8 @@ final class SessionContainer {
     /**
      * Checks if this container contains a session for specified user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return <code>true</code> if this container contains an entry for specified user; otherwise <code>false</code>
      */
     protected boolean containsUser(final int userId, final int contextId) {
@@ -132,8 +132,8 @@ final class SessionContainer {
     /**
      * Gets the number of sessions bound to specified user in specified context
      *
-     * @param userId The user ID
-     * @param contextId The context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The number of sessions bound to specified user in specified context
      */
     protected int numOfUserSessions(final int userId, final int contextId) {
@@ -146,10 +146,10 @@ final class SessionContainer {
     }
 
     /**
-     * Gets the session bound to specified session ID.
+     * Gets the session bound to specified session identifier.
      *
-     * @param sessionId The session ID
-     * @return The session bound to specified session ID, or <code>null</code> if there's no session for specified session ID.
+     * @param sessionId The session identifier
+     * @return The session bound to specified session identifier, or <code>null</code> if there's no session for specified session identifier.
      */
     protected SessionControl getSessionById(final String sessionId) {
         return sessionMap.getBySessionId(sessionId);
@@ -166,11 +166,11 @@ final class SessionContainer {
     }
 
     /**
-     * Gets the sessions bound to specified user ID and context ID.
+     * Gets the sessions bound to specified user identifier and context identifier.
      *
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @return The sessions bound to specified user ID and context ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The sessions bound to specified user identifier and context identifier
      */
     protected List<SessionControl> getSessionsByUser(final int userId, final int contextId) {
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
@@ -257,7 +257,7 @@ final class SessionContainer {
                 }
             }
         }
-        // Add session ID to user-sessions-map
+        // Add session identifier to user-sessions-map
         Integer iContextId = Integer.valueOf(session.getContextId());
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(iContextId);
         if (null == map) {
@@ -299,7 +299,7 @@ final class SessionContainer {
             final String login2 = sessionControl.getSession().getLogin();
             throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
         }
-        // Add session ID to user-sessions-map
+        // Add session identifier to user-sessions-map
         Integer iContextId = Integer.valueOf(session.getContextId());
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(iContextId);
         if (null == map) {
@@ -323,7 +323,7 @@ final class SessionContainer {
     }
 
     /**
-     * Removes the session bound to specified session ID.
+     * Removes the session bound to specified session identifier.
      *
      * @param sessionId The session Id
      * @return The {@link SessionControl session control} previously associated with specified session identifier, or <code>null</code>.
@@ -352,11 +352,11 @@ final class SessionContainer {
     }
 
     /**
-     * Removes the sessions bound to specified user ID and context ID.
+     * Removes the sessions bound to specified user identifier and context identifier.
      *
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The {@link SessionControl session controls} previously associated with specified user identifier and context identifier.
      */
     protected List<SessionControl> removeSessionsByUser(final int userId, final int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
@@ -382,10 +382,10 @@ final class SessionContainer {
     }
 
     /**
-     * Removes the sessions bound to specified context ID.
+     * Removes the sessions bound to specified context identifier.
      *
-     * @param contextId The context ID
-     * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
+     * @param contextId The context identifier
+     * @return The {@link SessionControl session controls} previously associated with specified user identifier and context identifier.
      */
     protected List<SessionControl> removeSessionsByContext(final int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
@@ -411,7 +411,7 @@ final class SessionContainer {
      * Removes the sessions bound to the given contextIds.
      *
      * @param contextIds The context identifiers to remove
-     * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
+     * @return The {@link SessionControl session controls} previously associated with specified user identifier and context identifier.
      */
     protected List<SessionControl> removeSessionsByContexts(final Set<Integer> contextIds) {
         List<SessionControl> removedSessionsByContexts = new ArrayList<SessionControl>();
