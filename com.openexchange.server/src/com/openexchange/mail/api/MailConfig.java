@@ -885,9 +885,6 @@ public abstract class MailConfig {
                 }
             }
 
-            mailConfig.password = "secret";
-
-
         } else {
             CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(forMailAccess, account.getId(), session);
             if (null == credentialsProvider) {
