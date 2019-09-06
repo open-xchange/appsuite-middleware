@@ -120,6 +120,9 @@ public class FilteredResponse extends IMAPResponse {
                     } else {
                         throw new ParsingException("error in FILTERED parsing, unrecognized item at index " + index + ", starts with \"" + next20() + "\"");
                     }
+                    break;
+                default:
+                    throw new ParsingException("error in FILTERED parsing, unrecognized item at index " + index + ", starts with \"" + next20() + "\"");
             }
         } while (true);
     }

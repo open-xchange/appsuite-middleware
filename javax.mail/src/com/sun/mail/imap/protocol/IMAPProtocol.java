@@ -2720,7 +2720,8 @@ public class IMAPProtocol extends Protocol {
 
     // dispatch remaining untagged responses
     notifyResponseHandlers(r);
-    handleResult(response);
+    if (!response.isNO()) // don't handle NO response
+        handleResult(response);
     return r;
     }
 
