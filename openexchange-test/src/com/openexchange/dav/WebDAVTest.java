@@ -280,6 +280,21 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         return folder;
     }
 
+    protected FolderObject getTaskFolder(String folderName) throws OXException, IOException, JSONException {
+        VisibleFoldersResponse response = getClient().execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, "tasks", new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+        FolderObject folder = findByName(response.getPrivateFolders(), folderName);
+        if (null == folder) {
+            folder = findByName(response.getPublicFolders(), folderName);
+            if (null == folder) {
+                folder = findByName(response.getSharedFolders(), folderName);
+            }
+        }
+        if (null != folder) {
+            folder = ftm.getFolderFromServer(folder.getObjectID());
+        }
+        return folder;
+    }
+
     private static FolderObject findByName(Iterator<FolderObject> iter, String folderName) {
         while (iter.hasNext()) {
             FolderObject folder = iter.next();
