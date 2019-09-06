@@ -228,8 +228,6 @@ public final class LoginPerformer {
             if (null != cookies) {
                 properties.put("cookies", cookies);
             }
-            String userLoginLanguage = request.getLanguage();
-            boolean storeLanguage = request.isStoreLanguage();
             final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
@@ -281,18 +279,9 @@ public final class LoginPerformer {
                 // Authorize
                 authService.authorizeUser(ctx, user);
             }
-            if (storeLanguage && Strings.isNotEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
-                UserImpl impl = new UserImpl(user);
-                impl.setPreferredLanguage(userLoginLanguage);
-                UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-                if (null != userService) {
-                    userService.updateUser(impl, ctx);
-                } else {
-                    LOG.warn("Unable to access user service, updating directly via storage.", ServiceExceptionCode.absentService(UserService.class));
-                    UserStorage.getInstance().updateUser(impl, ctx);
-                }
-                user = impl;
-            }
+
+            // Store locale if requested by client during login request
+            user = LoginPerformer.storeLanguageIfNeeded(request, user, ctx);
             retval.setContext(ctx);
             retval.setUser(user);
 
@@ -414,6 +403,35 @@ public final class LoginPerformer {
                 throw LoginExceptionCodes.CLIENT_DENIED.create(client);
             }
         }
+    }
+
+    /**
+     * Stores the user language supplied by the client during the login if explicitly requested via
+     * {@link LoginFields#STORE_LANGUAGE} / {@link LoginFields#STORE_LOCALE}.
+     *
+     * @param request The login request to get the parameters controlling the desired language from
+     * @param user The logged in user
+     * @param ctx The context
+     * @return The (possibly modified) user, or the passed user reference if not changed
+     */
+    public static User storeLanguageIfNeeded(LoginRequest request, User user, Context ctx) throws OXException {
+        if (false == request.isStoreLanguage()) {
+            return user;
+        }
+        String userLoginLanguage = request.getLanguage();
+        if (Strings.isNotEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+            UserImpl impl = new UserImpl(user);
+            impl.setPreferredLanguage(userLoginLanguage);
+            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            if (null != userService) {
+                userService.updateUser(impl, ctx);
+            } else {
+                LOG.warn("Unable to access user service, updating directly via storage.", ServiceExceptionCode.absentService(UserService.class));
+                UserStorage.getInstance().updateUser(impl, ctx);
+            }
+            return impl;
+        }
+        return user;
     }
 
     /**

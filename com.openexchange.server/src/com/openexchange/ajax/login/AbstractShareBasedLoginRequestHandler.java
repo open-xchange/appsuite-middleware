@@ -208,6 +208,9 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                 }
                 authService.authorizeUser(context, user);
 
+                // Store locale if requested by client during login request
+                user = LoginPerformer.storeLanguageIfNeeded(request, user, context);
+
                 // Create session
                 Session session;
                 {
