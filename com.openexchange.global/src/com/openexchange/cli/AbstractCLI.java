@@ -53,6 +53,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -119,6 +120,9 @@ public abstract class AbstractCLI<R, C> {
             Throwable t = e.getCause();
             String message = t.getMessage();
             System.err.println(null == message ? "An error occurred." : message);
+        } catch (MissingOptionException e) {
+            System.err.println("Missing option: " + e.getMessage());
+            printHelp(options);
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
@@ -196,9 +200,10 @@ public abstract class AbstractCLI<R, C> {
      *
      * @param cmd The command line
      * @param options The associated options
+     * @throws ParseException If check fails
      */
     @SuppressWarnings("unused")
-    protected void checkOptions(CommandLine cmd, Options options) {
+    protected void checkOptions(CommandLine cmd, Options options) throws ParseException {
         checkOptions(cmd);
     }
 
@@ -206,8 +211,9 @@ public abstract class AbstractCLI<R, C> {
      * Checks other mandatory options.
      *
      * @param cmd The command line
+     * @throws ParseException If check fails
      */
-    protected abstract void checkOptions(CommandLine cmd);
+    protected abstract void checkOptions(CommandLine cmd) throws ParseException;
 
     /**
      * Prints the <code>--help</code> text.

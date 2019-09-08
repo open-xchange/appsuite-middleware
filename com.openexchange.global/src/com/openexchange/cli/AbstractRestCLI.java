@@ -58,6 +58,7 @@ import javax.ws.rs.client.WebTarget;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.codec.binary.Base64;
@@ -155,6 +156,9 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             R retval = invoke(options, cmd, executionContext);
             error = false;
             return retval;
+        } catch (MissingOptionException e) {
+            System.err.println("Missing option: " + e.getMessage());
+            printHelp(options);
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);

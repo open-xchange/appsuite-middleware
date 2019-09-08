@@ -59,8 +59,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.gdpr.dataexport.rmi.DataExportRMIService;
@@ -127,9 +129,12 @@ public class DataExportConsistencyCLT extends AbstractRmiCLI<Void> {
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd) {
+    protected void checkOptions(CommandLine cmd) throws ParseException {
         repair = cmd.hasOption("r");
         String[] values = cmd.getOptionValues("f");
+        if (values == null) {
+            throw new MissingOptionException("File storage identifier(s) missing. Please specify one or more file storage identifier(s) through -f/--filestores option.");
+        }
         filestoreIds = new ArrayList<>(values.length);
         for (String value : values) {
             try {
