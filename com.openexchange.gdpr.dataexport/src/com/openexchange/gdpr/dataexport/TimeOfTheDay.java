@@ -191,9 +191,6 @@ public class TimeOfTheDay implements Comparable<TimeOfTheDay> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
         if (!(obj instanceof TimeOfTheDay)) {
             return false;
         }

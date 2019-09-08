@@ -84,6 +84,7 @@ public class TimeRange implements Comparable<TimeRange> {
 
     private final TimeOfTheDay start;
     private final TimeOfTheDay end;
+    private int hash;
 
     /**
      * Initializes a new {@link TimeRange}.
@@ -98,6 +99,7 @@ public class TimeRange implements Comparable<TimeRange> {
         }
         this.start = start;
         this.end = end;
+        hash = 0;
     }
 
     /**
@@ -141,6 +143,46 @@ public class TimeRange implements Comparable<TimeRange> {
     @Override
     public int compareTo(TimeRange o) {
         return start.compareTo(o.start);
+    }
+    
+
+    @Override
+    public int hashCode() {
+        int result = hash;
+        if (result == 0) {
+            int prime = 31;
+            result = 1;
+            result = prime * result + ((start == null) ? 0 : start.hashCode());
+            result = prime * result + ((end == null) ? 0 : end.hashCode());
+            hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof TimeRange)) {
+            return false;
+        }
+        TimeRange other = (TimeRange) obj;
+        if (start == null) {
+            if (other.start != null) {
+                return false;
+            }
+        } else if (!start.equals(other.start)) {
+            return false;
+        }
+        if (end == null) {
+            if (other.end != null) {
+                return false;
+            }
+        } else if (!end.equals(other.end)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
