@@ -108,6 +108,7 @@ public class TimeOfTheDay implements Comparable<TimeOfTheDay> {
     private final int hour;
     private final int minute;
     private final int second;
+    private int hash;
 
     /**
      * Initializes a new {@link TimeOfTheDay}.
@@ -121,6 +122,7 @@ public class TimeOfTheDay implements Comparable<TimeOfTheDay> {
         this.hour = atHour;
         this.minute = atMinute;
         this.second = atSecond;
+        hash = 0;
     }
 
     /**
@@ -168,6 +170,44 @@ public class TimeOfTheDay implements Comparable<TimeOfTheDay> {
 
         int oSecond = o.second;
         return (second < oSecond) ? -1 : (second == oSecond ? 0 : 1);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = hash;
+        if (result == 0) {
+            int prime = 31;
+            result = 1;
+            result = prime * result + hour;
+            result = prime * result + minute;
+            result = prime * result + second;
+            hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof TimeOfTheDay)) {
+            return false;
+        }
+        TimeOfTheDay other = (TimeOfTheDay) obj;
+        if (hour != other.hour) {
+            return false;
+        }
+        if (minute != other.minute) {
+            return false;
+        }
+        if (second != other.second) {
+            return false;
+        }
+        return true;
     }
 
     @Override
