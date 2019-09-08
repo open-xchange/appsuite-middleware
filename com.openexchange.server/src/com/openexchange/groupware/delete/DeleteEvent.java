@@ -232,7 +232,7 @@ public class DeleteEvent extends EventObject {
     protected Integer destUserID;
     private transient Session session;
     private final List<Integer> userIds;
-    private Reference<Connection> globalDbConnection;
+    private transient Reference<Connection> globalDbConnection;
 
     /**
      * Initializes a new {@link DeleteEvent}.
