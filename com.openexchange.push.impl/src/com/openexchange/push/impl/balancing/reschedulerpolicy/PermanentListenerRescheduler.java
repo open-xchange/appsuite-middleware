@@ -601,7 +601,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                     private String toString(Member m) {
                         InetSocketAddress addr = m.getSocketAddress(EndpointQualifier.MEMBER);
-                        return new StringBuilder(24).append(addr.getAddress().getHostAddress()).append(':').append(addr.getPort()).toString();
+                        return addr == null ? m.toString() : new StringBuilder(24).append(addr.getAddress().getHostAddress()).append(':').append(addr.getPort()).toString();
                     }
                 });
 
