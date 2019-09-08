@@ -157,7 +157,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             error = false;
             return retval;
         } catch (MissingOptionException e) {
-            System.err.println("Missing option: " + e.getMessage());
+            System.err.println(e.getMessage());
             printHelp(options);
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());

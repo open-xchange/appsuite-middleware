@@ -121,7 +121,7 @@ public abstract class AbstractCLI<R, C> {
             String message = t.getMessage();
             System.err.println(null == message ? "An error occurred." : message);
         } catch (MissingOptionException e) {
-            System.err.println("Missing option: " + e.getMessage());
+            System.err.println(e.getMessage());
             printHelp(options);
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());

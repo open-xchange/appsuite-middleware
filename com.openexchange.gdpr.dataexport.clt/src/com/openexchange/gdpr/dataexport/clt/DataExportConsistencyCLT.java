@@ -133,7 +133,7 @@ public class DataExportConsistencyCLT extends AbstractRmiCLI<Void> {
         repair = cmd.hasOption("r");
         String[] values = cmd.getOptionValues("f");
         if (values == null) {
-            throw new MissingOptionException("File storage identifier(s) missing. Please specify one or more file storage identifier(s) through -f/--filestores option.");
+            throw new MissingOptionException("Missing required file storage identifier(s). Please specify one or more file storage identifier(s) through -f/--filestores option.");
         }
         filestoreIds = new ArrayList<>(values.length);
         for (String value : values) {
