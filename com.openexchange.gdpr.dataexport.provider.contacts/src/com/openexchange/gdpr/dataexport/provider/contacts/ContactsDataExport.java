@@ -522,28 +522,29 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             try {
                 // Query full contact
                 Contact c = contactService.getContact(session, folder.getFolderId(), Integer.toString(contactId));
-
-                if (c.getNumberOfAttachments() > 0) {
-                    attachmentBinaries = loadContactAttachmentBinariesElseNull(contactId, folder, session);
+                if (c != null) {                    
+                    if (c.getNumberOfAttachments() > 0) {
+                        attachmentBinaries = loadContactAttachmentBinariesElseNull(contactId, folder, session);
+                    }
+                    
+                    if (optionalVCardStorageService.isPresent() && c.getVCardId() != null) {
+                        originalVCard = optionalVCardStorageService.get().getVCard(c.getVCardId(), session.getContextId());
+                    }
+                    
+                    if (attachmentBinaries != null) {
+                        c.setProperty(PROPERTY_BINARY_ATTACHMENTS, attachmentBinaries);
+                    }
+                    
+                    vCardExport = vcardService.exportContact(c, originalVCard, null);
+                    Streams.close(originalVCard);
+                    originalVCard = null;
+                    
+                    boolean exported = sink.export(vCardExport.getClosingStream(), new Item(path, contactId + ".vcf", null));
+                    if (!exported) {
+                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)));
+                    }
+                    LOG.debug("Exported contact {} ({} of {}) from directory {} for data export {} of user {} in context {}", I(contactId), I(batchCount), I(contacts.size()), folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
                 }
-
-                if (optionalVCardStorageService.isPresent() && c.getVCardId() != null) {
-                    originalVCard = optionalVCardStorageService.get().getVCard(c.getVCardId(), session.getContextId());
-                }
-
-                if (attachmentBinaries != null) {
-                    c.setProperty(PROPERTY_BINARY_ATTACHMENTS, attachmentBinaries);
-                }
-
-                vCardExport = vcardService.exportContact(c, originalVCard, null);
-                Streams.close(originalVCard);
-                originalVCard = null;
-
-                boolean exported = sink.export(vCardExport.getClosingStream(), new Item(path, contactId + ".vcf", null));
-                if (!exported) {
-                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)));
-                }
-                LOG.debug("Exported contact {} ({} of {}) from directory {} for data export {} of user {} in context {}", I(contactId), I(batchCount), I(contacts.size()), folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
             } catch (Exception e) {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
                     return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)), e);
