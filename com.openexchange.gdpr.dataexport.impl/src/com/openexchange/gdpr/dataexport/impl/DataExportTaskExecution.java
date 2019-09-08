@@ -328,35 +328,36 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                 if (keepGoing) {
                     // Consider as completed. Grab up-to-date version from storage
                     DataExportTask reloaded = storageService.getDataExportTask(userId, contextId).orElse(null);
-
-                    // Finished because no more work items left and therefore task is completed. Generate resulting archive(s)
-                    ChunkedZippedOutputStream zipOut = new ChunkedZippedOutputStream(reloaded, fileStorage, storageService, services);
-                    try {
-                        generateResultFilesAndMarkAsDone(reloaded, fileStorage, zipOut, optionalReport, locale);
-                    } finally {
-                        zipOut.close();
+                    if (reloaded != null) {
+                        // Finished because no more work items left and therefore task is completed. Generate resulting archive(s)
+                        ChunkedZippedOutputStream zipOut = new ChunkedZippedOutputStream(reloaded, fileStorage, storageService, services);
+                        try {
+                            generateResultFilesAndMarkAsDone(reloaded, fileStorage, zipOut, optionalReport, locale);
+                        } finally {
+                            zipOut.close();
+                        }
+                        
+                        // Drop work items' files to free space
+                        try {
+                            storageService.dropIntermediateFiles(taskId, contextId);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to drop intermediate files from data export task {} of user {} in context {}", stringFor(taskId), I(userId), I(contextId), e);
+                        }
+                        
+                        // Determine expiration date
+                        Date expiryDate;
+                        try {
+                            Optional<Date> lastAccessedTimeStamp = storageService.getLastAccessedTimeStamp(userId, contextId);
+                            expiryDate = new Date(lastAccessedTimeStamp.get().getTime() + maxTimeToLiveMillis);
+                        } catch (Exception e) {
+                            expiryDate = new Date(System.currentTimeMillis() + maxTimeToLiveMillis);
+                            LOG.warn("Failed to query last-accessed time stamp from data export task {} of user {} in context {}. Assuming \"{}\" as expiration date.", stringFor(taskId), I(userId), I(contextId), ISO8601Utils.format(expiryDate), e);
+                        }
+                        
+                        // Trigger notification for user that data export is available
+                        sendNotificationAndSetMarker(Reason.SUCCESS, expiryDate, task.getArguments().getHostInfo(), taskId, userId, contextId, true, services);
+                        LOG.info("Data export task {} of user {} in context {} completed", stringFor(taskId), I(userId), I(contextId));
                     }
-
-                    // Drop work items' files to free space
-                    try {
-                        storageService.dropIntermediateFiles(taskId, contextId);
-                    } catch (Exception e) {
-                        LOG.warn("Failed to drop intermediate files from data export task {} of user {} in context {}", stringFor(taskId), I(userId), I(contextId), e);
-                    }
-
-                    // Determine expiration date
-                    Date expiryDate;
-                    try {
-                        Optional<Date> lastAccessedTimeStamp = storageService.getLastAccessedTimeStamp(userId, contextId);
-                        expiryDate = new Date(lastAccessedTimeStamp.get().getTime() + maxTimeToLiveMillis);
-                    } catch (Exception e) {
-                        expiryDate = new Date(System.currentTimeMillis() + maxTimeToLiveMillis);
-                        LOG.warn("Failed to query last-accessed time stamp from data export task {} of user {} in context {}. Assuming \"{}\" as expiration date.", stringFor(taskId), I(userId), I(contextId), ISO8601Utils.format(expiryDate), e);
-                    }
-
-                    // Trigger notification for user that data export is available
-                    sendNotificationAndSetMarker(Reason.SUCCESS, expiryDate, task.getArguments().getHostInfo(), taskId, userId, contextId, true, services);
-                    LOG.info("Data export task {} of user {} in context {} completed", stringFor(taskId), I(userId), I(contextId));
                 } else {
                     // Processing work items has been stopped
 
