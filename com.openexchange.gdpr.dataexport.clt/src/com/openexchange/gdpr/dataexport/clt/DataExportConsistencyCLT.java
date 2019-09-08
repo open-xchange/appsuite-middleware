@@ -196,7 +196,7 @@ public class DataExportConsistencyCLT extends AbstractRmiCLI<Void> {
         System.out.println();
         if (!orphanedResultFiles.isEmpty()) {
             System.out.println("Orphaned result files:");
-            writeCompositeList(orphanedWorkItems, COLUMNS_RESULT_FILEM, FORMATS_RESULT_FILE, null);
+            writeCompositeList(orphanedResultFiles, COLUMNS_RESULT_FILEM, FORMATS_RESULT_FILE, null);
         } else {
             System.out.println("No orphaned result files found.");
         }
