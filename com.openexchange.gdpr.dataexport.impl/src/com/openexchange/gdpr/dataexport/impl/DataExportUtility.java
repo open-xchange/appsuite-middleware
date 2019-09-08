@@ -154,10 +154,12 @@ public class DataExportUtility {
      * @param fileStorage The file storage to delete in
      */
     public static void deleteQuietly(String fileStorageLocation, FileStorage fileStorage) {
-        try {
-            fileStorage.deleteFile(fileStorageLocation);
-        } catch (Exception e) {
-            LoggerHolder.LOG.warn("Failed to delete file storage location {} from storage {}", fileStorageLocation, fileStorage.getUri(), e);
+        if (fileStorageLocation != null && fileStorage != null) {            
+            try {
+                fileStorage.deleteFile(fileStorageLocation);
+            } catch (Exception e) {
+                LoggerHolder.LOG.warn("Failed to delete file storage location {} from storage {}", fileStorageLocation, fileStorage.getUri(), e);
+            }
         }
     }
 
