@@ -400,19 +400,27 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
         taskMap.put(DataExportRMIService.COLUMN_STATUS, task.getStatus().toString());
         {
             List<DataExportWorkItem> workItems = task.getWorkItems();
-            List<Map<String, Object>> lWorkItems = new ArrayList<>(workItems.size());
-            for (DataExportWorkItem workItem : workItems) {
-                lWorkItems.add(generateWorkItemMetadata(workItem));
+            if (workItems != null) {
+                List<Map<String, Object>> lWorkItems = new ArrayList<>(workItems.size());
+                for (DataExportWorkItem workItem : workItems) {
+                    lWorkItems.add(generateWorkItemMetadata(workItem));
+                }
+                taskMap.put(DataExportRMIService.COLUMN_WORK_ITEMS, lWorkItems);
+            } else {
+                taskMap.put(DataExportRMIService.COLUMN_WORK_ITEMS, new ArrayList<>(0));
             }
-            taskMap.put(DataExportRMIService.COLUMN_WORK_ITEMS, lWorkItems);
         }
         {
             List<DataExportResultFile> resultFiles = task.getResultFiles();
-            List<Map<String, Object>> lResultFiles = new ArrayList<>(resultFiles.size());
-            for (DataExportResultFile resultFile : resultFiles) {
-                lResultFiles.add(generateResultFileMetadata(resultFile));
+            if (resultFiles != null) {
+                List<Map<String, Object>> lResultFiles = new ArrayList<>(resultFiles.size());
+                for (DataExportResultFile resultFile : resultFiles) {
+                    lResultFiles.add(generateResultFileMetadata(resultFile));
+                }
+                taskMap.put(DataExportRMIService.COLUMN_RESULT_FILES, lResultFiles);
+            } else {
+                taskMap.put(DataExportRMIService.COLUMN_RESULT_FILES, new ArrayList<>(0));
             }
-            taskMap.put(DataExportRMIService.COLUMN_RESULT_FILES, lResultFiles);
         }
         return taskMap.build();
     }
