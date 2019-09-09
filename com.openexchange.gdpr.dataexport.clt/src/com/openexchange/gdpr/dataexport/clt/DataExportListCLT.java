@@ -107,8 +107,9 @@ public class DataExportListCLT extends AbstractRmiCLI<Void> {
         if (contextId > 0) {
             try {
                 authenticator.doAuthentication(login, password, contextId);
+                return;
             } catch (RemoteException e) {
-                if (!"authentication failed".equals(Strings.asciiLowerCase(e.getMessage()))) {
+                if (e.getMessage() == null || Strings.asciiLowerCase(e.getMessage()).indexOf("authentication failed") < 0) {
                     throw e;
                 }
                 // Context administrator authentication failed. Try with master authentication
