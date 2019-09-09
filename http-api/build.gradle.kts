@@ -96,7 +96,7 @@ configure(subprojects.filter { it.name == "http_api" || it.name == "rest_api" ||
         workingDir("../")
         val fromFolder = this.project.name
         val toFolder = "../documentation-generic/${fromFolder}"
-        val fileName = "openApi.json"
+        val fileName = "openAPI.json"
 
         val arguments = mutableListOf(
             fromFolder,
