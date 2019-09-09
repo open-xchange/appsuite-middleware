@@ -266,4 +266,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // User tries to access an OAuth-linked transport server, but required open-xchange-oauth package is not installed
     public static final String UNSUPPORTED_OAUTH_TRANSPORT_ACCESS_MSG = "Unsupported OAuth transport access to server %1$s";
 
+    // Although credentials are correct, the mail server denied the connect attempt for any reason
+    public static final String DENIED_CONNECT_ATTEMPT_MSG = "Mail server %1$s denied connect attempt: %3$s";
+
 }

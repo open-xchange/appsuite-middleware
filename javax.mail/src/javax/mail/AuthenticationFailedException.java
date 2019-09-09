@@ -52,6 +52,8 @@ public class AuthenticationFailedException extends MessagingException {
 
     private static final long serialVersionUID = 492080754054436511L;
 
+    private String reason;
+
     /**
      * Constructs an AuthenticationFailedException.
      */
@@ -81,4 +83,43 @@ public class AuthenticationFailedException extends MessagingException {
     public AuthenticationFailedException(String message, Exception e) {
 	super(message, e);
     }
+
+    /**
+     * Gets the optional reason for this authentication failed exception.
+     *
+     * @return The reason or <code>null</code>
+     */
+    public String getReason() {
+    return reason;
+    }
+
+    /**
+     * Sets the reason for this authentication failed exception.
+     *
+     * @param reason The reason to set
+     * @return This exception with given reason applied
+     */
+    public AuthenticationFailedException setReason(String reason) {
+    this.reason = reason;
+    return this;
+    }
+
+    /**
+     * Checks if the authentication failed exception has a reason set.
+     *
+     * @return <code>true</code> if a reason is set; otherwise <code>false</code> of there is no reason
+     */
+    public boolean hasReason() {
+    return reason != null;
+    }
+
+    /**
+     * Checks if the authentication failed exception has no reason set.
+     *
+     * @return <code>true</code> if no reason is set; otherwise <code>false</code> if there is a reason
+     */
+    public boolean hasNoReason() {
+    return reason == null;
+    }
+
 }

@@ -648,6 +648,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Unsupported OAuth transport access to server %1$s with login %2$s (user=%3$s, context=%4$s)
      */
     UNSUPPORTED_OAUTH_TRANSPORT_ACCESS("Unsupported OAuth transport access to server %1$s with login %2$s (user=%3$s, context=%4$s)", MailExceptionStrings.UNSUPPORTED_OAUTH_TRANSPORT_ACCESS_MSG, Category.CATEGORY_CONFIGURATION, 120),
+    /**
+     * Mail server %1$s denied connect attempt for login %2$s: %3$s
+     */
+    DENIED_CONNECT_ATTEMPT("Mail server %1$s denied connect attempt for login %2$s: %3$s", MailExceptionStrings.DENIED_CONNECT_ATTEMPT_MSG, Category.CATEGORY_PERMISSION_DENIED, 121),
     ;
 
     private static final String PREFIX = "MSG";

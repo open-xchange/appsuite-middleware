@@ -986,23 +986,23 @@ public class IMAPStore extends Store
 	        // Verify login really failed due to an authentication/authorization issue
             switch (responseCode) {
                 case AUTHENTICATIONFAILED:
-                    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex);
+                    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 case AUTHORIZATIONFAILED:
-                    throw new javax.mail.AuthorizationFailedException(cex.getResponse().getRest(), cex);
+                    throw new javax.mail.AuthorizationFailedException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 case UNAVAILABLE:
                     if (++retry > 5) {
-                        throw new javax.mail.TemporaryAuthenticationFailureException(cex.getResponse().getRest(), cex);
+                        throw new javax.mail.TemporaryAuthenticationFailureException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                     }
 
                     long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
                     LockSupport.parkNanos(nanosToWait);
                     continue LoginAttempt;
                 case EXPIRED:
-                    throw new javax.mail.PasswordExpiredException(cex.getResponse().getRest(), cex);
+                    throw new javax.mail.PasswordExpiredException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 case PRIVACYREQUIRED:
-                    throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex);
+                    throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
                 default:
-                    /*fall-through*/
+                    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex).setReason(responseCode.getName());
             }
         }
 

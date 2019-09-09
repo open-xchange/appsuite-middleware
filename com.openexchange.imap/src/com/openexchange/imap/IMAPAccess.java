@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.sun.mail.iap.ResponseCode.AUTHENTICATIONFAILED;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -824,7 +825,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 imapStore = connectIMAPStore(maxCount);
             } catch (AuthenticationFailedException e) {
-                if (accountId != MailAccount.DEFAULT_ID) {
+                if (accountId != MailAccount.DEFAULT_ID && (Strings.isEmpty(e.getReason()) || AUTHENTICATIONFAILED.getName().equals(e.getReason()))) {
                     int accountId = this.accountId;
                     Session session = this.session;
                     AbstractTask<Void> task = new AbstractTask<Void>() {
