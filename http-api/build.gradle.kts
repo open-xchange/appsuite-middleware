@@ -93,10 +93,15 @@ configure(subprojects.filter { it.name == "http_api" || it.name == "rest_api" ||
     }
 
     tasks.register("buildHtml", JavaExec::class.java) {
+        workingDir("../")
+        val fromFolder = this.project.name
+        val toFolder = "../documentation-generic/${fromFolder}"
+        val fileName = "openApi.json"
+
         val arguments = mutableListOf(
-            "../" + this.project.name,
-            "../../documentation-generic/${this.project.name}",
-            "openApi.json"
+            fromFolder,
+            toFolder,
+            fileName
         )
 
         classpath = rootProject.configurations.getByName("openapiTools")
