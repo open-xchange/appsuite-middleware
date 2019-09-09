@@ -52,11 +52,13 @@ package com.openexchange.logging.filter;
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Marker;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -72,33 +74,48 @@ import ch.qos.logback.core.spi.FilterReply;
  */
 public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
-    /** Dummy object */
-    private static final Object PRESENT = new Object();
+    /** Wrapper class for categories and derived name */
+    private static class CategoriesAndName {
 
-    /** The map used to manage categories */
-    private static final AtomicReference<Set<Category.EnumType>> CATEGORIES_REF = new AtomicReference<Set<Category.EnumType>>(EnumSet.noneOf(Category.EnumType.class));
+        final Set<Category.EnumType> categories;
+        final String name;
 
-    private static String generateName() {
-        Set<Category.EnumType> categories = CATEGORIES_REF.get();
-        if (categories.isEmpty()) {
-            return ExceptionCategoryFilter.class.getSimpleName();
+        CategoriesAndName() {
+            this(EnumSet.noneOf(Category.EnumType.class));
         }
 
-        StringBuilder nameBuilder = new StringBuilder(1024).append(ExceptionCategoryFilter.class.getSimpleName());
-        boolean added = false;
-        for (Category.EnumType category : categories) {
-            if (null != category) {
-                if (!added) {
-                    nameBuilder.append(':');
-                    added = true;
-                }
-                nameBuilder.append(category.getName());
+        CategoriesAndName(Set<Category.EnumType> categories) {
+            super();
+            this.categories = categories;
+            name = generateName(categories);
+        }
+
+        private static String generateName(Set<Category.EnumType> categories) {
+            if (categories.isEmpty()) {
+                return ExceptionCategoryFilter.class.getSimpleName();
             }
+
+            StringBuilder nameBuilder = new StringBuilder(1024).append(ExceptionCategoryFilter.class.getSimpleName());
+            boolean added = false;
+            for (Category.EnumType category : categories) {
+                if (null != category) {
+                    if (!added) {
+                        added = true;
+                        nameBuilder.append(':');
+                    } else {
+                        nameBuilder.append(',');
+                    }
+                    nameBuilder.append(category.getName());
+                }
+            }
+            return nameBuilder.toString();
         }
-        return nameBuilder.toString();
     }
 
-    // ----------------------------------------------------------------------------- //
+    /** The reference used to manage categories */
+    private static final AtomicReference<CategoriesAndName> CATEGORIES_AND_NAME_REF = new AtomicReference<>(new CategoriesAndName());
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final IncludeStackTraceService traceService;
 
@@ -110,11 +127,9 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         this.traceService = traceService;
     }
 
-    /**
-     * Adapts filter name to changed category set.
-     */
-    public void adaptName() {
-        setName(generateName());
+    @Override
+    public String getName() {
+        return CATEGORIES_AND_NAME_REF.get().name;
     }
 
     @Override
@@ -127,7 +142,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
         if (OXException.class.isInstance(t)) {
             Category category = ((OXException) t).getCategory();
-            if (null != category && ExceptionCategoryFilter.CATEGORIES_REF.get().contains(category.getType())) {
+            if (null != category && CATEGORIES_AND_NAME_REF.get().categories.contains(category.getType())) {
                 if (traceService.isEnabled()) {
                     try {
                         final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
@@ -146,6 +161,8 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
         return FilterReply.NEUTRAL;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
 
@@ -167,18 +184,28 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         }
     }
 
+    /**
+     * Sets the categories to apply.
+     *
+     * @param categories The categories
+     */
     public static void setCategories(Set<String> categories) {
         Set<Category.EnumType> newCategories = EnumSet.noneOf(Category.EnumType.class);
         for (String category : categories) {
             try {
                 newCategories.add(Category.EnumType.valueOf(Category.EnumType.class, category));
             } catch (IllegalArgumentException e) {
-                //Skip this value
+                // Skip this value
             }
         }
-        CATEGORIES_REF.set(newCategories);
+        CATEGORIES_AND_NAME_REF.set(new CategoriesAndName(newCategories));
     }
 
+    /**
+     * Sets the categories to apply as comma-separated string
+     *
+     * @param categories The categories as comma-separated string
+     */
     public static void setCategories(String categories) {
         Set<String> c = new HashSet<String>();
         for (String category : Strings.splitByComma(categories)) {
@@ -187,11 +214,22 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         setCategories(c);
     }
 
+    /**
+     * Gets the currently applicable categories as comma-separated string.
+     *
+     * @return The currently applicable categories
+     */
     public static String getCategories() {
-        StringBuilder sb = new StringBuilder();
-        for (Category.EnumType c : CATEGORIES_REF.get()) {
-            sb.append(c.getName()).append(", ");
+        Iterator<EnumType> it = CATEGORIES_AND_NAME_REF.get().categories.iterator();
+        if (!it.hasNext()) {
+            return "";
         }
-        return sb.substring(0, sb.length()-2);
+
+        StringBuilder sb = new StringBuilder(it.next().getName());
+        while (it.hasNext()) {
+            Category.EnumType c = it.next();
+            sb.append(", ").append(c.getName());
+        }
+        return sb.toString();
     }
 }

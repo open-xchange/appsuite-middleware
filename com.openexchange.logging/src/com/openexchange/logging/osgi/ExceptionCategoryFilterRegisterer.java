@@ -100,7 +100,6 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
             rankingAwareTurboFilterList.addTurboFilter(exceptionCategoryFilter);
             this.exceptionCategoryFilter = exceptionCategoryFilter;
         }
-        exceptionCategoryFilter.adaptName();
 
         return service;
     }
