@@ -49,8 +49,10 @@
 
 package com.openexchange.groupware.settings.tree.modules.passwordchange;
 
+import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -81,10 +83,10 @@ public class ShowStrength implements PreferencesItemService {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ConfigViewFactory service = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                ConfigViewFactory service = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
                 ConfigView view = service.getView(user.getId(), ctx.getContextId());
-                Boolean property = Boolean.valueOf(view.get("com.openexchange.passwordchange.showStrength", String.class));
-                setting.setSingleValue(property);
+                boolean showStrength = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.passwordchange.showStrength", false, view);
+                setting.setSingleValue(B(showStrength));
             }
 
             @Override

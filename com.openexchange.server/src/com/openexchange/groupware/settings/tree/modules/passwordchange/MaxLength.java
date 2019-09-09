@@ -52,6 +52,7 @@ package com.openexchange.groupware.settings.tree.modules.passwordchange;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -81,10 +82,10 @@ public class MaxLength implements PreferencesItemService {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                ConfigViewFactory service = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                ConfigViewFactory service = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
                 ConfigView view = service.getView(user.getId(), ctx.getContextId());
-                Integer property = view.opt("com.openexchange.passwordchange.maxLength", Integer.class, I(0));
-                setting.setSingleValue(property);
+                int maxLength = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.passwordchange.maxLength", 0, view);
+                setting.setSingleValue(I(maxLength));
             }
 
             @Override

@@ -50,7 +50,6 @@
 package com.openexchange.passwordchange;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,6 +67,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -200,14 +200,14 @@ public abstract class PasswordChangeService {
                         properties.put("cookies", cookies);
                     }
                 }
-                if (!user.isGuest()) {
-                    Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
-                } else {
+                if (user.isGuest()) {
                     BasicAuthenticationService basicService = Authentication.getBasicService();
                     if (basicService == null) {
                         throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(BasicAuthenticationService.class.getName());
                     }
                     basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
+                } else {
+                    Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
                 }
             }
         } catch (OXException e) {
@@ -237,14 +237,14 @@ public abstract class PasswordChangeService {
      */
     private void checkLength(PasswordChangeEvent event, ConfigView view) throws OXException {
         int len = event.getNewPassword().length();
-        Integer min = view.opt("com.openexchange.passwordchange.minLength", Integer.class, I(4));
-        if (i(min) > 0 && len < i(min)) {
-            throw UserExceptionCode.INVALID_MIN_LENGTH.create(min);
+        int min = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.passwordchange.minLength", 4, view);
+        if (min > 0 && len < min) {
+            throw UserExceptionCode.INVALID_MIN_LENGTH.create(I(min));
         }
 
-        Integer max = view.opt("com.openexchange.passwordchange.maxLength", Integer.class, I(0));
-        if (i(max) > 0 && len > i(max)) {
-            throw UserExceptionCode.INVALID_MAX_LENGTH.create(max);
+        int max = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.passwordchange.maxLength", 0, view);
+        if (max > 0 && len > max) {
+            throw UserExceptionCode.INVALID_MAX_LENGTH.create(I(max));
         }
     }
 
@@ -257,13 +257,13 @@ public abstract class PasswordChangeService {
      * @throws OXException If restrictions aren't met
      */
     private void checkPattern(PasswordChangeEvent event, ConfigView view) throws OXException {
-        String allowedPattern = view.get("com.openexchange.passwordchange.allowedPattern", String.class);
+        String allowedPattern = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.passwordchange.allowedPattern", "", view).trim();
         if (Strings.isEmpty(allowedPattern)) {
             return;
         }
         try {
             if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
-                String allowedPatternHint = view.get("com.openexchange.passwordchange.allowedPatternHint", String.class);
+                String allowedPatternHint = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.passwordchange.allowedPatternHint", "", view);
                 throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
             }
         } catch (PatternSyntaxException e) {
