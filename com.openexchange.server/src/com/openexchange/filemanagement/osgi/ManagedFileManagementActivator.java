@@ -49,7 +49,8 @@
 
 package com.openexchange.filemanagement.osgi;
 
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -67,7 +68,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class ManagedFileManagementActivator implements BundleActivator {
 
-    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
+    private List<ServiceTracker<?,?>> trackers = null;
 
     /**
      * Initializes a new {@link ManagedFileManagementActivator}.
@@ -77,19 +78,28 @@ public final class ManagedFileManagementActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
+        List<ServiceTracker<?,?>> trackers = new ArrayList<>(2);
+        this.trackers = trackers;
+
         trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new TmpFileCleaner()));
-        DependentServiceRegisterer<ManagedFileManagement> registerer = new DependentServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, ConfigurationService.class, TimerService.class, DispatcherPrefixService.class);
+
+        DependentServiceRegisterer<ManagedFileManagement> registerer = new DependentServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, TimerService.class, DispatcherPrefixService.class);
         trackers.add(new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer));
+
         for (ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
     }
 
     @Override
-    public void stop(BundleContext context) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
+    public synchronized void stop(BundleContext context) {
+        List<ServiceTracker<?,?>> trackers = this.trackers;
+        if (trackers != null) {
+            this.trackers = null;
+            for (ServiceTracker<?,?> tracker : trackers) {
+                tracker.close();
+            }
         }
     }
 
