@@ -111,11 +111,14 @@ configure(subprojects.filter { it.name == "http_api" || it.name == "rest_api" ||
     }
 
 
-    tasks.register("insertMarkdown", Exec::class) {
+    tasks.register("insertMarkdown", JavaExec::class.java) {
         dependsOn("buildHtml")
+        workingDir("../../documentation-generic")
 
-        workingDir("../../documentation-generic/${this.project.name}")
-        commandLine("./insertExtendedMarkdownDocu.sh")
+        val arguments = mutableListOf(this.project.name)
+        classpath = rootProject.configurations.getByName("openapiTools")
+        main = "src.com.openexchange.replacer.Main"
+        args(arguments)
     }
 
 }

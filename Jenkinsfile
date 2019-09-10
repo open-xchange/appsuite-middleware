@@ -202,7 +202,7 @@ spec:
                             sh "gradle resolve insertMarkdown"
                         }
                     }
-                    dir('documentation-generic/') {
+                    dir('backend/documentation-generic/') {
                         sshPublisher(publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation',
                                 transfers: [
                                         sshTransfer(cleanRemote: true, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/http/${targetVersion}", remoteDirectorySDF: false, removePrefix: '', sourceFiles: "http_api/documents/html/**"),
