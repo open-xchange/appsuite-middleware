@@ -137,7 +137,7 @@ public class HostList {
         super();
         this.ipRanges = ipRanges;
         this.hostString = hostString;
-        this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : ImmutableSet.copyOf(matchingAppendixHostNames);
+        this.matchingAppendixHostNames = ImmutableSet.copyOf(matchingAppendixHostNames);
         this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
     }
 
