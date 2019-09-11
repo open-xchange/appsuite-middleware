@@ -50,9 +50,12 @@
 package com.openexchange.share.servlet.handler;
 
 import java.io.IOException;
+import java.util.function.Function;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.i18n.Translator;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -125,6 +128,29 @@ public class WebUIShareHandler extends AbstractShareHandler {
         }
     }
 
+    /**
+     * Get translation function for the share request
+     *
+     * @param shareRequest The Share request
+     * @param sharingUser  The sharing user
+     * @return  Translator function
+     */
+    private static Function<Translator, String> getMessage(AccessShareRequest shareRequest, User sharingUser) {
+        ShareTargetPath targetPath = shareRequest.getTargetPath();
+        switch (targetPath.getModule()) {
+            // Mail
+            case FolderObject.MAIL: return  t -> String.format(
+                t.translate(ShareServletStrings.SHARE_PASSWORD));
+            // Other share
+            default: return t -> String.format(
+                t.translate(ShareServletStrings.SHARE_WITH_TARGET),
+                FullNameBuilder.buildFullName(sharingUser, t),
+                t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
+                shareRequest.getTargetProxy().getLocalizedTitle(t));
+        }
+
+    }
+
     private ShareHandlerReply redirectToLoginPage(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
         try {
             GuestInfo guestInfo = shareRequest.getGuest();
@@ -159,12 +185,8 @@ public class WebUIShareHandler extends AbstractShareHandler {
             LoginLocation location = new LoginLocation()
                 .share(guestInfo.getBaseToken())
                 .loginType(guestInfo.getAuthentication())
-                .message(MessageType.INFO, t -> String.format(
-                    t.translate(ShareServletStrings.SHARE_WITH_TARGET), 
-                    FullNameBuilder.buildFullName(sharingUser, t),
-                    t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
-                    shareRequest.getTargetProxy().getLocalizedTitle(t)
-            ));
+                .message(MessageType.INFO, getMessage(shareRequest, sharingUser)
+            );
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
                 location.loginName(guestInfo.getGuestID(), guestInfo.getContextID());
             }
