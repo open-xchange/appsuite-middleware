@@ -1904,8 +1904,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             for (Map.Entry<String, Map<String, String>> ns : ctx.getUserAttributes().entrySet()) {
                 String namespace = ns.getKey();
+                boolean isConfigAttribute = "config".equals(namespace);
                 for (Map.Entry<String, String> pair : ns.getValue().entrySet()) {
-                    String name = namespace + "/" + pair.getKey();
+                    String name = namespace + '/' + pair.getKey();
                     String value = pair.getValue();
                     if (value == null) {
                         if (null == deleteStmt) {
@@ -1924,7 +1925,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         insertStmt.setString(4, value);
                         insertStmt.addBatch();
                     }
-                    if ("config".equals(namespace)) {
+                    if (isConfigAttribute) {
                         changedConfigAttributes.add(name);
                     }
                 }
