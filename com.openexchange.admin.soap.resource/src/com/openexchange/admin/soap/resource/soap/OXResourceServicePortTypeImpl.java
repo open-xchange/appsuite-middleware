@@ -9,8 +9,8 @@ package com.openexchange.admin.soap.resource.soap;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -657,7 +657,7 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
             return null;
         }
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<String, Map<String,String>>(entries.size());
+        final Map<String, Map<String, String>> map = new LinkedHashMap<String, Map<String,String>>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -671,7 +671,7 @@ public class OXResourceServicePortTypeImpl implements OXResourceServicePortType 
             return null;
         }
         final java.util.List<Entry> entries = soapStringMap.getEntries();
-        final Map<String, String> map = new HashMap<String, String>(entries.size());
+        final Map<String, String> map = new LinkedHashMap<String, String>(entries.size());
         for (final Entry entry : entries) {
             if (null != entry) {
                 map.put(entry.getKey(), entry.getValue());

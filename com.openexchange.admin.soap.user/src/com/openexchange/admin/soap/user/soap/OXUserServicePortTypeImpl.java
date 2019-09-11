@@ -15,7 +15,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -2664,7 +2663,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<>(entries.size());
+        final Map<String, Map<String, String>> map = new java.util.LinkedHashMap<>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -2678,7 +2677,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final java.util.List<Entry> entries = soapStringMap.getEntries();
-        final Map<String, String> map = new HashMap<>(entries.size());
+        final Map<String, String> map = new java.util.LinkedHashMap<>(entries.size());
         for (final Entry entry : entries) {
             if (null != entry) {
                 map.put(entry.getKey(), entry.getValue());

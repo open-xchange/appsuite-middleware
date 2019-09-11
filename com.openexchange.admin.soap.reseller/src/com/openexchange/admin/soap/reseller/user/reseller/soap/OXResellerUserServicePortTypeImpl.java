@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -1341,7 +1340,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             return null;
         }
         final List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<>(entries.size());
+        final Map<String, Map<String, String>> map = new java.util.LinkedHashMap<>(entries.size());
         for (final com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -1355,7 +1354,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             return null;
         }
         final List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry> entries = soapStringMap.getEntries();
-        final Map<String, String> map = new HashMap<>(entries.size());
+        final Map<String, String> map = new java.util.LinkedHashMap<>(entries.size());
         for (final com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry entry : entries) {
             if (null != entry) {
                 map.put(entry.getKey(), entry.getValue());
