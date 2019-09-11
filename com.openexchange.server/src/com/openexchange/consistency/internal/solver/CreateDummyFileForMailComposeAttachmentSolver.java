@@ -55,9 +55,12 @@ import java.sql.SQLException;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.consistency.Entity;
+import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -102,8 +105,8 @@ public class CreateDummyFileForMailComposeAttachmentSolver extends CreateDummyFi
                 for (String referenceId : problems) {
                     String identifier = createDummyFile(storage);
                     try (PreparedStatement stmt = con.prepareStatement("UPDATE compositionSpaceKeyStorage SET refId = ? WHERE refId = ?")) {
-                        stmt.setString(1, identifier);
-                        stmt.setString(2, referenceId);
+                        stmt.setString(1, obfuscate(identifier));
+                        stmt.setString(2, obfuscate(referenceId));
                         stmt.execute();
                     }
                 }
@@ -118,6 +121,21 @@ public class CreateDummyFileForMailComposeAttachmentSolver extends CreateDummyFi
     @Override
     public String description() {
         return "Create dummy file for Mail Compose Attachment.";
+    }
+
+    /**
+     * Obfuscates given string.
+     *
+     * @param s The string
+     * @return The obfuscated string
+     * @throws OXException If service is missing
+     */
+    private String obfuscate(String s) throws OXException {
+        ObfuscatorService obfuscatorService = ConsistencyServiceLookup.getOptionalService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.absentService(ObfuscatorService.class);
+        }
+        return obfuscatorService.obfuscate(s);
     }
 
 }

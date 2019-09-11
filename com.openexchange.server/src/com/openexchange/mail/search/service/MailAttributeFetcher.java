@@ -276,18 +276,22 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 final String importance;
                 if (parsedPrio >= 0) {
                     if (MailMessage.PRIORITY_NORMAL == parsedPrio) {
-                        importance = "Medium";
+                        importance = "Normal";
                     } else if (parsedPrio > MailMessage.PRIORITY_NORMAL) {
                         importance = "Low";
                     } else {
                         importance = "High";
                     }
                 } else {
-                    importance = "Medium";
+                    importance = "Normal";
                 }
-                return new ORTerm(new HeaderTerm(MessageHeaders.HDR_IMPORTANCE, importance), new HeaderTerm(
-                    MessageHeaders.HDR_X_PRIORITY,
-                    string));
+                SearchTerm<?> importanceTerm;
+                if ("Normal".equals(importance)) {
+                    importanceTerm = new ORTerm(new HeaderTerm(MessageHeaders.HDR_IMPORTANCE, importance), new HeaderTerm(MessageHeaders.HDR_IMPORTANCE, "Medium"));
+                } else {
+                    importanceTerm = new HeaderTerm(MessageHeaders.HDR_IMPORTANCE, importance);
+                }
+                return new ORTerm(importanceTerm, new HeaderTerm(MessageHeaders.HDR_X_PRIORITY, string));
             }
 
         });

@@ -47,72 +47,62 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.attachment;
+package com.openexchange.mail.compose.impl.groupware;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 import com.openexchange.database.Databases;
-import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
-import com.openexchange.mail.compose.AttachmentStorageType;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link FileStrorageAttachmentFileLocationHandler}
+ * {@link CompositionSpaceAddFileStorageIdentifier}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class FileStrorageAttachmentFileLocationHandler extends AbstractFileLocationHandler {
-
-    private final int fileStorageType;
+public class CompositionSpaceAddFileStorageIdentifier extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link FileStrorageAttachmentFileLocationHandler}.
+     * Initializes a new {@link CompositionSpaceAddFileStorageIdentifier}.
      */
-    public FileStrorageAttachmentFileLocationHandler() {
+    public CompositionSpaceAddFileStorageIdentifier() {
         super();
-        fileStorageType = AttachmentStorageType.FILE_STORAGE.getType();
     }
 
     @Override
-    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        String selectStmt = "SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=" + fileStorageType + " AND refId IN ";
-        String updateStmt = "UPDATE compositionSpaceAttachmentMeta SET refId = ? WHERE cid = ? AND refId = ?";
-        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
-    }
-
-    @Override
-    public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws SQLException {
-        // Files for attachments are always stored in context-related storage
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<String> determineFileLocationsFor(int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        int rollback = 0;
         try {
-            stmt = con.prepareStatement("SELECT refId FROM preview WHERE cid=? AND refType=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, fileStorageType);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
-            }
+            con.setAutoCommit(false);
+            rollback = 1;
 
-            Set<String> locations = new LinkedHashSet<String>();
-            do {
-                locations.add(rs.getString(1));
-            } while (rs.next());
-            return locations;
+            Column col = new Column("dedicatedFileStorageId", "INT4 UNSIGNED NOT NULL DEFAULT 0");
+            Tools.checkAndAddColumns(con, "compositionSpaceAttachmentMeta", col);
+            Tools.checkAndAddColumns(con, "compositionSpaceKeyStorage", col);
+
+            con.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(rs, stmt);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
         }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { CompositionSpaceAddContentEncryptedFlag.class.getName() };
     }
 
 }

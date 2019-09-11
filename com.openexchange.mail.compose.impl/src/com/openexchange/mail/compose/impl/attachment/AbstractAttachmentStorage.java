@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.impl.attachment;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
@@ -71,6 +73,8 @@ import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.compose.AttachmentDescription;
 import com.openexchange.mail.compose.AttachmentOrigin;
 import com.openexchange.mail.compose.AttachmentStorage;
+import com.openexchange.mail.compose.AttachmentStorageIdentifier;
+import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
 import com.openexchange.mail.compose.AttachmentStorageReference;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.DataProvider;
@@ -115,7 +119,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @return The data provider
      * @throws OXException If data provider cannot be returned
      */
-    protected abstract DataProvider getDataProviderFor(String storageIdentifier, Session session) throws OXException;
+    protected abstract DataProvider getDataProviderFor(AttachmentStorageIdentifier storageIdentifier, Session session) throws OXException;
 
     /**
      * Saves the specified data to storage.
@@ -126,7 +130,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @return The storage identifier
      * @throws OXException If data cannot be saved
      */
-    protected abstract String saveData(InputStream input, long size, Session session) throws OXException;
+    protected abstract AttachmentStorageIdentifier saveData(InputStream input, long size, Session session) throws OXException;
 
     /**
      * Deletes the specified data associated with given identifier from storage.
@@ -136,7 +140,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @return <code>true</code> if deletion was successful; otherwise <code>false</code>
      * @throws OXException If data cannot be deleted
      */
-    protected abstract boolean deleteData(String storageIdentifier, Session session) throws OXException;
+    protected abstract boolean deleteData(AttachmentStorageIdentifier storageIdentifier, Session session) throws OXException;
 
     /**
      * Requires the database service
@@ -180,7 +184,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, csid FROM compositionSpaceAttachmentMeta WHERE uuid=?");
+            stmt = con.prepareStatement("SELECT cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, csid, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE uuid=?");
             stmt.setBytes(1, UUIDs.toByteArray(id));
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -199,7 +203,8 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                 // Storage type does not match
                 return null;
             }
-            String storageIdentifier = rs.getString(4);
+
+            AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
 
             DefaultAttachment.Builder attachment = DefaultAttachment.builder(id);
             attachment.withStorageReference(new AttachmentStorageReference(storageIdentifier, getStorageType()));
@@ -247,7 +252,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, uuid FROM compositionSpaceAttachmentMeta WHERE csid=?");
+            stmt = con.prepareStatement("SELECT cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, uuid, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE csid=?");
             stmt.setBytes(1, UUIDs.toByteArray(compositionSpaceId));
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -268,7 +273,8 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                     // Storage type does not match
                     continue;
                 }
-                String storageIdentifier = rs.getString(4);
+
+                AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
 
                 DefaultAttachment.Builder attachment = DefaultAttachment.builder(UUIDs.toUUID(rs.getBytes(11)));
                 attachment.withStorageReference(new AttachmentStorageReference(storageIdentifier, getStorageType()));
@@ -318,7 +324,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, refType, refId, size FROM compositionSpaceAttachmentMeta WHERE csid=?");
+            stmt = con.prepareStatement("SELECT cid, user, refType, refId, size, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE csid=?");
             stmt.setBytes(1, UUIDs.toByteArray(compositionSpaceId));
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -343,7 +349,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                 long size = rs.getLong(5);
                 if (size < 0) {
                     // Need to count...
-                    String storageIdentifier = rs.getString(4);
+                    AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
                     sizeReturner.addDataProvider(getDataProviderFor(storageIdentifier, session));
                 } else {
                     sizeReturner.addSize(size);
@@ -368,7 +374,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @throws OXException If saving data fails
      */
     private StorageIdentifierAndSize saveData(InputStream input, long givenSize, SizeProvider sizeProvider, Session session) throws OXException {
-        String storageIdentifier = null;
+        AttachmentStorageIdentifier storageIdentifier = null;
         try {
             long size = givenSize;
 
@@ -417,7 +423,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @param optStorageIdentifier The storage identifier or <code>null</code>
      * @param session The session
      */
-    private void deleteSafely(String optStorageIdentifier, Session session) {
+    private void deleteSafely(AttachmentStorageIdentifier optStorageIdentifier, Session session) {
         if (null != optStorageIdentifier) {
             try {
                 if (false == deleteData(optStorageIdentifier, session)) {
@@ -435,7 +441,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
 
         StorageIdentifierAndSize identifierAndSize = saveData(input, attachment.getSize(), sizeProvider, session);
 
-        String storageIdentifierToDelete = identifierAndSize.storageIdentifier;
+        AttachmentStorageIdentifier storageIdentifierToDelete = identifierAndSize.storageIdentifier;
         Connection con = null;
         int rollback = 0;
         try {
@@ -494,17 +500,30 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         return saveAttachment(identifierAndSize, attachment, session, con);
     }
 
+    /**
+     * Enhances given INSERT statement.
+     *
+     * @param stmt The INSERT statement
+     * @param pos The position to start from
+     * @param session The session
+     * @throws OXException If enhancing fails
+     * @throws SQLException If an SQL error occurs
+     */
+    protected void enhanceInsertStatement(PreparedStatement stmt, int pos, Session session) throws OXException, SQLException {
+        stmt.setInt(pos, 0);
+    }
+
     private Attachment saveAttachment(StorageIdentifierAndSize identifierAndSize, AttachmentDescription attachment, Session session, Connection con) throws OXException {
-        String storageIdentifierToDelete = identifierAndSize.storageIdentifier;
+        AttachmentStorageIdentifier storageIdentifierToDelete = identifierAndSize.storageIdentifier;
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO compositionSpaceAttachmentMeta (uuid, cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, csid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO compositionSpaceAttachmentMeta (uuid, cid, user, refType, refId, name, size, mimeType, contentId, disposition, origin, csid, dedicatedFileStorageId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             UUID uuid = UUID.randomUUID();
             stmt.setBytes(1, UUIDs.toByteArray(uuid));
             stmt.setInt(2, session.getContextId());
             stmt.setInt(3, session.getUserId());
             stmt.setInt(4, getStorageType().getType());
-            stmt.setString(5, storageIdentifierToDelete);
+            stmt.setString(5, storageIdentifierToDelete.getIdentifier());
             setOptVarChar(6, attachment.getName(), stmt);
             stmt.setLong(7, identifierAndSize.size);
             setOptVarChar(8, attachment.getMimeType(), stmt);
@@ -512,6 +531,10 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             setOptVarChar(10, null == attachment.getContentDisposition() ? null : attachment.getContentDisposition().getId(), stmt);
             setOptVarChar(11, null == attachment.getOrigin() ? null : attachment.getOrigin().getIdentifier(), stmt);
             stmt.setBytes(12, UUIDs.toByteArray(attachment.getCompositionSpaceId()));
+            {
+                Optional<Integer> dedicatedFileStorageId = storageIdentifierToDelete.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER);
+                stmt.setInt(13, dedicatedFileStorageId.isPresent() ? dedicatedFileStorageId.get().intValue() : 0);
+            }
             stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
@@ -556,13 +579,13 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             Databases.startTransaction(con);
             rollback = 1;
 
-            List<String> storageIdentifiers = new ArrayList<>();
+            List<AttachmentStorageIdentifier> storageIdentifiers = new ArrayList<>();
             deleteAttachmentsByCompositionSpace(compositionSpaceId, session, storageIdentifiers, con);
 
             con.commit();
             rollback = 2;
 
-            for (String storageIdentifier : storageIdentifiers) {
+            for (AttachmentStorageIdentifier storageIdentifier : storageIdentifiers) {
                 deleteSafely(storageIdentifier, session);
             }
         } catch (SQLException e) {
@@ -587,7 +610,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @param con The connection to use
      * @throws OXException If attachments cannot be deleted
      */
-    public void deleteAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session, List<String> storageIdentifiers, Connection con) throws OXException {
+    public void deleteAttachmentsByCompositionSpace(UUID compositionSpaceId, Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
         if (null == con) {
             deleteAttachmentsByCompositionSpace(compositionSpaceId, session);
             return;
@@ -598,7 +621,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("SELECT uuid, cid, user, refType, refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND csid=?");
+                stmt = con.prepareStatement("SELECT uuid, cid, user, refType, refId, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE cid=? AND csid=?");
                 stmt.setInt(1, session.getContextId());
                 stmt.setBytes(2, UUIDs.toByteArray(compositionSpaceId));
                 rs = stmt.executeQuery();
@@ -608,8 +631,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                 while (rs.next()) {
                     if ((session.getUserId() == rs.getInt(3)) && (storageType == rs.getInt(4))) {
                         byte[] id = rs.getBytes(1);
-
-                        String storageIdentifier = rs.getString(5);
+                        AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
                         storageIdentifiers.add(storageIdentifier);
 
                         ids2Delete.add(id);
@@ -651,13 +673,13 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             Databases.startTransaction(con);
             rollback = 1;
 
-            List<String> storageIdentifiers = new ArrayList<>(ids.size());
+            List<AttachmentStorageIdentifier> storageIdentifiers = new ArrayList<>(ids.size());
             deleteAttachments(ids, session, storageIdentifiers, con);
 
             con.commit();
             rollback = 2;
 
-            for (String storageIdentifier : storageIdentifiers) {
+            for (AttachmentStorageIdentifier storageIdentifier : storageIdentifiers) {
                 deleteSafely(storageIdentifier, session);
             }
         } catch (SQLException e) {
@@ -682,7 +704,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @param con The connection to use
      * @throws OXException If attachments cannot be deleted
      */
-    public void deleteAttachments(List<UUID> ids, Session session, List<String> storageIdentifiers, Connection con) throws OXException {
+    public void deleteAttachments(List<UUID> ids, Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
         if (null == con) {
             deleteAttachments(ids, session);
             return;
@@ -695,11 +717,11 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT cid, user, refType, refId FROM compositionSpaceAttachmentMeta WHERE uuid=?");
+                    stmt = con.prepareStatement("SELECT cid, user, refType, refId, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE uuid=?");
                     stmt.setBytes(1, UUIDs.toByteArray(id));
                     rs = stmt.executeQuery();
                     if (rs.next() && (session.getContextId() == rs.getInt(1)) && (session.getUserId() == rs.getInt(2)) && (getStorageType().getType() == rs.getInt(3))) {
-                        String storageIdentifier = rs.getString(4);
+                        AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
                         storageIdentifiers.add(storageIdentifier);
 
                         Databases.closeSQLStuff(rs, stmt);
@@ -718,11 +740,11 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                     PreparedStatement stmt = null;
                     ResultSet rs = null;
                     try {
-                        stmt = con.prepareStatement("SELECT cid, user, refType, refId FROM compositionSpaceAttachmentMeta WHERE uuid=?");
+                        stmt = con.prepareStatement("SELECT cid, user, refType, refId, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE uuid=?");
                         stmt.setBytes(1, UUIDs.toByteArray(id));
                         rs = stmt.executeQuery();
                         if (rs.next() && (session.getContextId() == rs.getInt(1)) && (session.getUserId() == rs.getInt(2)) && (getStorageType().getType() == rs.getInt(3))) {
-                            String storageIdentifier = rs.getString(4);
+                            AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
                             storageIdentifiers.add(storageIdentifier);
 
                             Databases.closeSQLStuff(rs, stmt);
@@ -768,13 +790,13 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             Databases.startTransaction(con);
             rollback = 1;
 
-            List<String> storageIdentifiers = new ArrayList<>();
+            List<AttachmentStorageIdentifier> storageIdentifiers = new ArrayList<>();
             deleteUnreferencedAttachments(session, storageIdentifiers, con);
 
             con.commit();
             rollback = 2;
 
-            for (String storageIdentifier : storageIdentifiers) {
+            for (AttachmentStorageIdentifier storageIdentifier : storageIdentifiers) {
                 deleteSafely(storageIdentifier, session);
             }
         } catch (SQLException e) {
@@ -798,7 +820,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
      * @param con The connection to use
      * @throws OXException If operation fails
      */
-    public void deleteUnreferencedAttachments(Session session, List<String> storageIdentifiers, Connection con) throws OXException {
+    public void deleteUnreferencedAttachments(Session session, List<AttachmentStorageIdentifier> storageIdentifiers, Connection con) throws OXException {
         if (null == con) {
             deleteUnreferencedAttachments(session);
             return;
@@ -809,7 +831,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("SELECT compositionSpaceAttachmentMeta.uuid, refType, refId FROM compositionSpaceAttachmentMeta LEFT JOIN compositionSpace ON compositionSpaceAttachmentMeta.csid=compositionSpace.uuid WHERE compositionSpaceAttachmentMeta.cid=? AND compositionSpaceAttachmentMeta.user=? AND compositionSpace.uuid IS NULL");
+                stmt = con.prepareStatement("SELECT compositionSpaceAttachmentMeta.uuid, refType, refId, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta LEFT JOIN compositionSpace ON compositionSpaceAttachmentMeta.csid=compositionSpace.uuid WHERE compositionSpaceAttachmentMeta.cid=? AND compositionSpaceAttachmentMeta.user=? AND compositionSpace.uuid IS NULL");
                 stmt.setInt(1, session.getContextId());
                 stmt.setInt(2, session.getUserId());
                 rs = stmt.executeQuery();
@@ -819,7 +841,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
                         if (getStorageType().getType() == rs.getInt(2)) {
                             UUID attachmentId = UUIDs.toUUID(rs.getBytes(1));
                             ids2Delete.add(attachmentId);
-                            String storageIdentifier = rs.getString(3);
+                            AttachmentStorageIdentifier storageIdentifier = storageIdentifierFrom(rs);
                             storageIdentifiers.add(storageIdentifier);
                         }
                     } while (rs.next());
@@ -851,12 +873,21 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         }
     }
 
+    private static AttachmentStorageIdentifier storageIdentifierFrom(ResultSet rs) throws SQLException {
+        String storageIdentifier = rs.getString("refId");
+        int dedicatedFileStorageId = rs.getInt("dedicatedFileStorageId");
+        if (dedicatedFileStorageId <= 0) {
+            return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(0));
+        }
+        return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(dedicatedFileStorageId));
+    }
+
     private static class StorageIdentifierAndSize {
 
-        final String storageIdentifier;
+        final AttachmentStorageIdentifier storageIdentifier;
         final long size;
 
-        StorageIdentifierAndSize(String storageIdentifier, long size) {
+        StorageIdentifierAndSize(AttachmentStorageIdentifier storageIdentifier, long size) {
             super();
             this.storageIdentifier = storageIdentifier;
             this.size = size;

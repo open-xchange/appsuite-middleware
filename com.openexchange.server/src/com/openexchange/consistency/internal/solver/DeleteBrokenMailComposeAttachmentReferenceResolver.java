@@ -61,9 +61,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import com.openexchange.consistency.Entity;
+import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -146,7 +149,7 @@ public class DeleteBrokenMailComposeAttachmentReferenceResolver implements Probl
             if (DBUtils.tableExists(con, "compositionSpaceKeyStorage")) {
                 for (String referenceId : problems) {
                     try (PreparedStatement stmt = con.prepareStatement("DELETE FROM compositionSpaceKeyStorage WHERE refId = ?")) {
-                        stmt.setString(1, referenceId);
+                        stmt.setString(1, obfuscate(referenceId));
                         stmt.executeUpdate();
                     }
                 }
@@ -179,6 +182,21 @@ public class DeleteBrokenMailComposeAttachmentReferenceResolver implements Probl
             LoggerHolder.LOG.error("Unable to parse {} to a List of Attachments", attachments, e);
         }
         return null;
+    }
+
+    /**
+     * Obfuscates given string.
+     *
+     * @param s The string
+     * @return The obfuscated string
+     * @throws OXException If service is missing
+     */
+    private String obfuscate(String s) throws OXException {
+        ObfuscatorService obfuscatorService = ConsistencyServiceLookup.getOptionalService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.absentService(ObfuscatorService.class);
+        }
+        return obfuscatorService.obfuscate(s);
     }
 
 }

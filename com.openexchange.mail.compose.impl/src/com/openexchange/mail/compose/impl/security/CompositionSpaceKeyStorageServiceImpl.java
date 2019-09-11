@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.impl.security;
 
-import java.util.List;
 import org.osgi.framework.BundleContext;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -83,32 +82,13 @@ public class CompositionSpaceKeyStorageServiceImpl extends RankingAwareNearRegis
 
     @Override
     public CompositionSpaceKeyStorage getKeyStorageFor(Session session) throws OXException {
-        CapabilitySet capabilities = null;
+        CapabilitySet capabilities = getCapabilitySet(session);
         for (CompositionSpaceKeyStorage keyStorage : this) {
-            List<String> neededCapabilities = keyStorage.neededCapabilities();
-            if (null == neededCapabilities) {
-                // No required capabilities
-                return keyStorage;
-            }
-
-            // Obtain user's capabilities (if not done yet) and check if required ones are covered
-            if (null == capabilities) {
-                capabilities = getCapabilitySet(session);
-            }
-            if (isApplicable(neededCapabilities, capabilities)) {
+            if (keyStorage.isApplicableFor(capabilities, session)) {
                 return keyStorage;
             }
         }
         throw CompositionSpaceErrorCode.NO_KEY_STORAGE.create();
-    }
-
-    private boolean isApplicable(List<String> neededCapabilities, CapabilitySet capabilities) {
-        for (String capability : neededCapabilities) {
-            if (false == capabilities.contains(capability)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private CapabilitySet getCapabilitySet(Session session) throws OXException {

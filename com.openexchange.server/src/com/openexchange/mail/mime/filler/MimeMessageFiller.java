@@ -536,7 +536,7 @@ public class MimeMessageFiller {
         final int priority = mail.getPriority();
         mimeMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(priority));
         if (MailMessage.PRIORITY_NORMAL == priority) {
-            mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
+            mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Normal");
         } else if (priority > MailMessage.PRIORITY_NORMAL) {
             mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Low");
         } else {

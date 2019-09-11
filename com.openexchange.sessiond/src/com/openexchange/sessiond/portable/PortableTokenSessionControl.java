@@ -50,6 +50,8 @@
 package com.openexchange.sessiond.portable;
 
 import java.io.IOException;
+import com.hazelcast.nio.serialization.ClassDefinition;
+import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -62,13 +64,24 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
  */
 public class PortableTokenSessionControl implements CustomPortable {
 
+    private static final String PARAMETER_SESSION = "session";
+    private static final String PARAMETER_CLIENT_TOKEN = "clientToken";
+    private static final String PARAMETER_SERVER_TOKEN = "serverToken";
+    private static final String PARAMETER_CREATION_STAMP = "creationStamp";
+
     /** The unique portable class ID of the {@link PortableTokenSessionControl} */
     public static final int CLASS_ID = 18;
 
-    public static final String PARAMETER_SESSION = "session";
-    public static final String PARAMETER_CLIENT_TOKEN = "clientToken";
-    public static final String PARAMETER_SERVER_TOKEN = "serverToken";
-    public static final String PARAMETER_CREATION_STAMP = "creationStamp";
+    /** The class version for {@link PortableTokenSessionControl} */
+    public static final int CLASS_VERSION = PortableSession.CLASS_VERSION;
+
+    /** The class definition for PortableTokenSessionControl */
+    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
+        .addPortableField(PARAMETER_SESSION, PortableSession.CLASS_DEFINITION)
+        .addUTFField(PARAMETER_CLIENT_TOKEN)
+        .addUTFField(PARAMETER_SERVER_TOKEN)
+        .addLongField(PARAMETER_CREATION_STAMP)
+        .build();
 
     // --------------------------------------------------------------------------------------------------------------------
 

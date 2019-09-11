@@ -19,7 +19,9 @@ Import-Package: com.google.common.annotations,
  com.openexchange.log,
  com.openexchange.osgi,
  javax.annotation.concurrent;version="1.1.0",
+ org.apache.commons.io,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.filestore.utils
+Bundle-Activator: com.openexchange.filestore.utils.osgi.FileStorageUtilsActivator

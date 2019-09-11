@@ -231,7 +231,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
              * Set header
              */
             smtpMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, "3 (normal)");
-            smtpMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
+            smtpMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Normal");
             /*
              * Subject
              */

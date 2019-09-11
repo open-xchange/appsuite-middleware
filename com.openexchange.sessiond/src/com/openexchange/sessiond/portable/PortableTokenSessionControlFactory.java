@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.portable;
 
+import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
@@ -67,6 +68,11 @@ public class PortableTokenSessionControlFactory extends AbstractCustomPortableFa
     @Override
     public int getClassId() {
         return PortableTokenSessionControl.CLASS_ID;
+    }
+
+    @Override
+    public ClassDefinition getClassDefinition() {
+        return PortableTokenSessionControl.CLASS_DEFINITION;
     }
 
 }

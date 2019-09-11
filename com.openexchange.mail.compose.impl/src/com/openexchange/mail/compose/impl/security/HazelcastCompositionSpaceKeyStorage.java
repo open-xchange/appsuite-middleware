@@ -65,6 +65,7 @@ import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.MailExceptionCode;
@@ -99,6 +100,11 @@ public class HazelcastCompositionSpaceKeyStorage extends AbstractCompositionSpac
         super(services);
         inMemoryMap = new ConcurrentHashMap<>(128);
         lock = new ReentrantLock();
+    }
+
+    @Override
+    public boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException {
+        return true;
     }
 
     @Override
