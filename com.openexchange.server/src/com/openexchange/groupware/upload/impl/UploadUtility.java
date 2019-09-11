@@ -780,7 +780,9 @@ public final class UploadUtility {
                         if (size > maxFileSize) {
                             // Close resources and count remaining bytes
                             Streams.close(out);
-                            tmpFile.delete();
+                            if (!tmpFile.delete()) {
+                                LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
+                            }
                             size += Streams.countInputStream(in);
                             throw new FileSizeLimitExceededException("File size exceeded", size, maxFileSize);
                         }
@@ -789,7 +791,9 @@ public final class UploadUtility {
                         if (size > maxOverallSize) {
                             // Close resources and count remaining bytes
                             Streams.close(out);
-                            tmpFile.delete();
+                            if (!tmpFile.delete()) {
+                                LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
+                            }
                             size += Streams.countInputStream(in);
                             retval.setSize(size);
                             return retval;
@@ -808,7 +812,9 @@ public final class UploadUtility {
         } finally {
             Streams.close(in, out);
             if (error) {
-                tmpFile.delete();
+                if (!tmpFile.delete()) {
+                    LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
+                }
             }
         }
 
