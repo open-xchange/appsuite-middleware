@@ -68,7 +68,7 @@ public class DataExportNotificationStrings implements LocalizableStrings {
     public static final String SALUTATION = "Dear %1$s,";
 
     // The content of the E-Mail informing about successful data export.
-    public static final String CONTENT_SUCCESS = "we are pleased to inform you that your requested data export has been completed. You can now download your archives. To do so, please click on this link: %1$s";
+    public static final String CONTENT_SUCCESS = "we are pleased to inform you that your requested data export has been completed. You can now download your archives. To do so, please click on the button below.";
 
     // The content of the E-Mail informing about failed data export
     public static final String CONTENT_FAILURE = "we are sorry to inform you that your requested data export failed. Please try again.";
@@ -81,6 +81,9 @@ public class DataExportNotificationStrings implements LocalizableStrings {
 
     // The content of the optional expiration information.
     public static final String EXPIRATION = "The archives will expire on %1$s";
+
+    // The label of the button linking to downloadable archives.
+    public static final String VIEW_ARCHIVES = "Download archives";
 
     // The personal part for the no-reply address
     public static final String NO_REPLY_PERSONAL = "Service for dowloading your personal data";

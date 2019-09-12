@@ -92,6 +92,8 @@ public class DataExportNotificationMail {
     private static final String VARIABLE_SALUTATION = "salutation";
     private static final String VARIABLE_CONTENT = "content";
     private static final String VARIABLE_EXPIRATION = "expiration";
+    private static final String VARIABLE_VIEW_ARCHIVES_LINK = "view_archives_link";
+    private static final String VARIABLE_VIEW_ARCHIVES_LABEL = "view_archives_label";
 
     private static final String fallbackHostname;
     static {
@@ -157,10 +159,10 @@ public class DataExportNotificationMail {
             case SUCCESS:
                 // Link to settings
                 String settingsLink = generateSettingsLink(hostInfo);
+                vars.put(VARIABLE_VIEW_ARCHIVES_LINK, settingsLink);
+                vars.put(VARIABLE_VIEW_ARCHIVES_LABEL, translator.translate(DataExportNotificationStrings.VIEW_ARCHIVES));
                 // Translate content
                 content = translator.translate(DataExportNotificationStrings.CONTENT_SUCCESS);
-                // Replace placeholder in translated content to fill in direct link
-                content = String.format(content, settingsLink);
                 if (expiryDate != null) {
                     // Expiration date
                     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, user.getLocale());

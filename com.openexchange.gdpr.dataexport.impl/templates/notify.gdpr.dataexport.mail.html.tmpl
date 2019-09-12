@@ -15,6 +15,13 @@
   <p>
   ${content}
   </p>
+
+  <#if view_archives_link?has_content>
+    <p id="view_archives" style="padding:10px 0;margin:20px 0;">
+      <@styledButton link=view_archives_link>${view_archives_label}</@styledButton>
+    </p>
+  </#if>
+
   <#if expiration?has_content>
     <p>
     ${expiration}
