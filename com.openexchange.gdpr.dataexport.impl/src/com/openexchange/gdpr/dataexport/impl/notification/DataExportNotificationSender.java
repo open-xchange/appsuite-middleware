@@ -96,6 +96,7 @@ public class DataExportNotificationSender {
      * Sends the notification message to specified user.
      *
      * @param reason The notification reason
+     * @param creationDate The date when the data export has been created/requested
      * @param expiryDate The expiration date (only expected if reason is set to {@link Reason#SUCCESS})
      * @param hostInfo The basic host information (only expected if reason is set to {@link Reason#SUCCESS})
      * @param taskId The task identifier
@@ -105,10 +106,10 @@ public class DataExportNotificationSender {
      * @param services The service look-up
      * @throws OXException If operation fails to set/unset notification-sent marker
      */
-    public static void sendNotificationAndSetMarker(Reason reason, Date expiryDate, HostInfo hostInfo, UUID taskId, int userId, int contextId, boolean markNotificationSent, ServiceLookup services) throws OXException {
+    public static void sendNotificationAndSetMarker(Reason reason, Date creationDate, Date expiryDate, HostInfo hostInfo, UUID taskId, int userId, int contextId, boolean markNotificationSent, ServiceLookup services) throws OXException {
         if (!markNotificationSent) {
             // Only send notification message w/o any storage operation
-            sendNotification(reason, expiryDate, hostInfo, taskId, userId, contextId, services);
+            sendNotification(reason, creationDate, expiryDate, hostInfo, taskId, userId, contextId, services);
             return;
         }
 
@@ -126,7 +127,7 @@ public class DataExportNotificationSender {
         boolean error = true;
         try {
             // Send notification message
-            sendNotification(reason, expiryDate, hostInfo, taskId, userId, contextId, services);
+            sendNotification(reason, creationDate, expiryDate, hostInfo, taskId, userId, contextId, services);
             error = false;
         } finally {
             if (error) {
@@ -139,13 +140,13 @@ public class DataExportNotificationSender {
         }
     }
 
-    private static void sendNotification(Reason reason, Date expiryDate, HostInfo hostInfo, UUID taskId, int userId, int contextId, ServiceLookup services) {
+    private static void sendNotification(Reason reason, Date creationDate, Date expiryDate, HostInfo hostInfo, UUID taskId, int userId, int contextId, ServiceLookup services) {
         try {
             TransportProvider transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
             MailTransport transport = transportProvider.createNewNoReplyTransport(contextId);
             try {
                 NotificationMailFactory notify = services.getServiceSafe(NotificationMailFactory.class);
-                MailData mailData = DataExportNotificationMail.createNotificationMail(reason, expiryDate, hostInfo, userId, contextId);
+                MailData mailData = DataExportNotificationMail.createNotificationMail(reason, creationDate, expiryDate, hostInfo, userId, contextId);
                 ComposedMailMessage message = notify.createMail(mailData);
                 // Set personal for no-reply address
                 {

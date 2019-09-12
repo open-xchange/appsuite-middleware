@@ -91,9 +91,9 @@ public class DataExportNotificationMail {
 
     private static final String VARIABLE_SALUTATION = "salutation";
     private static final String VARIABLE_CONTENT = "content";
-    private static final String VARIABLE_EXPIRATION = "expiration";
     private static final String VARIABLE_VIEW_ARCHIVES_LINK = "view_archives_link";
     private static final String VARIABLE_VIEW_ARCHIVES_LABEL = "view_archives_label";
+    private static final String VARIABLE_INFO = "info";
 
     private static final String fallbackHostname;
     static {
@@ -110,6 +110,7 @@ public class DataExportNotificationMail {
      * Creates a new {@link MailData} instance ready to be used to create an appropriate notification mail for delivering a profile via E-Mail.
      *
      * @param reason The notification reason
+     * @param creationDate The date when the data export has been created/requested
      * @param expiryDate The expiry date (only expected if reason is set to {@link Reason#SUCCESS})
      * @param hostInfo The basic host information (only expected if reason is set to {@link Reason#SUCCESS})
      * @param userId The user identifier
@@ -117,9 +118,9 @@ public class DataExportNotificationMail {
      * @return A new {@code MailData} instance representing the profile delivery mail
      * @throws OXException If {@code MailData} instance cannot be returned
      */
-    public static MailData createNotificationMail(Reason reason, Date expiryDate, HostInfo hostInfo, int userId, int contextId) throws OXException {
+    public static MailData createNotificationMail(Reason reason, Date creationDate, Date expiryDate, HostInfo hostInfo, int userId, int contextId) throws OXException {
         String hostName = determineHostName(userId, contextId);
-        return createNotificationMail(hostName, reason, expiryDate, hostInfo, userId, contextId);
+        return createNotificationMail(hostName, reason, creationDate, expiryDate, hostInfo, userId, contextId);
     }
 
     /**
@@ -127,6 +128,7 @@ public class DataExportNotificationMail {
      *
      * @param hostName The associated host name
      * @param reason The notification reason
+     * @param creationDate The date when the data export has been created/requested
      * @param expiryDate The expiry date (only expected if reason is set to {@link Reason#SUCCESS})
      * @param hostInfo The basic host information (only expected if reason is set to {@link Reason#SUCCESS})
      * @param userId The user identifier
@@ -134,7 +136,7 @@ public class DataExportNotificationMail {
      * @return A new {@code MailData} instance representing the profile delivery mail
      * @throws OXException If {@code MailData} instance cannot be returned
      */
-    public static MailData createNotificationMail(String hostName, Reason reason, Date expiryDate, HostInfo hostInfo, int userId, int contextId) throws OXException {
+    public static MailData createNotificationMail(String hostName, Reason reason, Date creationDate, Date expiryDate, HostInfo hostInfo, int userId, int contextId) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>(4);
 
         // Get translator
@@ -153,7 +155,8 @@ public class DataExportNotificationMail {
             vars.put(VARIABLE_SALUTATION, translated);
         }
 
-        // E-Mail content
+        // Determine E-Mail subject &  content dependent on reason
+        String subject;
         String content;
         switch (reason) {
             case SUCCESS:
@@ -161,32 +164,52 @@ public class DataExportNotificationMail {
                 String settingsLink = generateSettingsLink(hostInfo);
                 vars.put(VARIABLE_VIEW_ARCHIVES_LINK, settingsLink);
                 vars.put(VARIABLE_VIEW_ARCHIVES_LABEL, translator.translate(DataExportNotificationStrings.VIEW_ARCHIVES));
-                // Translate content
-                content = translator.translate(DataExportNotificationStrings.CONTENT_SUCCESS);
+                // Inject expiration date
                 if (expiryDate != null) {
-                    // Expiration date
+                    // Translate content
+                    content = translator.translate(DataExportNotificationStrings.CONTENT_SUCCESS_WITH_EXPIRATION);
+                    // Inject creation & expiration date
                     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, user.getLocale());
-                    Date localExpiry = new Date(expiryDate.getTime() + TimeZoneUtils.getTimeZone(user.getTimeZone()).getOffset(expiryDate.getTime()));
-                    // Translation for expiration
-                    String expirationInfo = translator.translate(DataExportNotificationStrings.EXPIRATION);
-                    expirationInfo = String.format(expirationInfo, dateFormat.format(localExpiry));
-                    // Insert expiration information
-                    vars.put(VARIABLE_EXPIRATION, expirationInfo);
+                    Date localCreationDate = new Date(creationDate.getTime() + TimeZoneUtils.getTimeZone(user.getTimeZone()).getOffset(creationDate.getTime()));
+                    Date localExpirationDate = new Date(expiryDate.getTime() + TimeZoneUtils.getTimeZone(user.getTimeZone()).getOffset(expiryDate.getTime()));
+                    content = String.format(content, dateFormat.format(localCreationDate), dateFormat.format(localExpirationDate));
+                } else {
+                    // Translate content
+                    content = translator.translate(DataExportNotificationStrings.CONTENT_SUCCESS_WITHOUT_EXPIRATION);
+                    // Inject creation date
+                    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, user.getLocale());
+                    Date localCreationDate = new Date(creationDate.getTime() + TimeZoneUtils.getTimeZone(user.getTimeZone()).getOffset(creationDate.getTime()));
+                    content = String.format(content, dateFormat.format(localCreationDate));
                 }
+                subject = translator.translate(DataExportNotificationStrings.SUBJECT_SUCCESS);
                 break;
             case FAILED:
                 content = translator.translate(DataExportNotificationStrings.CONTENT_FAILURE);
+                // Inject creation date
+                {
+                    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, user.getLocale());
+                    Date localCreationDate = new Date(creationDate.getTime() + TimeZoneUtils.getTimeZone(user.getTimeZone()).getOffset(creationDate.getTime()));
+                    content = String.format(content, dateFormat.format(localCreationDate));
+                }
+                subject = translator.translate(DataExportNotificationStrings.SUBJECT_FAILURE);
                 break;
             case ABORTED:
-                content = translator.translate(DataExportNotificationStrings.CONTENT_FAILURE);
+                content = translator.translate(DataExportNotificationStrings.CONTENT_ABORTED);
+                // Inject creation date
+                {
+                    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, user.getLocale());
+                    Date localCreationDate = new Date(creationDate.getTime() + TimeZoneUtils.getTimeZone(user.getTimeZone()).getOffset(creationDate.getTime()));
+                    content = String.format(content, dateFormat.format(localCreationDate));
+                }
+                subject = translator.translate(DataExportNotificationStrings.SUBJECT_ABORTED);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown reason: " + reason);
         }
+
         vars.put(VARIABLE_CONTENT, content);
 
-        // E-Mail subject
-        String subject = translator.translate(DataExportNotificationStrings.SUBJECT);
+        vars.put(VARIABLE_INFO, translator.translate(DataExportNotificationStrings.INFO));
 
         return createNotificationMail(mailAddress, hostName, userId, contextId, "notify.gdpr.dataexport.mail.html.tmpl", subject, vars);
     }

@@ -277,7 +277,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                 storageService.deleteDataExportTask(userId, contextId);
 
                 // Trigger notification for user that data export has been aborted
-                sendNotificationAndSetMarker(Reason.ABORTED, null, null, taskId, userId, contextId, false, services);
+                sendNotificationAndSetMarker(Reason.ABORTED, task.getCreationTime(), null, null, taskId, userId, contextId, false, services);
                 return;
             }
 
@@ -322,7 +322,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                 storageService.deleteDataExportTask(userId, contextId);
 
                 // Trigger notification for user that data export has been aborted
-                sendNotificationAndSetMarker(Reason.ABORTED, null, null, taskId, userId, contextId, false, services);
+                sendNotificationAndSetMarker(Reason.ABORTED, task.getCreationTime(), null, null, taskId, userId, contextId, false, services);
                 LOG.info("Data export task {} of user {} in context {} aborted", stringFor(taskId), I(userId), I(contextId));
             } else if (currentStatus == DataExportStatus.RUNNING) {
                 if (keepGoing) {
@@ -336,14 +336,14 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                         } finally {
                             zipOut.close();
                         }
-                        
+
                         // Drop work items' files to free space
                         try {
                             storageService.dropIntermediateFiles(taskId, contextId);
                         } catch (Exception e) {
                             LOG.warn("Failed to drop intermediate files from data export task {} of user {} in context {}", stringFor(taskId), I(userId), I(contextId), e);
                         }
-                        
+
                         // Determine expiration date
                         Date expiryDate;
                         try {
@@ -353,9 +353,9 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                             expiryDate = new Date(System.currentTimeMillis() + maxTimeToLiveMillis);
                             LOG.warn("Failed to query last-accessed time stamp from data export task {} of user {} in context {}. Assuming \"{}\" as expiration date.", stringFor(taskId), I(userId), I(contextId), ISO8601Utils.format(expiryDate), e);
                         }
-                        
+
                         // Trigger notification for user that data export is available
-                        sendNotificationAndSetMarker(Reason.SUCCESS, expiryDate, task.getArguments().getHostInfo(), taskId, userId, contextId, true, services);
+                        sendNotificationAndSetMarker(Reason.SUCCESS, task.getCreationTime(), expiryDate, task.getArguments().getHostInfo(), taskId, userId, contextId, true, services);
                         LOG.info("Data export task {} of user {} in context {} completed", stringFor(taskId), I(userId), I(contextId));
                     }
                 } else {
@@ -389,7 +389,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
 
                 // Trigger notification for user that data export failed
                 try {
-                    sendNotificationAndSetMarker(Reason.FAILED, null, null, taskId, userId, contextId, true, services);
+                    sendNotificationAndSetMarker(Reason.FAILED, task.getCreationTime(), null, null, taskId, userId, contextId, true, services);
                 } catch (Exception e) {
                     LOG.warn("Cannot set notification-sent marker for data export task {} of user {} in context {}", stringFor(taskId), I(userId), I(contextId), e);
                 }

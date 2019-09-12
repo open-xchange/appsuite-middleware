@@ -211,6 +211,7 @@ public class DataExportServiceImpl implements DataExportService {
 
                             HostInfo hostInfo = null;
                             Date expiryDate = null;
+                            Date creationDate = null;
                             if (Reason.SUCCESS == reason) {
                                 try {
                                     Optional<Date> lastAccessedTimeStamp = storageService.getLastAccessedTimeStamp(userId, contextId);
@@ -222,7 +223,9 @@ public class DataExportServiceImpl implements DataExportService {
                                 try {
                                     Optional<DataExportTask> optionalTask = storageService.getDataExportTask(userId, contextId);
                                     if (optionalTask.isPresent()) {
-                                        hostInfo = optionalTask.get().getArguments().getHostInfo();
+                                        DataExportTask task = optionalTask.get();
+                                        hostInfo = task.getArguments().getHostInfo();
+                                        creationDate = task.getCreationTime();
                                     }
                                 } catch (Exception e) {
                                     LOG.warn("Failed loading data export task {} of user {} in context {}", stringFor(taskId), I(userId), I(contextId), e);
@@ -230,7 +233,7 @@ public class DataExportServiceImpl implements DataExportService {
                             }
 
                             try {
-                                DataExportNotificationSender.sendNotificationAndSetMarker(reason, expiryDate, hostInfo, taskId, userId, contextId, true, services);
+                                DataExportNotificationSender.sendNotificationAndSetMarker(reason, creationDate == null ? new Date() : creationDate, expiryDate, hostInfo, taskId, userId, contextId, true, services);
                             } catch (Exception e) {
                                 LOG.warn("Cannot set notification-sent marker for data export task {} of user {} in context {}", stringFor(taskId), I(userId), I(contextId), e);
                             }

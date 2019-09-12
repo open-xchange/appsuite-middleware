@@ -67,25 +67,34 @@ public class DataExportNotificationStrings implements LocalizableStrings {
     // The user salutation; e.g. "Dear John Doe,"
     public static final String SALUTATION = "Dear %1$s,";
 
-    // The content of the E-Mail informing about successful data export.
-    public static final String CONTENT_SUCCESS = "we are pleased to inform you that your requested data export has been completed. You can now download your archives. To do so, please click on the button below.";
+    // The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+    public static final String CONTENT_SUCCESS_WITH_EXPIRATION = "The data archive that you have requested on %1$s is now ready for download. You can download the archive until %1$s.";
 
-    // The content of the E-Mail informing about failed data export
-    public static final String CONTENT_FAILURE = "we are sorry to inform you that your requested data export failed. Please try again.";
+    // The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+    public static final String CONTENT_SUCCESS_WITHOUT_EXPIRATION = "The data archive that you have requested on %1$s is now ready for download.";
 
-    // The content of the E-Mail informing about aborted data export
-    public static final String CONTENT_ABORTED = "we are sorry to inform you that your requested data export has been aborted. In case you did not abort the export yourself, please try again.";
+    // The content of the E-Mail informing about failed data export. E.g. "Unfortunately the data export that you have requested on 09/01/2019 has failed. Please try again."
+    public static final String CONTENT_FAILURE = "Unfortunately the data export that you have requested on %1$s has failed. Please try again.";
 
-    // The subject of the E-Mail providing the data export result
-    public static final String SUBJECT = "Your data export";
+    // The content of the E-Mail informing about aborted data export. E.g. "The data export that you have requested on 09/01/2019 has been canceled."
+    public static final String CONTENT_ABORTED = "The data export that you have requested on %1$s has been canceled.";
 
-    // The content of the optional expiration information.
-    public static final String EXPIRATION = "The archives will expire on %1$s";
+    // The subject of the E-Mail for a successful data export result
+    public static final String SUBJECT_SUCCESS = "Your personal data archive is ready for download";
+
+    // The subject of the E-Mail for a failed data export result
+    public static final String SUBJECT_FAILURE = "Your personal data export failed";
+
+    // The subject of the E-Mail for an aborted data export result
+    public static final String SUBJECT_ABORTED = "Your personal data export has been canceled";
 
     // The label of the button linking to downloadable archives.
     public static final String VIEW_ARCHIVES = "Download archives";
 
     // The personal part for the no-reply address
     public static final String NO_REPLY_PERSONAL = "Service for dowloading your personal data";
+
+    // The info footer provided for every data export notification E-Mail
+    public static final String INFO = "You are receiving this email because you have requested a personal data download recently.";
 
 }
