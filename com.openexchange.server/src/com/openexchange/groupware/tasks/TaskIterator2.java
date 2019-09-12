@@ -78,6 +78,8 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * This class implements the new iterator for tasks that fixes problems with
@@ -88,34 +90,23 @@ import gnu.trove.map.TIntObjectMap;
 public final class TaskIterator2 implements TaskIterator, Runnable {
 
     private final Context ctx;
-
     private final int userId;
-
     private final String sql;
-
     private final StatementSetter setter;
-
     private final int folderId;
-
     private final int[] taskAttributes;
-
     private final int[] additionalAttributes;
-
     private final StorageType type;
-
     private final Connection con;
-
     private final PreRead<Task> preread = new PreRead<Task>();
-
     private final Queue<Task> ready = new LinkedList<Task>();
 
     private OXException exc;
 
     private final Future<Object> runner;
-
     private final ParticipantStorage partStor = ParticipantStorage.getInstance();
-
     private final List<OXException> warnings;
+    private final boolean filterDuplicates;
 
     /**
      * Default constructor.
@@ -127,15 +118,15 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
      * @param attributes Array of fields that the returned tasks should contain.
      * @param type ACTIVE or DELETED.
      */
-    TaskIterator2(final Context ctx, final int userId, final String sql,
-        final StatementSetter setter, final int folderId, final int[] attributes,
-        final StorageType type) {
-        this(ctx, userId, sql, setter, folderId, attributes, type, null);
+    TaskIterator2(Context ctx, int userId, String sql,
+        StatementSetter setter, int folderId, int[] attributes,
+        boolean filterDuplicates, StorageType type) {
+        this(ctx, userId, sql, setter, folderId, attributes, filterDuplicates, type, null);
     }
 
-    TaskIterator2(final Context ctx, final int userId, final String sql,
-        final StatementSetter setter, final int folderId, final int[] attributes,
-        final StorageType type, final Connection con) {
+    TaskIterator2(Context ctx, int userId, String sql,
+        StatementSetter setter, int folderId, int[] attributes,
+        boolean filterDuplicates, StorageType type, Connection con) {
         super();
         this.warnings =  new ArrayList<OXException>(2);
         this.ctx = ctx;
@@ -156,6 +147,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         modifyAdditionalAttributes(tmp2);
         this.additionalAttributes = Collections.toArray(tmp2);
         this.type = type;
+        this.filterDuplicates = filterDuplicates;
         this.con = con;
         runner = ThreadPools.submitElseExecute(ThreadPools.trackableTask(this));
     }
@@ -323,6 +315,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             stmt = myCon.prepareStatement(sql);
             setter.perform(stmt);
             result = stmt.executeQuery();
+            TIntSet taskIds = filterDuplicates ? new TIntHashSet() : null;
             while (result.next()) {
                 final Task task = new Task();
                 int pos = 1;
@@ -338,7 +331,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                         mapper.fromDB(result, pos++, task);
                     }
                 }
-                preread.offer(task);
+                if (!filterDuplicates || taskIds.add(task.getObjectID())) {
+                    preread.offer(task);
+                }
             }
         } catch (final SQLException e) {
             exc = TaskExceptionCode.SQL_ERROR.create(e);

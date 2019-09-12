@@ -154,7 +154,7 @@ public class RdbTaskSearch extends TaskSearch {
                         stmt.setInt(pos++, userId);
                     }
                 }
-            }, folderId, columns, type);
+            }, folderId, columns, false, type);
         if (StorageType.DELETED == type) {
             final StringBuilder sql2 = new StringBuilder();
             sql2.append("SELECT ");
@@ -203,7 +203,7 @@ public class RdbTaskSearch extends TaskSearch {
                             stmt.setInt(pos++, userId);
                         }
                     }
-                }, folderId, columns, StorageType.REMOVED);
+                }, folderId, columns, false, StorageType.REMOVED);
             return new CombinedSearchIterator<Task>(iter1, iter2);
         }
         return iter1;
@@ -354,7 +354,7 @@ public class RdbTaskSearch extends TaskSearch {
             }
         };
 
-        TaskIterator it = new TaskIterator2(context, userID, builder.toString(), ss, -1, columns, StorageType.ACTIVE);
+        TaskIterator it = new TaskIterator2(context, userID, builder.toString(), ss, -1, columns, false, StorageType.ACTIVE);
 
         return it;
     }
