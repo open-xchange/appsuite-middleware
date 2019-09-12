@@ -241,7 +241,15 @@ public class DataExportNotificationMail {
         }
     }
 
-    private static User getUser(int userId, int contextId) throws OXException {
+    /**
+     * Gets the user for given identifier.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The user
+     * @throws OXException If user cannot be returned
+     */
+    public static User getUser(int userId, int contextId) throws OXException {
         UserService userService = Services.optService(UserService.class);
         if (null == userService) {
             throw ServiceExceptionCode.absentService(UserService.class);

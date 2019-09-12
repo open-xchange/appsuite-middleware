@@ -49,13 +49,16 @@
 
 package com.openexchange.smtp;
 
+import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
@@ -138,7 +141,20 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
     protected void processAddressHeader(MimeMessage mimeMessage) throws OXException, MessagingException {
         super.processAddressHeader(mimeMessage);
         if (useNoReplyAddress) {
-            mimeMessage.setFrom(noReplyConfig.getAddress());
+            InternetAddress noReplyAddress = noReplyConfig.getAddress();
+            String noReplyPersonal = mimeMessage.getHeader(NoReplyConfig.HEADER_NO_REPLY_PERSONAL, ",");
+            if (Strings.isNotEmpty(noReplyPersonal)) {
+                mimeMessage.removeHeader(NoReplyConfig.HEADER_NO_REPLY_PERSONAL);
+                try {
+                    QuotedInternetAddress newAddr = new QuotedInternetAddress();
+                    newAddr.setAddress(noReplyAddress.getAddress());
+                    newAddr.setPersonal(noReplyPersonal, "UTF-8");
+                    noReplyAddress = newAddr;
+                } catch (UnsupportedEncodingException e) {
+                    // Cannot occur
+                }
+            }
+            mimeMessage.setFrom(noReplyAddress);
             mimeMessage.setSender(null);
             mimeMessage.setReplyTo(null);
         }

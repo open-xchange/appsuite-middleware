@@ -62,6 +62,11 @@ import javax.mail.internet.InternetAddress;
 public interface NoReplyConfig {
 
     /**
+     * The name of the special MIME header advertising a possible personal for the no-reply address.
+     */
+    public static final String HEADER_NO_REPLY_PERSONAL = "X-OX-NoReply-Personal";
+
+    /**
      * The secure mode enumeration.
      */
     public static enum SecureMode {

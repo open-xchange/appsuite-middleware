@@ -82,4 +82,7 @@ public class DataExportNotificationStrings implements LocalizableStrings {
     // The content of the optional expiration information.
     public static final String EXPIRATION = "The archives will expire on %1$s";
 
+    // The personal part for the no-reply address
+    public static final String NO_REPLY_PERSONAL = "Service for dowloading your personal data";
+
 }
