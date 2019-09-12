@@ -285,6 +285,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                  */
                 handlePrivateComments(appointmentToSave);
                 ReminderObject nextReminder = handleReminders(originalAppointment, appointmentToSave, exceptionsToSave);
+                boolean confirmationChange = isConfirmationChange(originalAppointment, appointmentToSave);
                 /*
                  * explicitly update user's confirmation to trigger scheduling-related notifications
                  */
@@ -310,7 +311,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                         Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
                     }
                 }
-                checkForExplicitRemoves(originalAppointment, appointmentToSave);
+                checkForExplicitRemoves(originalAppointment, appointmentToSave, confirmationChange);
                 if (false == containsChanges(originalAppointment, appointmentToSave)) {
                     LOG.debug("No further changes detected in {}, skipping update.", appointmentToSave);
                 } else {
@@ -373,7 +374,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                      */
                     exceptionToSave.setObjectID(originalException.getObjectID());
                     exceptionToSave.setParentFolderID(originalException.getParentFolderID());
-                    checkForExplicitRemoves(originalException, exceptionToSave);
+                    checkForExplicitRemoves(originalException, exceptionToSave, isConfirmationChange(originalException, exceptionToSave));
                     if (false == Patches.Incoming.tryRestoreParticipants(originalException, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
@@ -390,7 +391,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                      */
                     exceptionToSave.setObjectID(object.getObjectID());
                     exceptionToSave.setParentFolderID(object.getParentFolderID());
-                    checkForExplicitRemoves(originalAppointment, exceptionToSave);
+                    checkForExplicitRemoves(originalAppointment, exceptionToSave, isConfirmationChange(originalAppointment, exceptionToSave));
                     if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
@@ -816,7 +817,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             diff.anyFieldChangedOf(RECURRENCE_FIELDS);
     }
 
-    private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject updatedAppointment) {
+    private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject updatedAppointment, boolean confirmationChange) {
         /*
          * reset previously set appointment fields
          */
@@ -875,8 +876,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 updatedAppointment.removeShownAs();
             } else if ((updatedAppointment.containsOrganizerId() && factory.getSession().getUserId() != updatedAppointment.getOrganizerId() ||
                 updatedAppointment.containsOrganizer() && null != updatedAppointment.getOrganizer() &&
-                false == updatedAppointment.getOrganizer().equals(factory.getUser().getMail())) &&
-                isConfirmationChange(oldAppointment, updatedAppointment)) {
+                false == updatedAppointment.getOrganizer().equals(factory.getUser().getMail())) && confirmationChange) {
                 // don't change "shown as", since iCal clients tend to change the transparency on accept/decline actions of participants
                 updatedAppointment.removeShownAs();
             }
