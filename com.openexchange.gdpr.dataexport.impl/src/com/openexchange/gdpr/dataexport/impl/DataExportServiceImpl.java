@@ -468,7 +468,7 @@ public class DataExportServiceImpl implements DataExportService {
         for (FileLocation fileLocation : locations) {
             DefaultDataExportResultFile resultFile = DefaultDataExportResultFile.builder()
                 .withContentType(DataExportUtility.CONTENT_TYPE)
-                .withFileName(DataExportUtility.generateFileNameFor("export", ".zip", fileLocation.getNumber(), total, task.getCreationTime(), user))
+                .withFileName(DataExportUtility.generateFileNameFor("archive", ".zip", fileLocation.getNumber(), total, task.getCreationTime(), user))
                 .withNumber(fileLocation.getNumber())
                 .withTaskId(task.getId())
                 .build();
@@ -523,7 +523,7 @@ public class DataExportServiceImpl implements DataExportService {
         User user = userService.getUser(userId, contextId);
 
         // File name
-        String fileName = DataExportUtility.generateFileNameFor("export", ".zip", number, locations.size(), task.getCreationTime(), user);
+        String fileName = DataExportUtility.generateFileNameFor("archive", ".zip", number, locations.size(), task.getCreationTime(), user);
 
         return new FileStorageDataExportDownload(fileLocation, task, fileName);
     }

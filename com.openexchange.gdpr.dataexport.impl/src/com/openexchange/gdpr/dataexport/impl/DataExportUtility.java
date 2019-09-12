@@ -50,10 +50,12 @@
 package com.openexchange.gdpr.dataexport.impl;
 
 import java.net.URI;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.UUID;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
@@ -61,10 +63,10 @@ import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.gdpr.dataexport.DataExportTask;
-import com.openexchange.java.ISO8601Utils;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.user.User;
 
@@ -154,7 +156,7 @@ public class DataExportUtility {
      * @param fileStorage The file storage to delete in
      */
     public static void deleteQuietly(String fileStorageLocation, FileStorage fileStorage) {
-        if (fileStorageLocation != null && fileStorage != null) {            
+        if (fileStorageLocation != null && fileStorage != null) {
             try {
                 fileStorage.deleteFile(fileStorageLocation);
             } catch (Exception e) {
@@ -187,7 +189,7 @@ public class DataExportUtility {
     /**
      * Generates the file name from given arguments.
      *
-     * @param prefix The optional prefix; e.g. <code>"export"</code>
+     * @param prefix The optional prefix; e.g. <code>"archive"</code>
      * @param ext The optional file extension; e.g. <code>".zip"</code>
      * @param number The package number
      * @param total The total number of packages
@@ -196,22 +198,23 @@ public class DataExportUtility {
      * @return The file name
      */
     public static String generateFileNameFor(String prefix, String ext, int number, int total, Date creationTime, User user) {
-        return generateFileNameFor(prefix, ext, DEFAULT_DELIM, number, total, creationTime, user);
+        return generateFileNameFor(prefix, ext, DEFAULT_DELIM, number, total, creationTime, user, false);
     }
 
     /**
      * Generates the file name from given arguments.
      *
-     * @param prefix The optional prefix; e.g. <code>"export"</code>
+     * @param prefix The optional prefix; e.g. <code>"archive"</code>
      * @param ext The optional file extension; e.g. <code>".zip"</code>
      * @param delim The delimiter character; e.g. <code>'_'</code>
      * @param number The package number
      * @param total The total number of packages
      * @param creationTime The optional creation time to include in file name
      * @param user The user for whom to generate the file name for
+     * @param preferLocaleSpecificDateFormat <code>true</code> to prefer {@link DateFormat#SHORT short} {@link DateFormat#getDateInstance(int, java.util.Locale) locale-specific date format}; otherwise <code>false</code> to use standard pattern <code>"yyyy-MM-dd"</code>
      * @return The file name
      */
-    public static String generateFileNameFor(String prefix, String ext, char delim, int number, int total, Date creationTime, User user) {
+    public static String generateFileNameFor(String prefix, String ext, char delim, int number, int total, Date creationTime, User user, boolean preferLocaleSpecificDateFormat) {
         StringBuilder fileNameBuilder = new StringBuilder(32);
         if (Strings.isEmpty(prefix)) {
             fileNameBuilder.append("export");
@@ -223,7 +226,13 @@ public class DataExportUtility {
             if (fileNameBuilder.charAt(fileNameBuilder.length() - 1) != delim) {
                 fileNameBuilder.append(delim);
             }
-            fileNameBuilder.append(ISO8601Utils.format(creationTime));
+            FastDateFormat dateFormat;
+            if (preferLocaleSpecificDateFormat) {
+                dateFormat = FastDateFormat.getDateInstance(FastDateFormat.SHORT, TimeZoneUtils.getTimeZone(user.getTimeZone()), user.getLocale());
+            } else {
+                dateFormat = FastDateFormat.getInstance("yyyy-MM-dd", TimeZoneUtils.getTimeZone(user.getTimeZone()), user.getLocale());
+            }
+            fileNameBuilder.append(dateFormat.format(creationTime));
         }
 
         if (total > 1) {
