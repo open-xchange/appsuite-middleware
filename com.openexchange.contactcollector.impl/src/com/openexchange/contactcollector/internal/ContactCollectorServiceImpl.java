@@ -87,6 +87,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         MemorizerTask memorizerTask = new MemorizerTask(addresses, incrementUseCount, session);
         if (!background) {
             // Run with current thread
+            ContactCleanUp.performContactCleanUp(session, services);
             MemorizerWorker.handleTask(memorizerTask, services);
             return;
         }
@@ -95,6 +96,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         MemorizerWorker worker = this.worker;
         if (null == worker) {
             // Worker not initialized. Run with current thread
+            ContactCleanUp.performContactCleanUp(session, services);
             MemorizerWorker.handleTask(memorizerTask, services);
             return;
         }
@@ -103,6 +105,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
             worker.submit(memorizerTask);
         } catch (Exception x) {
             // Thread pool service is absent. Run with current thread
+            ContactCleanUp.performContactCleanUp(session, services);
             MemorizerWorker.handleTask(memorizerTask, services);
         }
     }
