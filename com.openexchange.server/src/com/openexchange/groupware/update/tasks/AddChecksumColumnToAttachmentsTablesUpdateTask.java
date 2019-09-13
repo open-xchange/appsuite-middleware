@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,66 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.attach;
+package com.openexchange.groupware.update.tasks;
 
-import java.util.Date;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
-public interface AttachmentMetadata {
 
-    public abstract int getCreatedBy();
+/**
+ * {@link AddChecksumColumnToAttachmentsTablesUpdateTask}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.3
+ */
+public class AddChecksumColumnToAttachmentsTablesUpdateTask extends UpdateTaskAdapter {
+    
+    private final static String[] TABLES = { "prg_attachment", "del_attachment" };
+    private final static Column column = new Column("checksum", "VARCHAR(32) DEFAULT NULL");
 
-    public abstract void setCreatedBy(int createdBy);
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        try {
+            con.setAutoCommit(false);
+            for (String table : TABLES) {
+                Tools.checkAndAddColumns(con, table, column);
+            }
+            con.commit();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.autocommit(con);
+        }
+    }
 
-    public abstract Date getCreationDate();
-
-    public abstract void setCreationDate(Date creationDate);
-
-    public abstract String getFileMIMEType();
-
-    public abstract void setFileMIMEType(String fileMIMEType);
-
-    public abstract String getFilename();
-
-    public abstract void setFilename(String filename);
-
-    public abstract long getFilesize();
-
-    public abstract void setFilesize(long filesize);
-
-    public abstract int getAttachedId();
-
-    public abstract void setAttachedId(int objectId);
-
-    public abstract boolean getRtfFlag();
-
-    public abstract void setRtfFlag(boolean rtfFlag);
-
-    public abstract int getModuleId();
-
-    public abstract void setModuleId(int moduleId);
-
-    public abstract int getId();
-
-    public abstract void setId(int id);
-
-    public abstract void setFolderId(int folderId);
-
-    public abstract int getFolderId();
-
-    public abstract void setComment(String string);
-
-    public abstract String getComment();
-
-    public abstract void setFileId(String string);
-
-    public abstract String getFileId();
-
-    public void setAttachmentBatch(AttachmentBatch batch);
-
-    public AttachmentBatch getAttachmentBatch();
-
-    public abstract String getChecksum();
-
-    public abstract void setChecksum(String checksum);
+    @Override
+    public String[] getDependencies() {
+        return new String[] { AttachmentConvertUtf8ToUtf8mb4Task.class.getName() };
+    }
 
 }

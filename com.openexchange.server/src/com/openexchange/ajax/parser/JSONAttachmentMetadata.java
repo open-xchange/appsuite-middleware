@@ -299,7 +299,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     public void setFileId(final String string) {
         if (null == string) {
             try {
-                json.put(AttachmentField.COMMENT_LITERAL.getName(),JSONObject.NULL);
+                json.put(AttachmentField.FILE_ID_LITERAL.getName(),JSONObject.NULL);
                 return;
             } catch (JSONException e) {
                 LOG.debug("",e);
@@ -320,6 +320,28 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
     @Override
     public AttachmentBatch getAttachmentBatch() {
         return batch;
+    }
+
+    @Override
+    public String getChecksum() {
+        return json.optString(AttachmentField.CHECKSUM_LITERAL.getName());
+    }
+
+    @Override
+    public void setChecksum(String checksum) {
+        if (null == checksum) {
+            try {
+                json.put(AttachmentField.CHECKSUM_LITERAL.getName(), JSONObject.NULL);
+                return;
+            } catch (JSONException e) {
+                LOG.debug("",e);
+            }
+        }
+        try {
+            json.put(AttachmentField.CHECKSUM_LITERAL.getName(), checksum);
+        } catch (JSONException e) {
+            LOG.debug("",e);
+        }
     }
 
 }

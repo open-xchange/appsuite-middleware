@@ -96,7 +96,7 @@ public class DefaultVCardStorageService implements VCardStorageService {
     }
 
     protected SaveFileAction createFileAction(InputStream file,int contextId) throws OXException {
-        return new SaveFileAction(getFileStorage(contextId), file, -1, false);
+        return new SaveFileAction(getFileStorage(contextId), file, -1, true);
     }
 
     /**

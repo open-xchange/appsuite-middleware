@@ -160,4 +160,10 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		attachment.setFileId((String)value);
 		return null;
 	}
+
+	@Override
+	public Object checksum() {
+	    attachment.setChecksum((String) value);
+	    return null;
+	}
 }

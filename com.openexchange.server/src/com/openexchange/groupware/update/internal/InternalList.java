@@ -733,6 +733,9 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
         list.add(new com.openexchange.groupware.update.tasks.DeleteOXMFSubscriptionTask());
 
+        // Add 'checksum' column to attachment tablesm see MW-1235
+        list.add(new com.openexchange.groupware.update.tasks.AddChecksumColumnToAttachmentsTablesUpdateTask());
+
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

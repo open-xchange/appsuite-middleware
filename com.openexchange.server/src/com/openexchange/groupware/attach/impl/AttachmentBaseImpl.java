@@ -185,7 +185,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         String fileId;
         if (data != null) {
             try {
-                fileId = saveFile(data, attachment, ctx);
+                fileId = saveFile(data, attachment, ctx, true);
             } catch (OXException e) {
                 if (QuotaFileStorageExceptionCodes.STORE_FULL.getNumber() == e.getCode()) {
                     throw AttachmentExceptionCodes.OVER_LIMIT.create(e);
@@ -667,11 +667,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-    private String saveFile(final InputStream data, final AttachmentMetadata attachment, Context ctx) throws OXException {
-        SaveFileAction action = new SaveFileAction(getFileStorage(ctx), data, attachment.getFilesize(), false);
+    private String saveFile(final InputStream data, final AttachmentMetadata attachment, Context ctx, boolean calculateChecksum) throws OXException {
+        SaveFileAction action = new SaveFileAction(getFileStorage(ctx), data, attachment.getFilesize(), calculateChecksum);
         action.perform();
         addUndoable(action);
         attachment.setFilesize(action.getByteCount());
+        attachment.setChecksum(action.getChecksum());
         return action.getFileStorageID();
     }
 

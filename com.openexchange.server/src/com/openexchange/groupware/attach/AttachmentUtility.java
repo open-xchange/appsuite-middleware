@@ -69,6 +69,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
@@ -279,6 +280,7 @@ public final class AttachmentUtility {
         private String comment;
         private String fileId;
         private AttachmentBatch batch;
+        private String checksum;
 
         /**
          * Initializes a new {@link AttachmentMetadataImpl}.
@@ -429,6 +431,16 @@ public final class AttachmentUtility {
         @Override
         public AttachmentBatch getAttachmentBatch() {
             return batch;
+        }
+
+        @Override
+        public String getChecksum() {
+            return checksum;
+        }
+
+        @Override
+        public void setChecksum(String checksum) {
+            this.checksum = checksum;
         }
 
     }
