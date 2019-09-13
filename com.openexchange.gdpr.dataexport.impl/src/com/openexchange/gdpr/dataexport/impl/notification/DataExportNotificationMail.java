@@ -211,7 +211,9 @@ public class DataExportNotificationMail {
 
         vars.put(VARIABLE_INFO, translator.translate(DataExportNotificationStrings.INFO));
 
-        return createNotificationMail(mailAddress, hostName, userId, contextId, "notify.gdpr.dataexport.mail.html.tmpl", subject, vars);
+        String noReplyPersonal = translator.translate(DataExportNotificationStrings.NO_REPLY_PERSONAL);
+
+        return createNotificationMail(mailAddress, hostName, userId, contextId, "notify.gdpr.dataexport.mail.html.tmpl", subject, noReplyPersonal, vars);
     }
 
     private static String generateSettingsLink(HostInfo hostInfo) throws OXException {
@@ -232,11 +234,12 @@ public class DataExportNotificationMail {
      * @param contextId The context identifier
      * @param templateFileName The file name of the HTML template
      * @param subject The string for the mail's subject
+     * @param noReplyPersonal The no-reply personal
      * @param vars The variables to insert
      * @return A new {@code MailData} instance
      * @throws OXException If {@code MailData} instance cannot be returned
      */
-    private static MailData createNotificationMail(String mailAddress, String hostName, int userId, int contextId, String templateFileName, String subject, Map<String, Object> vars) throws OXException {
+    private static MailData createNotificationMail(String mailAddress, String hostName, int userId, int contextId, String templateFileName, String subject, String noReplyPersonal, Map<String, Object> vars) throws OXException {
         // Acquire needed services
         ServerConfigService serverConfigService = Services.optService(ServerConfigService.class);
         if (null == serverConfigService) {
@@ -260,6 +263,7 @@ public class DataExportNotificationMail {
                 .setTemplateVars((null == vars) ? Collections.<String, Object> emptyMap() : vars)
                 .setMailConfig(serverConfig.getNotificationMailConfig())
                 .setContext(ctx)
+                .setNoReplyAddressPersonal(noReplyPersonal)
                 .build();
         } catch (AddressException e) {
             throw DataExportExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());

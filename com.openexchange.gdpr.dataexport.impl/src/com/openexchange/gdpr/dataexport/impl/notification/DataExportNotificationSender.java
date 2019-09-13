@@ -57,20 +57,14 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExportStorageService;
 import com.openexchange.gdpr.dataexport.HostInfo;
-import com.openexchange.gdpr.dataexport.impl.osgi.Services;
-import com.openexchange.i18n.Translator;
-import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.User;
 
 /**
  * {@link DataExportNotificationSender} - Utility class for sending notification messages.
@@ -148,16 +142,6 @@ public class DataExportNotificationSender {
                 NotificationMailFactory notify = services.getServiceSafe(NotificationMailFactory.class);
                 MailData mailData = DataExportNotificationMail.createNotificationMail(reason, creationDate, expiryDate, hostInfo, userId, contextId);
                 ComposedMailMessage message = notify.createMail(mailData);
-                // Set personal for no-reply address
-                {
-                    TranslatorFactory factory = Services.optService(TranslatorFactory.class);
-                    if (null == factory) {
-                        throw ServiceExceptionCode.absentService(TranslatorFactory.class);
-                    }
-                    User user = DataExportNotificationMail.getUser(userId, contextId);
-                    Translator translator = factory.translatorFor(user.getLocale());
-                    message.setHeader(NoReplyConfig.HEADER_NO_REPLY_PERSONAL, translator.translate(DataExportNotificationStrings.NO_REPLY_PERSONAL));
-                }
                 transport.sendMailMessage(message, ComposeType.NEW);
             } finally {
                 transport.close();

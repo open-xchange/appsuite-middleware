@@ -114,6 +114,7 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAware;
 import com.openexchange.mail.mime.HeaderCollection;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeHeaderNameChecker;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -382,7 +383,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-    protected boolean checkRecipients(final Address[] recipients) throws OXException {
+    protected boolean checkRecipients(Address[] recipients) throws OXException {
         if ((recipients == null) || (recipients.length == 0)) {
             throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
         }
@@ -1347,6 +1348,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             // Check recipients
             Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
             processAddressHeader(mimeMessage);
+            mimeMessage.removeHeader(MessageHeaders.HDR_X_OX_NO_REPLY_PERSONAL);
 
             // Save changes
             saveChangesSafe(mimeMessage, true);

@@ -142,7 +142,7 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         super.processAddressHeader(mimeMessage);
         if (useNoReplyAddress) {
             InternetAddress noReplyAddress = noReplyConfig.getAddress();
-            String noReplyPersonal = mimeMessage.getHeader(NoReplyConfig.HEADER_NO_REPLY_PERSONAL, ",");
+            String noReplyPersonal = mimeMessage.getHeader(NoReplyConfig.HEADER_NO_REPLY_PERSONAL, null);
             if (Strings.isNotEmpty(noReplyPersonal)) {
                 mimeMessage.removeHeader(NoReplyConfig.HEADER_NO_REPLY_PERSONAL);
                 try {

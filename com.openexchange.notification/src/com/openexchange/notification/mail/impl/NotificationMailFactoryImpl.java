@@ -189,6 +189,10 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
                 mimeMessage.addHeader(header.getKey(), header.getValue());
             }
 
+            if (data.getNoReplyAddressPersonal().isPresent()) {
+                mimeMessage.setHeader(MessageHeaders.HDR_X_OX_NO_REPLY_PERSONAL, data.getNoReplyAddressPersonal().get());
+            }
+
             MimeMultipart multipart;
             if (null == attachments || attachments.isEmpty()) {
                 // No attachment specified
