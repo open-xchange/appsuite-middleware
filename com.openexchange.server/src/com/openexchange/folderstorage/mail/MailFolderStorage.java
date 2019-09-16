@@ -1784,7 +1784,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             {
                 final int pos = fullname.lastIndexOf(separator);
                 if (pos == -1) {
-                    oldParent = "";
+                    oldParent = MailFolder.DEFAULT_FOLDER_ID;
                     oldName = fullname;
                 } else {
                     oldParent = fullname.substring(0, pos);
@@ -2304,12 +2304,12 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     private boolean cannotConnect(Session session, int accountId) throws OXException {
         return !canConnect(session, accountId);
     }
-    
+
     private boolean canConnect(Session session, int accountId) throws OXException {
         if (accountId != MailAccount.DEFAULT_ID || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             return true;
         }
-        
+
         // Check presence of OAuth token in case OAuth-wise mail access is configured
         if (AuthType.isOAuthType(MailConfig.getConfiguredAuthType(true, session))) {
             // OAuth is supposed to be used
