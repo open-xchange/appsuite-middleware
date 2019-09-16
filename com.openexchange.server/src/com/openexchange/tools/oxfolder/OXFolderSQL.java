@@ -2504,7 +2504,7 @@ public final class OXFolderSQL {
     }
 
     // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
-    private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type, ot.module, ot.default_flag FROM " + TMPL_PERM_TABLE + " AS op JOIN " + TMPL_FOLDER_TABLE + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN " + TMPL_IDS + " GROUP BY ot.fuid";
+    private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type, ot.module, ot.default_flag FROM " + TMPL_PERM_TABLE + " AS op JOIN " + TMPL_FOLDER_TABLE + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN " + TMPL_IDS;
 
     /**
      * Deletes all permissions assigned to context's mail admin from given permission table.
@@ -2537,8 +2537,7 @@ public final class OXFolderSQL {
             }
             final String permissionsIDs;
             if (isMailAdmin) {
-                permissionsIDs = new StringBuilder().append('(').append(entity).append(',').append(OCLPermission.ALL_GROUPS_AND_USERS).append(
-                    ')').toString();
+                permissionsIDs = new StringBuilder().append('(').append(entity).append(',').append(OCLPermission.ALL_GROUPS_AND_USERS).append(')').toString();
             } else {
                 permissionsIDs = new StringBuilder().append('(').append(entity).append(')').toString();
             }
@@ -2548,7 +2547,9 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             rs = executeQuery(stmt);
-
+            /*
+             * Iterate result set
+             */
             TIntSet deletePerms = new TIntHashSet();
             TIntSet reassignPerms = new TIntHashSet();
             while (rs.next()) {
