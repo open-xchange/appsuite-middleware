@@ -991,7 +991,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
             return null;
         }
         String addrStr = addrString.trim();
-        if ("false".equalsIgnoreCase(addrStr)) {
+        if ("false".equalsIgnoreCase(addrStr) || addrStr.indexOf('@') < 0) {
             return null;
         }
         try {
