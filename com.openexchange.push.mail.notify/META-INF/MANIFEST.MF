@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.push.mail.notify
 Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.hazelcast.core;version="3.12.2",
+Import-Package: com.hazelcast.core,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.context,
