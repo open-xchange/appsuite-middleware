@@ -122,21 +122,21 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
 
                 @Override
                 public void run() throws Exception {
-                    LOG.info("Circuit breaker opened for: {}", hostList.getHostString());
+                    LOG.info("IMAP circuit breaker opened for: {}", hostList.getHostString());
                 }
             })
             .onHalfOpen(new CheckedRunnable() {
 
                 @Override
                 public void run() throws Exception {
-                    LOG.info("Circuit breaker half-opened for: {}", hostList.getHostString());
+                    LOG.info("IMAP circuit breaker half-opened for: {}", hostList.getHostString());
                 }
             })
             .onClose(new CheckedRunnable() {
 
                 @Override
                 public void run() throws Exception {
-                    LOG.info("Circuit breaker closed for: {}", hostList.getHostString());
+                    LOG.info("IMAP circuit breaker closed for: {}", hostList.getHostString());
                 }
             });
         this.circuitBreaker = circuitBreaker;
