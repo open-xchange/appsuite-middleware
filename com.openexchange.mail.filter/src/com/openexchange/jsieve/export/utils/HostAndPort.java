@@ -52,7 +52,7 @@ package com.openexchange.jsieve.export.utils;
 import com.openexchange.java.Strings;
 
 /**
- * Simple (immutable) class to hold host and port for an IMAP end-point
+ * Simple (immutable) class to hold host and port for a mail filter end-point
  */
 public final class HostAndPort {
 
