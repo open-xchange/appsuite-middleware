@@ -78,12 +78,12 @@ public abstract class NetworkCommunicationErrorAdvertisingCallable<V> implements
     @Override
     public final IOResult<V> call() throws Exception {
         try {
-            return new IOResult<V>(performIOOperation(), null);
+            return IOResult.resultFor(performIOOperation());
         } catch (IOException e) {
             if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
                 throw e;
             }
-            return new IOResult<V>(null, e);
+            return IOResult.errorFor(e);
         }
     }
 

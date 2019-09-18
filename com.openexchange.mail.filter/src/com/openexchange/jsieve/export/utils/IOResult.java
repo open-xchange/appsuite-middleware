@@ -54,6 +54,40 @@ import java.io.IOException;
 /** An I/O result */
 public class IOResult<V> {
 
+    private static final IOResult<?> EMPTY = new IOResult<>(null, null);
+
+    /**
+     * Creates a success result for result instance.
+     *
+     * @param <V> The result type
+     * @param result The result to propagate
+     * @return The success result
+     */
+    static <V> IOResult<V> resultFor(V result) {
+        if (result == null) {
+            @SuppressWarnings("unchecked")
+            IOResult<V> ior = (IOResult<V>) EMPTY;
+            return ior;
+        }
+        return new IOResult<V>(result, null);
+    }
+
+    /**
+     * Creates an error result for given I/O error.
+     *
+     * @param <V> The result type
+     * @param ioError The I/O error
+     * @return The error result
+     */
+    static <V> IOResult<V> errorFor(IOException ioError) {
+        if (ioError == null) {
+            throw new IllegalArgumentException("I/O error must not be null");
+        }
+        return new IOResult<V>(null, ioError);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
     private final V result;
     private final IOException ioError;
 
@@ -63,7 +97,7 @@ public class IOResult<V> {
      * @param result The result or <code>null</code>
      * @param ioError The I/O error or <code>null</code>
      */
-    IOResult(V result, IOException ioError) {
+    private IOResult(V result, IOException ioError) {
         super();
         this.result = result;
         this.ioError = ioError;
