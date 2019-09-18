@@ -57,7 +57,9 @@ import com.google.common.collect.ImmutableList;
 
 
 /**
- * {@link NetworkCommunicationErrorAdvertisingCallable} -
+ * {@link NetworkCommunicationErrorAdvertisingCallable} - A special {@link Callable} calling an I/O operation, which only throws such
+ * {@link IOException} that are considered as network communication error. Otherwise an instance of {@link IOResult} is returned that might
+ * advertise an {@link IOException} as well.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
