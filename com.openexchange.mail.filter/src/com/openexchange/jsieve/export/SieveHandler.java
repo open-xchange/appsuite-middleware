@@ -68,6 +68,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -82,12 +83,15 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.jsieve.export.utils.FailsafeCircuitBreakerBufferedOutputStream;
+import com.openexchange.jsieve.export.utils.FailsafeCircuitBreakerBufferedReader;
 import com.openexchange.jsieve.export.utils.HostAndPort;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.encoding.Base64;
+import net.jodah.failsafe.CircuitBreaker;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -190,6 +194,7 @@ public class SieveHandler {
     private Long readTimeout = null;
     private int userId = -1;
     private int contextId = -1;
+    private final Optional<CircuitBreaker> optionalCircuitBreaker;
 
     /**
      * Initializes a new {@link SieveHandler}.
@@ -201,8 +206,11 @@ public class SieveHandler {
      * @param port The port of the SIEVE end-point
      * @param authEnc The encoding to use when transferring credential bytes to SIEVE end-point
      * @param oauthToken The optional OAuth token; relevant in case <code>"XOAUTH2"</code> or <code>"OAUTHBEARER"</code> SASL authentication is supposed to be performed
+     * @param optionalCircuitBreaker The optional circuit breaker for mail filter access
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, int userId, int contextId) {
+    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, Optional<CircuitBreaker> optionalCircuitBreaker, int userId, int contextId) {
         super();
         sieve_user = null == userName ? authUserName : userName;
         sieve_auth = authUserName;
@@ -214,6 +222,7 @@ public class SieveHandler {
         this.oauthToken = oauthToken;
         this.userId = userId;
         this.contextId = contextId;
+        this.optionalCircuitBreaker = optionalCircuitBreaker;
     }
 
     /**
@@ -232,6 +241,7 @@ public class SieveHandler {
         sieve_host_port = port; // 2000
         onlyWelcome = true;
         this.oauthToken = null;
+        optionalCircuitBreaker = Optional.empty();
     }
 
     /**
@@ -382,8 +392,8 @@ public class SieveHandler {
          * Set timeout to the one specified in the config file or the one which was explicitly set
          */
         s_sieve.setSoTimeout(getEffectiveReadTimeout(configuredTimeout));
-        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8));
-        bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
+        bis_sieve = optionalCircuitBreaker.isPresent() ? new FailsafeCircuitBreakerBufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8), optionalCircuitBreaker.get()) : new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8));
+        bos_sieve = optionalCircuitBreaker.isPresent() ? new FailsafeCircuitBreakerBufferedOutputStream(s_sieve.getOutputStream(), optionalCircuitBreaker.get()) : new BufferedOutputStream(s_sieve.getOutputStream());
 
         if (!getServerWelcome()) {
             throw new OXSieveHandlerException("No welcome from server", sieve_host, sieve_host_port, null);
@@ -446,8 +456,8 @@ public class SieveHandler {
                  * Switch to TLS
                  */
                 s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
-                bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8));
-                bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
+                bis_sieve = optionalCircuitBreaker.isPresent() ? new FailsafeCircuitBreakerBufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8), optionalCircuitBreaker.get()) : new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8));
+                bos_sieve = optionalCircuitBreaker.isPresent() ? new FailsafeCircuitBreakerBufferedOutputStream(s_sieve.getOutputStream(), optionalCircuitBreaker.get()) : new BufferedOutputStream(s_sieve.getOutputStream());
                 /*
                  * Fire CAPABILITY command but only for cyrus that is not sieve draft conform to sent CAPABILITY response again
                  * directly as response for the STARTTLS command.

@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -111,6 +112,8 @@ import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PasswordSource;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import net.jodah.failsafe.CircuitBreaker;
+import net.jodah.failsafe.function.CheckedRunnable;
 
 /**
  * {@link MailFilterServiceImpl}
@@ -119,7 +122,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class MailFilterServiceImpl implements MailFilterService, Reloadable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
 
     private static final String CATEGORY_FLAG = "category";
     private static final String SYSTEM_CATEGORY_FLAG = "syscategory";
@@ -175,11 +178,11 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     // ---------------------------------------------------------------------------------------------------------------- //
 
     private final Cache<HostAndPort, Capabilities> staticCapabilities;
-
     private final ServiceLookup services;
+    private final Optional<CircuitBreaker> optionalCircuitBreaker;
 
     /**
-     * Initialises a new {@link MailFilterServiceImpl}.
+     * Initializes a new {@link MailFilterServiceImpl}.
      *
      * @param services The {@link ServiceLookup} instance
      * @throws OXException
@@ -188,16 +191,69 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         super();
         this.services = services;
         staticCapabilities = CacheBuilder.newBuilder().maximumSize(10).expireAfterWrite(30, TimeUnit.MINUTES).build();
-        checkConfigfile();
+
+        ConfigurationService config = getService(ConfigurationService.class);
+        checkConfigfile(config);
+
+        String sFailureThreshold = config.getProperty(MailFilterProperty.failureThreshold.getFQPropertyName());
+        String sSuccessThreshold = config.getProperty(MailFilterProperty.successThreshold.getFQPropertyName());
+        String sDelayMillis = config.getProperty(MailFilterProperty.delayMillis.getFQPropertyName());
+        if (Strings.isNotEmpty(sFailureThreshold, sSuccessThreshold, sDelayMillis)) {
+            CircuitBreaker circuitBreaker = null;
+            try {
+                int failureThreshold = Integer.parseInt(sSuccessThreshold);
+                if (failureThreshold < 0) {
+                    throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
+                }
+                int successThreshold = Integer.parseInt(sFailureThreshold);
+                if (successThreshold < 0) {
+                    throw new IllegalArgumentException("successThreshold must be greater than 0 (zero).");
+                }
+                int delayMillis = Integer.parseInt(sDelayMillis);
+                if (delayMillis <= 0) {
+                    throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
+                }
+                circuitBreaker = new CircuitBreaker()
+                    .withFailureThreshold(failureThreshold)
+                    .withSuccessThreshold(successThreshold)
+                    .withDelay(delayMillis, TimeUnit.MILLISECONDS)
+                    .onOpen(new CheckedRunnable() {
+
+                        @Override
+                        public void run() throws Exception {
+                            LOGGER.info("Mail filter circuit breaker opened");
+                        }
+                    })
+                    .onHalfOpen(new CheckedRunnable() {
+
+                        @Override
+                        public void run() throws Exception {
+                            LOGGER.info("Mail filter circuit breaker half-opened");
+                        }
+                    })
+                    .onClose(new CheckedRunnable() {
+
+                        @Override
+                        public void run() throws Exception {
+                            LOGGER.info("Mail filter circuit breaker closed");
+                        }
+                    });
+            } catch (RuntimeException e) {
+                LOGGER.warn("Invalid configuration for mail filter circuit breaker", e);
+            }
+            optionalCircuitBreaker = Optional.ofNullable(circuitBreaker);
+        } else {
+            optionalCircuitBreaker = Optional.empty();
+        }
     }
 
     /**
      * This method checks for a valid properties' file and throws and exception if none is there or one of the properties is missing
      *
+     * @param config The configuration service
      * @throws OXException If the properties' file is invalid
      */
-    private void checkConfigfile() throws OXException {
-        final ConfigurationService config = getService(ConfigurationService.class);
+    private void checkConfigfile(ConfigurationService config) throws OXException {
         try {
             Properties file = ConfigurationServices.loadPropertiesFrom(config.getFileByName("mailfilter.properties"));
             if (file.isEmpty()) {
@@ -274,7 +330,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -329,7 +385,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -388,7 +444,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -433,7 +489,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public final void purgeFilters(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -458,7 +514,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public final String getActiveScript(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -488,7 +544,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public List<Rule> listRules(Credentials credentials, String flag) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -545,7 +601,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public List<Rule> listRules(Credentials credentials, List<FilterType> exclusionFlags) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -585,7 +641,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
@@ -644,7 +700,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
 
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
@@ -688,7 +744,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public Set<String> getCapabilities(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 Capabilities capabilities = sieveHandler.getCapabilities();
@@ -705,7 +761,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public Set<String> getStaticCapabilities(final Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, true);
+            final SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, Optional.empty(), true);
             sieveHandler.setConnectTimeout(1500);
             sieveHandler.setReadTimeout(2000);
             HostAndPort key = new HostAndPort(sieveHandler.getSieveHost(), sieveHandler.getSievePort());
@@ -738,7 +794,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         try {
-            checkConfigfile();
+            checkConfigfile(configService);
         } catch (OXException e) {
             LOGGER.error("Error while reloading 'mailfilter.properties': {}", e.getMessage(), e);
         }
@@ -1235,7 +1291,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     public Map<String, Object> getExtendedProperties(Credentials credentials) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
-            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials, optionalCircuitBreaker);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 Capabilities capabilities = sieveHandler.getCapabilities();

@@ -828,6 +828,21 @@ public class Strings {
     }
 
     /**
+     * Checks for empty strings.
+     *
+     * @param strings The strings
+     * @return <code>true</code> if all input strings are <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
+     */
+    public static boolean isEmpty(final String... strings) {
+        for (String string : strings) {
+            if (!isEmpty(string)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Checks for a non-empty string.
      *
      * @param string The string
@@ -835,6 +850,21 @@ public class Strings {
      */
     public static boolean isNotEmpty(final String string) {
         return !isEmpty(string);
+    }
+
+    /**
+     * Checks for a non-empty strings.
+     *
+     * @param strings The strings
+     * @return <code>true</code> if all input strings are non-empty strings; else <code>false</code>
+     */
+    public static boolean isNotEmpty(final String... strings) {
+        for (String string : strings) {
+            if (isEmpty(string)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

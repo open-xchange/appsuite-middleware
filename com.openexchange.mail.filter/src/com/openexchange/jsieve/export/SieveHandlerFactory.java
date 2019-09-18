@@ -51,6 +51,7 @@ package com.openexchange.jsieve.export;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
@@ -67,6 +68,7 @@ import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
+import net.jodah.failsafe.CircuitBreaker;
 
 /**
  * {@link SieveHandlerFactory}
@@ -78,23 +80,25 @@ public final class SieveHandlerFactory {
     /**
      * Connect to the Sieve server and return a handler
      *
-     * @param creds credentials
-     * @return a sieve handler
+     * @param creds The credentials
+     * @param optionalCircuitBreaker The optional breaker for mail filter access
+     * @return A sieve handler
      * @throws OXException
      */
-    public static SieveHandler getSieveHandler(Credentials creds) throws OXException {
-        return getSieveHandler(creds, false);
+    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreaker> optionalCircuitBreaker) throws OXException {
+        return getSieveHandler(creds, optionalCircuitBreaker, false);
     }
 
     /**
      * Connect to the Sieve server and return a handler
      *
-     * @param creds credentials
+     * @param creds The credentials
+     * @param optionalCircuitBreaker The optional breaker for mail filter access
      * @param onlyWelcome <code>true</code> if only server's welcome message is of interest; otherwise <code>false</code> for full login round-trip
-     * @return a sieve handler
+     * @return A sieve handler
      * @throws OXException
      */
-    public static SieveHandler getSieveHandler(Credentials creds, boolean onlyWelcome) throws OXException {
+    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreaker> optionalCircuitBreaker, boolean onlyWelcome) throws OXException {
         LeanConfigurationService mailFilterConfig = Services.getService(LeanConfigurationService.class);
 
         int userId = creds.getUserid();
@@ -155,16 +159,16 @@ public final class SieveHandlerFactory {
         switch (credentialSource) {
             case IMAP_LOGIN: {
                 String authname = getMailAccount(userId, contextId, mailAccount).getLogin();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), userId, contextId);
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, userId, contextId);
             }
             case MAIL: {
                 String authname = getUser(creds, user).getMail();
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), userId, contextId);
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), authname, getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, userId, contextId);
             }
             case SESSION:
                 // fall-through
             case SESSION_FULL_LOGIN:
-                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), userId, contextId);
+                return newSieveHandlerUsing(sieveServer, sievePort, creds.getUsername(), creds.getAuthname(), getRightPassword(mailFilterConfig, creds), authEnc, creds.getOauthToken(), optionalCircuitBreaker, userId, contextId);
             default:
                 throw MailFilterExceptionCode.NO_VALID_CREDSRC.create();
         }
@@ -175,17 +179,17 @@ public final class SieveHandlerFactory {
      *
      * @param host The host
      * @param port The port
-     * @param userName The username
+     * @param userName The user name
      * @param authName The authentication name
      * @param password The password
      * @param authEncoding The authentication encoding
-     * @param oauthToken The oauth token
+     * @param oauthToken The OAuth token
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link SieveHandler}
      */
-    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, int userId, int contextId) {
-        return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken, userId, contextId);
+    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, Optional<CircuitBreaker> optionalCircuitBreaker, int userId, int contextId) {
+        return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken, optionalCircuitBreaker, userId, contextId);
     }
 
     /**

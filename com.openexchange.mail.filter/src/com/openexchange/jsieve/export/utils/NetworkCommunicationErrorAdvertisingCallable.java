@@ -47,78 +47,52 @@
  *
  */
 
-package com.openexchange.jsieve.export;
+package com.openexchange.jsieve.export.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
+import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringReader;
-import java.util.Optional;
-import java.util.StringTokenizer;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
+import java.util.List;
+import java.util.concurrent.Callable;
+import com.google.common.collect.ImmutableList;
 
 
 /**
- * {@link Bug34495Test}
+ * {@link NetworkCommunicationErrorAdvertisingCallable} -
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class Bug34495Test extends SieveHandler {
+public abstract class NetworkCommunicationErrorAdvertisingCallable<V> implements Callable<IOResult<V>> {
 
+    private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(
+        java.net.SocketTimeoutException.class,
+        java.io.EOFException.class);
 
-    private static final String ERROR_MSG_1 = "\"Zeile 7: Fehlender String: Hier muss entweder \\\"text:\\\" oder `\\\"` folgen\"";
-
-    private static final String ERROR_MSG_2 = "\"Cited from RFC 5804: \\\"Client implementations should note that this may be a\r\n" +
-                                              "multiline literal string with more than one error message separated\r\n" +
-                                              "by CRLFs.\\\"\"";
-
-    private static final String DELIMS = "\"\\\r\n ";
-
-    public Bug34495Test() {
-        super(null, null, null, null, 0, null, null, Optional.empty(), -1, -1);
+    /**
+     * Initializes a new {@link NetworkCommunicationErrorAdvertisingCallable}.
+     */
+    protected NetworkCommunicationErrorAdvertisingCallable() {
+        super();
     }
 
-
-    @Before
-    public void setUp() {
-        AUTH = true;
-        bos_sieve = new BufferedOutputStream(new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-            }
-        });
-    }
-
-     @Test
-     public void testParseMessageWithQuotes() throws Exception {
-        testParseMessage(ERROR_MSG_1);
-    }
-
-     @Test
-     public void testParseMessageWithLineBreaks() throws Exception {
-        testParseMessage(ERROR_MSG_2);
-    }
-
-    private void testParseMessage(String msg) throws Exception {
-        bis_sieve = new BufferedReader(new StringReader("NO " + msg));
-        boolean errorThrown = false;
+    @Override
+    public final IOResult<V> call() throws Exception {
         try {
-            setScript("test", new byte[1], new StringBuilder());
-        } catch (OXSieveHandlerException e) {
-            errorThrown = true;
-//          System.out.println(e.getMessage());
-          int c1 = new StringTokenizer(msg, DELIMS, false).countTokens();
-          int c2 = new StringTokenizer(e.getMessage(), DELIMS, false).countTokens();
-          assertTrue(c1 > 1);
-          assertEquals(c1, c2);
+            return new IOResult<V>(performIOOperation(), null);
+        } catch (IOException e) {
+            if (isEitherOf(e, NETWORK_COMMUNICATION_ERRORS)) {
+                throw e;
+            }
+            return new IOResult<V>(null, e);
         }
-
-        assertTrue(errorThrown);
     }
+
+    /**
+     * Performs the I/O operation
+     *
+     * @return The result
+     * @throws IOException An I/O error
+     */
+    protected abstract V performIOOperation() throws IOException;
 
 }
