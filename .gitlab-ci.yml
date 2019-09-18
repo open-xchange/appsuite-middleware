@@ -1,5 +1,4 @@
 stages:
-  - trigger-build-appsuite-stack
   - build
   - deploy
 
@@ -60,10 +59,3 @@ deploy documentation:
     - /^master-.*$/
     - /^release-.*$/
 
-
-trigger-vanillagradle:
-  stage: trigger-build-appsuite-stack
-  script:
-    - "curl -X POST -F token=686e6e702ab5da776a699d39d4b4c7 -F ref=master https://gitlab.open-xchange.com/api/v4/projects/1021/trigger/pipeline"
-  only:
-    - develop
