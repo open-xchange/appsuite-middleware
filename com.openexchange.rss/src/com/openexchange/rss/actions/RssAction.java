@@ -165,7 +165,8 @@ public class RssAction implements AJAXActionService {
             }
 
             // Iterate feed's entries
-            String feedTitle = feed.getTitle();
+
+            String feedTitle = extractTextFrom(feed.getTitleEx());
             String imageUrl = null;
             String feedUrl;
             try {
@@ -183,8 +184,11 @@ public class RssAction implements AJAXActionService {
                 // Create appropriate RssResult instance
                 RssResult result;
                 try {
-                    result = new RssResult().setAuthor(entry.getAuthor()).setSubject(entry.getTitle()).setUrl(checkUrl(entry.getLink()));
+                    result = new RssResult().setAuthor(entry.getAuthor()).setUrl(checkUrl(entry.getLink()));
                     result.setFeedUrl(feedUrl).setFeedTitle(feedTitle).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), now);
+
+                    // Title
+                    result.setSubject(extractTextFrom(entry.getTitleEx()));
 
                     // Check possible image
                     if (imageUrl != null) {
@@ -219,6 +223,23 @@ public class RssAction implements AJAXActionService {
         }
 
         return new AJAXRequestResult(results, "rss").addWarnings(warnings);
+    }
+
+    /**
+     * Extracts plain text from given content.
+     *
+     * @param content The content to extract from
+     * @return The extracted plain text
+     */
+    private String extractTextFrom(SyndContent content) {
+        String type = content.getType();
+        if (null != type && (type.startsWith("htm") || type.startsWith("xhtm"))) {
+            HtmlService htmlService = Services.optService(HtmlService.class);
+            if (htmlService != null) {
+                return htmlService.html2text(content.getValue(), false);
+            }
+        }
+        return content.getValue();
     }
 
     private void handleContents(RssPreprocessor preprocessor, SyndEntry entry, RssResult result, List<SyndContent> contents) throws OXException {
