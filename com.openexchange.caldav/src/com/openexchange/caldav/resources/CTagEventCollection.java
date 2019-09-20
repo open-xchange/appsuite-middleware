@@ -51,7 +51,6 @@ package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -172,7 +171,7 @@ public class CTagEventCollection extends EventCollection {
     }
 
     @Override
-    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+    protected SyncStatus<WebdavResource> getSyncStatus(com.openexchange.dav.resources.SyncToken syncToken) throws OXException {
         throw new UnsupportedOperationException();
     }
 
