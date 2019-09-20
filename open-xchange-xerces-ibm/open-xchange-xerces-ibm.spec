@@ -5,6 +5,7 @@ BuildArch:      noarch
 BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-sdk-ibm >= 1.6.0
+BuildRequires:  open-xchange-osgi
 Version:    	@OXVERSION@
 %define        ox_release 49
 Release:     	%{ox_release}_<CI_CNT>.<B_CNT>
