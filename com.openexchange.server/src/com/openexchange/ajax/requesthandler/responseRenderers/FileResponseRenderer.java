@@ -52,8 +52,8 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,6 +62,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.HttpStatus;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.ajax.container.DelegateFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -75,12 +76,12 @@ import com.openexchange.ajax.requesthandler.responseRenderers.actions.RemovePrag
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.SetBinaryInputStreamAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageClientAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.UpdateETagHeaderAction;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -159,12 +160,14 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         return (result.getResultObject() instanceof IFileHolder);
     }
 
+    private static final String MSG_OUTPUT_EXCEPTION = "Exception while trying to output file";
+
     @Override
     public void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
 
         // Check if file is actually supplied by the request URL.
-        if ((null == file) || hasNoFileItem(file)) {
+        if (null == file) {
             try {
                 // Do your thing if the file is not supplied to the request URL or if there is no file item associated with specified file
                 // Throw an exception, or send 404, or show default/warning page, or just ignore it.
@@ -173,10 +176,29 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
                 LOG.error("Exception while trying to write HTTP response.", e);
             }
         } else {
+            // Check if file is actually supplied by the request URL.
             try {
-                writeFileHolder(file, request, result, req, resp);
-            } finally {
-                postProcessingTasks(file);
+                file = returnInstanceIfHoldsData(file);
+            } catch (IOException e) {
+                LOG.error(MSG_OUTPUT_EXCEPTION, e);
+                sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, MSG_OUTPUT_EXCEPTION, resp);
+            }
+
+            // Output...
+            if (file == null) {
+                try {
+                    // Do your thing if the file is not supplied to the request URL or if there is no file item associated with specified file
+                    // Throw an exception, or send 404, or show default/warning page, or just ignore it.
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                } catch (IOException e) {
+                    LOG.error("Exception while trying to write HTTP response.", e);
+                }
+            } else {
+                try {
+                    writeFileHolder(file, request, result, req, resp);
+                } finally {
+                    postProcessingTasks(file);
+                }
             }
         }
     }
@@ -223,7 +245,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             }
             return;
         } catch (OXException e) {
-            String message = "Exception while trying to output file";
+            String message = MSG_OUTPUT_EXCEPTION;
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 Throwable cause = e;
@@ -246,8 +268,8 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             LOG.error("Exception while trying to output image", e);
             sendErrorSafe(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage(), resp);
         } catch (Exception e) {
-            String message = "Exception while trying to output file";
-            LOG.error("Exception while trying to output file", e);
+            String message = MSG_OUTPUT_EXCEPTION;
+            LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
             close(data.getDocumentData(), data.getFile());
@@ -277,12 +299,60 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
     }
 
     /**
-     * @param file
-     * @return
+     * Checks if given file holder holds data.
+     *
+     * @param file The file holder to check
+     * @return The passed file holder instance in case it is considered to hold data; otherwise <code>null</code> for no data
+     * @throws IOException If an I/O error occurs
      */
-    private static boolean hasNoFileItem(final IFileHolder file) {
+    private static IFileHolder returnInstanceIfHoldsData(final IFileHolder file) throws IOException {
         final String fileMIMEType = file.getContentType();
-        return ((isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && isEmpty(file.getName()) && (file.getLength() <= 0L));
+        if ((!isEmpty(fileMIMEType) && !SAVE_AS_TYPE.equals(fileMIMEType)) || !isEmpty(file.getName())) {
+            return file;
+        }
+
+        // First, check advertised length
+        if (file.getLength() > 0L) {
+            // File holder signals to hold data
+            return file;
+        }
+        if (file.getLength() == 0L) {
+            // Apparently no data
+            return null;
+        }
+
+        // Unknown length. Need to check stream...
+        if (file.repetitive()) {
+            InputStream in = null;
+            try {
+                in = file.getStream();
+                in = Streams.getNonEmpty(in);
+                return in == null ? null : file;
+            } catch (OXException e) {
+                Throwable cause = e.getCause();
+                throw cause instanceof IOException ? ((IOException) cause) : new IOException(null == cause ? e : cause);
+            } finally {
+                close(in);
+            }
+        }
+
+        InputStream in = null;
+        try {
+            in = file.getStream();
+            in = Streams.getNonEmpty(in);
+            if (in == null) {
+                return null;
+            }
+            DelegateFileHolder newFile = new DelegateFileHolder(file);
+            newFile.setStream(in, -1);
+            in = null; // Avoid premature closing
+            return newFile;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            throw cause instanceof IOException ? ((IOException) cause) : new IOException(null == cause ? e : cause);
+        } finally {
+            close(in);
+        }
     }
 
     /**
