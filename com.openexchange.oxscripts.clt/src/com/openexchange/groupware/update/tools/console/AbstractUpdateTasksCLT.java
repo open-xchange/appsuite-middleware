@@ -91,7 +91,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     @Override
     protected Boolean requiresAdministrativePermission() {
-        return Boolean.TRUE;
+        return null;
     }
 
     @Override
@@ -111,7 +111,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Writes the specified composite list to the console
-     * 
+     *
      * @param compositeList The composite list to write
      * @param columns The column names
      * @param formats The formatting of the columns
@@ -122,7 +122,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Writes the specified composite list to the console
-     * 
+     *
      * @param compositeList The composite list to write
      * @param columns The column names
      * @param formats The formatting of the columns
@@ -144,7 +144,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Prepare the header row
-     * 
+     *
      * @param columns The header columns
      * @return A {@link List} with the header columns
      */
@@ -158,7 +158,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Prepares the table data
-     * 
+     *
      * @param compositeList The composite list to read the data from
      * @param columns The column names
      * @return The prepared data
@@ -173,7 +173,7 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
 
     /**
      * Prepares a row for the table data
-     * 
+     *
      * @param columns The columns
      * @param executedTask The executed task metadata
      * @return A {@link List} with the row data

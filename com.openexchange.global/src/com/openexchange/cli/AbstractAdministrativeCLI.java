@@ -55,7 +55,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AbstractAdministrativeCLI} - The basic class for administrative command-line tools that probably require appropriate permissions.
- * 
+ *
  * @param <R> - The return type
  * @param <C> - The execution context type
  * @param <A> - The authenticator type
@@ -84,25 +84,24 @@ public abstract class AbstractAdministrativeCLI<R, C, A> extends AbstractCLI<R, 
     /**
      * Checks if the administrative options are mandatory, configuration based, or optional and adds them
      * as command line options as such, i.e. as mandatory, optional or not at all.
-     * 
+     *
      * @return <code>true</code> if the administrative are required or configuration based; <code>false</code> otherwise
      */
     protected boolean optAdministrativeOptions() {
         Boolean requiresAdministrativePermission = requiresAdministrativePermission();
-        boolean mandatory = true;
-        if (requiresAdministrativePermission == null) {
-            mandatory = false;
-        }
         if (requiresAdministrativePermission != null && false == requiresAdministrativePermission.booleanValue()) {
             return false;
         }
+
+        // If not null, requiresAdministrativePermission is set to Boolean.TRUE at this location
+        boolean mandatory = (requiresAdministrativePermission != null);
         addAdministrativeOptions(options, mandatory);
         return true;
     }
 
     /**
      * Performs administrative authentication
-     * 
+     *
      * @param cmd The {@link CommandLine} that contains all command line arguments
      * @throws Exception if the operation fails
      */
@@ -135,21 +134,21 @@ public abstract class AbstractAdministrativeCLI<R, C, A> extends AbstractCLI<R, 
      * @param options The {@link Options} instance to add administrative options to.
      * @param mandatory Whether the administrative options shall be mandatory
      */
-    protected void addAdministrativeOptions(Options option, boolean mandatory) {
+    protected void addAdministrativeOptions(Options options, boolean mandatory) {
         options.addOption(createArgumentOption("A", "adminuser", "adminUser", "Admin username", mandatory));
         options.addOption(createArgumentOption("P", "adminpass", "adminPassword", "Admin password", mandatory));
     }
 
     /**
      * Returns the exit code when authentication fails
-     * 
+     *
      * @return the exit code when authentication fails
      */
     protected abstract int getAuthFailedExitCode();
 
     /**
      * Returns the authenticator stub
-     * 
+     *
      * @return The Authenticator stub
      * @throws Exception if the operation fails
      */
