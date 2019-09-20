@@ -61,6 +61,7 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.java.HTMLDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 
 /**
@@ -138,6 +139,9 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
                 if (checkedDownload.isConsideredHarmful()) {
                     // CLient requested possibly harmful content for inline display. Deny.
                     throw new FileResponseRendererActionException(HttpServletResponse.SC_FORBIDDEN, "Denied to output possibly harmful content");
+                }
+                if (Strings.isNotEmpty(checkedDownload.getFileName())) {
+                    contentTypeByFileName = FileResponseRenderer.getContentTypeByFileName(checkedDownload.getFileName());
                 }
             }
             /*
