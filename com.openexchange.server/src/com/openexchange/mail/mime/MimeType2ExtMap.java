@@ -261,7 +261,11 @@ public final class MimeType2ExtMap {
                 list = nl;
             }
         }
-        list.add(mimeType);
+        for (String ext : fileExtensions) {
+            if (!list.contains(ext)) {
+                list.add(ext);
+            }
+        }
     }
 
     private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
@@ -610,6 +614,13 @@ public final class MimeType2ExtMap {
 
         void add(String mimeType) {
             if (null != mimeType) {
+                List<ComparableMimeTypeEntry> snapshot = mimeTypeEntries.getSnapshot();
+                for (ComparableMimeTypeEntry comparableMimeTypeEntry : snapshot) {
+                    if (comparableMimeTypeEntry.mimeType.equals(mimeType)) {
+                        // Already contained
+                        return;
+                    }
+                }
                 mimeTypeEntries.addAndSort(new ComparableMimeTypeEntry(mimeType));
             }
         }
