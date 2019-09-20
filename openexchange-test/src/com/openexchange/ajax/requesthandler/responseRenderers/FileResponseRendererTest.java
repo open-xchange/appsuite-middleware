@@ -274,6 +274,37 @@ public class FileResponseRendererTest {
     }
 
     @Test
+    public void testContentTypeByFileName_Bug67097() {
+        try {
+            ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("67097.png", "image/png", Delivery.view, Disposition.inline, "oxout.html");
+            final AJAXRequestData requestData = new AJAXRequestData();
+            {
+                requestData.setSession(new SimServerSession(1, 1));
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+
+            MimeType2ExtMap.addMimeType("image/png", "png");
+
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            fileResponseRenderer.setScaler(new TestableImageTransformationService(IOUtils.toByteArray(fileHolder.getStream()), ImageTransformations.HIGH_EXPENSE));
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+            final String expectedContentType = "image/png";
+            final String currentContentType = resp.getContentType();
+            assertEquals("Unexpected content-type.", expectedContentType, currentContentType);
+            final String expectedFileName = "oxout.png";
+            final String currentContentDisposition = resp.getHeader("Content-Disposition");
+            assertTrue("Unexpected content-disposition: " + currentContentDisposition, currentContentDisposition.indexOf(expectedFileName) > 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testRangeHeader_Bug27394() {
         try {
             ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("26926_27394.pdf", "application/pdf", Delivery.view, Disposition.inline, "26926_27394.pdf");
