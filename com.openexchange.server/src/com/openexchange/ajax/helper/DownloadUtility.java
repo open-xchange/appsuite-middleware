@@ -430,7 +430,7 @@ public final class DownloadUtility {
                             /*
                              * File extension does not fit to MIME type. Reset file name.
                              */
-                            fn = addFileExtension(fileExtension, extensions.iterator().next());
+                            fn = addFileExtension(fn, extensions.iterator().next());
                             preparedFileName = getSaveAsFileName(fn, msieOnWindows, contentType.getBaseType());
                         }
                         final String detectedCT = ImageTypeDetector.getMimeType(sink.getStream());
@@ -508,17 +508,17 @@ public final class DownloadUtility {
             if (sContentDisposition == null) {
                 // Assume "inline" as default disposition to trigger client's (Browser) internal viewer.
                 final StringBuilder builder = new StringBuilder(32).append("inline");
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
+                appendFilenameParameter(fn, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz, harmful);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), fn, in, sz, harmful);
             } else if (sContentDisposition.indexOf(';') < 0) {
                 final StringBuilder builder = new StringBuilder(32).append(sContentDisposition);
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
+                appendFilenameParameter(fn, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz, harmful);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), fn, in, sz, harmful);
             } else {
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in, sz, harmful);
+                retval = new CheckedDownload(contentType.toString(), sContentDisposition, fn, in, sz, harmful);
             }
             return retval;
         } catch (final UnsupportedEncodingException e) {
@@ -657,7 +657,7 @@ public final class DownloadUtility {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
-        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), randomAccess, size, harmful);
+        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), preparedFileName, randomAccess, size, harmful);
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
@@ -740,14 +740,16 @@ public final class DownloadUtility {
 
         private final String contentType;
         private final String contentDisposition;
+        private final String fileName;
         private final Readable inputStream;
         private final long size;
         private final boolean consideredHarmful;
 
-        CheckedDownload(String contentType, String contentDisposition, Readable inputStream, long size, boolean consideredHarmful) {
+        CheckedDownload(String contentType, String contentDisposition, String fileName, Readable inputStream, long size, boolean consideredHarmful) {
             super();
             this.contentType = contentType;
             this.contentDisposition = contentDisposition;
+            this.fileName = fileName;
             this.inputStream = inputStream;
             this.size = size;
             this.consideredHarmful = consideredHarmful;
@@ -760,6 +762,15 @@ public final class DownloadUtility {
          */
         public boolean isConsideredHarmful() {
             return consideredHarmful;
+        }
+
+        /**
+         * Gets the file name
+         *
+         * @return The file name
+         */
+        public String getFileName() {
+            return fileName;
         }
 
         /**
