@@ -88,6 +88,8 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.CalendarDescription;
 import com.openexchange.dav.mixins.ScheduleCalendarTransp;
 import com.openexchange.dav.reports.SyncStatus;
+import com.openexchange.dav.resources.SyncToken;
+import com.openexchange.dav.resources.SyncToken.Flag;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -301,12 +303,12 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
     }
 
     @Override
-    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
-        return getSyncStatus(since, -1);
+    protected SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken) throws OXException {
+        return getSyncStatus(syncToken, -1);
     }
 
     @Override
-    protected SyncStatus<WebdavResource> getSyncStatus(Date since, int limit) throws OXException {
+    protected SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken, int limit) throws OXException {
         SyncStatus<WebdavResource> syncStatus = new SyncStatus<WebdavResource>();
         /*
          * get new, modified & deleted objects since client token within synchronized interval
@@ -319,14 +321,14 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
                 if (0 < limit) {
                     maxResults = 0 < maxResults ? Math.min(maxResults, limit) : limit;
                 }
-                if (null == since) {
+                if (syncToken.isInitial()) {
                     access.set(CalendarParameters.PARAMETER_IGNORE, new String[] { "deleted" }); // exclude deleted events for initial sync
                 }
                 access.set(CalendarParameters.PARAMETER_FIELDS, SYNC_STATUS_FIELDS);
                 access.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
                 access.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
                 access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(maxResults));
-                return access.getUpdatedEventsInFolder(folderID, null == since ? 0L : since.getTime());
+                return access.getUpdatedEventsInFolder(folderID, syncToken.getTimestamp());
             }
         }.execute(factory.getSession());
         /*
@@ -335,7 +337,7 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         Map<String, List<Event>> newAndModifiedEventsByUID = CalendarUtils.getEventsByUID(updates.getNewAndModifiedEvents(), false);
         for (List<Event> value : newAndModifiedEventsByUID.values()) {
             EventResource resource = getEventResource(CalendarUtils.sortSeriesMasterFirst(value));
-            int status = null == since || null != resource.getCreationDate() && resource.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
+            int status = syncToken.isInitial() || null != resource.getCreationDate() && resource.getCreationDate().getTime() > syncToken.getTimestamp() ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
             syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
         }
         /*
@@ -349,15 +351,19 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
             syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), resource));
         }
         /*
-         * additionally add HTTP 507 status to indicate truncated results if required
+         * additionally add HTTP 507 status and mark sync token accordingly to indicate truncated results if required
          */
+        SyncToken nextSyncToken;
         if (updates.isTruncated()) {
             syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(DAVProtocol.SC_INSUFFICIENT_STORAGE, getUrl(), this));
+            nextSyncToken = new SyncToken(updates.getTimestamp(), Flag.TRUNCATED);
+        } else {
+            nextSyncToken = new SyncToken(updates.getTimestamp());
         }
         /*
          * set next sync token (as maximum timestamp) & return result
          */
-        syncStatus.setToken(String.valueOf(updates.getTimestamp()));
+        syncStatus.setToken(nextSyncToken.toString());
         return syncStatus;
     }
 

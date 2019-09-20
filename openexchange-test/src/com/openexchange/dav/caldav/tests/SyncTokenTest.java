@@ -95,6 +95,14 @@ public class SyncTokenTest extends CalDAVTest {
         syncCollection("wurstpeter", StatusCodes.SC_FORBIDDEN);
     }
 
+    @Test
+    public void testOutdatedTruncatedSyncToken() throws Exception {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.YEAR, -2);
+        String token = calendar.getTimeInMillis() + ".4";
+        syncCollection(token, StatusCodes.SC_MULTISTATUS);
+    }
+
     protected MultiStatusResponse[] syncCollection(String syncToken, int expectedResponse) throws Exception {
         String uri = getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID());
         DavPropertyNameSet props = new DavPropertyNameSet();
