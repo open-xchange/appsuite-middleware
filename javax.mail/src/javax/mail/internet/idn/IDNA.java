@@ -51,6 +51,7 @@ package javax.mail.internet.idn;
 
 import javax.mail.internet.AddressException;
 import org.slf4j.LoggerFactory;
+import com.openexchange.java.Strings;
 import gnu.inet.encoding.IDNAException;
 
 /**
@@ -141,7 +142,7 @@ public final class IDNA {
             return aceAddress;
         }
         try {
-            String unicode = gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true);
+            String unicode = gnu.inet.encoding.IDNA.toUnicode(Strings.asciiLowerCase(aceAddress.substring(pos + 1)), true);
             return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(unicode).toString();
         } catch (RuntimeException e) {
             // Decoding punycode failed
