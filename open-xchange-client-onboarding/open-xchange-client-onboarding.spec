@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 62
+%define        ox_release 63
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -138,6 +138,8 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
+* Mon Sep 23 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2019-09-30 (5418)
 * Mon Sep 02 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2019-09-09 (5395)
 * Mon Aug 19 2019 Thorben Betten <thorben.betten@open-xchange.com>
