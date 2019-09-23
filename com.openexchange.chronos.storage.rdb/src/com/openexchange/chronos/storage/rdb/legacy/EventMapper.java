@@ -787,11 +787,12 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 int storedOrganizerId = resultSet.getInt(columnLabels[1]);
                 String storedPrincipal = resultSet.getString(columnLabels[2]);
                 int storedPrincipalId = resultSet.getInt(columnLabels[3]);
-                if (0 < storedOrganizerId && storedOrganizerId == storedPrincipalId ||
-                    0 == storedOrganizerId && Strings.isNotEmpty(storedOrganizer) && storedOrganizer.equals(storedPrincipal) ||
-                    0 == storedPrincipalId && Strings.isEmpty(storedPrincipal)) {
+                if (0 == storedPrincipalId && Strings.isEmpty(storedPrincipal) /* no principal set */ ||
+                    0 < storedOrganizerId && storedOrganizerId == storedPrincipalId /* same internal entity */ ||
+                    0 == storedOrganizerId && Strings.isNotEmpty(storedOrganizer) && storedOrganizer.equals(storedPrincipal) /* same email */ ||
+                    0 == storedPrincipalId && Strings.isNotEmpty(storedPrincipal) && storedPrincipal.equals(storedOrganizer) /* same email */ ) {
                     /*
-                     * no different "sent-by" user, take over stored values
+                     * no or no different "sent-by" user, take over stored values
                      */
                     organizer.setEntity(storedOrganizerId);
                     organizer.setUri(Appointment2Event.getURI(storedOrganizer));

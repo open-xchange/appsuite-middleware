@@ -58,6 +58,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectOrganizerSentByTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -82,7 +83,7 @@ public class ChronosStoragePurgeLegacyDataTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { ChronosStorageMigrationTask.class.getName() };
+        return new String[] { ChronosStorageMigrationTask.class.getName(), CalendarEventCorrectOrganizerSentByTask.class.getName() };
     }
 
     @Override
