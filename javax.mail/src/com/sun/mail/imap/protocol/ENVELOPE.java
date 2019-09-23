@@ -59,6 +59,12 @@ import com.sun.mail.util.PropUtil;
  */
 
 public class ENVELOPE implements Item {
+
+    static final boolean FILL_MISSING_DOMAIN = getBooleanSystemProperty("mail.imap.envelope.fillmissingdomain", true);
+
+    private static boolean getBooleanSystemProperty(final String name, final boolean def) {
+        return Boolean.parseBoolean(System.getProperty(name, def ? "true" : "false"));
+    }
     
     // IMAP item name
     static final char[] name = {'E','N','V','E','L','O','P','E'};
@@ -205,6 +211,10 @@ class IMAPAddress extends InternetAddress {
 	r.skipSpaces();
 	if (!r.isNextNonSpace(')')) // skip past terminating ')'
             throw new ParsingException("ADDRESS parse error");
+
+	if (ENVELOPE.FILL_MISSING_DOMAIN && host == null) {
+	    host = "missing-domain";
+    }
 
 	if (host == null) {
 	    // it's a group list, start or end
