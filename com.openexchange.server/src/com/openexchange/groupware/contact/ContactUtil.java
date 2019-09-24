@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -206,10 +207,9 @@ public class ContactUtil {
         if (0 < con.getNumberOfImages() || con.containsImage1() && null != con.getImage1()) {
             Date lastModified = con.getImageLastModified();
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
-                return service.getUserPictureUrl(con.getInternalUserId(), session, lastModified == null ? null : lastModified.getTime(), true);
-            } else {
-                return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, lastModified == null ? null : lastModified.getTime(), true);
+                return service.getUserPictureUrl(con.getInternalUserId(), session, lastModified == null ? null : L(lastModified.getTime()), true);
             }
+            return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, lastModified == null ? null : L(lastModified.getTime()), true);
         }
         return null;
     }
