@@ -240,6 +240,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                     });
             } catch (RuntimeException e) {
                 LOGGER.warn("Invalid configuration for mail filter circuit breaker", e);
+                circuitBreaker = null;
             }
             optionalCircuitBreaker = Optional.ofNullable(circuitBreaker);
         } else {
