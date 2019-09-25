@@ -94,12 +94,32 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         new GetUserConfigurationSource().execute(args);
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private Integer contextId;
+
+    /**
+     * Prevent instantiation from outside.
+     */
+    private GetUserConfigurationSource() {
+        super();
+    }
+
+    @Override
+    protected boolean isAuthEnabled(RemoteAuthenticator authenticator) throws RemoteException {
+        return contextId == null ? !authenticator.isMasterAuthenticationDisabled() : !authenticator.isContextAuthenticationDisabled();
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) {
-        // nothing to do
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException{
+        if (contextId == null) {
+            authenticator.doAuthentication(login, password);
+        } else {
+            authenticator.doAuthentication(login, password, contextId.intValue());
+        }
     }
 
     /**
@@ -140,6 +160,15 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             printHelp();
             System.exit(-1);
             return;
+        }
+
+        String contextVal = cmd.getOptionValue(OPT_CONTEXT_SHORT);
+        try {
+            contextId = Integer.valueOf(contextVal.trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Cannot parse '" + contextVal + "' as a context id");
+            printHelp();
+            System.exit(1);
         }
     }
 
@@ -245,7 +274,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
      */
     @Override
     protected Boolean requiresAdministrativePermission() {
-        return Boolean.TRUE;
+        return null;
     }
 
     /**
