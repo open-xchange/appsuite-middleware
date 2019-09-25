@@ -202,11 +202,11 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             CircuitBreaker circuitBreaker = null;
             try {
                 int failureThreshold = Integer.parseInt(sSuccessThreshold);
-                if (failureThreshold < 0) {
+                if (failureThreshold <= 0) {
                     throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
                 }
                 int successThreshold = Integer.parseInt(sFailureThreshold);
-                if (successThreshold < 0) {
+                if (successThreshold <= 0) {
                     throw new IllegalArgumentException("successThreshold must be greater than 0 (zero).");
                 }
                 int delayMillis = Integer.parseInt(sDelayMillis);

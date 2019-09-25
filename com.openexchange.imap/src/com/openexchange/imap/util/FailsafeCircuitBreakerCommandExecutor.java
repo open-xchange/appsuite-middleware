@@ -101,10 +101,10 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
         if (null == hostList || hostList.isEmpty()) {
             throw new IllegalArgumentException("hostList must not be null or empty.");
         }
-        if (failureThreshold < 0) {
+        if (failureThreshold <= 0) {
             throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
         }
-        if (successThreshold < 0) {
+        if (successThreshold <= 0) {
             throw new IllegalArgumentException("successThreshold must be greater than 0 (zero).");
         }
         if (delayMillis <= 0) {
