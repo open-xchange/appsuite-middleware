@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -802,87 +803,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 tmp = tmp.trim();
                 String[] names = Strings.splitByComma(tmp);
                 List<FailsafeCircuitBreakerCommandExecutor> breakerList = new ArrayList<>(names.length);
-                NextName: for (String name : names) {
-                    String propertyName = "com.openexchange.imap.breaker." + name + ".hosts";
-                    String hosts = configuration.getProperty(propertyName, "");
-                    if (Strings.isEmpty(hosts)) {
-                        LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
-                        continue NextName;
+                for (String name : names) {
+                    Optional<FailsafeCircuitBreakerCommandExecutor> optionalCircuitBreaker = initCircuitBreakerForName(name, configuration);
+                    if (optionalCircuitBreaker.isPresent()) {
+                        FailsafeCircuitBreakerCommandExecutor circuitBreaker = optionalCircuitBreaker.get();
+                        breakerList.add(circuitBreaker);
+                        logBuilder.append("    Added circuit breaker for hosts: {}{}");
+                        args.add(circuitBreaker.getHostList().getHostString());
+                        args.add(Strings.getLineSeparator());
                     }
-
-                    propertyName = "com.openexchange.imap.breaker." + name + ".ports";
-                    String ports = configuration.getProperty(propertyName, "");
-                    if (Strings.isEmpty(ports)) {
-                        ports = null;
-                    }
-
-                    int failures;
-                    {
-                        propertyName = "com.openexchange.imap.breaker." + name + ".failureThreshold";
-                        String sFailures = configuration.getProperty(propertyName, "");
-                        if (Strings.isEmpty(sFailures)) {
-                            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
-                            continue NextName;
-                        }
-                        try {
-                            failures = Integer.parseInt(sFailures.trim());
-                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                            LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
-                            continue NextName;
-                        }
-                    }
-                    
-                    int success;
-                    {
-                        propertyName = "com.openexchange.imap.breaker." + name + ".successThreshold";
-                        String sSuccess = configuration.getProperty(propertyName, "");
-                        if (Strings.isEmpty(sSuccess)) {
-                            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
-                            continue NextName;
-                        }
-                        try {
-                            success = Integer.parseInt(sSuccess.trim());
-                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                            LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
-                            continue NextName;
-                        }
-                    }
-
-                    long delayMillis;
-                    {
-                        propertyName = "com.openexchange.imap.breaker." + name + ".delayMillis";
-                        String sDelayMillis = configuration.getProperty(propertyName, "");
-                        if (Strings.isEmpty(sDelayMillis)) {
-                            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
-                            continue NextName;
-                        }
-                        try {
-                            delayMillis = Long.parseLong(sDelayMillis.trim());
-                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                            LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
-                            continue NextName;
-                        }
-                    }
-
-                    HostList hostList = HostList.valueOf(hosts);
-                    Set<Integer> portSet;
-                    if (null == ports) {
-                        portSet = null;
-                    } else {
-                        portSet = new HashSet<>(6);
-                        for (String sPort : Strings.splitByComma(ports)) {
-                            try {
-                                portSet.add(Integer.valueOf(sPort.trim()));
-                            } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                                LOG.warn("Invalid value for port. Not a number. Skipping breaker configuration for {}", name);
-                                continue NextName;
-                            }
-                        }
-                    }
-                    breakerList.add(new FailsafeCircuitBreakerCommandExecutor(hostList, portSet, failures, success, delayMillis));
-                    logBuilder.append("    Added circuit breaker for hosts: {}{}");
-                    args.add(hosts);
-                    args.add(Strings.getLineSeparator());
                 }
                 breakers = breakerList;
                 for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
@@ -894,6 +823,87 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         logBuilder.append("Global IMAP properties successfully loaded!");
 
         LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
+    }
+
+    private static Optional<FailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(String name, ConfigurationService configuration) {
+        String propertyName = "com.openexchange.imap.breaker." + name + ".hosts";
+        String hosts = configuration.getProperty(propertyName, "");
+        if (Strings.isEmpty(hosts)) {
+            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+            return Optional.empty();
+        }
+
+        propertyName = "com.openexchange.imap.breaker." + name + ".ports";
+        String ports = configuration.getProperty(propertyName, "");
+        if (Strings.isEmpty(ports)) {
+            ports = null;
+        }
+
+        int failures;
+        {
+            propertyName = "com.openexchange.imap.breaker." + name + ".failureThreshold";
+            String sFailures = configuration.getProperty(propertyName, "");
+            if (Strings.isEmpty(sFailures)) {
+                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                return Optional.empty();
+            }
+            try {
+                failures = Integer.parseInt(sFailures.trim());
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                return Optional.empty();
+            }
+        }
+
+        int success;
+        {
+            propertyName = "com.openexchange.imap.breaker." + name + ".successThreshold";
+            String sSuccess = configuration.getProperty(propertyName, "");
+            if (Strings.isEmpty(sSuccess)) {
+                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                return Optional.empty();
+            }
+            try {
+                success = Integer.parseInt(sSuccess.trim());
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                return Optional.empty();
+            }
+        }
+
+        long delayMillis;
+        {
+            propertyName = "com.openexchange.imap.breaker." + name + ".delayMillis";
+            String sDelayMillis = configuration.getProperty(propertyName, "");
+            if (Strings.isEmpty(sDelayMillis)) {
+                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                return Optional.empty();
+            }
+            try {
+                delayMillis = Long.parseLong(sDelayMillis.trim());
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                return Optional.empty();
+            }
+        }
+
+        HostList hostList = HostList.valueOf(hosts);
+        Set<Integer> portSet;
+        if (null == ports) {
+            portSet = null;
+        } else {
+            portSet = new HashSet<>(6);
+            for (String sPort : Strings.splitByComma(ports)) {
+                try {
+                    portSet.add(Integer.valueOf(sPort.trim()));
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    LOG.warn("Invalid value for port. Not a number. Skipping breaker configuration for {}", name);
+                    return Optional.empty();
+                }
+            }
+        }
+
+        return Optional.of(new FailsafeCircuitBreakerCommandExecutor(hostList, portSet, failures, success, delayMillis));
     }
 
     @Override

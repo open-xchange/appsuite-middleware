@@ -142,6 +142,15 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
         this.circuitBreaker = circuitBreaker;
     }
 
+    /**
+     * Gets the listing of IMAP hosts to which this circuit breaker applies.
+     *
+     * @return The host list
+     */
+    public HostList getHostList() {
+        return hostList;
+    }
+
     @Override
     public boolean isApplicable(Protocol protocol) {
         return hostList.contains(protocol.getHost()) && (null == ports || ports.contains(Integer.valueOf(protocol.getPort())));
