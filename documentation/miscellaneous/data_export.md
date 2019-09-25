@@ -6,7 +6,7 @@ tags: Configuration, Installation
 
 The data export feature allows users to submit a data export of his/her personal data packed into one or more ZIP archives. The actual export is a background task that completes at any time in future. Once ready, the user is notified via E-Mail that he/she is now able to download the packages.
 
-Since the artefacts and result files a typically quite big files, the configuration for the data export feature requires to specify a dedicated file storage, which is used to manage those big files. Thus common file storage associated with a context or user is not burdened and quota is unaffected as well.
+Since the artefacts and result files are typically quite big files, the configuration for the data export feature requires to specify a dedicated file storage, which is used to manage those big files. Thus common file storage associated with a context or user is not burdened and quota is unaffected as well.
 
 Furthermore, scheduling of data export tasks within an Open-Xchange installation is a global task. Therefore, the common payload databases are not suitable to store data export information since determination execution of the next adequate data export task requires to look-up every payload database on every registered database host. Therefore, the data export feature requires setup of the global database to have a central database for fast and easy look-up.
 
