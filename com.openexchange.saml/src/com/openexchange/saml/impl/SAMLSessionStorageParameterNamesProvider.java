@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,63 +47,46 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.openexchange.exception.OXException;
+import com.openexchange.saml.SAMLSessionParameters;
+import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 
 /**
- * SAML specific keys of session properties.
+ * {@link SAMLSessionStorageParameterNamesProvider} - Provides the SAML-specific session parameters.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class SAMLSessionParameters {
+public class SAMLSessionStorageParameterNamesProvider implements SessionStorageParameterNamesProvider {
+
+    private final List<String> parameterNames;
 
     /**
-     * com.openexchange.saml.Authenticated
-     * <p>
-     * See also <code>com.openexchange.saml.oauth.OAuthFailedAuthenticationHandler.AUTHENTICATED</code>.
+     * Initializes a new {@link SAMLSessionStorageParameterNamesProvider}.
      */
-    public static final String AUTHENTICATED = "com.openexchange.saml.Authenticated";
+    public SAMLSessionStorageParameterNamesProvider() {
+        super();
+        List<String> parameterNames = new ArrayList<String>(10);
+        parameterNames.add(SAMLSessionParameters.AUTHENTICATED);
+        parameterNames.add(SAMLSessionParameters.SUBJECT_ID);
+        parameterNames.add(SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER);
+        parameterNames.add(SAMLSessionParameters.SESSION_INDEX);
+        parameterNames.add(SAMLSessionParameters.SESSION_COOKIE);
+        parameterNames.add(SAMLSessionParameters.ACCESS_TOKEN);
+        parameterNames.add(SAMLSessionParameters.REFRESH_TOKEN);
+        parameterNames.add(SAMLSessionParameters.SAML_PATH);
+        parameterNames.add(SAMLSessionParameters.SINGLE_LOGOUT);
+        this.parameterNames = ImmutableList.copyOf(parameterNames);
+    }
 
-    /**
-     * com.openexchange.saml.SubjectID
-     */
-    public static final String SUBJECT_ID = "com.openexchange.saml.SubjectID";
+    @Override
+    public List<String> getParameterNames(int userId, int contextId) throws OXException {
+        return parameterNames;
+    }
 
-    /**
-     * com.openexchange.saml.SessionNotOnOrAfter
-     */
-    public static final String SESSION_NOT_ON_OR_AFTER = "com.openexchange.saml.SessionNotOnOrAfter";
-
-    /**
-     * com.openexchange.saml.SessionIndex
-     */
-    public static final String SESSION_INDEX = "com.openexchange.saml.SessionIndex";
-
-    /**
-     * com.openexchange.saml.SessionCookie
-     */
-    public static final String SESSION_COOKIE = "com.openexchange.saml.SessionCookie";
-
-    /**
-     * com.openexchange.saml.AccessToken
-     */
-    public static final String ACCESS_TOKEN = "com.openexchange.saml.AccessToken";
-
-    /**
-     * com.openexchange.saml.RefreshToken
-     */
-    public static final String REFRESH_TOKEN = "com.openexchange.saml.RefreshToken";
-
-    /**
-     * com.openexchange.saml.SamlPath
-     */
-    public static final String SAML_PATH = "com.openexchange.saml.SamlPath";
-
-    /**
-     * com.openexchange.saml.SingleLogout
-     */
-    public static final String SINGLE_LOGOUT = "com.openexchange.saml.SingleLogout";
-
-    // In case of adding new constants here; see SAMLSessionStorageParameterNamesProvider!
 }

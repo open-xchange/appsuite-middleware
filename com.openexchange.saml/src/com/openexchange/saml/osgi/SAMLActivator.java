@@ -53,7 +53,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
+import com.openexchange.saml.impl.SAMLSessionStorageParameterNamesProvider;
 import com.openexchange.saml.spi.SAMLConfigRegistry;
+import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 
 /**
  * OSGi activator for com.openexchange.saml.
@@ -73,21 +75,24 @@ public class SAMLActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        samlFeature = new SAMLFeature(context);
+        SAMLFeature samlFeature = new SAMLFeature(context);
         samlFeature.open();
+        this.samlFeature = samlFeature;
 
         SAMLConfigRegistryImpl configRegistry = SAMLConfigRegistryImpl.getInstance();
         DefaultConfig config = DefaultConfig.init(getService(ConfigurationService.class));
         configRegistry.registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
         registerService(SAMLConfigRegistry.class, configRegistry);
 
+        registerService(SessionStorageParameterNamesProvider.class, new SAMLSessionStorageParameterNamesProvider());
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
+        SAMLFeature samlFeature = this.samlFeature;
         if (samlFeature != null) {
+            this.samlFeature = null;
             samlFeature.close();
-            samlFeature = null;
         }
         super.stopBundle();
     }
