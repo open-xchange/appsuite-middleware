@@ -599,51 +599,6 @@ public class EventResource extends DAVObjectResource<Event> {
      *         successfully and the create operation should not be tried again, or <code>null</code> if not recoverable at all
      */
     private Boolean handleOnCreate(CalDAVImport caldavImport, OXException e) {
-        try {
-            switch (e.getErrorCode()) {
-                case "CAL-4090": // UID conflict [uid %1$s, conflicting id %2$d]
-                    return handleUIDConflict(caldavImport, e);
-            }
-        } catch (Exception x) {
-            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
-        }
-        return null;
-    }
-
-    /**
-     * Handles an UID conflict during a create operation by attempting to perform an update of the existing event data instead.
-     *
-     * @param caldavImport The calendar data to import
-     * @param e The exception that occurred
-     * @return {@link Boolean#FALSE} if successfully handled and there's no need to try again, <code>null</code>, otherwise
-     */
-    private Boolean handleUIDConflict(CalDAVImport caldavImport, OXException e) throws Exception {
-        /*
-         * get identifier of conflicting event
-         */
-        String conflictingId = null;
-        if (null != e.getLogArgs() && 1 < e.getLogArgs().length && null != e.getLogArgs()[1] && String.class.isInstance(e.getLogArgs()[1])) {
-            conflictingId = (String) e.getLogArgs()[1];
-        }
-        if (null != conflictingId) {
-            /*
-             * try to perform an update of the existing event with the imported data from the client
-             */
-            LOG.info("Event {} already exists (id {}), trying again as update.", caldavImport.getUID(), conflictingId);
-            long clientTimestamp = CalendarUtils.DISTANT_FUTURE; //TODO timestamp from where?
-            EventID eventID = new EventID(parent.folderID, conflictingId);
-            CalendarResult result = new CalendarAccessOperation<CalendarResult>(factory) {
-
-                @Override
-                protected CalendarResult perform(IDBasedCalendarAccess access) throws OXException {
-                    return access.updateEvent(eventID, caldavImport.getEvent(), clientTimestamp);
-                }
-            }.execute(factory.getSession());
-            if (0 < result.getCreations().size()) {
-                // event is "created" afterwards from user's point of view
-                return Boolean.FALSE;
-            }
-        }
         return null;
     }
 
