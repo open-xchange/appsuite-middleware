@@ -798,7 +798,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             String addr = s.substring(start, end).trim();
             String pers = null;
             if (rfc822 && start_personal >= 0) {
-                pers = unquote(s.substring(start_personal, end_personal).trim());
+                pers = unquote(MimeMessageUtility.decodeMultiEncodedHeader(s.substring(start_personal, end_personal).trim()));
                 if (isEmpty(pers)) {
                     pers = null;
                 }

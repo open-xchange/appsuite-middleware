@@ -1001,7 +1001,7 @@ public final class MimeMessageUtility {
         return sb.toString();
     }
 
-    private static final Pattern ENC_PATTERN = Pattern.compile("=\\?(\\S+?)\\?(\\S+?)\\?(.+?)\\?=");
+    private static final Pattern ENC_PATTERN = Pattern.compile("=\\?(\\S+?)\\?(\\S+?)\\?(.*?)\\?=");
 
     /**
      * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1.
