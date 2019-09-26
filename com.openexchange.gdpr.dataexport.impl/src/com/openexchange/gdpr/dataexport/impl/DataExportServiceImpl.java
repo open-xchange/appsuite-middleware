@@ -622,6 +622,7 @@ public class DataExportServiceImpl implements DataExportService {
     public void planSchedule() throws OXException {
         if (!config.isActive()) {
             // Not enabled on this node
+            LOG.debug("Denied scheduling data export tasks on this node since deactivated per configuration");
             return;
         }
 
@@ -762,6 +763,8 @@ public class DataExportServiceImpl implements DataExportService {
             }
         };
         this.nextRunTask.set(timerService.schedule(nextScheduleRun, stopDelay + 60000L, TimeUnit.MILLISECONDS));
+
+        LOG.debug("Scheduled execution of data export tasks on this node");
     }
 
     private void cancelAllTimerTasks(boolean mayInterruptIfRunning) {
@@ -798,6 +801,7 @@ public class DataExportServiceImpl implements DataExportService {
             Optional<DataExportJob> dataExportJob = storageService.getNextDataExportJob();
             if (!dataExportJob.isPresent()) {
                 // No pending/paused/expired tasks available
+                LOG.debug("Currently there are no data export tasks to execute");
                 return;
             }
 
