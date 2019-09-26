@@ -102,7 +102,6 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class EventResource extends DAVObjectResource<Event> {
 
     private static final String CONTENT_TYPE = "text/calendar; charset=UTF-8";
-    private static final int MAX_RETRIES = 3;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventResource.class);
 
     private final EventCollection parent;
@@ -402,65 +401,29 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     public void create() throws WebdavProtocolException {
-        int retryCount = 0;
-        do {
-            try {
-                createEvent(caldavImport);
-                return;
-            } catch (OXException e) {
-                if (++retryCount < MAX_RETRIES) {
-                    Boolean handled = handleOnCreate(caldavImport, e);
-                    if (Boolean.TRUE.equals(handled)) {
-                        continue;
-                    } else if (Boolean.FALSE.equals(handled)) {
-                        return;
-                    }
-                }
-                throw getProtocolException(e);
-            }
-        } while (true);
+        try {
+            createEvent(caldavImport);
+        } catch (OXException e) {
+            throw getProtocolException(e);
+        }
     }
 
     @Override
     public void delete() throws WebdavProtocolException {
-        int retryCount = 0;
-        do {
-            try {
-                deleteEvent(object);
-                return;
-            } catch (OXException e) {
-                if (++retryCount < MAX_RETRIES) {
-                    Boolean handled = handleOnDelete(object, e);
-                    if (Boolean.TRUE.equals(handled)) {
-                        continue;
-                    } else if (Boolean.FALSE.equals(handled)) {
-                        return;
-                    }
-                }
-                throw getProtocolException(e);
-            }
-        } while (true);
+        try {
+            deleteEvent(object);
+        } catch (OXException e) {
+            throw getProtocolException(e);
+        }
     }
 
     @Override
     public void save() throws WebdavProtocolException {
-        int retryCount = 0;
-        do {
-            try {
-                updateEvent(caldavImport);
-                return;
-            } catch (OXException e) {
-                if (++retryCount < MAX_RETRIES) {
-                    Boolean handled = handleOnUpdate(caldavImport, e);
-                    if (Boolean.TRUE.equals(handled)) {
-                        continue;
-                    } else if (Boolean.FALSE.equals(handled)) {
-                        return;
-                    }
-                }
-                throw getProtocolException(e);
-            }
-        } while (true);
+        try {
+            updateEvent(caldavImport);
+        } catch (OXException e) {
+            throw getProtocolException(e);
+        }
     }
 
     private void deleteEvent(Event event) throws OXException {
@@ -564,42 +527,6 @@ public class EventResource extends DAVObjectResource<Event> {
                 return createdEvent;
             }
         }.execute(factory.getSession());
-    }
-
-    /**
-     * Tries to handle a {@link WebdavProtocolException} that occurred during resource deletion automatically.
-     *
-     * @param event The event being deleted
-     * @param e The exception
-     * @return {@link Boolean#TRUE} if the delete operation should be tried again, {@link Boolean#FALSE} if the problem was handled
-     *         successfully and the delete operation should not be tried again, or <code>null</code> if not recoverable at all
-     */
-    private Boolean handleOnDelete(Event event, OXException e) {
-        return null;
-    }
-
-    /**
-     * Tries to handle a {@link WebdavProtocolException} that occurred during resource update automatically.
-     *
-     * @param caldavImport The CalDAV import the event should be updated from
-     * @param e The exception
-     * @return {@link Boolean#TRUE} if the update operation should be tried again, {@link Boolean#FALSE} if the problem was handled
-     *         successfully and the update operation should not be tried again, or <code>null</code> if not recoverable at all
-     */
-    private Boolean handleOnUpdate(CalDAVImport caldavImport, OXException e) {
-        return null;
-    }
-
-    /**
-     * Tries to handle a {@link WebdavProtocolException} that occurred during resource creation automatically.
-     *
-     * @param caldavImport The CalDAV import the event shoudl be created from
-     * @param e The exception
-     * @return {@link Boolean#TRUE} if the create operation should be tried again, {@link Boolean#FALSE} if the problem was handled
-     *         successfully and the create operation should not be tried again, or <code>null</code> if not recoverable at all
-     */
-    private Boolean handleOnCreate(CalDAVImport caldavImport, OXException e) {
-        return null;
     }
 
     /**
