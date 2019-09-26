@@ -95,6 +95,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -160,6 +161,11 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
         cleanUpTask = new AtomicReference<>(null);
         latch = new CountDownLatch(1);
         startTime = new AtomicLong(0L);
+    }
+
+    @Override
+    public void setThreadName(ThreadRenamer threadRenamer) {
+        threadRenamer.renamePrefix(DataExportTaskExecution.class.getSimpleName());
     }
 
     /**
