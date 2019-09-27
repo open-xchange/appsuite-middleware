@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -793,9 +794,22 @@ public class DataExportServiceImpl implements DataExportService {
     }
 
     synchronized void startProcessingTasks() throws OXException {
+        // Grab thread pool service
         ThreadPoolService threadPool = services.getServiceSafe(ThreadPoolService.class);
 
+        // Obtain and check executions mapping
         final Map<Future<Void>, DataExportTaskExecution> executions = this.executions;
+        for (Iterator<Entry<Future<Void>, DataExportTaskExecution>> it = executions.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Future<Void>, DataExportTaskExecution> executionEntry = it.next();
+            DataExportTaskExecution execution = executionEntry.getValue();
+            if (execution.isInvalid()) {
+                it.remove();
+                execution.stop();
+                executionEntry.getKey().cancel(true);
+            }
+        }
+
+        // Start new executions as needed
         int count = 1;
         while (executions.size() < config.getNumberOfConcurrentTasks()) {
             Optional<DataExportJob> dataExportJob = storageService.getNextDataExportJob();
@@ -815,20 +829,31 @@ public class DataExportServiceImpl implements DataExportService {
             // Check if a diagnostics report is supposed to be compiled for task-associated user
             boolean addDiagnosticsReport = isAddDiagnosticsReport(job);
 
-            // Initialize execution
-            DataExportTaskExecution execution = new DataExportTaskExecution(job, addDiagnosticsReport, config, storageService, providerRegistry, services);
-            Future<Void> future = threadPool.submit(execution);
-            executions.put(future, execution);
+            // Some variables for clean-up
+            DataExportTaskExecution execution = null;
+            Future<Void> future = null;
+            boolean openedForProcessing = false;
+            try {
+                // Initialize execution & submit it to thread pool
+                execution = new DataExportTaskExecution(job, addDiagnosticsReport, config, storageService, providerRegistry, services);
+                future = threadPool.submit(execution);
 
-            // Open execution for processing & register clean-up task, which ensures execution is removed from map when finished
-            Runnable cleanUpTask = new Runnable() {
+                // Store execution in map. Then open it for being processed while registering a clean-up task that ensures execution is removed from map when finished
+                executions.put(future, execution);
+                execution.allowProcessing(new AllowProcessingRunnable(future, executions));
+                openedForProcessing = false;
+            } finally {
+                if (!openedForProcessing) {
+                    if (execution != null) {
+                        execution.stop();
+                    }
 
-                @Override
-                public void run() {
-                    executions.remove(future);
+                    if (future != null) {
+                        executions.remove(future);
+                        future.cancel(true);
+                    }
                 }
-            };
-            execution.allowProcessing(cleanUpTask);
+            }
         }
     }
 
@@ -878,6 +903,23 @@ public class DataExportServiceImpl implements DataExportService {
             return false;
         }
         return true;
+    }
+
+    private static final class AllowProcessingRunnable implements Runnable {
+
+        private final Future<Void> futureToRemove;
+        private final Map<Future<Void>, DataExportTaskExecution> executions;
+
+        AllowProcessingRunnable(Future<Void> futureToRemove, Map<Future<Void>, DataExportTaskExecution> executions) {
+            super();
+            this.futureToRemove = futureToRemove;
+            this.executions = executions;
+        }
+
+        @Override
+        public void run() {
+            executions.remove(futureToRemove);
+        }
     }
 
 }

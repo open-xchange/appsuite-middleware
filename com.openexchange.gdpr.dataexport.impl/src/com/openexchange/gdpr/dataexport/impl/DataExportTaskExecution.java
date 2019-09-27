@@ -123,7 +123,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
     private final long maxTimeToLiveMillis;
     private final AtomicReference<JobAndReport> currentJob;
     private final AtomicReference<ProviderInfo> currentProviderInfo;
-    private final AtomicReference<Thread> currentThread;
+    private final ProcessingThreadReference processingThread;
     private final AtomicReference<ScheduledTimerTask> currentToucher;
     private final AtomicReference<ScheduledTimerTask> currentStopper;
     private final Lock stopLock;
@@ -157,7 +157,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
         this.providerRegistry = providerRegistry;
         this.services = services;
         currentProviderInfo = new AtomicReference<>(null);
-        currentThread = new AtomicReference<>(null);
+        processingThread = new ProcessingThreadReference();
         cleanUpTask = new AtomicReference<>(null);
         latch = new CountDownLatch(1);
         startTime = new AtomicLong(0L);
@@ -196,11 +196,45 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
         return startTimeMillis <= 0 ? -1L : System.currentTimeMillis() - startTimeMillis;
     }
 
+    /**
+     * Checks whether this execution is considered as being valid.
+     * <p>
+     * Valid means, either processing is ahead or it is currently processed.
+     *
+     * @return <code>true</code> if processed; otherwise <code>false</code>
+     */
+    public boolean isValid() {
+        return processingThread.isPendingOrRunning();
+    }
+
+    /**
+     * Checks whether this execution is considered as being invalid.
+     * <p>
+     * Invalid means, processing has started, but there is no more a processing thread associated with it.
+     *
+     * @return <code>true</code> if <b>not</b> processed; otherwise <code>false</code>
+     */
+    public boolean isInvalid() {
+        return !isValid();
+    }
+
     @Override
     public Void call() throws OXException {
-        Thread executingThread = Thread.currentThread();
-        this.currentThread.set(executingThread);
+        this.processingThread.setCurrentThread(Thread.currentThread());
+        try {
+            process();
+        } finally {
+            this.processingThread.unsetCurrentThread();
+        }
+        return null;
+    }
 
+    /**
+     * Processes this data export execution that is querying and handling pending/paused/expired data export tasks.
+     *
+     * @throws OXException If processing fails
+     */
+    private void process() throws OXException {
         try {
             // Check if thread is interrupted
             if (Thread.interrupted()) {
@@ -219,7 +253,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
 
             if (!optionalJob.isPresent()) {
                 // No further pending/paused/expired jobs available
-                return null;
+                return;
             }
 
             do {
@@ -243,7 +277,6 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
             } while (optionalJob.isPresent());
 
             // No further pending/paused/expired jobs available
-            return null;
         } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
@@ -252,14 +285,15 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
             LOG.warn("Data export execution failed", t);
             throw t;
         } finally {
-            this.currentThread.set(null);
             Runnable cleanUpTask = this.cleanUpTask.get();
             if (cleanUpTask != null) {
-                cleanUpTask.run();
+                try {
+                    cleanUpTask.run();
+                } catch (Exception e) {
+                    LOG.warn("Failed to perform clean-up for data export execution", e);
+                }
             }
         }
-
-        return null;
     }
 
     /**
@@ -841,4 +875,32 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
             super(reason);
         }
     }
+
+    private static class ProcessingThreadReference {
+
+        private boolean started;
+        private Thread currentThread;
+
+        ProcessingThreadReference() {
+            super();
+            started = false;
+        }
+
+        synchronized boolean isPendingOrRunning() {
+            return !started || currentThread != null;
+        }
+
+        synchronized void setCurrentThread(Thread currentThread) {
+            if (currentThread == null) {
+                return;
+            }
+            this.currentThread = currentThread;
+            started = true;
+        }
+
+        synchronized void unsetCurrentThread() {
+            this.currentThread = null;
+        }
+    }
+
 }
