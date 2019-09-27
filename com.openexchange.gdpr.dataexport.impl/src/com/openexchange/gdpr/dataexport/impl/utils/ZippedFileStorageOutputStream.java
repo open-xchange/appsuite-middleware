@@ -69,6 +69,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link ZippedFileStorageOutputStream} - An output stream that writes a ZIP archive to a file storage location.
@@ -390,21 +391,16 @@ public class ZippedFileStorageOutputStream extends OutputStream {
     }
 
     private ExceptionForwardingPipedOutputStream initOutputStream() throws IOException {
+        // Initialize pipes
         ExceptionAwarePipedInputStream in = new ExceptionAwarePipedInputStream(DataExportUtility.BUFFER_SIZE);
         ExceptionForwardingPipedOutputStream out = new ExceptionForwardingPipedOutputStream(in);
 
+        // Create writer task
         FileStorage fileStorage= this.fileStorage;
         BlockingAtomicReference<String> fileStorageLocationReference = this.fileStorageLocationReference;
-        AbstractTask<Void> fileStorageWriter = new AbstractTask<Void>() {
+        AbstractTask<Void> fileStorageWriter = new DataExportFileStorageWriterTask(in, fileStorage, fileStorageLocationReference);
 
-            @Override
-            public Void call() throws OXException {
-                String fileStorageLocation = fileStorage.saveNewFile(in);
-                fileStorageLocationReference.set(fileStorageLocation);
-                return null;
-            }
-        };
-
+        // Submit/execute writer task
         ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
         if (threadPool == null) {
             try {
@@ -419,6 +415,46 @@ public class ZippedFileStorageOutputStream extends OutputStream {
         }
 
         return out;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * {@link DataExportFileStorageWriterTask} - Writes the bytes received from given piped input stream into specified file storage.
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since v7.10.3
+     */
+    private static final class DataExportFileStorageWriterTask extends AbstractTask<Void> {
+
+        private final ExceptionAwarePipedInputStream in;
+        private final BlockingAtomicReference<String> fileStorageLocationReference;
+        private final FileStorage fileStorage;
+
+        /**
+         * Initializes a new {@link DataExportFileStorageWriterTask}.
+         *
+         * @param in The piped input stream to read from
+         * @param fileStorage The file storage to write to
+         * @param fileStorageLocationReference The reference for the resulting file storage location when writing to storage is completed
+         */
+        DataExportFileStorageWriterTask(ExceptionAwarePipedInputStream in, FileStorage fileStorage, BlockingAtomicReference<String> fileStorageLocationReference) {
+            this.in = in;
+            this.fileStorageLocationReference = fileStorageLocationReference;
+            this.fileStorage = fileStorage;
+        }
+
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            threadRenamer.renamePrefix(DataExportFileStorageWriterTask.class.getSimpleName());
+        }
+
+        @Override
+        public Void call() throws OXException {
+            String fileStorageLocation = fileStorage.saveNewFile(in);
+            fileStorageLocationReference.set(fileStorageLocation);
+            return null;
+        }
     }
 
 }
