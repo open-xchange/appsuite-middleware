@@ -458,15 +458,27 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
-                            LOGGER.info("Started Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Started Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient(), new Throwable("Dovecot start listener trace"));
+                            } else {
+                                LOGGER.info("Started Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
+                            }
                             return listener;
                         }
 
                         // Registration failed
-                        LOGGER.info("Could not register Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Could not register Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient(), new Throwable("Dovecot start listener trace"));
+                        } else {
+                            LOGGER.info("Could not register Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
+                        }
                     } else {
                         // Already running for session user
-                        LOGGER.info("Did not start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Did not start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient(), new Throwable("Dovecot start listener trace"));
+                        } else {
+                            LOGGER.info("Did not start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
+                        }
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -483,7 +495,11 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient(), new Throwable("Dovecot start listener trace"));
+            } else {
+                LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
+            }
         }
 
         // No listener registered for given session
@@ -499,13 +515,25 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         StopResult stopResult = stopListener(true, false, session.getUserId(), session.getContextId());
         switch (stopResult) {
         case RECONNECTED:
-            LOGGER.info("Reconnected Dovecot listener for user {} in context {} using another session", I(session.getUserId()), I(session.getContextId()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Reconnected Dovecot listener for user {} in context {} using another session", I(session.getUserId()), I(session.getContextId()), new Throwable("Dovecot stop listener trace"));
+            } else {
+                LOGGER.info("Reconnected Dovecot listener for user {} in context {} using another session", I(session.getUserId()), I(session.getContextId()));
+            }
             return true;
         case RECONNECTED_AS_PERMANENT:
-            LOGGER.info("Reconnected as permanent Dovecot listener for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Reconnected as permanent Dovecot listener for user {} in context {}", I(session.getUserId()), I(session.getContextId()), new Throwable("Dovecot stop listener trace"));
+            } else {
+                LOGGER.info("Reconnected as permanent Dovecot listener for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+            }
             return true;
         case STOPPED:
-            LOGGER.info("Stopped Dovecot listener for user {} in context {} with session {}", I(session.getUserId()), I(session.getContextId()), session.getSessionID());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Stopped Dovecot listener for user {} in context {} with session {}", I(session.getUserId()), I(session.getContextId()), session.getSessionID(), new Throwable("Dovecot stop listener trace"));
+            } else {
+                LOGGER.info("Stopped Dovecot listener for user {} in context {} with session {}", I(session.getUserId()), I(session.getContextId()), session.getSessionID());
+            }
             return true;
         default:
             break;
@@ -571,7 +599,11 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
-                            LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
+                            } else {
+                                LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                            }
                             return listener;
                         }
 
@@ -587,15 +619,27 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
-                            LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
+                            } else {
+                                LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                            }
                             return listener;
                         }
 
                         // Registration failed
-                        LOGGER.info("Could not register permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Could not register permanent Dovecot listener for user {} in context {}", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
+                        } else {
+                            LOGGER.info("Could not register permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                        }
                     } else {
                         // Already running for session user
-                        LOGGER.info("Did not start permanent Dovecot listener for user {} in context {} as there is already an associated listener", I(userId), I(contextId));
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Did not start permanent Dovecot listener for user {} in context {} as there is already an associated listener", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
+                        } else {
+                            LOGGER.info("Did not start permanent Dovecot listener for user {} in context {} as there is already an associated listener", I(userId), I(contextId));
+                        }
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -612,7 +656,11 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} as there is already an associated listener", I(userId), I(contextId));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Could not acquire lock to start permanent Dovecot listener for user {} in context {} as there is already an associated listener", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
+            } else {
+                LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} as there is already an associated listener", I(userId), I(contextId));
+            }
         }
 
         // No listener registered for given session
@@ -628,10 +676,18 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         StopResult stopResult = stopListener(tryToReconnect, true, pushUser.getUserId(), pushUser.getContextId());
         switch (stopResult) {
         case RECONNECTED:
-            LOGGER.info("Reconnected permanent Dovecot listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Reconnected permanent Dovecot listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()), new Throwable("Dovecot stop permanent listener trace"));
+            } else {
+                LOGGER.info("Reconnected permanent Dovecot listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            }
             return true;
         case STOPPED:
-            LOGGER.info("Stopped permanent Dovecot listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Stopped permanent Dovecot listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()), new Throwable("Dovecot stop permanent listener trace"));
+            } else {
+                LOGGER.info("Stopped permanent Dovecot listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            }
             return true;
         default:
             break;
