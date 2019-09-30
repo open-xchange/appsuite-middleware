@@ -857,7 +857,7 @@ public final class SieveTextFilter {
                 nextChar = false;
                 i++;
             } else if (!commentRemoved && !comment && c == 't') {
-                if ("text:".equals(sb.substring(i, i + 5))) {
+                if (((i + 5) <= sb.length()) && "text:".equals(sb.substring(i, i + 5))) {
                     dontParse = true;
                 }
                 nextChar = false;
