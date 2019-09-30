@@ -60,6 +60,10 @@ import com.openexchange.java.Strings;
 public enum DataExportStatus {
 
     /**
+     * The task is non-existent.
+     */
+    NONE("NONE"),
+    /**
      * The task is pending and awaits execution.
      */
     PENDING("PENDING"),

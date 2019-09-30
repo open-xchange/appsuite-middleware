@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExport;
 import com.openexchange.gdpr.dataexport.DataExportService;
+import com.openexchange.gdpr.dataexport.DataExportStatus;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,7 +80,7 @@ public class GetDataExportAction extends AbstractDataExportAction {
      */
     public GetDataExportAction(ServiceLookup services) {
         super(services);
-        jNonExistent = ImmutableJSONObject.immutableFor(new JSONObject(2).putSafe("status", "none"));
+        jNonExistent = ImmutableJSONObject.immutableFor(new JSONObject(2).putSafe("status", DataExportStatus.NONE.getId() ));
     }
 
     @Override
