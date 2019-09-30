@@ -182,97 +182,6 @@
         }
       }
     },
-    "/infostore?action=search" : {
-      "put" : {
-        "operationId" : "searchInfoItems",
-        "tags" : [ "Infostore" ],
-        "summary" : "Search for infoitems.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamInfostoreColumns"
-        }, {
-          "in" : "query",
-          "name" : "folder",
-          "description" : "The folder ID to restrict the search to. If not specified, all folders are searched.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "sort",
-          "description" : "The identifier of a column which determines the sort order of the response. If this parameter is specified , then the parameter order must be also specified.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "order",
-          "description" : "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "start",
-          "description" : "The start index (inclusive, zero-based) in the ordered search, that is requested.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
-          }
-        }, {
-          "in" : "query",
-          "name" : "end",
-          "description" : "The last index (inclusive) from the ordered search, that is requested.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
-          }
-        }, {
-          "in" : "query",
-          "name" : "includeSubfolders",
-          "description" : "If set to `true` and a `folder` is specified, this folder and all of its subfolders are considered by the search.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "in" : "query",
-          "name" : "pregenerate_previews",
-          "description" : "If set to \"true\" preview generation is triggered in the background for all files in request result",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with matching infoitems. Infoitems are represented by arrays. The elements of each array contain the\ninformation specified by the corresponding identifiers in the `columns` parameter. In case of errors the\nresponsible fields in the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InfoItemsResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/InfoItemSearchBody"
-              }
-            }
-          },
-          "description" : "A JSON object containing search parameters.",
-          "required" : true
-        }
-      }
-    },
     "/mail?action=get" : {
       "get" : {
         "operationId" : "getMail",
@@ -395,38 +304,79 @@
         }
       }
     },
-    "/import?action=CSV" : {
-      "post" : {
-        "operationId" : "importCSV",
-        "tags" : [ "Import" ],
-        "summary" : "Imports contact data from CSV file.",
-        "description" : "#### Example CSV\n```\n\"Given name\",\"Sur name\"\n\"Günther\",\"Mustermann\"\n\"Hildegard\",\"Musterfrau\"\n```\nThe delimiter may be any CSV-valid character (e.g. \",\" or \";\"). The first line must contain the column titles that are related\nto the corresponding fields of the ContactData model (see [getContact](#contacts/getContact) request). See [Detailed contact data](#detailed-contact-data)\nfor a mapping of fields to CSV column titles.\n",
+    "/infostore?action=search" : {
+      "put" : {
+        "operationId" : "searchInfoItems",
+        "tags" : [ "Infostore" ],
+        "summary" : "Search for infoitems.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
-          "in" : "query",
-          "name" : "folder",
-          "description" : "Object ID of the folder into which the data should be imported. This must be a contact folder.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
+          "$ref" : "#/components/parameters/gblQueryParamInfostoreColumns"
         }, {
           "in" : "query",
-          "name" : "charset",
-          "description" : "A fixed character encoding to use when parsing the uploaded file, overriding the built-in defaults, following the conventions documented in [RFC 2278](http://tools.ietf.org/html/rfc2278).",
+          "name" : "folder",
+          "description" : "The folder ID to restrict the search to. If not specified, all folders are searched.",
           "required" : false,
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "in" : "query",
+          "name" : "sort",
+          "description" : "The identifier of a column which determines the sort order of the response. If this parameter is specified , then the parameter order must be also specified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "order",
+          "description" : "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "start",
+          "description" : "The start index (inclusive, zero-based) in the ordered search, that is requested.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "end",
+          "description" : "The last index (inclusive) from the ordered search, that is requested.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "includeSubfolders",
+          "description" : "If set to `true` and a `folder` is specified, this folder and all of its subfolders are considered by the search.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "pregenerate_previews",
+          "description" : "If set to \"true\" preview generation is triggered in the background for all files in request result",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A HTML page as described in [File uploads](#file-uploads) containing a JSON object with the field `data` that represents\nan array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created contacts.\nIn case of errors the JSON object contains the well known [error fields](#error-handling).\n",
+            "description" : "A JSON object containing an array with matching infoitems. Infoitems are represented by arrays. The elements of each array contain the\ninformation specified by the corresponding identifiers in the `columns` parameter. In case of errors the\nresponsible fields in the response are filled (see [Error handling](#error-handling)).\n",
             "content" : {
-              "text/html" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "string"
+                  "$ref" : "#/components/schemas/InfoItemsResponse"
                 }
               }
             }
@@ -434,21 +384,14 @@
         },
         "requestBody" : {
           "content" : {
-            "multipart/form-data" : {
+            "application/json" : {
               "schema" : {
-                "type" : "object",
-                "title" : "importCSVBody",
-                "properties" : {
-                  "file" : {
-                    "description" : "The CSV file containing the contact data. The column titles are the ones described in [Detailed contact data](#detailed-contact-data).",
-                    "type" : "string",
-                    "format" : "binary"
-                  }
-                },
-                "required" : [ "file" ]
+                "$ref" : "#/components/schemas/InfoItemSearchBody"
               }
             }
-          }
+          },
+          "description" : "A JSON object containing search parameters.",
+          "required" : true
         }
       }
     },
@@ -525,6 +468,63 @@
         }
       }
     },
+    "/import?action=CSV" : {
+      "post" : {
+        "operationId" : "importCSV",
+        "tags" : [ "Import" ],
+        "summary" : "Imports contact data from CSV file.",
+        "description" : "#### Example CSV\n```\n\"Given name\",\"Sur name\"\n\"Günther\",\"Mustermann\"\n\"Hildegard\",\"Musterfrau\"\n```\nThe delimiter may be any CSV-valid character (e.g. \",\" or \";\"). The first line must contain the column titles that are related\nto the corresponding fields of the ContactData model (see [getContact](#contacts/getContact) request). See [Detailed contact data](#detailed-contact-data)\nfor a mapping of fields to CSV column titles.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "folder",
+          "description" : "Object ID of the folder into which the data should be imported. This must be a contact folder.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "charset",
+          "description" : "A fixed character encoding to use when parsing the uploaded file, overriding the built-in defaults, following the conventions documented in [RFC 2278](http://tools.ietf.org/html/rfc2278).",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A HTML page as described in [File uploads](#file-uploads) containing a JSON object with the field `data` that represents\nan array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created contacts.\nIn case of errors the JSON object contains the well known [error fields](#error-handling).\n",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "importCSVBody",
+                "properties" : {
+                  "file" : {
+                    "description" : "The CSV file containing the contact data. The column titles are the ones described in [Detailed contact data](#detailed-contact-data).",
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/chronos/alarm?action=ack" : {
       "get" : {
         "operationId" : "acknowledgeAlarm",
@@ -595,45 +595,6 @@
         },
         "requestBody" : {
           "$ref" : "#/components/requestBodies/MailFilterDeletionBody"
-        }
-      }
-    },
-    "/mail/compose/{id}/attachments" : {
-      "post" : {
-        "operationId" : "postAttachments",
-        "tags" : [ "MailCompose" ],
-        "summary" : "Add new attachment.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "path",
-          "name" : "id",
-          "description" : "The ID of the composition space",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the newly added attachment.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailComposeAttachmentResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad request, response contains error message."
-          },
-          "401" : {
-            "description" : "Not authorized"
-          }
-        },
-        "requestBody" : {
-          "$ref" : "#/components/requestBodies/postAttachments"
         }
       }
     },
@@ -753,6 +714,45 @@
         }
       }
     },
+    "/mail/compose/{id}/attachments" : {
+      "post" : {
+        "operationId" : "postAttachments",
+        "tags" : [ "MailCompose" ],
+        "summary" : "Add new attachment.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "description" : "The ID of the composition space",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the newly added attachment.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailComposeAttachmentResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/postAttachments"
+        }
+      }
+    },
     "/sessionmanagement?action=all" : {
       "get" : {
         "operationId" : "all",
@@ -832,28 +832,6 @@
         }
       }
     },
-    "/chronos/availability?action=get" : {
-      "get" : {
-        "operationId" : "getAvailability",
-        "tags" : [ "Chronos" ],
-        "summary" : "Gets the configured availability of the user.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An object containing all data of the requested availability. In case of errors the\nresponsible fields in the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/GetAvailabilityResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/chronos/schedjoules?action=search" : {
       "get" : {
         "operationId" : "search",
@@ -887,6 +865,28 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/SearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chronos/availability?action=get" : {
+      "get" : {
+        "operationId" : "getAvailability",
+        "tags" : [ "Chronos" ],
+        "summary" : "Gets the configured availability of the user.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An object containing all data of the requested availability. In case of errors the\nresponsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAvailabilityResponse"
                 }
               }
             }
@@ -1232,6 +1232,33 @@
         }
       }
     },
+    "/contacts?action=list" : {
+      "put" : {
+        "operationId" : "getContactList",
+        "tags" : [ "Contacts" ],
+        "summary" : "Gets a list of contacts.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamContactColumns"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for the requested contacts. Each array element describes one contact and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactsResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/ContactListElementArray"
+        }
+      }
+    },
     "/multifactor/device?action=finishAuthentication" : {
       "put" : {
         "operationId" : "multifactorDeviceActionfinishAuthentication",
@@ -1266,33 +1293,6 @@
           },
           "description" : "The information required to finish the registration of a new multifactor device.\n",
           "required" : true
-        }
-      }
-    },
-    "/contacts?action=list" : {
-      "put" : {
-        "operationId" : "getContactList",
-        "tags" : [ "Contacts" ],
-        "summary" : "Gets a list of contacts.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamContactColumns"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for the requested contacts. Each array element describes one contact and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ContactsResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "$ref" : "#/components/requestBodies/ContactListElementArray"
         }
       }
     },
@@ -1928,44 +1928,6 @@
         }
       }
     },
-    "/messaging/account?action=delete" : {
-      "get" : {
-        "operationId" : "deleteMessagingAccount",
-        "tags" : [ "Messaging" ],
-        "summary" : "Deletes a messaging account.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "messagingService",
-          "description" : "The messaging service ID that the account belongs to.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The messaging account ID.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the number 1 if deletion was successful. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MessagingAccountUpdateResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/folders?action=notify" : {
       "put" : {
         "operationId" : "notifyAboutSharedFolder",
@@ -2006,6 +1968,44 @@
           },
           "description" : "JSON object providing the JSON array `entities`, which holds the entity ID(s) of the users or groups that\nshould be notified. To send a custom message to the recipients, an additional JSON object `notification` may\nbe included, inside of which an optional message can be passed (otherwise, some default message is used).\n(Example: {\"entities\":[\"2332\"]} or {\"entities\":[\"2332\"],\"notification\":{\"transport\":\"mail\",\"message\":\"The message\"}})\n",
           "required" : true
+        }
+      }
+    },
+    "/messaging/account?action=delete" : {
+      "get" : {
+        "operationId" : "deleteMessagingAccount",
+        "tags" : [ "Messaging" ],
+        "summary" : "Deletes a messaging account.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "messagingService",
+          "description" : "The messaging service ID that the account belongs to.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The messaging account ID.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the number 1 if deletion was successful. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessagingAccountUpdateResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -2304,41 +2304,6 @@
         }
       }
     },
-    "/gdpr/dataexport/delete" : {
-      "delete" : {
-        "operationId" : "deleteDataExportTask",
-        "tags" : [ "DataExport" ],
-        "summary" : "Deletes the result files and all resourcess of data export task for session-associated user",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the success status.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "object",
-                  "title" : "deleteDataExportTaskReponse",
-                  "properties" : {
-                    "success" : {
-                      "type" : "boolean",
-                      "description" : "True if such resources for data export task has been successfully deleted; false otherwise"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad request, response contains error message."
-          },
-          "401" : {
-            "description" : "Not authorized"
-          }
-        }
-      }
-    },
     "/infostore?action=lock" : {
       "get" : {
         "operationId" : "lockInfoItem",
@@ -2378,32 +2343,37 @@
         }
       }
     },
-    "/jobs?action=cancel" : {
-      "get" : {
-        "operationId" : "cancelJob",
-        "tags" : [ "Jobqueue" ],
-        "summary" : "Cancels a certain job held in job queue",
+    "/gdpr/dataexport/delete" : {
+      "delete" : {
+        "operationId" : "deleteDataExportTask",
+        "tags" : [ "DataExport" ],
+        "summary" : "Deletes the result files and all resourcess of data export task for session-associated user",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The identifier for the job",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object providing success information. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "description" : "A JSON object containing the success status.",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/CancelJobResponse"
+                  "type" : "object",
+                  "title" : "deleteDataExportTaskReponse",
+                  "properties" : {
+                    "success" : {
+                      "type" : "boolean",
+                      "description" : "True if such resources for data export task has been successfully deleted; false otherwise"
+                    }
+                  }
                 }
               }
             }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
           }
         }
       }
@@ -2433,6 +2403,36 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ContactResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs?action=cancel" : {
+      "get" : {
+        "operationId" : "cancelJob",
+        "tags" : [ "Jobqueue" ],
+        "summary" : "Cancels a certain job held in job queue",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The identifier for the job",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object providing success information. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CancelJobResponse"
                 }
               }
             }
@@ -2649,6 +2649,36 @@
         }
       }
     },
+    "/resource?action=get" : {
+      "get" : {
+        "operationId" : "getResource",
+        "tags" : [ "Resources" ],
+        "summary" : "Gets a resource.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The ID of the resource.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the resource data. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ResourceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mail?action=import" : {
       "post" : {
         "operationId" : "importMail",
@@ -2708,36 +2738,6 @@
                   }
                 },
                 "required" : [ "file" ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/resource?action=get" : {
-      "get" : {
-        "operationId" : "getResource",
-        "tags" : [ "Resources" ],
-        "summary" : "Gets a resource.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The ID of the resource.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the resource data. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ResourceResponse"
-                }
               }
             }
           }
@@ -3584,7 +3584,28 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/CommonResponse"
-<<<<<<< HEAD
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/resource?action=all" : {
+      "get" : {
+        "operationId" : "getAllResources",
+        "tags" : [ "Resources" ],
+        "summary" : "Gets all resources.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array of resource identifiers. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AllResourcesResponse"
                 }
               }
             }
@@ -3594,16 +3615,9 @@
     },
     "/mailfilter?action=update" : {
       "put" : {
-<<<<<<< HEAD
-        "operationId" : "updateMailComposeById",
-        "tags" : [ "MailCompose" ],
-        "summary" : "Updates the composition space",
-        "description" : "Payload is JSON that reflects changes. Response is the current composition space message model after update.",
-=======
         "operationId" : "updateRule",
         "tags" : [ "Mailfilter" ],
         "summary" : "Updates a mail filter rule.",
->>>>>>> MW-1185: Add test clients generated from API documentation
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
@@ -3637,74 +3651,6 @@
           },
           "description" : "A JSON object describing the rule with the `id` set (which identifies the rule to change). Only modified fields are present.",
           "required" : true
-        }
-      },
-      "patch" : {
-        "operationId" : "patchMailComposeById",
-        "tags" : [ "MailCompose" ],
-        "summary" : "Patches the composition space",
-        "description" : "Payload is JSON that reflects changes. Response is the current composition space message model after update.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "path",
-          "name" : "id",
-          "description" : "The ID of the composition space",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the updated composition space.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailComposeResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad request, response contains error message."
-          },
-          "401" : {
-            "description" : "Not authorized"
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MailComposeMessageModel"
-              }
-            }
-          },
-          "description" : "An object containing the attributes to update",
-          "required" : true
-        }
-      }
-    },
-    "/resource?action=all" : {
-      "get" : {
-        "operationId" : "getAllResources",
-        "tags" : [ "Resources" ],
-        "summary" : "Gets all resources.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array of resource identifiers. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AllResourcesResponse"
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -3772,75 +3718,108 @@
                       "description" : "True if such a composition space has been successfully closed; false otherwise"
                     }
                   }
-=======
->>>>>>> MW-1185: Updated test client
                 }
               }
             }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
           }
         }
-      }
-    },
-    "/mailfilter?action=update" : {
+      },
       "put" : {
-        "operationId" : "updateRule",
-        "tags" : [ "Mailfilter" ],
-        "summary" : "Updates a mail filter rule.",
+        "operationId" : "updateMailComposeById",
+        "tags" : [ "MailCompose" ],
+        "summary" : "Updates the composition space",
+        "description" : "Payload is JSON that reflects changes. Response is the current composition space message model after update.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
-          "in" : "query",
-          "name" : "username",
-          "description" : "Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.",
-          "required" : false,
+          "in" : "path",
+          "name" : "id",
+          "description" : "The ID of the composition space",
+          "required" : true,
           "schema" : {
             "type" : "string"
           }
         } ],
         "responses" : {
           "200" : {
-            "description" : "In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
+            "description" : "A JSON object containing the updated composition space.",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
+                  "$ref" : "#/components/schemas/MailComposeResponse"
                 }
               }
             }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
           }
         },
         "requestBody" : {
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/MailFilterRule"
+                "$ref" : "#/components/schemas/MailComposeMessageModel"
               }
             }
           },
-          "description" : "A JSON object describing the rule with the `id` set (which identifies the rule to change). Only modified fields are present.",
+          "description" : "An object containing the attributes to update",
           "required" : true
         }
-      }
-    },
-    "/resource?action=all" : {
-      "get" : {
-        "operationId" : "getAllResources",
-        "tags" : [ "Resources" ],
-        "summary" : "Gets all resources.",
+      },
+      "patch" : {
+        "operationId" : "patchMailComposeById",
+        "tags" : [ "MailCompose" ],
+        "summary" : "Patches the composition space",
+        "description" : "Payload is JSON that reflects changes. Response is the current composition space message model after update.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "description" : "The ID of the composition space",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object containing an array of resource identifiers. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "description" : "A JSON object containing the updated composition space.",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AllResourcesResponse"
+                  "$ref" : "#/components/schemas/MailComposeResponse"
                 }
               }
             }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
           }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MailComposeMessageModel"
+              }
+            }
+          },
+          "description" : "An object containing the attributes to update",
+          "required" : true
         }
       }
     },
@@ -3956,129 +3935,6 @@
           "400" : {
             "description" : "If request cannot be handled."
           }
-        }
-      }
-    },
-    "/mail/compose/{id}" : {
-      "get" : {
-        "operationId" : "getMailComposeById",
-        "tags" : [ "MailCompose" ],
-        "summary" : "Load the composition space under the given identifier",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "path",
-          "name" : "id",
-          "description" : "The ID of the composition space",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the requested composition space.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailComposeResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad request, response contains error message."
-          },
-          "401" : {
-            "description" : "Not authorized"
-          }
-        }
-      },
-      "delete" : {
-        "operationId" : "deleteMailComposeById",
-        "tags" : [ "MailCompose" ],
-        "summary" : "Deletes the composition space under the given identifier",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "path",
-          "name" : "id",
-          "description" : "The ID of the composition space",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the success status.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "object",
-                  "title" : "deleteMailComposeByIdReponse",
-                  "properties" : {
-                    "success" : {
-                      "type" : "boolean",
-                      "description" : "True if such a composition space has been successfully closed; false otherwise"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad request, response contains error message."
-          },
-          "401" : {
-            "description" : "Not authorized"
-          }
-        }
-      },
-      "put" : {
-        "operationId" : "patchMailComposeById",
-        "tags" : [ "MailCompose" ],
-        "summary" : "Updates the composition space",
-        "description" : "Payload is JSON that reflects changes. Response is the current composition space message model after update.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "path",
-          "name" : "id",
-          "description" : "The ID of the composition space",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the updated composition space.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailComposeResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad request, response contains error message."
-          },
-          "401" : {
-            "description" : "Not authorized"
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MailComposeMessageModel"
-              }
-            }
-          },
-          "description" : "An object containing the attributes to update",
-          "required" : true
         }
       }
     },
@@ -4405,6 +4261,36 @@
         }
       }
     },
+    "/messaging/account?action=all" : {
+      "get" : {
+        "operationId" : "getAllMessagingAccounts",
+        "tags" : [ "Messaging" ],
+        "summary" : "Gets all messaging accounts.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "messagingService",
+          "description" : "List only those accounts that belong to the given `messagingService`.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with account objects. In case of errors the responsible\nfields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessagingAccountsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/jslob?action=list" : {
       "put" : {
         "operationId" : "getJSlobList",
@@ -4446,36 +4332,6 @@
           },
           "description" : "A JSON array with the identifiers of the requested JSlobs.",
           "required" : true
-        }
-      }
-    },
-    "/messaging/account?action=all" : {
-      "get" : {
-        "operationId" : "getAllMessagingAccounts",
-        "tags" : [ "Messaging" ],
-        "summary" : "Gets all messaging accounts.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "messagingService",
-          "description" : "List only those accounts that belong to the given `messagingService`.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with account objects. In case of errors the responsible\nfields in the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MessagingAccountsResponse"
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -5111,6 +4967,38 @@
         }
       }
     },
+    "/tasks?action=get" : {
+      "get" : {
+        "operationId" : "getTask",
+        "tags" : [ "Tasks" ],
+        "summary" : "Gets a task.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "Object ID of the requested task.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamTaskFolder"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An object containing all data of the requested task. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/import?action=ICAL" : {
       "post" : {
         "operationId" : "importICal",
@@ -5177,38 +5065,6 @@
                   }
                 },
                 "required" : [ "file" ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/tasks?action=get" : {
-      "get" : {
-        "operationId" : "getTask",
-        "tags" : [ "Tasks" ],
-        "summary" : "Gets a task.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "Object ID of the requested task.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamTaskFolder"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An object containing all data of the requested task. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/TaskResponse"
-                }
               }
             }
           }
@@ -5870,53 +5726,6 @@
         }
       }
     },
-    "/messaging/message?action=get" : {
-      "get" : {
-        "operationId" : "getMessagingMessage",
-        "tags" : [ "Messaging" ],
-        "summary" : "Gets a messaging message.",
-        "description" : "A messaging message consists of some metadata, headers and a content. The content attribute varies\nby the content-type header. If the content-type is `text/*` it is a string, if it is `multipart/*` it\nis an array of objects, each representing a part of the multipart. If it is anything else it is considered binary\nand is a Base64 encoded string.\n\nThe folder ID of a message follows a predefined format: `[messagingService]://[accountId]/[path]`, like\n`com.openexchange.messaging.twitter://535/defaultTimeline/directMessages`.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The ID of the message to load.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "folder",
-          "description" : "The folder ID of the message.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "peek",
-          "description" : "If set to `true` the read/unread state of the message will not change. Default is `false`.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the data of the message. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MessagingMessageResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/halo/contact/picture" : {
       "get" : {
         "operationId" : "getHaloContactPicture",
@@ -6084,6 +5893,53 @@
           },
           "404" : {
             "description" : "If no picture could be found."
+          }
+        }
+      }
+    },
+    "/messaging/message?action=get" : {
+      "get" : {
+        "operationId" : "getMessagingMessage",
+        "tags" : [ "Messaging" ],
+        "summary" : "Gets a messaging message.",
+        "description" : "A messaging message consists of some metadata, headers and a content. The content attribute varies\nby the content-type header. If the content-type is `text/*` it is a string, if it is `multipart/*` it\nis an array of objects, each representing a part of the multipart. If it is anything else it is considered binary\nand is a Base64 encoded string.\n\nThe folder ID of a message follows a predefined format: `[messagingService]://[accountId]/[path]`, like\n`com.openexchange.messaging.twitter://535/defaultTimeline/directMessages`.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The ID of the message to load.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "folder",
+          "description" : "The folder ID of the message.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "peek",
+          "description" : "If set to `true` the read/unread state of the message will not change. Default is `false`.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the data of the message. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessagingMessageResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -6511,6 +6367,28 @@
         }
       }
     },
+    "/user/me" : {
+      "get" : {
+        "operationId" : "getCurrentUser",
+        "tags" : [ "User/Me" ],
+        "summary" : "Gets information about current user.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the data of the current user. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CurrentUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/image/file/mp3cover" : {
       "get" : {
         "operationId" : "getMP3CoverImage",
@@ -6539,28 +6417,6 @@
           },
           "400" : {
             "description" : "If request cannot be handled."
-          }
-        }
-      }
-    },
-    "/user/me" : {
-      "get" : {
-        "operationId" : "getCurrentUser",
-        "tags" : [ "User/Me" ],
-        "summary" : "Gets information about current user.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the data of the current user. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CurrentUserResponse"
-                }
-              }
-            }
           }
         }
       }
@@ -6741,6 +6597,39 @@
         }
       }
     },
+    "/tasks?action=new" : {
+      "put" : {
+        "operationId" : "createTask",
+        "tags" : [ "Tasks" ],
+        "summary" : "Creates a task.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the id of the newly created task. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TaskUpdateResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TaskData"
+              }
+            }
+          },
+          "description" : "A JSON object containing the task's data.",
+          "required" : true
+        }
+      }
+    },
     "/mailfilter/v2?action=getscript" : {
       "put" : {
         "operationId" : "getScript_v2",
@@ -6809,39 +6698,6 @@
             }
           },
           "description" : "A JSON object describing the rule with the `id` set (which identifies the rule to change). Only modified fields are present.",
-          "required" : true
-        }
-      }
-    },
-    "/tasks?action=new" : {
-      "put" : {
-        "operationId" : "createTask",
-        "tags" : [ "Tasks" ],
-        "summary" : "Creates a task.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the id of the newly created task. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/TaskUpdateResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/TaskData"
-              }
-            }
-          },
-          "description" : "A JSON object containing the task's data.",
           "required" : true
         }
       }
@@ -6944,6 +6800,39 @@
           },
           "description" : "A JSON object containing the value of the config node.",
           "required" : true
+        }
+      }
+    },
+    "/login?action=samlLogout" : {
+      "get" : {
+        "operationId" : "samlLogout",
+        "tags" : [ "Login", "SAML" ],
+        "summary" : "Terminates an App Suite session after SAML logout flow",
+        "description" : "This API call is typically the result of a redirect created by the server. It does not\nneed to be explicitly implemented by clients!\n\nAfter a successful SAML logout flow, the client (web browser) is redirected\nto this endpoint, where the actual App Suite session gets terminated. As a result,\nthe user gets usually redirected to an environment-specific location, for example\na portal page. The redirect response removes all App Suite session cookies.\n",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "session",
+          "description" : "App Suite session ID",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A html result page"
+          },
+          "302" : {
+            "description" : "A redirect to an exit page",
+            "headers" : {
+              "Location" : {
+                "description" : "A redirect URI that the client must follow to continue",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -7077,39 +6966,6 @@
                   }
                 },
                 "required" : [ "json", "file" ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/login?action=samlLogout" : {
-      "get" : {
-        "operationId" : "samlLogout",
-        "tags" : [ "Login", "SAML" ],
-        "summary" : "Terminates an App Suite session after SAML logout flow",
-        "description" : "This API call is typically the result of a redirect created by the server. It does not\nneed to be explicitly implemented by clients!\n\nAfter a successful SAML logout flow, the client (web browser) is redirected\nto this endpoint, where the actual App Suite session gets terminated. As a result,\nthe user gets usually redirected to an environment-specific location, for example\na portal page. The redirect response removes all App Suite session cookies.\n",
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "session",
-          "description" : "App Suite session ID",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A html result page"
-          },
-          "302" : {
-            "description" : "A redirect to an exit page",
-            "headers" : {
-              "Location" : {
-                "description" : "A redirect URI that the client must follow to continue",
-                "schema" : {
-                  "type" : "string"
-                }
               }
             }
           }
@@ -8231,6 +8087,58 @@
         }
       }
     },
+    "/calendar?action=all" : {
+      "get" : {
+        "operationId" : "getAllAppointments",
+        "tags" : [ "Calendar" ],
+        "summary" : "Gets all appointments.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamCalendarColumns"
+        }, {
+          "in" : "query",
+          "name" : "start",
+          "description" : "Lower inclusive limit of the queried range as a Date. Only appointments which start on or after this date are returned.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "end",
+          "description" : "Upper exclusive limit of the queried range as a Date. Only appointments which end before this date are returned.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "folder",
+          "description" : "Object ID of the folder, whose contents are queried. If not specified, defaults to all calendar folders.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRecurrenceMaster"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with appointment data. Each array element describes one appointment and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. Appointment sequencies are broken up into individual appointments\nand each occurrence of a sequence in the requested range is returned separately. The appointments are\nsorted in ascending order by the field `start_date`. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AppointmentsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/import?action=OUTLOOK_CSV" : {
       "post" : {
         "operationId" : "importOutlookCSV",
@@ -8288,84 +8196,6 @@
         }
       }
     },
-    "/calendar?action=all" : {
-      "get" : {
-        "operationId" : "getAllAppointments",
-        "tags" : [ "Calendar" ],
-        "summary" : "Gets all appointments.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamCalendarColumns"
-        }, {
-          "in" : "query",
-          "name" : "start",
-          "description" : "Lower inclusive limit of the queried range as a Date. Only appointments which start on or after this date are returned.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "in" : "query",
-          "name" : "end",
-          "description" : "Upper exclusive limit of the queried range as a Date. Only appointments which end before this date are returned.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "in" : "query",
-          "name" : "folder",
-          "description" : "Object ID of the folder, whose contents are queried. If not specified, defaults to all calendar folders.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRecurrenceMaster"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with appointment data. Each array element describes one appointment and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. Appointment sequencies are broken up into individual appointments\nand each occurrence of a sequence in the requested range is returned separately. The appointments are\nsorted in ascending order by the field `start_date`. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AppointmentsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/multifactor/device?action=delete" : {
-      "delete" : {
-        "operationId" : "multifactorDeviceActionDelete",
-        "tags" : [ "Multifactor" ],
-        "summary" : "Deletes a multifactor device",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/QueryParamMultifactorProviderName"
-        }, {
-          "$ref" : "#/components/parameters/QueryParamMultifactorDeviceId"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing all device IDs deleted. In case of errors the\nresponsible fields in the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MultifactorDeleteResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/accounts?action=delete" : {
       "put" : {
         "operationId" : "deleteOAuthAccount",
@@ -8396,52 +8226,25 @@
         }
       }
     },
-    "/login;jsessionid=1157370816112.OX1?action=redirect" : {
-      "get" : {
-        "operationId" : "redirect",
-        "tags" : [ "Login" ],
-        "summary" : "Refresh auto-login cookie",
-        "description" : "**SECURITY WARNING!** Utilizing this request is **INSECURE!** This request allows to access a session with a\nsingle one time token. This one time token may be delivered to the wrong client if the protocol has an\nerror or Apache or the load balancer make a mistake. This will cause a wrong user to be in a wrong\nsession. **IMMEDIATELY** consider not to use this request anymore. You have been warned. Use instead the\nFormLogin that does not need to use the redirect request.\n",
+    "/multifactor/device?action=delete" : {
+      "delete" : {
+        "operationId" : "multifactorDeviceActionDelete",
+        "tags" : [ "Multifactor" ],
+        "summary" : "Deletes a multifactor device",
         "parameters" : [ {
-          "in" : "query",
-          "name" : "random",
-          "description" : "A session random token to jump into the session. This random token is part of the login\nresponse. Only a very short configurable time after the login it is allowed to jump into\nthe session with the random token.\n",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
+          "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
-          "in" : "query",
-          "name" : "client",
-          "description" : "The client can be defined here newly if it is not correct on the login request itself.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
+          "$ref" : "#/components/parameters/QueryParamMultifactorProviderName"
         }, {
-          "in" : "query",
-          "name" : "store",
-          "description" : "Tells the UI to do a store request after login to be able to use autologin request.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "in" : "query",
-          "name" : "uiWebPath",
-          "description" : "The optional path on the webserver to the UI. If this parameter is not given the configured uiWebPath is used.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
+          "$ref" : "#/components/parameters/QueryParamMultifactorDeviceId"
         } ],
         "responses" : {
           "200" : {
-            "description" : "In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
+            "description" : "A JSON object containing all device IDs deleted. In case of errors the\nresponsible fields in the response are filled (see [Error handling](#error-handling)).\n",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
+                  "$ref" : "#/components/schemas/MultifactorDeleteResponse"
                 }
               }
             }
@@ -8499,6 +8302,59 @@
           },
           "description" : "JSON object with \"folder\" object containing the modified fields and optional \"notification\"\nobject to let added permission entities be notified about newly shared folders for all modules\nexcept mail. (Example: {\"folder\":{\"module\":\"infostore\",\"subscribed\":true,\"title\":\"Test123\"}} or \n{\"folder\":{\"module\":\"infostore\",\"subscribed\":true,\"title\":\"Test123\",\"permissions\":[{\"bits\":403710016,\"entity\":84,\"group\":false}]},\"notification\":{\"transport\":\"mail\",\"message\":\"The message\"}})\n",
           "required" : true
+        }
+      }
+    },
+    "/login;jsessionid=1157370816112.OX1?action=redirect" : {
+      "get" : {
+        "operationId" : "redirect",
+        "tags" : [ "Login" ],
+        "summary" : "Refresh auto-login cookie",
+        "description" : "**SECURITY WARNING!** Utilizing this request is **INSECURE!** This request allows to access a session with a\nsingle one time token. This one time token may be delivered to the wrong client if the protocol has an\nerror or Apache or the load balancer make a mistake. This will cause a wrong user to be in a wrong\nsession. **IMMEDIATELY** consider not to use this request anymore. You have been warned. Use instead the\nFormLogin that does not need to use the redirect request.\n",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "random",
+          "description" : "A session random token to jump into the session. This random token is part of the login\nresponse. Only a very short configurable time after the login it is allowed to jump into\nthe session with the random token.\n",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "client",
+          "description" : "The client can be defined here newly if it is not correct on the login request itself.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "store",
+          "description" : "Tells the UI to do a store request after login to be able to use autologin request.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "uiWebPath",
+          "description" : "The optional path on the webserver to the UI. If this parameter is not given the configured uiWebPath is used.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -8707,6 +8563,59 @@
           },
           "description" : "A JSON object the data source object and the data handler object.",
           "required" : true
+        }
+      }
+    },
+    "/folders?action=list" : {
+      "get" : {
+        "operationId" : "getSubFolders",
+        "tags" : [ "Folders" ],
+        "summary" : "Gets the subfolders of a specified parent folder.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "parent",
+          "description" : "Object ID of a folder, which is the parent folder of the requested folders.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamFolderColumns"
+        }, {
+          "in" : "query",
+          "name" : "all",
+          "description" : "Set to 1 to list even not subscribed folders.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamFolderTree"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAllowedModules"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamLanguage"
+        }, {
+          "in" : "query",
+          "name" : "errorOnDuplicateName",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for all folders, which have the folder with the requested object\nID as parent. Each array element describes one folder and is itself an array. The elements of each array\ncontain the information specified by the corresponding identifiers in the `columns` parameter. In case of\nerrors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FoldersResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -8951,59 +8860,6 @@
         }
       }
     },
-    "/folders?action=list" : {
-      "get" : {
-        "operationId" : "getSubFolders",
-        "tags" : [ "Folders" ],
-        "summary" : "Gets the subfolders of a specified parent folder.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "parent",
-          "description" : "Object ID of a folder, which is the parent folder of the requested folders.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamFolderColumns"
-        }, {
-          "in" : "query",
-          "name" : "all",
-          "description" : "Set to 1 to list even not subscribed folders.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
-          }
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamFolderTree"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAllowedModules"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamLanguage"
-        }, {
-          "in" : "query",
-          "name" : "errorOnDuplicateName",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for all folders, which have the folder with the requested object\nID as parent. Each array element describes one folder and is itself an array. The elements of each array\ncontain the information specified by the corresponding identifiers in the `columns` parameter. In case of\nerrors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/FoldersResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/share/management?action=getLink" : {
       "put" : {
         "operationId" : "getShareLink",
@@ -9157,28 +9013,6 @@
         }
       }
     },
-    "/capabilities?action=all" : {
-      "get" : {
-        "operationId" : "getAllCapabilities",
-        "tags" : [ "Capabilities" ],
-        "summary" : "Gets all capabilities.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for all capabilities. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CapabilitiesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/certificate?action=update" : {
       "put" : {
         "operationId" : "storeCertificate_put_req",
@@ -9214,6 +9048,28 @@
         "responses" : {
           "200" : {
             "description" : "An empty JSON object. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling))."
+          }
+        }
+      }
+    },
+    "/capabilities?action=all" : {
+      "get" : {
+        "operationId" : "getAllCapabilities",
+        "tags" : [ "Capabilities" ],
+        "summary" : "Gets all capabilities.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for all capabilities. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CapabilitiesResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -9681,6 +9537,37 @@
         }
       }
     },
+    "/mailfilter/v2?action=config" : {
+      "get" : {
+        "operationId" : "getConfig_v2",
+        "tags" : [ "Mailfilter" ],
+        "summary" : "Gets the configuration of the mail filter backend.",
+        "description" : "A mail filter can have different rules each containing one command. A command has a test condition and actions\nthat are executed if the condition is true. The list of available comparisions (that can be used in test\nconditions) and the list of available actions depends on a given test and the mail filter server configuration\nand must be determined at runtime.\n\nAll those dynamic values can be fetched via a config object at startup, which shows the capabilities of the server\nto the client.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "username",
+          "description" : "Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with the fields `tests` (containing an array of available test-objects, see [Possible tests](#possible-tests).) and `actioncommands`\n(containing an array of valid actions. See [Possible action commands](#possible-action-commands)). In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailFilterConfigResponsev2"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mail?action=receipt_ack" : {
       "put" : {
         "operationId" : "receiptMailAck",
@@ -9715,18 +9602,35 @@
         }
       }
     },
-    "/mailfilter/v2?action=config" : {
-      "get" : {
-        "operationId" : "getConfig_v2",
-        "tags" : [ "Mailfilter" ],
-        "summary" : "Gets the configuration of the mail filter backend.",
-        "description" : "A mail filter can have different rules each containing one command. A command has a test condition and actions\nthat are executed if the condition is true. The list of available comparisions (that can be used in test\nconditions) and the list of available actions depends on a given test and the mail filter server configuration\nand must be determined at runtime.\n\nAll those dynamic values can be fetched via a config object at startup, which shows the capabilities of the server\nto the client.\n",
+    "/mail?action=search" : {
+      "put" : {
+        "operationId" : "searchMails",
+        "tags" : [ "Mail" ],
+        "summary" : "Searches for mails.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailFolder"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailColumns"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailHeaders"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailUnseen"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailDeleted"
+        }, {
           "in" : "query",
-          "name" : "username",
-          "description" : "Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.",
+          "name" : "sort",
+          "description" : "The identifier of a column which determines the sort order of the response or the string “thread” to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified. Note: Applies only to root-level messages.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "order",
+          "description" : "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified. Note: Applies only to root-level messages.",
           "required" : false,
           "schema" : {
             "type" : "string"
@@ -9734,15 +9638,26 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object with the fields `tests` (containing an array of available test-objects, see [Possible tests](#possible-tests).) and `actioncommands`\n(containing an array of valid actions. See [Possible action commands](#possible-action-commands)). In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "description" : "'A JSON object containing an array with matching mails. Mails are represented by arrays. The elements of each array contain the\ninformation specified by the corresponding identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).'\n",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/MailFilterConfigResponsev2"
+                  "$ref" : "#/components/schemas/MailsResponse"
                 }
               }
             }
           }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "A JSON object describing the search term as described in [Advanced search](#advanced-search). Example:\n`{\"filter\":[\"and\",[\"=\", {\"field\":\"to\"},\"test1@example.com\"],[\"not\",[\"=\",{\"attachment\":\"name\"},\"document.pdf\"]]]}`\nwhich represents 'to = \"test1@example.com\" AND NOT from = \"test2@example.com\"'. Available field names are\n`from`, `to`, `cc`, `bcc`, `subject`, `received_date`, `sent_date`, `size`, `flags`, `content`, `content_type`, `disp`, and `priority`.\n",
+          "required" : true
         }
       }
     },
@@ -9851,65 +9766,6 @@
         }
       }
     },
-    "/mail?action=search" : {
-      "put" : {
-        "operationId" : "searchMails",
-        "tags" : [ "Mail" ],
-        "summary" : "Searches for mails.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailFolder"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailColumns"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailHeaders"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailUnseen"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailDeleted"
-        }, {
-          "in" : "query",
-          "name" : "sort",
-          "description" : "The identifier of a column which determines the sort order of the response or the string “thread” to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified. Note: Applies only to root-level messages.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "order",
-          "description" : "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified. Note: Applies only to root-level messages.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "'A JSON object containing an array with matching mails. Mails are represented by arrays. The elements of each array contain the\ninformation specified by the corresponding identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).'\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailsResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          },
-          "description" : "A JSON object describing the search term as described in [Advanced search](#advanced-search). Example:\n`{\"filter\":[\"and\",[\"=\", {\"field\":\"to\"},\"test1@example.com\"],[\"not\",[\"=\",{\"attachment\":\"name\"},\"document.pdf\"]]]}`\nwhich represents 'to = \"test1@example.com\" AND NOT from = \"test2@example.com\"'. Available field names are\n`from`, `to`, `cc`, `bcc`, `subject`, `received_date`, `sent_date`, `size`, `flags`, `content`, `content_type`, `disp`, and `priority`.\n",
-          "required" : true
-        }
-      }
-    },
     "/folders?action=allVisible" : {
       "get" : {
         "operationId" : "getVisibleFolders",
@@ -9939,29 +9795,6 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/FoldersVisibilityResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/certificate?action=all" : {
-      "get" : {
-        "operationId" : "getAllCertificates",
-        "tags" : [ "Certificate" ],
-        "summary" : "Gets all SSL certificates.",
-        "description" : "Returns all trusted and untrusted SSL certificates",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for all certificates. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CertificatesAllResponse"
                 }
               }
             }
@@ -10045,39 +9878,22 @@
         }
       }
     },
-    "/reminder?action=range" : {
+    "/certificate?action=all" : {
       "get" : {
-        "operationId" : "getRange",
-        "tags" : [ "Reminder" ],
-        "summary" : "Gets a reminder range.",
-        "description" : "Gets all reminders which are scheduled until the specified time (end date).",
+        "operationId" : "getAllCertificates",
+        "tags" : [ "Certificate" ],
+        "summary" : "Gets all SSL certificates.",
+        "description" : "Returns all trusted and untrusted SSL certificates",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "end",
-          "description" : "The end date of the reminder range.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "in" : "query",
-          "name" : "modules",
-          "description" : "A comma separated list of module ids to retrieve (e.g. \"1,4\" for tasks and appointments). If the parameter is missing or empty then all modules are retrieved.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object containing an array with data for each reminder. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "description" : "A JSON object containing an array with data for all certificates. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/RemindersResponse"
+                  "$ref" : "#/components/schemas/CertificatesAllResponse"
                 }
               }
             }
@@ -10125,6 +9941,46 @@
         },
         "requestBody" : {
           "$ref" : "#/components/requestBodies/ConversionDataSource"
+        }
+      }
+    },
+    "/reminder?action=range" : {
+      "get" : {
+        "operationId" : "getRange",
+        "tags" : [ "Reminder" ],
+        "summary" : "Gets a reminder range.",
+        "description" : "Gets all reminders which are scheduled until the specified time (end date).",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "end",
+          "description" : "The end date of the reminder range.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "in" : "query",
+          "name" : "modules",
+          "description" : "A comma separated list of module ids to retrieve (e.g. \"1,4\" for tasks and appointments). If the parameter is missing or empty then all modules are retrieved.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for each reminder. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RemindersResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -10387,6 +10243,37 @@
         }
       }
     },
+    "/resource?action=updates" : {
+      "get" : {
+        "operationId" : "getResourceUpdates",
+        "tags" : [ "Resources" ],
+        "summary" : "Gets the new, modified and deleted resources.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "timestamp",
+          "description" : "Timestamp of the last update of the requested resources.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with fields `new`, `modified` and `deleted` representing arrays of new, modified and\ndeleted resource objects. In case of errors the responsible fields in the response are filled\n(see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ResourceUpdatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/attachment?action=get" : {
       "get" : {
         "operationId" : "getAttachment",
@@ -10463,37 +10350,6 @@
         }
       }
     },
-    "/resource?action=updates" : {
-      "get" : {
-        "operationId" : "getResourceUpdates",
-        "tags" : [ "Resources" ],
-        "summary" : "Gets the new, modified and deleted resources.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "timestamp",
-          "description" : "Timestamp of the last update of the requested resources.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object with fields `new`, `modified` and `deleted` representing arrays of new, modified and\ndeleted resource objects. In case of errors the responsible fields in the response are filled\n(see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ResourceUpdatesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/chronos/alarm?action=pending" : {
       "get" : {
         "operationId" : "getAlarmTrigger",
@@ -10557,36 +10413,6 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/capabilities?action=get" : {
-      "get" : {
-        "operationId" : "getCapability",
-        "tags" : [ "Capabilities" ],
-        "summary" : "Gets a capability.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The identifier of the capability",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the data of the capability or an empty result, if capability not available. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CapabilityResponse"
                 }
               }
             }
@@ -10672,6 +10498,36 @@
           },
           "description" : "A JSON object containing the new organizer and an optional comment.",
           "required" : true
+        }
+      }
+    },
+    "/capabilities?action=get" : {
+      "get" : {
+        "operationId" : "getCapability",
+        "tags" : [ "Capabilities" ],
+        "summary" : "Gets a capability.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The identifier of the capability",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the data of the capability or an empty result, if capability not available. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CapabilityResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -10829,120 +10685,6 @@
         }
       }
     },
-    "/infostore?action=all" : {
-      "get" : {
-        "operationId" : "getAllInfoItems",
-        "tags" : [ "Infostore" ],
-        "summary" : "Gets all infoitems.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamInfostoreFolder"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamInfostoreColumns"
-        }, {
-          "in" : "query",
-          "name" : "sort",
-          "description" : "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "order",
-          "description" : "\"asc\" if the response entities should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "left_hand_limit",
-          "description" : "A positive integer number to specify the \"left-hand\" limit of the range to return.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
-          }
-        }, {
-          "in" : "query",
-          "name" : "right_hand_limit",
-          "description" : "A positive integer number to specify the \"right-hand\" limit of the range to return.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
-          }
-        }, {
-          "in" : "query",
-          "name" : "limit",
-          "description" : "A positive integer number to specify how many items shall be returned according to given sorting; overrides left_hand_limit/right_hand_limit parameters and is equal to left_hand_limit=0 and right_hand_limit=<limit>.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
-          }
-        }, {
-          "in" : "query",
-          "name" : "pregenerate_previews",
-          "description" : "If set to \"true\" preview generation is triggered in the background for all files in request result",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for all infoitems. Each array element describes one infoitem and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InfoItemsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mail?action=list" : {
-      "put" : {
-        "operationId" : "getMailList",
-        "tags" : [ "Mail" ],
-        "summary" : "Gets a list of mails.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailColumns"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailHeaders"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "'A JSON object containing an array with mail data. Mails are represented by arrays. The elements of each array contain the\ninformation specified by the corresponding identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).'\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailsResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/components/schemas/MailListElement"
-                }
-              }
-            }
-          },
-          "description" : "A JSON array of JSON objects with the id and folder of the requested mails.",
-          "required" : true
-        }
-      }
-    },
     "/contacts?action=anniversaries" : {
       "get" : {
         "operationId" : "searchContactsByAnniversary",
@@ -11012,6 +10754,120 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ContactsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mail?action=list" : {
+      "put" : {
+        "operationId" : "getMailList",
+        "tags" : [ "Mail" ],
+        "summary" : "Gets a list of mails.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailColumns"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailHeaders"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "'A JSON object containing an array with mail data. Mails are represented by arrays. The elements of each array contain the\ninformation specified by the corresponding identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).'\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailsResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/MailListElement"
+                }
+              }
+            }
+          },
+          "description" : "A JSON array of JSON objects with the id and folder of the requested mails.",
+          "required" : true
+        }
+      }
+    },
+    "/infostore?action=all" : {
+      "get" : {
+        "operationId" : "getAllInfoItems",
+        "tags" : [ "Infostore" ],
+        "summary" : "Gets all infoitems.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamInfostoreFolder"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamInfostoreColumns"
+        }, {
+          "in" : "query",
+          "name" : "sort",
+          "description" : "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "order",
+          "description" : "\"asc\" if the response entities should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "left_hand_limit",
+          "description" : "A positive integer number to specify the \"left-hand\" limit of the range to return.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "right_hand_limit",
+          "description" : "A positive integer number to specify the \"right-hand\" limit of the range to return.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "description" : "A positive integer number to specify how many items shall be returned according to given sorting; overrides left_hand_limit/right_hand_limit parameters and is equal to left_hand_limit=0 and right_hand_limit=<limit>.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "pregenerate_previews",
+          "description" : "If set to \"true\" preview generation is triggered in the background for all files in request result",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for all infoitems. Each array element describes one infoitem and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InfoItemsResponse"
                 }
               }
             }
@@ -11090,35 +10946,6 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/MailsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/jump?action=identityToken" : {
-      "get" : {
-        "operationId" : "acquireIdentityToken",
-        "tags" : [ "Jump" ],
-        "summary" : "Acquires an identity token.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "system",
-          "description" : "The identifier for the external service/system, like \"com.openexchange.jump.endpoint.mysystem\".",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the identity token. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/JumpResponse"
                 }
               }
             }
@@ -11238,6 +11065,35 @@
           },
           "description" : "'Contains the rudimentary mail as JSON object as described in [Detailed mail data](#detailed-mail-data) with just its message body\n(as html content) defined in nested JSON array `attachments` and its header data (from, to,\nsubject, etc.). The field \"content_type\" defines whether the mail ought to be sent as plain text\n(\"text/plain\"), as html (\"text/html\") or as multipart/alternative (\"ALTERNATIVE\"). Sending a mail\nrequires some special fields inside JSON mail object. The field \"infostore_ids\" defines a JSON\narray of infostore document ID(s) that ought to be appended to this mail as attachments. The field\n\"msgref\" indicates the ID of the referenced original mail. Moreover the field \"sendtype\" indicates\nthe type of the message: <br> 0 (normal new mail),<br> 1 (a reply mail, field `msgref` must be present),<br>\n2 (a forward mail, field `msgref` must be present),<br> 3 (draft edit operation, field `msgref` must be\npresent in order to delete previous draft message since e.g. IMAP does not support changing/replacing\na message but requires a delete-and-insert sequence),<br> 4 (transport of a draft mail, field `msgref`\nmust be present),<br> 6 (signals that user intends to send out a saved draft message and expects the draft\nmessage (referenced by `msgref` field) being deleted after successful transport). The `csid` field, if it is missing\nfrom the URL it must then be present in the body.' \n",
           "required" : true
+        }
+      }
+    },
+    "/jump?action=identityToken" : {
+      "get" : {
+        "operationId" : "acquireIdentityToken",
+        "tags" : [ "Jump" ],
+        "summary" : "Acquires an identity token.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "system",
+          "description" : "The identifier for the external service/system, like \"com.openexchange.jump.endpoint.mysystem\".",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the identity token. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/JumpResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -11914,36 +11770,6 @@
         }
       }
     },
-    "/infostore?action=checkname" : {
-      "get" : {
-        "operationId" : "checkName",
-        "tags" : [ "Infostore" ],
-        "summary" : "Checks if a given file name is valid.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "name",
-          "description" : "The file name to check.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty JSON object when file name is valid. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/chronos?action=new" : {
       "put" : {
         "operationId" : "createEvent",
@@ -12064,6 +11890,36 @@
                   }
                 },
                 "required" : [ "json_0", "file_0" ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/infostore?action=checkname" : {
+      "get" : {
+        "operationId" : "checkName",
+        "tags" : [ "Infostore" ],
+        "summary" : "Checks if a given file name is valid.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "name",
+          "description" : "The file name to check.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty JSON object when file name is valid. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonResponse"
+                }
               }
             }
           }
@@ -12218,113 +12074,6 @@
         }
       }
     },
-    "/messaging/message?action=perform" : {
-      "put" : {
-        "operationId" : "performMessagingAction",
-        "tags" : [ "Messaging" ],
-        "summary" : "Performs a certain messaging action on a message.",
-        "description" : "On actions of type \"message\" the body should contain the JSON representation of the message the action should be applied to.\nTo invoke a messaging action of type \"storage\" the folder and id are needed in URL parameters.\nMessaging actions of type \"none\" need a messaging message and account.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "messageAction",
-          "description" : "The message action to invoke.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The ID of the message the action shall be invoked on. Only used on actions of type \"storage\".",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "folder",
-          "description" : "The folder ID of the message. Only used on actions of type \"storage\".",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "account",
-          "description" : "The account ID. Only used on actions of type \"none\".",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the number 1 if message could be sent. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MessagingMessageUpdateResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "$ref" : "#/components/requestBodies/MessagingMessageData"
-        }
-      }
-    },
-    "/mail?action=zip_attachments" : {
-      "get" : {
-        "operationId" : "getAttachmentsAsZip",
-        "tags" : [ "Mail" ],
-        "summary" : "Gets multiple mail attachments as a ZIP file.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailFolder"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "Object ID of the mail which contains the attachments.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "attachment",
-          "description" : "A comma-separated list of IDs of the requested attachments.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "scan",
-          "description" : "Flag to request an Anti-Virus scan for the specified e-mail attachments before downloading them.\n",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The raw byte data of the ZIP file.",
-            "content" : {
-              "application/zip" : {
-                "schema" : {
-                  "type" : "string",
-                  "format" : "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/contacts/picture?action=get" : {
       "get" : {
         "operationId" : "getContactPicture",
@@ -12399,6 +12148,113 @@
           "404" : {
             "description" : "No image could be found."
           }
+        }
+      }
+    },
+    "/mail?action=zip_attachments" : {
+      "get" : {
+        "operationId" : "getAttachmentsAsZip",
+        "tags" : [ "Mail" ],
+        "summary" : "Gets multiple mail attachments as a ZIP file.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailFolder"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "Object ID of the mail which contains the attachments.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "attachment",
+          "description" : "A comma-separated list of IDs of the requested attachments.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "scan",
+          "description" : "Flag to request an Anti-Virus scan for the specified e-mail attachments before downloading them.\n",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The raw byte data of the ZIP file.",
+            "content" : {
+              "application/zip" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messaging/message?action=perform" : {
+      "put" : {
+        "operationId" : "performMessagingAction",
+        "tags" : [ "Messaging" ],
+        "summary" : "Performs a certain messaging action on a message.",
+        "description" : "On actions of type \"message\" the body should contain the JSON representation of the message the action should be applied to.\nTo invoke a messaging action of type \"storage\" the folder and id are needed in URL parameters.\nMessaging actions of type \"none\" need a messaging message and account.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "messageAction",
+          "description" : "The message action to invoke.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The ID of the message the action shall be invoked on. Only used on actions of type \"storage\".",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "folder",
+          "description" : "The folder ID of the message. Only used on actions of type \"storage\".",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "account",
+          "description" : "The account ID. Only used on actions of type \"none\".",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the number 1 if message could be sent. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessagingMessageUpdateResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/MessagingMessageData"
         }
       }
     },
@@ -13397,63 +13253,6 @@
         }
       }
     },
-    "/account?action=all" : {
-      "get" : {
-        "operationId" : "getAllAccounts",
-        "tags" : [ "Mailaccount" ],
-        "summary" : "Gets all mail accounts.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAccountColumns"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for all mail accounts. Each array element describes one account and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailAccountsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/account?action=new" : {
-      "put" : {
-        "operationId" : "createAccount",
-        "tags" : [ "Mailaccount" ],
-        "summary" : "Creates a new mail account.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the data of the inserted mail account. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailAccountUpdateResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MailAccountData"
-              }
-            }
-          },
-          "description" : "A JSON object describing the new account to create.",
-          "required" : true
-        }
-      }
-    },
     "/image/user/picture" : {
       "get" : {
         "operationId" : "getUserProfileImage",
@@ -13558,6 +13357,63 @@
           "400" : {
             "description" : "If request cannot be handled."
           }
+        }
+      }
+    },
+    "/account?action=all" : {
+      "get" : {
+        "operationId" : "getAllAccounts",
+        "tags" : [ "Mailaccount" ],
+        "summary" : "Gets all mail accounts.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAccountColumns"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for all mail accounts. Each array element describes one account and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailAccountsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account?action=new" : {
+      "put" : {
+        "operationId" : "createAccount",
+        "tags" : [ "Mailaccount" ],
+        "summary" : "Creates a new mail account.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the data of the inserted mail account. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailAccountUpdateResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MailAccountData"
+              }
+            }
+          },
+          "description" : "A JSON object describing the new account to create.",
+          "required" : true
         }
       }
     },
@@ -13763,6 +13619,36 @@
         }
       }
     },
+    "/oauth/accounts?action=get" : {
+      "get" : {
+        "operationId" : "getOAuthAccount",
+        "tags" : [ "OAuth" ],
+        "summary" : "Gets an OAuth account.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The account identifier.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the data of the OAuth account. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OAuthAccountResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/infostore?action=delete" : {
       "put" : {
         "operationId" : "deleteInfoItems",
@@ -13821,36 +13707,6 @@
           },
           "description" : "A JSON array of objects with the fields `id` and `folder` representing infoitems that shall be deleted.",
           "required" : true
-        }
-      }
-    },
-    "/oauth/accounts?action=get" : {
-      "get" : {
-        "operationId" : "getOAuthAccount",
-        "tags" : [ "OAuth" ],
-        "summary" : "Gets an OAuth account.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The account identifier.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the data of the OAuth account. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/OAuthAccountResponse"
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -13925,30 +13781,38 @@
         }
       }
     },
-    "/reminder?action=remindAgain" : {
+    "/find?action=autocomplete" : {
       "put" : {
-        "operationId" : "remindAgain",
-        "tags" : [ "Reminder" ],
-        "summary" : "Updates the reminder alarm.",
+        "operationId" : "doAutoComplete",
+        "tags" : [ "Find" ],
+        "summary" : "Suggests possible search filters based on a user's input.",
+        "description" : "Filters are grouped into categories, the so called facets.\n#### Facets\nThe style of a facet is responsible for how the according object is structured, how it is handled on the\nserver-side and how the client has to handle it. We distinguish three styles of facets:\n * simple\n * default\n * exclusive\n___\nEvery facet value contains an embedded `filter` object. The filter must not be changed by the client, it has\nto be seen as a black-box. Instead the filters of selected facet values have to be copied and sent to the\nserver with the subsequent requests.\n#### Simple facets\nA simple facet is a special facet that has exactly one value. The facet's type and its value are strictly\ncoupled, in a way that a display name for both, facet and value would be redundant. A simple facet generally\ndenotes a logical field like 'phone number'. Internally this logical field can map to several internal\nfields (e.g. 'phone_private', 'phone_mobile', 'phone_business'). In clients the facet as a whole can be\ndisplayed as a single item. Example: \"Search for 'term' in field 'phone number'\".\n#### Default facets\nA default facet contains multiple values and may be present multiple times in search requests to filter\nresults by a combination of different values (e.g. \"mails with 'foo' and 'bar' in subject\").\n\nFacet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an\naccording filter object. A two-dimensional value contains an array \"options\" with every option defining\ndifferent semantics of how the value is used to filter the search results.\n#### Exclusive facets\nAn exclusive facet is a facet where the contained values are mutually exclusive. That means that the facet\nmust only be present once in an autocomplete or query request.\n\nFacet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an\naccording filter object. A two-dimensional value contains an array \"options\" with every option defining\ndifferent semantics of how the value is used to filter the search results.\n",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
           "in" : "query",
-          "name" : "id",
-          "description" : "The ID of the reminder whose alarm date shall be changed.",
+          "name" : "module",
+          "description" : "The name of the module within that the search shall be performed. Possible modules are: mail, contacts,\ncalendar, tasks, drive. Because a user may have limited access to modules the useable modules might only\nbe a subset of the available ones. Retrieve a list of allowed modules by querying the user configuration,\nsee module \"config\" (path `search`) or module \"JSlob\" (e.g. `id=io.ox/core`).\n",
           "required" : true,
           "schema" : {
-            "type" : "integer",
-            "format" : "int64"
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "description" : "The maximum number of values returned per facet.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer"
           }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object containing the data of the updated reminder. In case of\nerrors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "description" : "A JSON object containing the facets that were found. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ReminderResponse"
+                  "$ref" : "#/components/schemas/FindAutoCompleteResponse"
                 }
               }
             }
@@ -13958,11 +13822,11 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ReminderUpdateBody"
+                "$ref" : "#/components/schemas/FindAutoCompleteBody"
               }
             }
           },
-          "description" : "A JSON object containing the field `alarm` which provides the new reminder date.",
+          "description" : "A JSON object containing the user's input (specified in field `prefix`), already selected `facets`, and possible `options`.",
           "required" : true
         }
       }
@@ -14021,38 +13885,30 @@
         }
       }
     },
-    "/find?action=autocomplete" : {
+    "/reminder?action=remindAgain" : {
       "put" : {
-        "operationId" : "doAutoComplete",
-        "tags" : [ "Find" ],
-        "summary" : "Suggests possible search filters based on a user's input.",
-        "description" : "Filters are grouped into categories, the so called facets.\n#### Facets\nThe style of a facet is responsible for how the according object is structured, how it is handled on the\nserver-side and how the client has to handle it. We distinguish three styles of facets:\n * simple\n * default\n * exclusive\n___\nEvery facet value contains an embedded `filter` object. The filter must not be changed by the client, it has\nto be seen as a black-box. Instead the filters of selected facet values have to be copied and sent to the\nserver with the subsequent requests.\n#### Simple facets\nA simple facet is a special facet that has exactly one value. The facet's type and its value are strictly\ncoupled, in a way that a display name for both, facet and value would be redundant. A simple facet generally\ndenotes a logical field like 'phone number'. Internally this logical field can map to several internal\nfields (e.g. 'phone_private', 'phone_mobile', 'phone_business'). In clients the facet as a whole can be\ndisplayed as a single item. Example: \"Search for 'term' in field 'phone number'\".\n#### Default facets\nA default facet contains multiple values and may be present multiple times in search requests to filter\nresults by a combination of different values (e.g. \"mails with 'foo' and 'bar' in subject\").\n\nFacet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an\naccording filter object. A two-dimensional value contains an array \"options\" with every option defining\ndifferent semantics of how the value is used to filter the search results.\n#### Exclusive facets\nAn exclusive facet is a facet where the contained values are mutually exclusive. That means that the facet\nmust only be present once in an autocomplete or query request.\n\nFacet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an\naccording filter object. A two-dimensional value contains an array \"options\" with every option defining\ndifferent semantics of how the value is used to filter the search results.\n",
+        "operationId" : "remindAgain",
+        "tags" : [ "Reminder" ],
+        "summary" : "Updates the reminder alarm.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
           "in" : "query",
-          "name" : "module",
-          "description" : "The name of the module within that the search shall be performed. Possible modules are: mail, contacts,\ncalendar, tasks, drive. Because a user may have limited access to modules the useable modules might only\nbe a subset of the available ones. Retrieve a list of allowed modules by querying the user configuration,\nsee module \"config\" (path `search`) or module \"JSlob\" (e.g. `id=io.ox/core`).\n",
+          "name" : "id",
+          "description" : "The ID of the reminder whose alarm date shall be changed.",
           "required" : true,
           "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "limit",
-          "description" : "The maximum number of values returned per facet.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer"
+            "type" : "integer",
+            "format" : "int64"
           }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object containing the facets that were found. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "description" : "A JSON object containing the data of the updated reminder. In case of\nerrors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/FindAutoCompleteResponse"
+                  "$ref" : "#/components/schemas/ReminderResponse"
                 }
               }
             }
@@ -14062,11 +13918,11 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/FindAutoCompleteBody"
+                "$ref" : "#/components/schemas/ReminderUpdateBody"
               }
             }
           },
-          "description" : "A JSON object containing the user's input (specified in field `prefix`), already selected `facets`, and possible `options`.",
+          "description" : "A JSON object containing the field `alarm` which provides the new reminder date.",
           "required" : true
         }
       }
@@ -14129,51 +13985,6 @@
         }
       }
     },
-    "/calendar?action=delete" : {
-      "put" : {
-        "operationId" : "deleteAppointment",
-        "tags" : [ "Calendar" ],
-        "summary" : "Deletes appointments.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "timestamp",
-          "description" : "Timestamp of the last update of the deleted appointments.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AppointmentDeletionsResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/components/schemas/AppointmentDeletionsElement"
-                }
-              }
-            }
-          },
-          "description" : "A JSON array of JSON objects with the id, folder and optionally the recurrence position (if present in an appointment to fully identify it) of the appointments.",
-          "required" : true
-        }
-      }
-    },
     "/folders?action=checklimits" : {
       "put" : {
         "operationId" : "checkLimits",
@@ -14219,6 +14030,51 @@
             }
           },
           "description" : "A JSON object containing an array of file meta data (size and name).",
+          "required" : true
+        }
+      }
+    },
+    "/calendar?action=delete" : {
+      "put" : {
+        "operationId" : "deleteAppointment",
+        "tags" : [ "Calendar" ],
+        "summary" : "Deletes appointments.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "timestamp",
+          "description" : "Timestamp of the last update of the deleted appointments.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AppointmentDeletionsResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/AppointmentDeletionsElement"
+                }
+              }
+            }
+          },
+          "description" : "A JSON array of JSON objects with the id, folder and optionally the recurrence position (if present in an appointment to fully identify it) of the appointments.",
           "required" : true
         }
       }
@@ -14367,6 +14223,89 @@
         }
       }
     },
+    "/folders?action=update" : {
+      "put" : {
+        "operationId" : "updateFolder",
+        "tags" : [ "Folders" ],
+        "summary" : "Updates a folder.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/glbQueryParamsAllowEnqueue"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "Object ID of the updated folder.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "timestamp",
+          "description" : "Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail.",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamFolderTree"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamAllowedModules"
+        }, {
+          "in" : "query",
+          "name" : "cascadePermissions",
+          "description" : "`true` to cascade permissions to all sub-folders. The user must have administrative permissions to all\nsub-folders subject to change. If one permission change fails, the entire operation fails.\n",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "in" : "query",
+          "name" : "pushToken",
+          "description" : "The client's push token to restrict the generated drive event",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object with the object id of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FolderUpdateResponse"
+                }
+              }
+            }
+          },
+          "202" : {
+            "description" : "The operation did not complete in time and was added to job queue providing the job identifier. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetJobResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FolderBody"
+              }
+            }
+          },
+          "description" : "JSON object with \"folder\" object containing the modified fields and optional \"notification\"\nobject to let added permission entities be notified about newly shared folders for all modules\nexcept mail. (Example: {\"folder\":{\"title\":\"test123\"}} or {\"folder\":{\"permissions\":[{\"bits\":403710016,\"entity\":84,\"group\":false}]},\"notification\":{\"transport\":\"mail\",\"message\":\"The message\"}})\n",
+          "required" : true
+        }
+      }
+    },
     "/mail?action=threadedAll" : {
       "get" : {
         "operationId" : "getMailConversations",
@@ -14460,89 +14399,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "/folders?action=update" : {
-      "put" : {
-        "operationId" : "updateFolder",
-        "tags" : [ "Folders" ],
-        "summary" : "Updates a folder.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/glbQueryParamsAllowEnqueue"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "Object ID of the updated folder.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "timestamp",
-          "description" : "Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail.",
-          "required" : false,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamFolderTree"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamAllowedModules"
-        }, {
-          "in" : "query",
-          "name" : "cascadePermissions",
-          "description" : "`true` to cascade permissions to all sub-folders. The user must have administrative permissions to all\nsub-folders subject to change. If one permission change fails, the entire operation fails.\n",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean",
-            "default" : false
-          }
-        }, {
-          "in" : "query",
-          "name" : "pushToken",
-          "description" : "The client's push token to restrict the generated drive event",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object with the object id of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/FolderUpdateResponse"
-                }
-              }
-            }
-          },
-          "202" : {
-            "description" : "The operation did not complete in time and was added to job queue providing the job identifier. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/GetJobResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FolderBody"
-              }
-            }
-          },
-          "description" : "JSON object with \"folder\" object containing the modified fields and optional \"notification\"\nobject to let added permission entities be notified about newly shared folders for all modules\nexcept mail. (Example: {\"folder\":{\"title\":\"test123\"}} or {\"folder\":{\"permissions\":[{\"bits\":403710016,\"entity\":84,\"group\":false}]},\"notification\":{\"transport\":\"mail\",\"message\":\"The message\"}})\n",
-          "required" : true
         }
       }
     },
@@ -14651,28 +14507,6 @@
         }
       }
     },
-    "/jobs?action=all" : {
-      "get" : {
-        "operationId" : "allJobs",
-        "tags" : [ "Jobqueue" ],
-        "summary" : "Get all user's jobs",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An array of JSON objects each describing a job currently held in job queue. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/AllJobsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/contacts?action=delete" : {
       "put" : {
         "operationId" : "deleteContacts",
@@ -14707,37 +14541,25 @@
         }
       }
     },
-    "/userfeedback?action=store" : {
-      "put" : {
-        "operationId" : "store",
-        "tags" : [ "userfeedback" ],
-        "summary" : "Store user feedback",
+    "/jobs?action=all" : {
+      "get" : {
+        "operationId" : "allJobs",
+        "tags" : [ "Jobqueue" ],
+        "summary" : "Get all user's jobs",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "type",
-          "description" : "The feedback type",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object signaling success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n"
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string"
+            "description" : "An array of JSON objects each describing a job currently held in job queue. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AllJobsResponse"
+                }
               }
             }
-          },
-          "description" : "A JSON object describing the feedback",
-          "required" : true
+          }
         }
       }
     },
@@ -14784,6 +14606,40 @@
         }
       }
     },
+    "/userfeedback?action=store" : {
+      "put" : {
+        "operationId" : "store",
+        "tags" : [ "userfeedback" ],
+        "summary" : "Store user feedback",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "type",
+          "description" : "The feedback type",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object signaling success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "A JSON object describing the feedback",
+          "required" : true
+        }
+      }
+    },
     "/mailfilter?action=new" : {
       "put" : {
         "operationId" : "createRule",
@@ -14822,42 +14678,6 @@
           },
           "description" : "A JSON object describing the mail filter rule. If the field `position` is included, it's taken as the position of the rule in the array on the server side (this value shouldn't be greater than the size of all rules).",
           "required" : true
-        }
-      }
-    },
-    "/mail/compose/{id}/attachments/vcard" : {
-      "post" : {
-        "operationId" : "postAttachmentsVcard",
-        "tags" : [ "MailCompose" ],
-        "summary" : "Attach vcard later on.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "path",
-          "name" : "id",
-          "description" : "The ID of the composition space",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the new attachment.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailComposeAttachmentResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad request, response contains error message."
-          },
-          "401" : {
-            "description" : "Not authorized"
-          }
         }
       }
     },
@@ -14946,6 +14766,42 @@
                 "required" : [ "login", "password", "clientToken", "client", "version" ]
               }
             }
+          }
+        }
+      }
+    },
+    "/mail/compose/{id}/attachments/vcard" : {
+      "post" : {
+        "operationId" : "postAttachmentsVcard",
+        "tags" : [ "MailCompose" ],
+        "summary" : "Attach vcard later on.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "description" : "The ID of the composition space",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the new attachment.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailComposeAttachmentResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
           }
         }
       }
@@ -15226,37 +15082,6 @@
         }
       }
     },
-    "/certificate?action=examine" : {
-      "get" : {
-        "operationId" : "examineCertificate",
-        "tags" : [ "Certificate" ],
-        "summary" : "Examines an untrusted SSL certificate from a previous endpoint call",
-        "description" : "Examines an untrusted SSL certificate from a previous endpoint call. The SSL certificate is cached for a brief amount of time by the middleware (2 minutes).",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "fingerprint",
-          "description" : "The fingerprint of the SSL certificate",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the data of the certificate. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CertificateExamineResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/mail?action=forward" : {
       "get" : {
         "operationId" : "forwardMail",
@@ -15312,34 +15137,34 @@
         }
       }
     },
-    "/sessionmanagement?action=delete" : {
-      "put" : {
-        "operationId" : "delete",
-        "tags" : [ "sessionmanagement" ],
-        "summary" : "Remove user's session",
+    "/certificate?action=examine" : {
+      "get" : {
+        "operationId" : "examineCertificate",
+        "tags" : [ "Certificate" ],
+        "summary" : "Examines an untrusted SSL certificate from a previous endpoint call",
+        "description" : "Examines an untrusted SSL certificate from a previous endpoint call. The SSL certificate is cached for a brief amount of time by the middleware (2 minutes).",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "fingerprint",
+          "description" : "The fingerprint of the SSL certificate",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
         } ],
         "responses" : {
           "200" : {
-            "description" : "A JSON object signaling success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n"
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "array",
-                "description" : "Session Ids to delete",
-                "items" : {
-                  "type" : "string",
-                  "description" : "A session id"
+            "description" : "A JSON object containing the data of the certificate. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CertificateExamineResponse"
                 }
               }
             }
-          },
-          "description" : "A JSON array containing all session Ids to delete",
-          "required" : true
+          }
         }
       }
     },
@@ -15443,6 +15268,37 @@
           "401" : {
             "description" : "Not authorized"
           }
+        }
+      }
+    },
+    "/sessionmanagement?action=delete" : {
+      "put" : {
+        "operationId" : "delete",
+        "tags" : [ "sessionmanagement" ],
+        "summary" : "Remove user's session",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object signaling success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n"
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "array",
+                "description" : "Session Ids to delete",
+                "items" : {
+                  "type" : "string",
+                  "description" : "A session id"
+                }
+              }
+            }
+          },
+          "description" : "A JSON array containing all session Ids to delete",
+          "required" : true
         }
       }
     },
@@ -15809,6 +15665,51 @@
         }
       }
     },
+    "/login?action=tokens" : {
+      "post" : {
+        "operationId" : "accessSession",
+        "tags" : [ "Login" ],
+        "summary" : "Accesses a session that was previously created with the token login.",
+        "description" : "This request allows clients to access a session created with the `/login?action=tokenLogin` request.\nWhen accessing the session its life time is extended equally to every other session.\n",
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object conform to the normal response body containing the session identifier, the login, the identifier\nand the locale of the user.  In case of errors the responsible fields in the response are filled\n(see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokensResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "accessSessionBody",
+                "properties" : {
+                  "serverToken" : {
+                    "description" : "The login name.",
+                    "type" : "string"
+                  },
+                  "clientToken" : {
+                    "description" : "The password (MUST be placed in the request body, otherwise the login request will be denied).",
+                    "type" : "string"
+                  },
+                  "client" : {
+                    "description" : "Identifier of the client using the HTTP/JSON interface. This is for statistic evaluations what clients are used with Open-Xchange.",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "serverToken", "clientToken", "client" ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/infostore?action=list" : {
       "put" : {
         "operationId" : "getInfoItemList",
@@ -15852,51 +15753,6 @@
           },
           "description" : "A JSON array of JSON objects with the id of the infoitems.",
           "required" : true
-        }
-      }
-    },
-    "/login?action=tokens" : {
-      "post" : {
-        "operationId" : "accessSession",
-        "tags" : [ "Login" ],
-        "summary" : "Accesses a session that was previously created with the token login.",
-        "description" : "This request allows clients to access a session created with the `/login?action=tokenLogin` request.\nWhen accessing the session its life time is extended equally to every other session.\n",
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object conform to the normal response body containing the session identifier, the login, the identifier\nand the locale of the user.  In case of errors the responsible fields in the response are filled\n(see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/TokensResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/x-www-form-urlencoded" : {
-              "schema" : {
-                "type" : "object",
-                "title" : "accessSessionBody",
-                "properties" : {
-                  "serverToken" : {
-                    "description" : "The login name.",
-                    "type" : "string"
-                  },
-                  "clientToken" : {
-                    "description" : "The password (MUST be placed in the request body, otherwise the login request will be denied).",
-                    "type" : "string"
-                  },
-                  "client" : {
-                    "description" : "Identifier of the client using the HTTP/JSON interface. This is for statistic evaluations what clients are used with Open-Xchange.",
-                    "type" : "string"
-                  }
-                },
-                "required" : [ "serverToken", "clientToken", "client" ]
-              }
-            }
-          }
         }
       }
     },
@@ -16071,6 +15927,33 @@
         }
       }
     },
+    "/tasks?action=list" : {
+      "put" : {
+        "operationId" : "getTaskList",
+        "tags" : [ "Tasks" ],
+        "summary" : "Gets a list of tasks.",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamTaskColumns"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing an array with data for the requested tasks. Each array element describes one task and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TasksResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "$ref" : "#/components/requestBodies/TaskListElementArray"
+        }
+      }
+    },
     "/onboarding?action=link" : {
       "get" : {
         "operationId" : "generateDownloadLinkForClientOnboardingProfile",
@@ -16100,33 +15983,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "/tasks?action=list" : {
-      "put" : {
-        "operationId" : "getTaskList",
-        "tags" : [ "Tasks" ],
-        "summary" : "Gets a list of tasks.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamTaskColumns"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing an array with data for the requested tasks. Each array element describes one task and\nis itself an array. The elements of each array contain the information specified by the corresponding\nidentifiers in the `columns` parameter. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/TasksResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "$ref" : "#/components/requestBodies/TaskListElementArray"
         }
       }
     },
@@ -16283,6 +16139,39 @@
         }
       }
     },
+    "/oauth/accounts?action=reauthorize" : {
+      "put" : {
+        "operationId" : "reauthorizeOAuthAccount",
+        "tags" : [ "OAuth" ],
+        "summary" : "Reauthorises the specified OAuth account",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "The account identifier. May also be provided in request body's JSON object by field `id`.",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "serviceId",
+          "description" : "The service meta data identifier, e.g. \"com.openexchange.oauth.twitter\".",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamScopes"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "The boolean value true if the account was successfully re-authorised.\n"
+          }
+        }
+      }
+    },
     "/mail?action=get&src=1" : {
       "get" : {
         "operationId" : "getMailSource",
@@ -16336,39 +16225,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/oauth/accounts?action=reauthorize" : {
-      "put" : {
-        "operationId" : "reauthorizeOAuthAccount",
-        "tags" : [ "OAuth" ],
-        "summary" : "Reauthorises the specified OAuth account",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The account identifier. May also be provided in request body's JSON object by field `id`.",
-          "required" : true,
-          "schema" : {
-            "type" : "integer"
-          }
-        }, {
-          "in" : "query",
-          "name" : "serviceId",
-          "description" : "The service meta data identifier, e.g. \"com.openexchange.oauth.twitter\".",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamScopes"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The boolean value true if the account was successfully re-authorised.\n"
           }
         }
       }
@@ -16497,55 +16353,6 @@
         }
       }
     },
-    "/mail?action=get&hdr=1" : {
-      "get" : {
-        "operationId" : "getMailHeaders",
-        "tags" : [ "Mail" ],
-        "summary" : "Gets the message headers as plain text.",
-        "description" : "#### Note\nBy setting the query parameter `hdr` to 1 the response type of the request action changes. Then\nit is returned a JSON object with the field `data` containing the (formatted) message headers\nas plain text.\nThe parameters below specify the ones that have an effect on the request.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamMailFolder"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "Object ID of the requested mail (can be substituded by `message_id` parameter).",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "message_id",
-          "description" : "The value of \"Message-Id\" header of the requested mail. This parameter is a substitute for \"id\" parameter.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "unseen",
-          "description" : "Use `true` to leave an unseen mail as unseen although its content is requested.",
-          "required" : false,
-          "schema" : {
-            "type" : "boolean"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the message headers as plain text. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MailHeadersResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/contacts?action=birthdays" : {
       "get" : {
         "operationId" : "searchContactsByBirthday",
@@ -16622,6 +16429,55 @@
         }
       }
     },
+    "/mail?action=get&hdr=1" : {
+      "get" : {
+        "operationId" : "getMailHeaders",
+        "tags" : [ "Mail" ],
+        "summary" : "Gets the message headers as plain text.",
+        "description" : "#### Note\nBy setting the query parameter `hdr` to 1 the response type of the request action changes. Then\nit is returned a JSON object with the field `data` containing the (formatted) message headers\nas plain text.\nThe parameters below specify the ones that have an effect on the request.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamMailFolder"
+        }, {
+          "in" : "query",
+          "name" : "id",
+          "description" : "Object ID of the requested mail (can be substituded by `message_id` parameter).",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "message_id",
+          "description" : "The value of \"Message-Id\" header of the requested mail. This parameter is a substitute for \"id\" parameter.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "unseen",
+          "description" : "Use `true` to leave an unseen mail as unseen although its content is requested.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the message headers as plain text. In case of errors the responsible fields in the\nresponse are filled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MailHeadersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/calendar?action=list" : {
       "put" : {
         "operationId" : "getAppointmentList",
@@ -16658,6 +16514,39 @@
             }
           },
           "description" : "A JSON array of JSON objects with the id, folder and optionally either recurrence_position or recurrence_date_position of the requested appointments.",
+          "required" : true
+        }
+      }
+    },
+    "/pns?action=subscribe" : {
+      "put" : {
+        "operationId" : "subscribe",
+        "tags" : [ "Pns" ],
+        "summary" : "Adds a new subscription associated with a token for certain topics",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object signaling success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PnsResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubscriptionData"
+              }
+            }
+          },
+          "description" : "A JSON object describing the subscription",
           "required" : true
         }
       }
@@ -16725,39 +16614,6 @@
         }
       }
     },
-    "/pns?action=subscribe" : {
-      "put" : {
-        "operationId" : "subscribe",
-        "tags" : [ "Pns" ],
-        "summary" : "Adds a new subscription associated with a token for certain topics",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object signaling success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PnsResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/x-www-form-urlencoded" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/SubscriptionData"
-              }
-            }
-          },
-          "description" : "A JSON object describing the subscription",
-          "required" : true
-        }
-      }
-    },
     "/user?action=setAttribute" : {
       "put" : {
         "operationId" : "setUserAttribute",
@@ -16804,40 +16660,6 @@
             }
           },
           "description" : "A JSON object providing the name and the value of the attribute. If the `value` field is missing or `null`, the attribute is removed.",
-          "required" : true
-        }
-      }
-    },
-    "/fileaccount?action=new" : {
-      "put" : {
-        "operationId" : "createFileAccount",
-        "tags" : [ "Filestorage" ],
-        "summary" : "Creates a file storage account.",
-        "description" : "#### Example for creating a new OAuth-based file storage account\nFirst, get the description of the file storage service for which a new account is supposed to be created:\n`GET /ajax/fileservice?action=get&id=boxcom&session=...`\n\nThe response might be:\n```json\n{\n  id: \"boxcom\",\n  displayName: \"Box File Storage Service\",\n  configuration: {\n    widget: \"oauthAccount\",\n    options: {\n      type: \"com.openexchange.oauth.boxcom\"\n    },\n    name: \"account\",\n    displayName: \"Select an existing account\",\n    mandatory: true\n  }\n}\n```\nNext get the associated OAuth account information:\n`GET /ajax/oauth/accounts?action=all&serviceId=com.openexchange.oauth.boxcom&session=...`\n\nThe response might be:\n```json\n{\n  \"data\":[\n    {\n      \"id\":333,\n      \"displayName\":\"My Box.com account\",\n      \"serviceId\":\"com.openexchange.oauth.boxcom\"\n    }\n  ]\n}\n```\nFinally, create the file storage account:\n```\nPUT /ajax/fileaccount?action=new&session=...\n\n{\n  \"filestorageService\":\"boxcom\",\n  \"displayName\":\"My box.com account\",\n  \"configuration\":{\n    \"account\":\"333\",\n    \"type\":\"com.openexchange.oauth.boxcom\"\n  }\n}\n```\nThe response provides the relative identifier of the newly created account.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the ID of the newly created account. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/FileAccountCreationResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FileAccountData"
-              }
-            }
-          },
-          "description" : "A JSON object describing the account to create, with at least the field `filestorageService` set.",
           "required" : true
         }
       }
@@ -16918,6 +16740,40 @@
               }
             }
           }
+        }
+      }
+    },
+    "/fileaccount?action=new" : {
+      "put" : {
+        "operationId" : "createFileAccount",
+        "tags" : [ "Filestorage" ],
+        "summary" : "Creates a file storage account.",
+        "description" : "#### Example for creating a new OAuth-based file storage account\nFirst, get the description of the file storage service for which a new account is supposed to be created:\n`GET /ajax/fileservice?action=get&id=boxcom&session=...`\n\nThe response might be:\n```json\n{\n  id: \"boxcom\",\n  displayName: \"Box File Storage Service\",\n  configuration: {\n    widget: \"oauthAccount\",\n    options: {\n      type: \"com.openexchange.oauth.boxcom\"\n    },\n    name: \"account\",\n    displayName: \"Select an existing account\",\n    mandatory: true\n  }\n}\n```\nNext get the associated OAuth account information:\n`GET /ajax/oauth/accounts?action=all&serviceId=com.openexchange.oauth.boxcom&session=...`\n\nThe response might be:\n```json\n{\n  \"data\":[\n    {\n      \"id\":333,\n      \"displayName\":\"My Box.com account\",\n      \"serviceId\":\"com.openexchange.oauth.boxcom\"\n    }\n  ]\n}\n```\nFinally, create the file storage account:\n```\nPUT /ajax/fileaccount?action=new&session=...\n\n{\n  \"filestorageService\":\"boxcom\",\n  \"displayName\":\"My box.com account\",\n  \"configuration\":{\n    \"account\":\"333\",\n    \"type\":\"com.openexchange.oauth.boxcom\"\n  }\n}\n```\nThe response provides the relative identifier of the newly created account.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the ID of the newly created account. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FileAccountCreationResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FileAccountData"
+              }
+            }
+          },
+          "description" : "A JSON object describing the account to create, with at least the field `filestorageService` set.",
+          "required" : true
         }
       }
     },
