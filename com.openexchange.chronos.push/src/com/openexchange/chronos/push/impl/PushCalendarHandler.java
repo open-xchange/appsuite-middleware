@@ -193,6 +193,12 @@ public class PushCalendarHandler implements CalendarHandler {
                  */
                 return true;
             }
+            if (update.getUpdatedFields().contains(EventField.ATTENDEE_PRIVILEGES)) {
+                /*
+                 * permission-related update, assume "significant" change
+                 */
+                return true;
+            }
             for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : update.getAttendeeUpdates().getUpdatedItems()) {
                 if (attendeeUpdate.getOriginal().getEntity() == userId) {
                     /*
