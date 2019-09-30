@@ -444,19 +444,13 @@ public class DataExportServiceImpl implements DataExportService {
         DataExportTask task = optionalTask.get();
         DataExportStatus status = task.getStatus();
         if (!status.isDone()) {
-            if (status.isFailed()) {
-                throw DataExportExceptionCode.TASK_FAILED.create(I(userId), I(contextId));
-            }
-            if (status.isAborted()) {
-                throw DataExportExceptionCode.TASK_ABORTED.create(I(userId), I(contextId));
-            }
             return Optional.of(DefaultDataExport.builder().withTask(task).build());
         }
 
         // Task is done
         Optional<FileLocations> optionalLocations = storageService.getDataExportResultFiles(userId, contextId);
         if (!optionalLocations.isPresent()) {
-            throw DataExportExceptionCode.TASK_NOT_COMPLETED.create(I(userId), I(contextId));
+            return Optional.of(DefaultDataExport.builder().withTask(task).build());
         }
 
         // Get locations
