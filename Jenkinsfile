@@ -186,7 +186,7 @@ spec:
         stage('HTTP API documentation') {
             when {
                 allOf {
-                    branch 'buildHtml'
+                    branch 'develop'
                     anyOf {
                         triggeredBy 'TimerTrigger'
                         triggeredBy cause: 'UserIdCause'
@@ -226,8 +226,6 @@ spec:
 }
 
 String version4Documentation(String branchName) {
-    if ('buildHtml' == branchName)
-        return branchName
     if ('develop' == branchName)
         return branchName
     if (branchName.startsWith('master-'))
