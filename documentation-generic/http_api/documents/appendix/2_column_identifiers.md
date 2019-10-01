@@ -46,6 +46,8 @@ specific field data of single or multiple objects.
 
 ## Extended permission object
 
+<div class="simpleTable">
+
 | Name | Type | Value |
 |:------|:------|:-------|
 |entity| Number | Identifier of the permission entity (i.e. user-, group- or guest-ID).|
@@ -57,6 +59,7 @@ specific field data of single or multiple objects.
 |password| String | The optionally set password for "anonymous" entities.|
 |expiry_date| Date | The optionally set expiry date for "anonymous" entities.|
 
+</div>
 
 ## Common folder data
 
@@ -638,6 +641,7 @@ specific field data of single or multiple objects.
 <div class="simpleTable">
 
 |Bits | Value |
+|:----|:-----|
 |0    |The numerical value indicating no object permissions.|
 |1    | The numerical value indicating read object permissions.|
 |2    | The numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask).|
