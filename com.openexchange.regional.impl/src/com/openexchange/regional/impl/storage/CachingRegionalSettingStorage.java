@@ -57,6 +57,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.lock.LockService;
 import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.impl.service.RegionalSettingsImpl;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -67,7 +68,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CachingRegionalSettingStorage implements RegionalSettingStorage {
 
-    private static final String REGION_NAME = "RegionSettings";
+    private static final RegionalSettings EMPTY_SETTINGS = RegionalSettingsImpl.newBuilder().build();
+    private static final String REGION_NAME = "RegionalSettings";
+
     private final SQLRegionalSettingStorage storage;
     private final ServiceLookup services;
 
@@ -89,7 +92,8 @@ public class CachingRegionalSettingStorage implements RegionalSettingStorage {
         CacheKey key = cache.newCacheKey(contextId, userId);
         Object object = cache.get(key);
         if (object instanceof RegionalSettings) {
-            return (RegionalSettings) object;
+            RegionalSettings cachedSettings = (RegionalSettings) object;
+            return EMPTY_SETTINGS.equals(cachedSettings) ? null : cachedSettings;
         }
 
         LockService lockService = optLockService();
@@ -98,14 +102,13 @@ public class CachingRegionalSettingStorage implements RegionalSettingStorage {
         try {
             object = cache.get(key);
             if (object instanceof RegionalSettings) {
-                return (RegionalSettings) object;
+                RegionalSettings cachedSettings = (RegionalSettings) object;
+                return EMPTY_SETTINGS.equals(cachedSettings) ? null : cachedSettings;
             }
 
-            RegionalSettings result = storage.get(contextId, userId);
-            if (result != null) {
-                cache.put(key, result, false);
-            }
-            return result;
+            RegionalSettings loadedSettings = storage.get(contextId, userId);
+            cache.put(key, null == loadedSettings ? EMPTY_SETTINGS : loadedSettings, false);
+            return loadedSettings;
         } finally {
             lock.unlock();
         }

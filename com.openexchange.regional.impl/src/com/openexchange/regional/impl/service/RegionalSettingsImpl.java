@@ -152,6 +152,85 @@ public class RegionalSettingsImpl implements RegionalSettings {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((dateFormat == null) ? 0 : dateFormat.hashCode());
+        result = prime * result + ((dateFormatFull == null) ? 0 : dateFormatFull.hashCode());
+        result = prime * result + ((dateFormatLong == null) ? 0 : dateFormatLong.hashCode());
+        result = prime * result + ((dateFormatMedium == null) ? 0 : dateFormatMedium.hashCode());
+        result = prime * result + ((dateFormatShort == null) ? 0 : dateFormatShort.hashCode());
+        result = prime * result + ((firstDayOfWeek == null) ? 0 : firstDayOfWeek.hashCode());
+        result = prime * result + ((firstDayOfYear == null) ? 0 : firstDayOfYear.hashCode());
+        result = prime * result + ((numberFormat == null) ? 0 : numberFormat.hashCode());
+        result = prime * result + ((timeFormat == null) ? 0 : timeFormat.hashCode());
+        result = prime * result + ((timeFormatLong == null) ? 0 : timeFormatLong.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RegionalSettingsImpl other = (RegionalSettingsImpl) obj;
+        if (dateFormat == null) {
+            if (other.dateFormat != null)
+                return false;
+        } else if (!dateFormat.equals(other.dateFormat))
+            return false;
+        if (dateFormatFull == null) {
+            if (other.dateFormatFull != null)
+                return false;
+        } else if (!dateFormatFull.equals(other.dateFormatFull))
+            return false;
+        if (dateFormatLong == null) {
+            if (other.dateFormatLong != null)
+                return false;
+        } else if (!dateFormatLong.equals(other.dateFormatLong))
+            return false;
+        if (dateFormatMedium == null) {
+            if (other.dateFormatMedium != null)
+                return false;
+        } else if (!dateFormatMedium.equals(other.dateFormatMedium))
+            return false;
+        if (dateFormatShort == null) {
+            if (other.dateFormatShort != null)
+                return false;
+        } else if (!dateFormatShort.equals(other.dateFormatShort))
+            return false;
+        if (firstDayOfWeek == null) {
+            if (other.firstDayOfWeek != null)
+                return false;
+        } else if (!firstDayOfWeek.equals(other.firstDayOfWeek))
+            return false;
+        if (firstDayOfYear == null) {
+            if (other.firstDayOfYear != null)
+                return false;
+        } else if (!firstDayOfYear.equals(other.firstDayOfYear))
+            return false;
+        if (numberFormat == null) {
+            if (other.numberFormat != null)
+                return false;
+        } else if (!numberFormat.equals(other.numberFormat))
+            return false;
+        if (timeFormat == null) {
+            if (other.timeFormat != null)
+                return false;
+        } else if (!timeFormat.equals(other.timeFormat))
+            return false;
+        if (timeFormatLong == null) {
+            if (other.timeFormatLong != null)
+                return false;
+        } else if (!timeFormatLong.equals(other.timeFormatLong))
+            return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "RegionalSettingsImpl [ timeFormat=" + timeFormat + " | timeFormatLong=" + timeFormatLong + " | dateFormat=" + dateFormat + " | dateFormatLong=" + dateFormatLong + " | numberFormat=" + numberFormat + " | firstDayOfWeek=" + firstDayOfWeek + " | firstDayOfYear=" + firstDayOfYear + "]";
     }
