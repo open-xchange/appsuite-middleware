@@ -50,8 +50,10 @@
 package com.openexchange.imap.util;
 
 import static com.openexchange.exception.ExceptionUtils.isEitherOf;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -82,9 +84,31 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
     /** The logger constant */
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FailsafeCircuitBreakerCommandExecutor.class);
 
+    private static HostList checkHostList(HostList hostList) {
+        if (null == hostList || hostList.isEmpty()) {
+            throw new IllegalArgumentException("hostList must not be null or empty.");
+        }
+        return hostList;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final CircuitBreaker circuitBreaker;
-    private final HostList hostList;
+    private final Optional<HostList> optionalHostList;
     private final Set<Integer> ports;
+    private final int ranking;
+
+    /**
+     * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor} applicable for all IMAP end-points with a ranking of <code>0</code> (zero).
+     *
+     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
+     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
+     * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @throws IllegalArgumentException If invalid/arguments are passed
+     */
+    public FailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
+        this(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 0);
+    }
 
     /**
      * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor}.
@@ -94,13 +118,26 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
      * @param failureThreshold The number of successive failures that must occur in order to open the circuit
      * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @param ranking The ranking
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public FailsafeCircuitBreakerCommandExecutor(HostList hostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis) {
+    public FailsafeCircuitBreakerCommandExecutor(HostList hostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis, int ranking) {
+        this(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking);
+    }
+
+    /**
+     * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor}.
+     *
+     * @param optHostList The optional hosts to consider
+     * @param optPorts The optional ports to consider
+     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
+     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
+     * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @param ranking The ranking
+     * @throws IllegalArgumentException If invalid/arguments are passed
+     */
+    public FailsafeCircuitBreakerCommandExecutor(Optional<HostList> optHostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis, int ranking) {
         super();
-        if (null == hostList || hostList.isEmpty()) {
-            throw new IllegalArgumentException("hostList must not be null or empty.");
-        }
         if (failureThreshold <= 0) {
             throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
         }
@@ -111,7 +148,8 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
             throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
         }
 
-        this.hostList = hostList;
+        this.ranking = ranking;
+        this.optionalHostList = optHostList;
         this.ports = null == optPorts || optPorts.isEmpty() ? null : optPorts;
 
         CircuitBreaker circuitBreaker = new CircuitBreaker()
@@ -122,38 +160,59 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
 
                 @Override
                 public void run() throws Exception {
-                    LOG.info("IMAP circuit breaker opened for: {}", hostList.getHostString());
+                    if (optHostList.isPresent()) {
+                        LOG.info("IMAP circuit breaker opened for: {}", optHostList.get().getHostString());
+                    } else {
+                        LOG.info("Generic IMAP circuit breaker opened");
+                    }
                 }
             })
             .onHalfOpen(new CheckedRunnable() {
 
                 @Override
                 public void run() throws Exception {
-                    LOG.info("IMAP circuit breaker half-opened for: {}", hostList.getHostString());
+                    if (optHostList.isPresent()) {
+                        LOG.info("IMAP circuit breaker half-opened for: {}", optHostList.get().getHostString());
+                    } else {
+                        LOG.info("Generic IMAP circuit breaker half-opened");
+                    }
                 }
             })
             .onClose(new CheckedRunnable() {
 
                 @Override
                 public void run() throws Exception {
-                    LOG.info("IMAP circuit breaker closed for: {}", hostList.getHostString());
+                    if (optHostList.isPresent()) {
+                        LOG.info("IMAP circuit breaker closed for: {}", optHostList.get().getHostString());
+                    } else {
+                        LOG.info("Generic IMAP circuit breaker closed");
+                    }
                 }
             });
         this.circuitBreaker = circuitBreaker;
     }
 
     /**
-     * Gets the listing of IMAP hosts to which this circuit breaker applies.
+     * Gets the optional listing of IMAP hosts to which this circuit breaker applies.
      *
      * @return The host list
      */
-    public HostList getHostList() {
-        return hostList;
+    public Optional<HostList> getHostList() {
+        return optionalHostList;
+    }
+
+    @Override
+    public int getRanking() {
+        return ranking;
     }
 
     @Override
     public boolean isApplicable(Protocol protocol) {
-        return hostList.contains(protocol.getHost()) && (null == ports || ports.contains(Integer.valueOf(protocol.getPort())));
+        if (!optionalHostList.isPresent()) {
+            return true;
+        }
+
+        return optionalHostList.get().contains(protocol.getHost()) && (null == ports || ports.contains(I(protocol.getPort())));
     }
 
     @Override
@@ -203,7 +262,11 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
-        sb.append("hosts=").append(hostList.getHostString());
+        if (optionalHostList.isPresent()) {
+            sb.append("hosts=").append(optionalHostList.get().getHostString());
+        } else {
+            sb.append("hosts=none");
+        }
         if (ports != null) {
             sb.append(", ports=").append(ports);
         }

@@ -835,6 +835,15 @@ public class Protocol {
     }
 
     /**
+     * Gets the properties used by this protocol.
+     *
+     * @return The properties
+     */
+    public Properties getProps() {
+        return props;
+    }
+
+    /**
      * Gets the remote IP address of the end-point this instance is connected to, or <code>null</code> if it is unconnected.
      * 
      * @return The remote IP address, or <code>null</code> if it is unconnected.

@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,6 +68,9 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -76,6 +80,7 @@ import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.FailsafeCircuitBreakerCommandExecutor;
+import com.openexchange.imap.util.PrimaryFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
@@ -797,27 +802,38 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            String tmp = configuration.getProperty("com.openexchange.imap.breaker.names", "").trim();
-            tmp = Strings.isEmpty(tmp) ? null : tmp;
-            if (null != tmp) {
-                tmp = tmp.trim();
-                String[] names = Strings.splitByComma(tmp);
-                List<FailsafeCircuitBreakerCommandExecutor> breakerList = new ArrayList<>(names.length);
-                for (String name : names) {
-                    Optional<FailsafeCircuitBreakerCommandExecutor> optionalCircuitBreaker = initCircuitBreakerForName(name, configuration);
-                    if (optionalCircuitBreaker.isPresent()) {
-                        FailsafeCircuitBreakerCommandExecutor circuitBreaker = optionalCircuitBreaker.get();
-                        breakerList.add(circuitBreaker);
-                        logBuilder.append("    Added circuit breaker for hosts: {}{}");
-                        args.add(circuitBreaker.getHostList().getHostString());
-                        args.add(Strings.getLineSeparator());
+            List<FailsafeCircuitBreakerCommandExecutor> breakerList = initCircuitBreakers(configuration, logBuilder, args);
+            breakers = breakerList;
+            for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
+                IMAPStore.addCommandExecutor(breaker);
+            }
+
+            IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+                @Override
+                public Interests getInterests() {
+                    return Reloadables.interestsForProperties("com.openexchange.imap.breaker.*");
+                }
+
+                @SuppressWarnings("synthetic-access")
+                @Override
+                public void reloadConfiguration(ConfigurationService configService) {
+                    List<FailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
+                    if (null != breakerList) {
+                        for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
+                            IMAPStore.removeCommandExecutor(breaker);
+                        }
+                    }
+                    breakers = null;
+
+                    breakerList = initCircuitBreakers(configuration, logBuilder, args);
+                    breakers = breakerList;
+                    for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
+                        IMAPStore.addCommandExecutor(breaker);
                     }
                 }
-                breakers = breakerList;
-                for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
-                    IMAPStore.addCommandExecutor(breaker);
-                }
-            }
+
+            });
         }
 
         logBuilder.append("Global IMAP properties successfully loaded!");
@@ -825,15 +841,183 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
-    private static Optional<FailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(String name, ConfigurationService configuration) {
-        String propertyName = "com.openexchange.imap.breaker." + name + ".hosts";
+    private static List<FailsafeCircuitBreakerCommandExecutor> initCircuitBreakers(ConfigurationService configuration, StringBuilder logBuilder, List<Object> args) {
+        List<FailsafeCircuitBreakerCommandExecutor> breakerList = null;
+
+        // Load generic breaker
+        Optional<FailsafeCircuitBreakerCommandExecutor> genericBreaker = initCircuitBreakerForName(null, configuration);
+        if (genericBreaker.isPresent()) {
+            breakerList = new ArrayList<>();
+            breakerList.add(genericBreaker.get());
+            logBuilder.append("    Added generic circuit breaker{}");
+            args.add(Strings.getLineSeparator());
+        }
+
+        // Collect names of other breaker-associated properties
+        Set<String> names = new HashSet<>();
+        String prefix = "com.openexchange.imap.breaker.";
+        for (Iterator<String> it = configuration.propertyNames(); it.hasNext();) {
+            String propName = it.next();
+            if (propName.startsWith(prefix, 0)) {
+                int pos = propName.indexOf('.', prefix.length());
+                if (pos > 0) {
+                    names.add(propName.substring(prefix.length(), pos));
+                }
+            }
+        }
+
+        // Iterate them
+        for (String name : names) {
+            Optional<FailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(name, configuration);
+            if (optBreaker.isPresent()) {
+                if (breakerList == null) {
+                    breakerList = new ArrayList<>(names.size());
+                }
+                FailsafeCircuitBreakerCommandExecutor circuitBreaker = optBreaker.get();
+                breakerList.add(circuitBreaker);
+                if ("primary".equals(name)) {
+                    logBuilder.append("    Added circuit breaker for primary account{}");
+                    args.add(Strings.getLineSeparator());
+                } else {
+                    logBuilder.append("    Added \"{}\"  circuit breaker for hosts: {}{}");
+                    args.add(name);
+                    args.add(circuitBreaker.getHostList().get().getHostString());
+                    args.add(Strings.getLineSeparator());
+                }
+            }
+        }
+
+        return breakerList == null ? Collections.emptyList() : breakerList;
+    }
+
+    private static Optional<FailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(String infix, ConfigurationService configuration) {
+        if (infix == null) {
+            // The generic IMAP circuit breaker
+            String propertyName = "com.openexchange.imap.breaker.enabled";
+            boolean enabled = configuration.getBoolProperty(propertyName, true);
+            if (!enabled) {
+                return Optional.empty();
+            }
+
+            int failures;
+            {
+                propertyName = "com.openexchange.imap.breaker.failureThreshold";
+                String sFailures = configuration.getProperty(propertyName, "5").trim();
+                if (Strings.isEmpty(sFailures)) {
+                    LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
+                    return Optional.empty();
+                }
+                try {
+                    failures = Integer.parseInt(sFailures.trim());
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+                    return Optional.empty();
+                }
+            }
+
+            int success;
+            {
+                propertyName = "com.openexchange.imap.breaker.successThreshold";
+                String sSuccess = configuration.getProperty(propertyName, "2").trim();
+                if (Strings.isEmpty(sSuccess)) {
+                    LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
+                    return Optional.empty();
+                }
+                try {
+                    success = Integer.parseInt(sSuccess.trim());
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+                    return Optional.empty();
+                }
+            }
+
+            long delayMillis;
+            {
+                propertyName = "com.openexchange.imap.breaker.delayMillis";
+                String sDelayMillis = configuration.getProperty(propertyName, "60000").trim();
+                if (Strings.isEmpty(sDelayMillis)) {
+                    LOG.warn("Missing value for property {}. Skipping generic breaker configuration", propertyName);
+                    return Optional.empty();
+                }
+                try {
+                    delayMillis = Long.parseLong(sDelayMillis.trim());
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
+                    return Optional.empty();
+                }
+            }
+
+            return Optional.of(new FailsafeCircuitBreakerCommandExecutor(failures, success, delayMillis));
+        } // End of generic
+
+        if ("primary".equals(infix)) {
+            // The IMAP circuit breaker form primary account
+            String propertyName = "com.openexchange.imap.breaker.primary.enabled";
+            boolean enabled = configuration.getBoolProperty(propertyName, true);
+            if (!enabled) {
+                return Optional.empty();
+            }
+
+            int failures;
+            {
+                propertyName = "com.openexchange.imap.breaker.primary.failureThreshold";
+                String sFailures = configuration.getProperty(propertyName, "5").trim();
+                if (Strings.isEmpty(sFailures)) {
+                    LOG.warn("Missing value for property {}. Skipping breaker configuration for primary account", propertyName);
+                    return Optional.empty();
+                }
+                try {
+                    failures = Integer.parseInt(sFailures.trim());
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for primary account", propertyName);
+                    return Optional.empty();
+                }
+            }
+
+            int success;
+            {
+                propertyName = "com.openexchange.imap.breaker.primary.successThreshold";
+                String sSuccess = configuration.getProperty(propertyName, "2").trim();
+                if (Strings.isEmpty(sSuccess)) {
+                    LOG.warn("Missing value for property {}. Skipping breaker configuration for primary account", propertyName);
+                    return Optional.empty();
+                }
+                try {
+                    success = Integer.parseInt(sSuccess.trim());
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for primary account", propertyName);
+                    return Optional.empty();
+                }
+            }
+
+            long delayMillis;
+            {
+                propertyName = "com.openexchange.imap.breaker.primary.delayMillis";
+                String sDelayMillis = configuration.getProperty(propertyName, "60000").trim();
+                if (Strings.isEmpty(sDelayMillis)) {
+                    LOG.warn("Missing value for property {}. Skipping breaker configuration for primary account", propertyName);
+                    return Optional.empty();
+                }
+                try {
+                    delayMillis = Long.parseLong(sDelayMillis.trim());
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for primary account", propertyName);
+                    return Optional.empty();
+                }
+            }
+
+            return Optional.of(new PrimaryFailsafeCircuitBreakerCommandExecutor(failures, success, delayMillis));
+        } // End of primary
+
+        // Specific
+        String propertyName = "com.openexchange.imap.breaker." + infix + ".hosts";
         String hosts = configuration.getProperty(propertyName, "");
         if (Strings.isEmpty(hosts)) {
-            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, infix);
             return Optional.empty();
         }
 
-        propertyName = "com.openexchange.imap.breaker." + name + ".ports";
+        propertyName = "com.openexchange.imap.breaker." + infix + ".ports";
         String ports = configuration.getProperty(propertyName, "");
         if (Strings.isEmpty(ports)) {
             ports = null;
@@ -841,48 +1025,48 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         int failures;
         {
-            propertyName = "com.openexchange.imap.breaker." + name + ".failureThreshold";
-            String sFailures = configuration.getProperty(propertyName, "");
+            propertyName = "com.openexchange.imap.breaker." + infix + ".failureThreshold";
+            String sFailures = configuration.getProperty(propertyName, "5").trim();
             if (Strings.isEmpty(sFailures)) {
-                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, infix);
                 return Optional.empty();
             }
             try {
                 failures = Integer.parseInt(sFailures.trim());
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, infix);
                 return Optional.empty();
             }
         }
 
         int success;
         {
-            propertyName = "com.openexchange.imap.breaker." + name + ".successThreshold";
-            String sSuccess = configuration.getProperty(propertyName, "");
+            propertyName = "com.openexchange.imap.breaker." + infix + ".successThreshold";
+            String sSuccess = configuration.getProperty(propertyName, "2").trim();
             if (Strings.isEmpty(sSuccess)) {
-                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, infix);
                 return Optional.empty();
             }
             try {
                 success = Integer.parseInt(sSuccess.trim());
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, infix);
                 return Optional.empty();
             }
         }
 
         long delayMillis;
         {
-            propertyName = "com.openexchange.imap.breaker." + name + ".delayMillis";
-            String sDelayMillis = configuration.getProperty(propertyName, "");
+            propertyName = "com.openexchange.imap.breaker." + infix + ".delayMillis";
+            String sDelayMillis = configuration.getProperty(propertyName, "60000").trim();
             if (Strings.isEmpty(sDelayMillis)) {
-                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, infix);
                 return Optional.empty();
             }
             try {
                 delayMillis = Long.parseLong(sDelayMillis.trim());
             } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, infix);
                 return Optional.empty();
             }
         }
@@ -897,14 +1081,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 try {
                     portSet.add(Integer.valueOf(sPort.trim()));
                 } catch (@SuppressWarnings("unused") NumberFormatException e) {
-                    LOG.warn("Invalid value for port. Not a number. Skipping breaker configuration for {}", name);
+                    LOG.warn("Invalid value for port. Not a number. Skipping breaker configuration for {}", infix);
                     return Optional.empty();
                 }
             }
         }
 
-        return Optional.of(new FailsafeCircuitBreakerCommandExecutor(hostList, portSet, failures, success, delayMillis));
+        return Optional.of(new FailsafeCircuitBreakerCommandExecutor(hostList, portSet, failures, success, delayMillis, 100));
     }
+
 
     @Override
     protected void resetFields() {

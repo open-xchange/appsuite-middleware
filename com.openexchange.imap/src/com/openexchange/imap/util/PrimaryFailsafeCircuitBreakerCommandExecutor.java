@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,66 +47,36 @@
  *
  */
 
-package com.sun.mail.imap;
+package com.openexchange.imap.util;
 
-import java.io.IOException;
-import com.sun.mail.iap.Argument;
+import java.util.Optional;
 import com.sun.mail.iap.Protocol;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.iap.Response;
 
 /**
- * {@link CommandExecutor} - Is responsible for executing commands and reading responses.
+ * {@link PrimaryFailsafeCircuitBreakerCommandExecutor} - The special IMAP circuit breaker form primary account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.10.3
  */
-public interface CommandExecutor {
+public class PrimaryFailsafeCircuitBreakerCommandExecutor extends FailsafeCircuitBreakerCommandExecutor {
+
+    private static final String PROP_PRIMARY_ACCOUNT = "mail.imap.primary";
 
     /**
-     * Checks if this executor is applicable to given protocol instance
+     * Initializes a new {@link PrimaryFailsafeCircuitBreakerCommandExecutor}.
      *
-     * @param protocol The protocol instance
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
+     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
+     * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    boolean isApplicable(Protocol protocol);
-
-    /**
-     * Executes given command with given arguments using specified protocol instance.
-     *
-     * @param command The command
-     * @param args The arguments
-     * @param protocol The protocol instance
-     * @return The response array
-     */
-    default Response[] executeCommand(String command, Argument args, Protocol protocol) {
-        return protocol.executeCommand(command, args);
+    public PrimaryFailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
+        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100);
     }
 
-    /**
-     * Reads a response using specified protocol instance.
-     *
-     * @param protocol The protocol instance
-     * @return The response
-     * @throws IOException If an I/O error occurs
-     */
-    default Response readResponse(Protocol protocol) throws IOException {
-        try {
-            return protocol.readResponse();
-        } catch (ProtocolException e) {
-            // Cannot occur
-            throw new IOException(e);
-        }
+    @Override
+    public boolean isApplicable(Protocol protocol) {
+        return "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
     }
 
-    /**
-     * Gets the ranking for this command executor.
-     * <p>
-     * The higher the ranking, the more likely the executor will be invoked in preference over others.
-     *
-     * @return The ranking
-     */
-    default int getRanking() {
-        return 0;
-    }
 }

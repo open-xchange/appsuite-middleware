@@ -1420,6 +1420,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Allow round-robin address election for primary IMAP account
          */
         if (config.getAccountId() == MailAccount.DEFAULT_ID) {
+            imapProps.put("mail.imap.primary", "true");
             boolean useMultipleAddresses = IMAPProperties.getInstance().isUseMultipleAddresses(userId, contextId);
             if (useMultipleAddresses) {
                 imapProps.put("mail.imap.multiAddress.enabled", "true");
