@@ -47,73 +47,36 @@
  *
  */
 
-package com.openexchange.lock;
+package com.openexchange.session.oauth.osgi;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.lock.LockService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.oauth.SessionOAuthTokenService;
+import com.openexchange.session.oauth.impl.DefaultSessionOAuthTokenService;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
- * {@link ReentrantLockAccessControl}
+ * {@link OAuthUtilsActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class ReentrantLockAccessControl implements AccessControl {
+public class OAuthUtilsActivator extends HousekeepingActivator {
 
-    private final ReentrantLock lock;
-
-    /**
-     * Initializes a new {@link ReentrantLockAccessControl}.
-     */
-    public ReentrantLockAccessControl() {
-        this(new ReentrantLock());
-    }
-
-    /**
-     * Initializes a new {@link ReentrantLockAccessControl}.
-     *
-     * @param lock The reentrant lock to use
-     * @throws IllegalArgumentException If specified lock is <code>null</code>
-     */
-    public ReentrantLockAccessControl(ReentrantLock lock) {
-        super();
-        if (null == lock) {
-            throw new IllegalArgumentException("lock is null");
-        }
-        this.lock = lock;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
     }
 
     @Override
-    public void close() throws Exception {
-        release();
-    }
+    protected void startBundle() throws Exception {
+        track(SessiondService.class);
+        track(SessionStorageService.class);
+        track(LockService.class);
+        openTrackers();
 
-    @Override
-    public void acquireGrant() throws InterruptedException {
-        lock.lock();
-    }
-
-    @Override
-    public boolean tryAcquireGrant() {
-        return lock.tryLock();
-    }
-
-    @Override
-    public boolean tryAcquireGrant(long timeout, TimeUnit unit) throws InterruptedException {
-        return lock.tryLock(timeout, unit);
-    }
-
-    @Override
-    public boolean release() {
-        return release(true);
-    }
-
-    @Override
-    public boolean release(boolean acquired) {
-        if (acquired) {
-            lock.unlock();
-        }
-        return true;
+        registerService(SessionOAuthTokenService.class, new DefaultSessionOAuthTokenService(this));
     }
 
 }

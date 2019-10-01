@@ -49,6 +49,7 @@
 
 package com.openexchange.lock;
 
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link AccessControl} - Limits the number of concurrent access to a resource.
@@ -83,6 +84,15 @@ public interface AccessControl extends AutoCloseable {
      * @return <code>true</code> if grant has been acquired; otherwise <code>false</code>
      */
     boolean tryAcquireGrant();
+
+    /**
+     * Attempts to immediately acquire a grant from this access control; waiting for up to the specified timeout,
+     * for available grant becoming available.
+     *
+     * @return <code>true</code> if grant has been acquired in time; otherwise <code>false</code>
+     * @throws InterruptedException If interrupted while waiting for a grant
+     */
+    boolean tryAcquireGrant(long timeout, TimeUnit unit) throws InterruptedException;
 
     /**
      * Releases this access control assuming that a grant was successfully acquired before.

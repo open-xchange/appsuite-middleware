@@ -47,73 +47,23 @@
  *
  */
 
-package com.openexchange.lock;
+package com.openexchange.session.oauth;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link ReentrantLockAccessControl}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class ReentrantLockAccessControl implements AccessControl {
+@RunWith(Suite.class)
+@SuiteClasses({ SessionOAuthTokenServiceTest.class })
+public class UnitTests {
 
-    private final ReentrantLock lock;
-
-    /**
-     * Initializes a new {@link ReentrantLockAccessControl}.
-     */
-    public ReentrantLockAccessControl() {
-        this(new ReentrantLock());
-    }
-
-    /**
-     * Initializes a new {@link ReentrantLockAccessControl}.
-     *
-     * @param lock The reentrant lock to use
-     * @throws IllegalArgumentException If specified lock is <code>null</code>
-     */
-    public ReentrantLockAccessControl(ReentrantLock lock) {
+    public UnitTests() {
         super();
-        if (null == lock) {
-            throw new IllegalArgumentException("lock is null");
-        }
-        this.lock = lock;
     }
-
-    @Override
-    public void close() throws Exception {
-        release();
-    }
-
-    @Override
-    public void acquireGrant() throws InterruptedException {
-        lock.lock();
-    }
-
-    @Override
-    public boolean tryAcquireGrant() {
-        return lock.tryLock();
-    }
-
-    @Override
-    public boolean tryAcquireGrant(long timeout, TimeUnit unit) throws InterruptedException {
-        return lock.tryLock(timeout, unit);
-    }
-
-    @Override
-    public boolean release() {
-        return release(true);
-    }
-
-    @Override
-    public boolean release(boolean acquired) {
-        if (acquired) {
-            lock.unlock();
-        }
-        return true;
-    }
-
 }

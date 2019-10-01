@@ -47,73 +47,33 @@
  *
  */
 
-package com.openexchange.lock;
+package com.openexchange.session.oauth;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ReentrantLockAccessControl}
+ * A {@link TokenRefresher} performs the actual action of obtaining a new
+ * OAuth token pair. Use a new implementation instance for every refresh
+ * attempt.
+ * <p>
+ * Implementors are supposed to carry any needed state as fields. For the actual
+ * execution, only the current session-specific tokens are passed. During execution,
+ * the per-session token refresh lock is held.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class ReentrantLockAccessControl implements AccessControl {
-
-    private final ReentrantLock lock;
+public interface TokenRefresher {
 
     /**
-     * Initializes a new {@link ReentrantLockAccessControl}.
-     */
-    public ReentrantLockAccessControl() {
-        this(new ReentrantLock());
-    }
-
-    /**
-     * Initializes a new {@link ReentrantLockAccessControl}.
+     * Executes the token refresh. Any exceptions are re-thrown from
+     * {@link SessionOAuthTokenService#checkOrRefreshTokens(com.openexchange.session.Session, TokenRefresher, TokenRefreshConfig)}.
      *
-     * @param lock The reentrant lock to use
-     * @throws IllegalArgumentException If specified lock is <code>null</code>
+     * @param currentTokens The current OAuth tokens from a passed session
+     * @return A {@link TokenRefreshResponse}
+     * @throws InterruptedException If thread was interrupted during a blocking operation
+     * @throws OXException Use only for unexpected errors or errors that cannot be announced with the result object
      */
-    public ReentrantLockAccessControl(ReentrantLock lock) {
-        super();
-        if (null == lock) {
-            throw new IllegalArgumentException("lock is null");
-        }
-        this.lock = lock;
-    }
-
-    @Override
-    public void close() throws Exception {
-        release();
-    }
-
-    @Override
-    public void acquireGrant() throws InterruptedException {
-        lock.lock();
-    }
-
-    @Override
-    public boolean tryAcquireGrant() {
-        return lock.tryLock();
-    }
-
-    @Override
-    public boolean tryAcquireGrant(long timeout, TimeUnit unit) throws InterruptedException {
-        return lock.tryLock(timeout, unit);
-    }
-
-    @Override
-    public boolean release() {
-        return release(true);
-    }
-
-    @Override
-    public boolean release(boolean acquired) {
-        if (acquired) {
-            lock.unlock();
-        }
-        return true;
-    }
+    TokenRefreshResponse execute(OAuthTokens currentTokens) throws InterruptedException, OXException;
 
 }

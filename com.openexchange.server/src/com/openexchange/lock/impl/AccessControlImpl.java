@@ -51,6 +51,7 @@ package com.openexchange.lock.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -158,6 +159,30 @@ public class AccessControlImpl implements AccessControl {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public boolean tryAcquireGrant(long timeout, TimeUnit unit) throws InterruptedException {
+        long start = System.nanoTime();
+        long maxTime = start + unit.toNanos(timeout);
+        if (lock.tryLock(maxTime - start, TimeUnit.NANOSECONDS)) {
+            try {
+                long timeLeft = maxTime - System.nanoTime();
+                while (grants >= maxAccess) {
+                    if (timeLeft <= 0l) {
+                        return false;
+                    }
+
+                    timeLeft = accessible.awaitNanos(timeLeft);
+                }
+                grants++;
+                return true;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        return false;
     }
 
     /**
