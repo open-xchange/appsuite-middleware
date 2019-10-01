@@ -622,7 +622,7 @@ public class AdminCache {
                 Map.Entry<Object, Object> property = it.next();
                 String name = property.getKey().toString();
                 String value = property.getValue().toString();
-                if (name != null && name.length() > 0 && value != null && value.length() > 0 && !Strings.asciiLowerCase(name).endsWith("timeout")) {
+                if (Strings.isEmpty(name) || Strings.isEmpty(value) || Strings.asciiLowerCase(name).endsWith("timeout")) {
                     it.remove();
                 }
             }

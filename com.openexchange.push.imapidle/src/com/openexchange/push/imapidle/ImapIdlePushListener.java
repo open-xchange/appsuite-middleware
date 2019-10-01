@@ -668,7 +668,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
 
         long delay = TimeUnit.NANOSECONDS.toMillis(delayNanos);
-        timerTask = timerService.scheduleAtFixedRate(this, delay, delay);
+        timerTask = timerService.scheduleWithFixedDelay(this, delay, delay);
     }
 
     /**
