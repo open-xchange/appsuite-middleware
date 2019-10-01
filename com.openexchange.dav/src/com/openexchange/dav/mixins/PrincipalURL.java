@@ -118,30 +118,30 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
             }
             String path = getExternalPath(configViewFactory, "/principals/");
             if (principalURL.startsWith(path)) {
-                // Compile pattern each time, services/configuration might not be ready when building pattern statically.
-                Pattern url_pattern = Pattern.compile(path + "(resources|users|groups)/(\\d+)/?");
-                Matcher matcher = url_pattern.matcher(principalURL);
-                if (matcher.find() && 2 == matcher.groupCount()) {
-                    try {
-                        switch (matcher.group(1)) {
-                            case "resources":
-                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.RESOURCE, configViewFactory);
-                            case "groups":
-                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.GROUP, configViewFactory);
-                            case "users":
-                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.INDIVIDUAL, configViewFactory);
-                            default:
-                                throw new IllegalArgumentException(matcher.group(1));
-                        }
-                    } catch (IllegalArgumentException e) {
-                        org.slf4j.LoggerFactory.getLogger(PrincipalURL.class).debug("Error parsing principal URL", e);
+                principalURL = principalURL.substring(path.length());
+            }
+            Matcher matcher = URL_PATTERN.matcher(principalURL);
+            if (matcher.find() && 2 == matcher.groupCount()) {
+                try {
+                    switch (matcher.group(1)) {
+                        case "resources":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.RESOURCE, configViewFactory);
+                        case "groups":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.GROUP, configViewFactory);
+                        case "users":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.INDIVIDUAL, configViewFactory);
+                        default:
+                            throw new IllegalArgumentException(matcher.group(1));
                     }
+                } catch (IllegalArgumentException e) {
+                    org.slf4j.LoggerFactory.getLogger(PrincipalURL.class).debug("Error parsing principal URL", e);
                 }
             }
         }
         return null;
     }
 
+    private static final Pattern URL_PATTERN = Pattern.compile("(resources|users|groups)/(\\d+)/?");
     private static final String PROPERTY_NAME = "principal-URL";
 
     private final int principalID;

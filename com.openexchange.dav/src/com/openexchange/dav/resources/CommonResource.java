@@ -65,7 +65,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.AttachmentUtils;
-import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -92,8 +91,6 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
 
     protected final FolderCollection<T> parent;
 
-    private DAVFactory factory;
-
     /**
      * Initializes a new {@link CommonResource}.
      *
@@ -101,10 +98,9 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    protected CommonResource(FolderCollection<T> parent, T object, WebdavPath url, DAVFactory factory) throws OXException {
+    protected CommonResource(FolderCollection<T> parent, T object, WebdavPath url) throws OXException {
         super(parent, object, url);
         this.parent = parent;
-        this.factory = factory;
     }
 
     protected abstract void deserialize(InputStream inputStream) throws OXException, IOException;
@@ -145,13 +141,14 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
      *
      * @param object The groupware object to apply managed attachment properties for
      */
-    protected void applyAttachments(CommonObject object, ConfigViewFactory configViewFactory) throws OXException {
+    protected void applyAttachments(CommonObject object) throws OXException {
         if (0 < object.getNumberOfAttachments()) {
             int moduleId = AttachmentUtils.getModuleId(parent.getFolder().getContentType());
             TimedResult<AttachmentMetadata> attachments = Attachments.getInstance().getAttachments(factory.getSession(),
                 object.getParentFolderID(), object.getObjectID(), moduleId, factory.getContext(), factory.getUser(), factory.getUserConfiguration());
             SearchIterator<AttachmentMetadata> searchIterator = null;
             HostData hostData = getHostData();
+            ConfigViewFactory configViewFactory = factory.requireService(ConfigViewFactory.class);
             List<Entry<URI, AttachmentMetadata>> managedAttachments = new ArrayList<Entry<URI, AttachmentMetadata>>();
             try {
                 searchIterator = attachments.results();

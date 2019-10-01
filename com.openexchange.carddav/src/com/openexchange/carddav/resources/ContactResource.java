@@ -124,7 +124,7 @@ public class ContactResource extends CommonResource<Contact> {
      * @param url The resource url
      */
     public ContactResource(GroupwareCarddavFactory factory, CardDAVCollection parent, Contact object, WebdavPath url) throws OXException {
-        super(parent, object, url, factory);
+        super(parent, object, url);
         this.factory = factory;
         this.parent = parent;
     }
@@ -536,7 +536,7 @@ public class ContactResource extends CommonResource<Contact> {
          */
         Contact contact = factory.getContactService().getContact(
             factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()), contactFields);
-        applyAttachments(contact, factory.getServiceSafe(ConfigViewFactory.class));
+        applyAttachments(contact);
         if (isExportPhotoAsURI() && 0 < contact.getNumberOfImages()) {
             contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(factory.getServiceSafe(ConfigViewFactory.class), getHostData(), contact));
             contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());

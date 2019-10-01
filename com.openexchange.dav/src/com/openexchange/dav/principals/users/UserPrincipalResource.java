@@ -100,17 +100,6 @@ public class UserPrincipalResource extends DAVResource {
         );
     }
 
-    /**
-     * Initializes a new {@link UserPrincipalResource}.
-     *
-     * @param factory The factory
-     * @param user The user
-     * @param url The WebDAV path of the resource
-     */
-    public UserPrincipalResource(DAVFactory factory, User user) {
-        this(factory, user, new WebdavPath("principals", "users", String.valueOf(user.getId())));
-    }
-
     @Override
     public String getResourceType() throws WebdavProtocolException {
         return"<D:resourcetype><D:principal /></D:resourcetype>";

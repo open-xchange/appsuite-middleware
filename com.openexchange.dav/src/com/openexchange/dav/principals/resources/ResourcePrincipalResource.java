@@ -77,9 +77,10 @@ public class ResourcePrincipalResource extends DAVResource {
      *
      * @param factory The factory
      * @param resource The resource
+     * @param url The WebDAV path of the resource
      */
-    public ResourcePrincipalResource(DAVFactory factory, Resource resource) {
-        super(factory, new WebdavPath("principals", "resources", String.valueOf(resource.getIdentifier())));
+    public ResourcePrincipalResource(DAVFactory factory, Resource resource, WebdavPath url) {
+        super(factory, url);
         this.resource = resource;
         ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
         includeProperties(new DisplayName(resource.getDisplayName()), new com.openexchange.dav.mixins.CalendarUserType(CalendarUserType.RESOURCE),

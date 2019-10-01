@@ -319,6 +319,12 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
         /*
          * marshal response
          */
+        ConfigViewFactory configViewFactory;
+        try {
+            configViewFactory = factory.requireService(ConfigViewFactory.class);
+        } catch (OXException e) {
+            throw DAVProtocol.protocolException(request.getUrl(), e);
+        }
         Element multistatusElement = prepareMultistatusElement();
         ResourceMarshaller marshaller = getMarshaller(request, requestBody, new WebdavPath().toString());
         for (User user : users) {
@@ -326,13 +332,16 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                 // skip, since the Mac OS client gets into trouble when the TLD is missing in the mail address
                 continue;
             }
-            multistatusElement.addContent(marshaller.marshal(new UserPrincipalResource(factory, user)));
+            WebdavPath url = new WebdavPath(PrincipalURL.forUser(user.getId(), configViewFactory));
+            multistatusElement.addContent(marshaller.marshal(new UserPrincipalResource(factory, user, url)));
         }
         for (Group group : groups) {
-            multistatusElement.addContent(marshaller.marshal(new GroupPrincipalResource(factory, group)));
+            WebdavPath url = new WebdavPath(PrincipalURL.forGroup(group.getIdentifier(), configViewFactory));
+            multistatusElement.addContent(marshaller.marshal(new GroupPrincipalResource(factory, group, url)));
         }
         for (Resource resource : resources) {
-            multistatusElement.addContent(marshaller.marshal(new ResourcePrincipalResource(factory, resource)));
+            WebdavPath url = new WebdavPath(PrincipalURL.forResource(resource.getIdentifier(), configViewFactory));
+            multistatusElement.addContent(marshaller.marshal(new ResourcePrincipalResource(factory, resource, url)));
         }
         sendMultistatusResponse(response, multistatusElement);
     }

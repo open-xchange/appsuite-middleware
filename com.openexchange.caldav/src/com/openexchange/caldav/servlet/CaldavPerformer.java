@@ -60,7 +60,6 @@ import com.openexchange.caldav.action.CalDAVIfScheduleTagMatchAction;
 import com.openexchange.caldav.action.CalDAVPOSTAction;
 import com.openexchange.caldav.action.CalDAVPUTAction;
 import com.openexchange.caldav.action.MKCALENDARAction;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.ACLAction;
@@ -102,7 +101,7 @@ public class CaldavPerformer extends DAVPerformer {
     public CaldavPerformer(ServiceLookup services) {
         super();
         this.factory = new GroupwareCaldavFactory(PROTOCOL, services, this);
-        this.actions = initActions(services);
+        this.actions = initActions();
     }
 
     /**
@@ -110,7 +109,7 @@ public class CaldavPerformer extends DAVPerformer {
      *
      * @return The WebDAV actions, mapped to their corresponding WebDAV method
      */
-    private EnumMap<WebdavMethod, WebdavAction> initActions(ServiceLookup services) {
+    private EnumMap<WebdavMethod, WebdavAction> initActions() {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
         actions.put(WebdavMethod.UNLOCK, prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.PROPPATCH, prepare(new PROPPATCHAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
@@ -126,7 +125,7 @@ public class CaldavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.HEAD, prepare(new CalDAVHEADAction(factory), true, true, false, null, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.POST, prepare(new CalDAVPOSTAction(factory), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MKCALENDAR, prepare(new MKCALENDARAction(PROTOCOL), true, true, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL, services.getService(ConfigViewFactory.class)), true, true, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.PUT, prepare(new CalDAVPUTAction(factory), true, true, new WebdavIfMatchAction(), new CalDAVIfScheduleTagMatchAction(PROTOCOL)));
         makeLockNullTolerant(actions);

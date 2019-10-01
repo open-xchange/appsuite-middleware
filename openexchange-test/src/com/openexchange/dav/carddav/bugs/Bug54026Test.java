@@ -122,7 +122,7 @@ public class Bug54026Test extends CardDAVTest {
          * verify updated contact on client
          */
 
-        Map<String, String> eTags = syncCollection(syncToken, Config.getPathPrefix() + "/carddav/" + gabCollection + "/").getETagsStatusOK();
+        Map<String, String> eTags = syncCollection(syncToken, "/carddav/" + gabCollection + "/").getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = addressbookMultiget(gabCollection, eTags.keySet());
         card = assertContains(contact.getUid(), addressData);

@@ -11,48 +11,27 @@ The Open-Xchange server can be accessed via it's CalDAV- and CardDAV-interfaces 
 CalDAV and CardDAV are standard protocols for the exchange of calendar data and address data respectively. The CalDAV interface publishes all the user's calendar folders via CalDAV so the user can subscribe to them in a client application. Similarly, the CardDAV interface publishes the user's contact folders. Depending on the used client, the user can either subscribe one or more folders, or access all available data in an aggregated way. 
 
 
-# Setup
+# Webserver Configuration
 
 In order to redirect DAV requests to the appropriate servlets, the webserver's configuration may need to be adjusted using one of the following alternatives. 
 
-> Note: Please be aware that for a working Mavericks auto configuration setup you need to have SSL enabled on the server. The non-SSL variant described below only works if you use the advanced CalDAV configuration in Mac OS X Mavericks and enter the path by hand. If you just want to enter the hostname, SSL is required. The same applies to iOS7 where SSL is always required.
+> Note: Please be aware that for a working auto configuration setup in OS X Mavericks you need to have SSL enabled on the server. The non-SSL variant described below only works if you use the advanced CalDAV configuration in Mac OS X Mavericks and enter the path by hand. If you just want to enter the hostname, SSL is required. The same applies to iOS7 where SSL is always required.
 
 
-## Via server configuration (recommended)
-Since v7.10.3 the Open-Xchange server can manage and redirect DAV requests by itself. Therefore a prefix must be defined for *DAV servlets*. This prefix can be configured like in the example below:
+## Via Virtual Hosts (recommended)
 
-```
-com.openexchange.dav.pathPrefix=/dav
-com.openexchange.dav.proxyPathPrefix=/
-```
-
-> Note: For further information about the properties, have a look at [com.openexchange.dav.pathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.pathPrefix) and [com.openexchange.dav.proxyPathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.proxyPathPrefix)
-
-With this configuration the server will register all *DAV servlets* with the prefix */dav/* thus e.g. the CalDAV servlet will be reachable under <code>MYSERVER.TLD/dav/caldav</code>. To ensure requests will reach the server, the Apache server needs to be configured, too. However with the server managing the requests, the webserver configuration is reduced to a minimum. E.g.:
-
-```
-  ProxyPass /.well-known balancer://oxserver/.well-known
-  ProxyPass /dav balancer://oxserver-sync/dav
-```
-
-It is highly recommended to use <code>/dav</code> as path prefix. Client like the MacOS Calendar will automatically search under this path if e.g. only <code>MYSERVER.TLD</code> is entered as server address.
-
-
-## Via Apache <code>vhost</code>
-
-Please edit your site configuration file for OX so that ''' the existing OX configuration as well as the CalDAV/CardDAV configuration are placed inside their own virtual hosts sections.'''.
-Please add the following entries before your existing <code>VirtualHost</code> entry. This is an <b>example</b> where <code>MYSERVER.TLD</code> is the domain-name of the ox-server:
+Please edit your site configuration file for OX so that the existing OX configuration is placed inside its own virtual hosts sections. Then, add the following entries before the <code>VirtualHost</code> entry of your existing site (this is an <b>example</b> where <code>MYSERVER.TLD</code> is the domain-name of the Open-Xchange-Server):
 
 ```
  # NameVirtualHost directive no longer has any effect since Apache >=2.4
  # uncomment only for Apache Versions <2.4
- #NameVirtualHost *:80
- <VirtualHost *:80>
-        ServerName dav.<MYSERVER.TLD>
-        ErrorLog /tmp/dav.err.log
-        TransferLog /tmp/dav.access.log
- 
-       <Proxy balancer://oxserver-sync>
+ #NameVirtualHost *:443
+ <VirtualHost *:442>
+     ServerName dav.<MYSERVER.TLD>
+     ErrorLog /tmp/dav.err.log
+     TransferLog /tmp/dav.access.log
+     
+     <Proxy balancer://oxserver-sync>
          Order deny,allow
          Allow from all
  
@@ -62,21 +41,44 @@ Please add the following entries before your existing <code>VirtualHost</code> e
          #BalancerMember http://<ip-of-other-host>:8009 timeout=100 smax=0 ttl=60 retry=60 loadfactor=50 route=OX2
          SetEnv proxy-initial-not-pooled
          SetEnv proxy-sendchunked
-       </Proxy>
+     </Proxy>
  
-       ProxyPass / balancer://oxserver-sync/servlet/dav/
- 
+     ProxyPass / balancer://oxserver-sync/servlet/dav/
+    SSLEngine on
+      SSLCertificateFile "conf/ssl.crt/dav.MYSERVER.TLD.crt"
+      SSLCertificateKeyFile "conf/ssl.key/dav.MYSERVER.TLD.key"
  </VirtualHost>
 ```
 
-If you use this method, you have to make sure that <code>dav.<MYSERVER.TLD></code> is reachable, your DNS configuration needs an entry for this name. Take care of the the dav.* logfiles, the example writes them without logrotation to <code>/tmp</code>.
+Please adjust the SSL configuration as needed and make sure that <code>dav.<MYSERVER.TLD></code> is reachable; your DNS configuration needs an entry for this name. Take care of the the <code>dav.*</code> logfiles, the example writes them without logrotation to <code>/tmp</code>.
 
 Please note the <code>NameVirtualHost</code> directive is needed to be able to specify multiple virtual hosts for the same IP. The differentiation is only done by the given <code>ServerName</code>. This implies that you need two server names, so the virtual host entry for the existing ox site configuration needs to be also enriched by a <code>ServerName</code> if not already present. If you access the system without one of the given <code>ServerName</code>s so e.g. via the IP the system will pick the corresponding one by order (in this case the DAV part first. If you want it to work differently please change the order accordingly.
 
 
+## Via prefix path configuration 
+
+Starting with v7.10.3, it is also possible to provide access to CalDAV- and CardDAV-servlets below a designated path. Client requests will then no longer be targeted at the server's root level, but will include the advertised prefix path instead. This prefix path needs to be configured in the middleware like in the example below:
+
+```
+com.openexchange.dav.pathPrefix=/dav
+com.openexchange.dav.proxyPathPrefix=/
+```
+
+> Note: For further information about the properties, have a look at [com.openexchange.dav.pathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.pathPrefix) and [com.openexchange.dav.proxyPathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.proxyPathPrefix)
+
+With this configuration, the server will register all *DAV servlets* with the prefix <code>/dav/*</code>, thus e.g. the CalDAV servlet will be reachable under <code>MYSERVER.TLD/dav/caldav</code>. To ensure requests will reach the server, a corresponding ProxyPass directive needs to be configured, too. E.g. for Apache:
+
+```
+  ProxyPass /.well-known balancer://oxserver/.well-known
+  ProxyPass /dav balancer://oxserver-sync/dav
+```
+
+It is highly recommended to use <code>/dav</code> as path prefix. Clients like the Mac OS Calendar will automatically search under this path if e.g. only <code>MYSERVER.TLD</code> is entered as server address.
+
+
 ## Via Apache UserAgent detection
 
-For environments where it is inconvenient to setup a vhost there is the possibility to redirect to relevant servlets another way: Via useragent detection. This is not recommended for the following reason: Per definition this is a whitelist-approach and any client sending a useragent-string not explicitly listed in the configuration will not be able to connect . Useragent-strings may also change between different versions of an application or may even be actively changed into something non-standard.
+For environments where it is inconvenient to setup a virtual host there is also the possibility to redirect to relevant servlets another way: Via useragent detection. This is not recommended for the following reason: Per definition this is a whitelist-approach and any client sending a useragent-string not explicitly listed in the configuration will not be able to connect . Useragent-strings may also change between different versions of an application or may even be actively changed into something non-standard.
 
 ```
    $ vi <your-ox-site-configuration-file>
@@ -111,8 +113,8 @@ For environments where it is inconvenient to setup a vhost there is the possibil
 
 >Note: Depending on the specific configuration, such a global definition of the rewrite rules might not be appropriate. However, the rules may also be defined inside a <code>Directory</code> context. More details are available at http://httpd.apache.org/docs/current/mod/mod_rewrite.html#rewriterule.
 
-## Via Autodiscovery
 
+# Autodiscovery
 
 By providing some DNS service name registrations for your domain and adding an additional rewrite-rule to the webserver's configuration, it's possible for some clients to automatically discover the account settings by just providing the user's e-mail address and password. The procedure is specified in [http://tools.ietf.org/html/rfc6764 RFC 6764]. 
 
@@ -135,7 +137,7 @@ The well-known aliases should be added for your DAV vhost and on the vhost servi
  RewriteRule (.*) / [L,R]
 ```
 
-In the case of not serving the DAV service on the vhost root additionally some DNS TXT records are recommended:
+In the case of not serving the DAV service on the vhost root additionally some DNS TXT records are recommended, pointing to the path where the *DAV servlets are registered:
 
 ```
  _caldavs._tcp.MYSERVER.TLD.      10800 IN TXT   path=/servlet/dav

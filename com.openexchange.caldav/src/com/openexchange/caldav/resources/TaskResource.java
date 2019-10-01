@@ -121,7 +121,7 @@ public class TaskResource extends CommonResource<Task> {
     private int retryCount;
 
     public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) throws OXException {
-        super(parent, object, url, factory);
+        super(parent, object, url);
         this.parent = parent;
         this.factory = factory;
     }
@@ -411,7 +411,7 @@ public class TaskResource extends CommonResource<Task> {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
         ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK, null));
         Task task = parent.load(object);
-        applyAttachments(task, factory.getConfigViewFactory());
+        applyAttachments(task);
         icalEmitter.writeTask(session, task, factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         return serialize(session);
     }

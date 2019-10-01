@@ -49,7 +49,6 @@
 
 package com.openexchange.dav.mixins;
 
-import static com.openexchange.dav.DAVTools.getExternalPath;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -81,7 +80,7 @@ public class ExpandedGroupMemberSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (int member : members) {
-            stringBuilder.append("<D:href>").append(getExternalPath(configViewFactory, PrincipalURL.forUser(member, configViewFactory)) + "</D:href>");
+            stringBuilder.append("<D:href>").append(PrincipalURL.forUser(member, configViewFactory)).append("</D:href>");
         }
         return stringBuilder.toString();
     }

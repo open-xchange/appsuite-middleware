@@ -148,7 +148,7 @@ public class GroupPrincipalCollection extends DAVCollection {
     }
 
     private GroupPrincipalResource createGroupResource(Group group) {
-        return new GroupPrincipalResource(factory, group);
+        return new GroupPrincipalResource(factory, group, constructPathForChildResource(String.valueOf(group.getIdentifier())));
     }
 
 }

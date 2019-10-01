@@ -79,9 +79,10 @@ public class GroupPrincipalResource extends DAVResource {
      *
      * @param factory The factory
      * @param group The group
+     * @param url The WebDAV path of the resource
      */
-    public GroupPrincipalResource(DAVFactory factory, Group group) {
-        super(factory, new WebdavPath("principals", "groups", String.valueOf(group.getIdentifier())));
+    public GroupPrincipalResource(DAVFactory factory, Group group, WebdavPath url) {
+        super(factory, url);
         this.group = group;
         ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
         includeProperties(new DisplayName(group.getDisplayName()), new com.openexchange.dav.mixins.CalendarUserType(CalendarUserType.GROUP), 

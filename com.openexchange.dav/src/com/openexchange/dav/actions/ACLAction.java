@@ -80,17 +80,13 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class ACLAction extends DAVAction {
 
-    private final ConfigViewFactory configViewFactory;
-
     /**
      * Initializes a new {@link ACLAction}.
      *
      * @param protocol The underlying protocol
-     * @param configViewFactory The configuration view
      */
-    public ACLAction(DAVProtocol protocol, ConfigViewFactory configViewFactory) {
+    public ACLAction(DAVProtocol protocol) {
         super(protocol);
-        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -115,7 +111,13 @@ public class ACLAction extends DAVAction {
         if (null == aclElement || false == "acl".equals(aclElement.getName()) || false == DAVProtocol.DAV_NS.equals(aclElement.getNamespace())) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
-        List<Permission> permissions = parsePermissions(aclElement.getChildren("ace", DAVProtocol.DAV_NS));
+        ConfigViewFactory configViewFactory;
+        try {
+            configViewFactory = folderCollection.getFactory().requireService(ConfigViewFactory.class);
+        } catch (OXException e) {
+            throw DAVProtocol.protocolException(request.getUrl(), e);
+        }
+        List<Permission> permissions = parsePermissions(aclElement.getChildren("ace", DAVProtocol.DAV_NS), configViewFactory);
         if (null == permissions || 0 == permissions.size()) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
@@ -137,18 +139,18 @@ public class ACLAction extends DAVAction {
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
-    private List<Permission> parsePermissions(List<Element> aceElements) throws WebdavProtocolException {
+    private List<Permission> parsePermissions(List<Element> aceElements, ConfigViewFactory configViewFactory) throws WebdavProtocolException {
         if (null == aceElements) {
             return null;
         }
         List<Permission> permissions = new ArrayList<Permission>(aceElements.size());
         for (Element aceElement : aceElements) {
-            permissions.add(parsePermission(aceElement));
+            permissions.add(parsePermission(aceElement, configViewFactory));
         }
         return permissions;
     }
 
-    private Permission parsePermission(Element aceElement) throws WebdavProtocolException {
+    private static Permission parsePermission(Element aceElement, ConfigViewFactory configViewFactory) throws WebdavProtocolException {
         if (null == aceElement) {
             return null;
         }

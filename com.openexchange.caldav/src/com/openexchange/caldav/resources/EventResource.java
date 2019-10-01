@@ -348,7 +348,7 @@ public class EventResource extends DAVObjectResource<Event> {
                 }
                 StringBuilder stringBuilder = new StringBuilder();
                 if (null != calendarUser) {
-                    stringBuilder.append("<D:href>mailto:").append(calendarUser.getUri()).append("</D:href>");
+                    stringBuilder.append("<D:href>").append(calendarUser.getUri()).append("</D:href>");
                     if (CalendarUtils.isInternal(calendarUser, CalendarUserType.INDIVIDUAL)) {
                         try {
                             User user = factory.getService(UserService.class).getUser(calendarUser.getEntity(), factory.getContext());

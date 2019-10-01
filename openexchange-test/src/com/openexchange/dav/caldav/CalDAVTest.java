@@ -103,7 +103,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.PermissionTools;
 import net.fortuna.ical4j.model.component.Available;
@@ -181,7 +180,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     @Override
     protected SyncCollectionResponse syncCollection(SyncToken syncToken, String folderID) throws Exception {
-        return super.syncCollection(syncToken, Config.getPathPrefix() + "/caldav/" + encodeFolderID(folderID));
+        return super.syncCollection(syncToken, "/caldav/" + encodeFolderID(folderID));
     }
 
     protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
