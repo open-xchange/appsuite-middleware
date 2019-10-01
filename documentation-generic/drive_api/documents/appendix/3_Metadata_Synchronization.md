@@ -225,6 +225,8 @@ The metadata in .drive-meta files is serialized in JSON format to allow easy pro
 
 The following objects describe the JSON structure of the metadata for a directory:
 
+<div class="simpleTable">
+
 ### Directory Metadata
 |Name|Type|Value|
 |:---|:---|:----|
@@ -245,6 +247,8 @@ The following objects describe the JSON structure of the metadata for a director
 
 
 ### File Metadata
+
+<div class="simpleTable">
 
 |Name|Type|Value|
 |:---|:---|:----|
@@ -269,7 +273,12 @@ The following objects describe the JSON structure of the metadata for a director
 |version_comment|String|An additional comment for the file version.|
 |versions|Array|Metadata for all versions of the file, each element is an object as described in File Version.|
 
+</div>
+
 ### File Version
+
+<div class="simpleTable">
+
 |Name|Type|Value|
 |:---|:---|:----|
 |name|String|The name of the file version.|
@@ -280,6 +289,8 @@ The following objects describe the JSON structure of the metadata for a director
 |modified_by|Number|User ID of the user who last modified this object.|
 |version|String|The version identifier (usually, but not necessarily a numerical value) of the file version.|
 |version_comment|String|An additional comment for the file version.|
+
+</div>
 
 ## Client-side implementation
 

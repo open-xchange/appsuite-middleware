@@ -260,12 +260,7 @@ div.oxNormalDiv tr.PUT:nth-child(even) {background-color: #eedec7;}
 div.oxNormalDiv tr.DELETE:nth-child(even) {background-color: #ffcecc;}
 
 .simpleTable td {
-  background-color: #FFFFFF;
   border-bottom:  1px solid #BBBBBB;
-}
-
-.simpleTable td:empty{
-  border-bottom:  none;
 }
 
 .simpleTable thead{
@@ -277,6 +272,8 @@ div.oxNormalDiv tr.DELETE:nth-child(even) {background-color: #ffcecc;}
   background-color: #275885;
   color: #FFFFFF !important;
 }
+
+.simpleTable tr:nth-child(even) {background-color: #f2f2f2;}
 
 th {
   font-weight: bold;

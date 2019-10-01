@@ -306,34 +306,14 @@ This section describes the structures of action commands.
 |Name |Type|Value|Description|
 |:----|:---|:----|:----------|
 |id | String | addflags | A string defining the object itself.|
-|flags | Array || An array containing the flags which should be added to that mail. A flag can be either a system flag or a user flag. System flags begin with a backslash (\) and can be one of the ones describes in [Flags](#flags). \
-\
-System flags are case-insensitive. \
-\
-User flags begin with a dollar sign ($) and can contain any ASCII characters between 0x21 (!) and 0x7E (~), inclusive, except for the characters 0x22, 0x25, 0x28, 0x29, 0x2A, 0x5C, 0x5D and 0x7B, which correspond to \
-\
-"%()*\]{ \
-\
-Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, inclusive.\
-\
-See [RFC 3501](http://tools.ietf.org/html/rfc3501) for further details on IMAP flags and their meanings.|
+|flags | Array || An array containing the flags which should be added to that mail. A flag can be either a system flag or a user flag. System flags begin with a backslash (\\) and can be one of the ones describes in [Flags](#flags).<br><br> System flags are case-insensitive.<br><br> User flags begin with a dollar sign ($) and can contain any ASCII characters between 0x21 (!) and 0x7E (~), inclusive, except for the characters 0x22, 0x25, 0x28, 0x29, 0x2A, 0x5C, 0x5D and 0x7B, which correspond to <br><br> "%()*\]{ <br><br> Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, inclusive. <br><br> See [RFC 3501](http://tools.ietf.org/html/rfc3501) for further details on IMAP flags and their meanings.|
 
 ### setflags-command
 
 |Name |Type|Value|Description|
 |:----|:---|:----|:----------|
 |id | String | setflags | A string defining the object itself.|
-|flags | Array || An array containing the flags which should be set. A flag can be either a system flag or a user flag. System flags begin with a backslash (\) and can be one of the ones describes in [Flags](#flags). \
-\
-System flags are case-insensitive. \
-\
-User flags begin with a dollar sign ($) and can contain any ASCII characters between 0x21 (!) and 0x7E (~), inclusive, except for the characters 0x22, 0x25, 0x28, 0x29, 0x2A, 0x5C, 0x5D and 0x7B, which correspond to \
-\
-"%()*\]{ \
-\
-Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, inclusive.\
-\
-See [RFC 3501](http://tools.ietf.org/html/rfc3501) for further details on IMAP flags and their meanings.|
+|flags | Array || An array containing the flags which should be set. A flag can be either a system flag or a user flag. System flags begin with a backslash (\) and can be one of the ones describes in [Flags](#flags). <br><br> System flags are case-insensitive. <br><br> User flags begin with a dollar sign ($) and can contain any ASCII characters between 0x21 (!) and 0x7E (~), inclusive, except for the characters 0x22, 0x25, 0x28, 0x29, 0x2A, 0x5C, 0x5D and 0x7B, which correspond to <br><br> "%()*\]{ <br><br> Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, inclusive.<br><br> See [RFC 3501](http://tools.ietf.org/html/rfc3501) for further details on IMAP flags and their meanings.|
 
 
 #### Flags

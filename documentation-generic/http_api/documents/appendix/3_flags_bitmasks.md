@@ -34,6 +34,8 @@
 
 ## Capabilities
 
+<div class="simpleTable">
+
 | Bit        | Description             |
 |:-----------|:------------------------|
 |0 | Mailing system supports permissions.|
@@ -42,10 +44,14 @@
 |3 | Mailing system supports sorting.|
 |4 | Mailing system supports folder subscription.|
 
+</div>
+
 Note: Capabilities describe the entire mailing system (mail account), not the specific folder in which they are transmitted. E.g. bit 4 of the capabilities on the user's inbox describes whether subscriptions are supported by the default account, even though the inbox itself cannot be unsubscribed because it's a standard folder.
 
 
 ## Standard Folder Types
+
+<div class="simpleTable">
 
 | Bit        | Description             |
 |:-----------|:------------------------|
@@ -60,8 +66,11 @@ Note: Capabilities describe the entire mailing system (mail account), not the sp
 |11 | Spam.|
 |12 | Trash.|
 
+</div>
 
 ## Supported Capabilities
+
+<div class="simpleTable">
 
 |Name        | Description   |
 |:-----------|:--------------|
@@ -71,8 +80,11 @@ Note: Capabilities describe the entire mailing system (mail account), not the sp
 |sort | Folder storage supports sorting.|
 |subscription | Folder storage supports folder subscription.|
 
+</div>
 
 ## Event Flags
+
+<div class="simpleTable">
 
 |Name        | Description   |
 |:-----------|:--------------|
@@ -98,3 +110,5 @@ Note: Capabilities describe the entire mailing system (mail account), not the sp
 |overridden | The event represents an exception / overridden instance of a recurring event series.|
 |first_occurrence | The event represents the <i>first</i> occurrence of a recurring event series.|
 |last_occurrence | The event represents the <i>last</i> occurrence of a recurring event series.|
+
+</div>
