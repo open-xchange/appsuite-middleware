@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.regional.RegionalSettingField;
 import com.openexchange.regional.RegionalSettings;
 import com.openexchange.regional.RegionalSettingsService;
@@ -111,6 +112,7 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
             // The setting doesn't contain any custom fields. Therefore the entry can be deleted
             storage.delete(contextId, userId);
         } else {
+            check(purged);
             storage.upsert(contextId, userId, purged);
         }
     }
@@ -212,7 +214,6 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
             isDefault = false;
         }
         return isDefault ? null : builder.build();
-
     }
 
     /**
@@ -228,6 +229,78 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
         } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
         }
+    }
+
+    /**
+     * Checks if values in {@link RegionalSettings} object are valid
+     *
+     * @param settings The settings
+     */
+    private void check(RegionalSettings settings) throws OXException {
+        for (RegionalSettingField field : RegionalSettingField.values()) {
+            Object fieldValue = SerialiserUtil.getField(settings, field);
+            if (fieldValue == null) {
+                continue;
+            }
+            if (isValidPattern(fieldValue, field)) {
+                continue;
+            }
+            throw SettingExceptionCodes.INVALID_VALUE.create(fieldValue, field.getName());
+        }
+    }
+
+    /**
+     * Checks if value if valid for given field
+     *
+     * @param value The value
+     * @param field The field
+     * @return <code>true</code> if value is valid for this field, <code>false</code> otherwise
+     */
+    private boolean isValidPattern(Object value, RegionalSettingField field) {
+        switch (field) {
+            case TIME:
+            case TIME_LONG:
+            case DATE:
+            case DATE_FULL:
+            case DATE_LONG:
+            case DATE_MEDIUM:
+            case DATE_SHORT:
+                return checkDateTimePattern((String)value, field);
+            case NUMBER:
+                return true;
+            case FIRST_DAY_OF_WEEK:
+                if ("sunday".equals(value) || "monday".equals(value)) {
+                    return true;
+                }
+                return false;
+            case FIRST_DAY_OF_YEAR:
+                try {
+                    int v = Integer.parseInt((String)value);
+                    return 0 <= v && 7 > v;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            default:
+                // Will not happen...
+                return false;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    /**
+     * Validates a date field value
+     *
+     * @param pattern The pattern to validate
+     * @param field The field
+     * @return <code>true</code> if value is valid for this field, <code>false</code> otherwise
+     */
+    private boolean checkDateTimePattern(String pattern, RegionalSettingField field) {
+        try {
+            new SimpleDateFormat(pattern);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
     }
 
     private static String getTimePattern(RegionalSettings settings, int style) {
@@ -285,5 +358,17 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
         }
         return null;
     }
+//
+//    private void validate(RegionalSettings settings) throws OXException {
+//        RegionalSettingField.values()
+//        Map<String, String> localeData = new HashMap<>();
+//        localeData.put("date", settings.getDateFormat());
+//        localeData.put(key, value)
+//        try {
+//            DateFormat df = new SimpleDateFormat(settings.getDateFormat());
+//        } catch (IllegalArgumentException e) {
+//            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE
+//        }
+//    }
 
 }
