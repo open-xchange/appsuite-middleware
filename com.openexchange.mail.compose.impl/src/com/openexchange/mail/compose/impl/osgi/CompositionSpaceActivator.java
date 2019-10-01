@@ -98,10 +98,12 @@ import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStor
 import com.openexchange.mail.compose.impl.attachment.filestore.FileStrorageAttachmentFileLocationHandler;
 import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddCustomHeaders;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceEnlargeSubjectField;
 import com.openexchange.mail.compose.impl.rmi.RemoteCompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.security.CompositionSpaceKeyStorageServiceImpl;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
@@ -323,7 +325,9 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
             new CompositionSpaceCreateTableTask(),
             new CompositionSpaceAddContentEncryptedFlag(),
-            new CompositionSpaceAddFileStorageIdentifier()
+            new CompositionSpaceAddFileStorageIdentifier(),
+            new CompositionSpaceEnlargeSubjectField(),
+            new CompositionSpaceAddCustomHeaders()
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 

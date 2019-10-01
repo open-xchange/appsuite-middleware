@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleActiveSessionRemoteLookupFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookupFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollectionFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheckFactory;
@@ -122,6 +123,9 @@ public class PortableSessionActivator implements BundleActivator {
 
             // Create & register portable factory
             portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableMultipleSessionRemoteLookupFactory(), null));
+
+            // Create & register portable factory
+            portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableMultipleActiveSessionRemoteLookupFactory(), null));
 
             logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
         } catch (Exception e) {

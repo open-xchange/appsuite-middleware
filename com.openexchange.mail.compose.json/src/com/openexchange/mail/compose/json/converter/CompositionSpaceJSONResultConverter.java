@@ -52,6 +52,7 @@ package com.openexchange.mail.compose.json.converter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -176,6 +177,11 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
             json.putOpt("meta", convertMeta(message.getMeta()));
         }
 
+        // Custom headers
+        if (null == optFields || optFields.contains(MessageField.CUSTOM_HEADERS)) {
+            json.putOpt("customHeaders", convertCustomHeders(message.getCustomHeaders()));
+        }
+
         // Read receipt
         if (null == optFields || optFields.contains(MessageField.REQUEST_READ_RECEIPT)) {
             json.put("requestReadReceipt", message.isRequestReadReceipt());
@@ -272,6 +278,18 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
             jMeta.putOpt("forwardsFor", jForwardsFor);
         }
         return jMeta;
+    }
+
+    private JSONObject convertCustomHeders(Map<String, String> customHeaders) throws JSONException {
+        if (null == customHeaders) {
+            return null;
+        }
+
+        JSONObject jCustomHeaders = new JSONObject(customHeaders.size());
+        for (Map.Entry<String, String> customHeader : customHeaders.entrySet()) {
+            jCustomHeaders.put(customHeader.getKey(), customHeader.getValue());
+        }
+        return jCustomHeaders;
     }
 
     private JSONObject convertSecurity(Security security) throws JSONException {

@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl.storage;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.mail.compose.Address;
 import com.openexchange.mail.compose.Attachment;
@@ -92,6 +93,7 @@ public class ImmutableMessage implements Message {
         private SharedAttachmentsInfo sharedAttachmentsInfo;
         private List<Attachment> attachments;
         private Meta meta;
+        private Map<String, String> customHeaders;
         private Security security;
         private Priority priority;
         private boolean contentEncrypted;
@@ -170,6 +172,11 @@ public class ImmutableMessage implements Message {
             return this;
         }
 
+        public Builder withCustomHeaders(Map<String, String> customHeaders) {
+            this.customHeaders = customHeaders;
+            return this;
+        }
+
         public Builder withSecurity(Security security) {
             this.security = security;
             return this;
@@ -197,6 +204,7 @@ public class ImmutableMessage implements Message {
                 security = md.getSecurity();
                 priority = md.getPriority();
                 contentEncrypted = md.isContentEncrypted();
+                customHeaders = md.getCustomHeaders();
             }
             return this;
         }
@@ -218,12 +226,13 @@ public class ImmutableMessage implements Message {
                 security = m.getSecurity();
                 priority = m.getPriority();
                 contentEncrypted = m.isContentEncrypted();
+                customHeaders = m.getCustomHeaders();
             }
             return this;
         }
 
         public ImmutableMessage build() {
-            return new ImmutableMessage(from, sender, to, cc, bcc, subject, content, contentType, requestReadReceipt, sharedAttachmentsInfo, attachments, meta, security, priority, contentEncrypted);
+            return new ImmutableMessage(from, sender, to, cc, bcc, subject, content, contentType, requestReadReceipt, sharedAttachmentsInfo, attachments, meta, security, priority, contentEncrypted, customHeaders);
         }
     }
 
@@ -241,11 +250,12 @@ public class ImmutableMessage implements Message {
     private final SharedAttachmentsInfo sharedAttachmentsInfo;
     private final List<Attachment> attachments;
     private final Meta meta;
+    private final Map<String, String> customHeaders;
     private final Security security;
     private final Priority priority;
     private final boolean contentEncrypted;
 
-    ImmutableMessage(Address from, Address sender, List<Address> to, List<Address> cc, List<Address> bcc, String subject, String content, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, List<Attachment> attachments, Meta meta, Security security, Priority priority, boolean contentEncrypted) {
+    ImmutableMessage(Address from, Address sender, List<Address> to, List<Address> cc, List<Address> bcc, String subject, String content, ContentType contentType, boolean requestReadReceipt, SharedAttachmentsInfo sharedAttachmentsInfo, List<Attachment> attachments, Meta meta, Security security, Priority priority, boolean contentEncrypted, Map<String, String> customHeaders) {
         super();
         this.from = from;
         this.sender = sender;
@@ -262,6 +272,7 @@ public class ImmutableMessage implements Message {
         this.security = security;
         this.priority = priority;
         this.contentEncrypted = contentEncrypted;
+        this.customHeaders = customHeaders;
     }
 
     private static <E> List<E> immutableListFor(List<E> list) {
@@ -351,6 +362,11 @@ public class ImmutableMessage implements Message {
     @Override
     public boolean isContentEncrypted() {
         return contentEncrypted;
+    }
+
+    @Override
+    public Map<String, String> getCustomHeaders() {
+        return customHeaders;
     }
 
     @Override

@@ -1,3 +1,9 @@
+open-xchange-file-storage-boxcom (7.10.2-13) stable; urgency=medium
+
+  * Build for patch 2019-09-30 (5420)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 23 Sep 2019 13:25:24 +0200
+
 open-xchange-file-storage-boxcom (7.10.2-12) stable; urgency=medium
 
   * Build for patch 2019-09-09 (5397)

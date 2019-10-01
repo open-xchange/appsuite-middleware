@@ -96,6 +96,7 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
 
     private static final String FIELD_USER_ID = "userId";
     private static final String FIELD_CTX_ID = "contextId";
+    private static final String FIELD_WITH_LOCAL_LAST_ACTIVE = "withLocalLastActive";
 
     private int userId;
     private int contextId;
@@ -171,12 +172,14 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
     public void writePortable(PortableWriter writer) throws IOException {
         writer.writeInt(FIELD_CTX_ID, contextId);
         writer.writeInt(FIELD_USER_ID, userId);
+        writer.writeBoolean(FIELD_WITH_LOCAL_LAST_ACTIVE, withLocalLastActive);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         this.contextId = reader.readInt(FIELD_CTX_ID);
         this.userId = reader.readInt(FIELD_USER_ID);
+        this.withLocalLastActive = reader.readBoolean(FIELD_WITH_LOCAL_LAST_ACTIVE);
     }
 
 }

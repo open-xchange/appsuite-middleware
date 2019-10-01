@@ -398,6 +398,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
         }
 
+        // Custom headers
+        {
+            Map<String, String> customHeaders = m.getCustomHeaders();
+            if (customHeaders != null) {
+                for (Map.Entry<String, String> customHeader : customHeaders.entrySet()) {
+                    String headerName = customHeader.getKey();
+                    if (MimeMessageFiller.isCustomOrReplyHeader(headerName)) {
+                        sourceMessage.setHeader(headerName, customHeader.getValue());
+                    }
+                }
+            }
+        }
+
         // Create a new text part instance
         TextBodyMailPart textPart = provider.getNewTextBodyPart(content);
         textPart.setContentType(m.getContentType().getId());
@@ -747,6 +760,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
                 mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS, HeaderUtility.encodeHeaderValue(25, HeaderUtility.sharedAttachments2HeaderValue(m.getSharedAttachments())));
                 if (m.isRequestReadReceipt()) {
                     mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_READ_RECEIPT, HeaderUtility.encodeHeaderValue(19, "true"));
+                }
+                if (m.getCustomHeaders() != null) {
+                    mimeMessage.setHeader(HeaderUtility.HEADER_X_OX_CUSTOM_HEADERS, HeaderUtility.encodeHeaderValue(19, HeaderUtility.customHeaders2HeaderValue(m.getCustomHeaders())));
                 }
             }
 

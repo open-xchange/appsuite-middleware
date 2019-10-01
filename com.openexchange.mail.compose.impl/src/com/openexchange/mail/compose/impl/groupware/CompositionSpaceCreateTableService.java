@@ -85,7 +85,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "toAddr TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "ccAddr TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "bccAddr TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
-        + "subject VARCHAR(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
+        + "subject TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "content MEDIUMTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "contentType VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
         + "requestReadReceipt TINYINT(1) DEFAULT NULL,"
@@ -95,6 +95,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "priority VARCHAR(16) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
         + "attachments TEXT CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,"
         + "contentEncrypted TINYINT(1) NOT NULL DEFAULT 0,"
+        + "customHeaders TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "PRIMARY KEY (uuid),"
         + "KEY id (cid, user, uuid)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";

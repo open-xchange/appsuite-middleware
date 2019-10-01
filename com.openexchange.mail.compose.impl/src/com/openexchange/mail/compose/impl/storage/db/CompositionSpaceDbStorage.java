@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose.impl.storage.db;
 
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -361,6 +362,12 @@ public class CompositionSpaceDbStorage {
             stmt.setInt(3, userId);
             stmt.setBytes(4, UUIDs.toByteArray(compositionSpaceId));
             stmt.executeUpdate();
+        } catch (DataTruncation truncation) {
+            OXException handled = handleDataTruncation(truncation);
+            if (handled != null) {
+                throw handled;
+            }
+            throw truncation;
         }
     }
 
@@ -391,6 +398,12 @@ public class CompositionSpaceDbStorage {
             if (rows <= 0) {
                 throw CompositionSpaceErrorCode.MAX_NUMBER_OF_COMPOSITION_SPACE_REACHED.create(Integer.valueOf(maxSpacesPerUser));
             }
+        } catch (DataTruncation truncation) {
+            OXException handled = handleDataTruncation(truncation);
+            if (handled != null) {
+                throw handled;
+            }
+            throw truncation;
         }
     }
 
@@ -509,6 +522,12 @@ public class CompositionSpaceDbStorage {
                 throw CompositionSpaceErrorCode.CONCURRENT_UPDATE.create();
             }
             return newLastModified;
+        } catch (DataTruncation truncation) {
+            OXException handled = handleDataTruncation(truncation);
+            if (handled != null) {
+                throw handled;
+            }
+            throw truncation;
         }
     }
 
@@ -576,6 +595,30 @@ public class CompositionSpaceDbStorage {
 
     private OXException handleException(SQLException e) {
         return CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
+    }
+
+    private OXException handleDataTruncation(DataTruncation truncation) {
+        String[] truncatedFields = Databases.parseTruncatedFields(truncation);
+        if (truncatedFields.length > 0) {
+            String truncatedField = truncatedFields[0];
+            switch (truncatedField) {
+                case "fromAddr":
+                    return CompositionSpaceErrorCode.FROM_TOO_LONG.create(truncation, new Object[0]);
+                case "senderAddr":
+                    return CompositionSpaceErrorCode.SENDER_TOO_LONG.create(truncation, new Object[0]);
+                case "toAddr":
+                    return CompositionSpaceErrorCode.TO_TOO_LONG.create(truncation, new Object[0]);
+                case "ccAddr":
+                    return CompositionSpaceErrorCode.CC_TOO_LONG.create(truncation, new Object[0]);
+                case "bccAddr":
+                    return CompositionSpaceErrorCode.BCC_TOO_LONG.create(truncation, new Object[0]);
+                case "subject":
+                    return CompositionSpaceErrorCode.SUBJECT_TOO_LONG.create(truncation, new Object[0]);
+                default:
+                    break;
+            }
+        }
+        return null;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
