@@ -56,6 +56,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -67,6 +68,7 @@ import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailfilter.MailFilterInterceptorRegistry;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.internal.MailFilterCircuitBreakerReloadable;
 import com.openexchange.mailfilter.internal.MailFilterInterceptorRegistryImpl;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterServiceImpl;
@@ -127,7 +129,9 @@ public class MailFilterActivator extends HousekeepingActivator {
                 registerService(EventHandler.class, eventHandler, dict);
             }
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
-            registerService(MailFilterService.class, new MailFilterServiceImpl(this));
+            MailFilterServiceImpl mailFilterService = new MailFilterServiceImpl(this);
+            registerService(MailFilterService.class, mailFilterService);
+            registerService(Reloadable.class, new MailFilterCircuitBreakerReloadable(mailFilterService));
             registerTestCommandRegistry();
             registerActionCommandRegistry();
 

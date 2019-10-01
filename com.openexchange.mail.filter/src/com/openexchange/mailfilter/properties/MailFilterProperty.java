@@ -199,22 +199,27 @@ public enum MailFilterProperty implements Property {
     tempDownTimeout(I(10000), true),
 
     /**
+     * The enabled flag for mail filter circuit breaker
+     */
+    enabled(Boolean.TRUE, true, "com.openexchange.mail.filter.breaker."),
+
+    /**
      * The failure threshold for mail filter circuit breaker, which is the number of successive failures that must occur in order to open
      * the circuit
      */
-    failureThreshold("", true, "com.openexchange.mail.filter.breaker."),
+    failureThreshold("5", true, "com.openexchange.mail.filter.breaker."),
 
     /**
      * The success threshold for mail filter circuit breaker, which is the number of successive successful executions that must occur when
      * in a half-open state in order to close the circuit
      */
-    successThreshold("", true, "com.openexchange.mail.filter.breaker."),
+    successThreshold("2", true, "com.openexchange.mail.filter.breaker."),
 
     /**
      * The delay in milliseconds for mail filter circuit breaker, which is the number of milliseconds to wait in open state before
      * transitioning to half-open
      */
-    delayMillis("", true, "com.openexchange.mail.filter.breaker.");
+    delayMillis("60000", true, "com.openexchange.mail.filter.breaker.");
 
     private static final String EMPTY = "";
     private static final String PREFIX = "com.openexchange.mail.filter.";
