@@ -446,6 +446,7 @@ public class DefaultNotificationParticipantResolver implements
 			final NotificationConfiguration configuration = defaultConfiguration.clone();
 			if (organizerUser == null) {
 			    LOG.warn("Unable to resolve Organizer for appointment: " + appointment.getObjectID() + " in context " + ctx.getContextId());
+			    notificationOrganizer.setLocale(user.getLocale());
 			} else {
 			    configure(organizerUser, ctx, configuration, true);
 			    notificationOrganizer.setUser(organizerUser);
