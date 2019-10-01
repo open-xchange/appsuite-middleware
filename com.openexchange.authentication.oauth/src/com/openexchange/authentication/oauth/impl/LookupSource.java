@@ -47,36 +47,59 @@
  *
  */
 
-package com.openexchange.authentication;
+package com.openexchange.authentication.oauth.impl;
+
+import com.openexchange.authentication.NamePart;
 
 /**
- * This data must be available to the application after a user has been authenticated. It is used to assign the according context and user
- * information.
- * <p>
- * If you want to influence the session, the {@link Authenticated} instance may also implement {@link SessionEnhancement}.
+ * {@link LookupSource} denotes the input value used to resolve a user or context
+ * within App Suite. The taken value might be evaluated further to determine the
+ * actual identifier to lookup the user or context, see {@link NamePart}.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @see SessionEnhancement
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @see NamePart
+ * @since v7.10.3
  */
-public interface Authenticated {
+public enum LookupSource {
 
     /**
-     * The default context info/login mapping: {@code defaultcontext}
+     * The name given as user input during login.
      */
-    static final String DEFAULT_CONTEXT_INFO = "defaultcontext";
+    LOGIN_NAME("login-name"),
+    /**
+     * A response parameter from the authorization server.
+     */
+    RESPONSE_PARAMETER("response-parameter");
+
+    private final String configName;
+
+    private LookupSource(String configName) {
+        this.configName = configName;
+    }
 
     /**
-     * Gets the context information used to look-up the associated context.
-     *
-     * @return The context information
+     * Gets the name of this part as it would be defined in a configuration property.
+     * 
+     * @return The configuration name
      */
-    String getContextInfo();
+    public String getConfigName() {
+        return configName;
+    }
 
     /**
-     * Gets the user information used to look-up the associated user.
-     *
-     * @return The user information
+     * Gets the {@link NamePart} for a given config name or <code>null</code> if none matches.
+     * 
+     * @param configName
+     * @return The config name or <code>null</code>
      */
-    String getUserInfo();
+    public static LookupSource of(String configName) {
+        for (LookupSource value : LookupSource.values()) {
+            if (value.configName.equals(configName)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
 
 }

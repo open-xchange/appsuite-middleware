@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,67 @@
  *
  */
 
-package com.openexchange.authentication;
+package com.openexchange.authentication.oauth.impl;
+
+import java.util.Date;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.oauth2.sdk.token.Tokens;
+import com.openexchange.session.oauth.OAuthTokens;
 
 /**
- * This data must be available to the application after a user has been authenticated. It is used to assign the according context and user
- * information.
- * <p>
- * If you want to influence the session, the {@link Authenticated} instance may also implement {@link SessionEnhancement}.
+ * {@link OAuthRequestIssuer}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @see SessionEnhancement
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public interface Authenticated {
+public abstract class OAuthRequestIssuer {
+
+    protected final OAuthAuthenticationConfig config;
+
+    protected OAuthRequestIssuer(OAuthAuthenticationConfig config) {
+        super();
+        this.config = config;
+    }
 
     /**
-     * The default context info/login mapping: {@code defaultcontext}
-     */
-    static final String DEFAULT_CONTEXT_INFO = "defaultcontext";
-
-    /**
-     * Gets the context information used to look-up the associated context.
+     * Get the client authentication based on the config 
      *
-     * @return The context information
+     * @return The {@link ClientAuthentication}
      */
-    String getContextInfo();
+    protected ClientAuthentication getClientAuthentication() {
+        ClientID clientID = new ClientID(config.getClientId());
+        Secret clientSecret = new Secret(config.getClientSecret());
+        return new ClientSecretBasic(clientID, clientSecret);
+    }
 
     /**
-     * Gets the user information used to look-up the associated user.
+     * Converts tokens to OAuth tokens 
      *
-     * @return The user information
+     * @param tokens The tokens to convert
+     * @return The {@link OAuthTokens}
      */
-    String getUserInfo();
+    protected OAuthTokens convertNimbusTokens(Tokens tokens) {
+        AccessToken accessToken = tokens.getAccessToken();
+        long lifetime = accessToken.getLifetime();
+        Date expiryDate = null;
+        if (lifetime > 0) {
+            long expiryDateMillis = System.currentTimeMillis();
+            expiryDateMillis += lifetime * 1000;
+            expiryDate = new Date(expiryDateMillis);
+        }
+
+        RefreshToken refreshToken = tokens.getRefreshToken();
+        String refreshTokenValue = null;
+        if (refreshToken != null) {
+            refreshTokenValue = refreshToken.getValue();
+        }
+
+        return new OAuthTokens(tokens.getAccessToken().getValue(), expiryDate, refreshTokenValue);
+    }
 
 }

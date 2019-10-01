@@ -47,36 +47,26 @@
  *
  */
 
-package com.openexchange.authentication;
+package com.openexchange.authentication.oauth.impl;
+
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 
 /**
- * This data must be available to the application after a user has been authenticated. It is used to assign the according context and user
- * information.
- * <p>
- * If you want to influence the session, the {@link Authenticated} instance may also implement {@link SessionEnhancement}.
+ * {@link SessionParameters}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @see SessionEnhancement
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public interface Authenticated {
+public class SessionParameters implements SessionStorageParameterNamesProvider {
 
-    /**
-     * The default context info/login mapping: {@code defaultcontext}
-     */
-    static final String DEFAULT_CONTEXT_INFO = "defaultcontext";
+    public static final String PASSWORD_GRANT_MARKER = "com.openexchange.authentication.oauth.passwordGrant";
 
-    /**
-     * Gets the context information used to look-up the associated context.
-     *
-     * @return The context information
-     */
-    String getContextInfo();
-
-    /**
-     * Gets the user information used to look-up the associated user.
-     *
-     * @return The user information
-     */
-    String getUserInfo();
+    @Override
+    public List<String> getParameterNames(int userId, int contextId) throws OXException {
+        return Collections.singletonList(PASSWORD_GRANT_MARKER);
+    }
 
 }
