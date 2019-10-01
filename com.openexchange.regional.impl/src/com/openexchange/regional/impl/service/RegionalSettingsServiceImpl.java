@@ -68,6 +68,7 @@ import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.regional.RegionalSettingField;
 import com.openexchange.regional.RegionalSettings;
 import com.openexchange.regional.RegionalSettingsService;
+import com.openexchange.regional.RegionalSettingsUtil;
 import com.openexchange.regional.impl.storage.RegionalSettingStorage;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -124,50 +125,17 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
 
     @Override
     public DateFormat getDateFormat(int contextId, int userId, Locale locale, int style) {
-        String pattern = getDatePattern(get(contextId, userId), style);
-        if (null != pattern) {
-            try {
-                return new SimpleDateFormat(pattern);
-            } catch (Exception e) {
-                LOG.error("Error applying date format {}, falling back to defaults for user {} in context {}.", pattern, I(userId), I(contextId), e);
-            }
-        }
-        return SimpleDateFormat.getDateInstance(style, locale);
+        return RegionalSettingsUtil.getDateFormat(get(contextId, userId), style, locale);
     }
 
     @Override
     public DateFormat getTimeFormat(int contextId, int userId, Locale locale, int style) {
-        String pattern = getTimePattern(get(contextId, userId), style);
-        if (null != pattern) {
-            try {
-                return new SimpleDateFormat(pattern);
-            } catch (Exception e) {
-                LOG.error("Error applying time format {}, falling back to defaults for user {} in context {}.", pattern, I(userId), I(contextId), e);
-            }
-        }
-        return SimpleDateFormat.getTimeInstance(style, locale);
+        return RegionalSettingsUtil.getTimeFormat(get(contextId, userId), style, locale);
     }
 
     @Override
     public DateFormat getDateTimeFormat(int contextId, int userId, Locale locale, int dateStyle, int timeStyle) {
-        RegionalSettings settings = get(contextId, userId);
-        if (null != settings) {
-            String datePattern = getDatePattern(settings, dateStyle);
-            String timePattern = getTimePattern(settings, timeStyle);
-            if (null == datePattern) {
-                datePattern = ((SimpleDateFormat) SimpleDateFormat.getDateInstance(dateStyle, locale)).toLocalizedPattern();
-            }
-            if (null == timePattern) {
-                timePattern = ((SimpleDateFormat) SimpleDateFormat.getTimeInstance(timeStyle, locale)).toLocalizedPattern();
-            }
-            String pattern = datePattern + ' ' + timePattern;
-            try {
-                return new SimpleDateFormat(datePattern + ' ' + timePattern);
-            } catch (Exception e) {
-                LOG.error("Error applying date/time format {}, falling back to defaults for user {} in context {}.", pattern, I(userId), I(contextId), e);
-            }
-        }
-        return SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
+        return RegionalSettingsUtil.getDateTimeFormat(get(contextId, userId), locale, dateStyle, timeStyle);
     }
 
     @Override
@@ -301,36 +269,6 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
             return false;
         }
         return true;
-    }
-
-    private static String getTimePattern(RegionalSettings settings, int style) {
-        if (null != settings) {
-            switch (style) {
-                case DateFormat.LONG:
-                    return settings.getTimeFormatLong();
-                default:
-                    return settings.getTimeFormat();
-            }
-        }
-        return null;
-    }
-
-    private static String getDatePattern(RegionalSettings settings, int style) {
-        if (null != settings) {
-            switch (style) {
-                case DateFormat.SHORT:
-                    return settings.getDateFormatShort();
-                case DateFormat.FULL:
-                    return settings.getDateFormatFull();
-                case DateFormat.LONG:
-                    return settings.getDateFormatLong();
-                case DateFormat.MEDIUM:
-                    return settings.getDateFormatMedium();
-                default:
-                    return settings.getDateFormat();
-            }
-        }
-        return null;
     }
 
     private static Character getDecimalSeparator(RegionalSettings settings) {

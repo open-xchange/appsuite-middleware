@@ -51,6 +51,7 @@ package com.openexchange.chronos.scheduling.changes;
 
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.regional.RegionalSettings;
 
 /**
  * {@link Sentence}
@@ -65,9 +66,9 @@ public interface Sentence {
      *
      * @param format The format. For <code>null</code>, format <code>text</code> is assumed
      * @param locale The local to translate the sentence in
-     * @return The sentence
+     * @param timeZone The time zone to use the sentence
+     * @param regionalSettings The preferred regional settings, or <code>null</code> if not configured
      */
-
-    String getMessage(String format, Locale locale, TimeZone timeZone);
+    String getMessage(String format, Locale locale, TimeZone timeZone, RegionalSettings regionalSettings);
 
 }

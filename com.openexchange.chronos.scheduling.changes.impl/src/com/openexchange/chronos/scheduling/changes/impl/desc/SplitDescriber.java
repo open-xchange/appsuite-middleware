@@ -68,6 +68,7 @@ import com.openexchange.chronos.scheduling.changes.impl.FormattableArgument;
 import com.openexchange.chronos.scheduling.changes.impl.MessageContext;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.regional.RegionalSettingsUtil;
 
 /**
  * {@link SplitDescriber}
@@ -93,7 +94,7 @@ public class SplitDescriber implements ChangeDescriber {
             
             @Override
             public Object format(MessageContext context) {
-                DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, context.getLocale());
+                DateFormat dateFormat = RegionalSettingsUtil.getDateFormat(context.getRegionalSettings(), DateFormat.LONG, context.getLocale());
                 dateFormat.setTimeZone(startDate.isAllDay() ? TimeZone.getTimeZone("UTC") : context.getTimeZone());
                 return  dateFormat.format(new Date(startDate.getTimestamp()));
             }

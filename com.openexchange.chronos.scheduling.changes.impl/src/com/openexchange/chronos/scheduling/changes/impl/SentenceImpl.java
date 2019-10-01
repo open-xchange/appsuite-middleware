@@ -63,6 +63,7 @@ import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.scheduling.changes.Sentence;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.regional.RegionalSettings;
 
 /**
  * {@link SentenceImpl}
@@ -99,8 +100,8 @@ public class SentenceImpl implements Sentence {
     }
 
     @Override
-    public String getMessage(String format, Locale locale, TimeZone timeZone) {
-        return getMessage(new DefaultMessageContext(TypeWrapper.WRAPPER.get(format), locale, timeZone));
+    public String getMessage(String format, Locale locale, TimeZone timeZone, RegionalSettings regionalSettings) {
+        return getMessage(new DefaultMessageContext(TypeWrapper.WRAPPER.get(format), locale, timeZone, regionalSettings));
     }
 
     public String getMessage(MessageContext context) {

@@ -71,6 +71,7 @@ import com.openexchange.chronos.scheduling.changes.impl.MessageContext;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
+import com.openexchange.regional.RegionalSettingsUtil;
 
 /**
  * {@link ReschedulingDescriber}
@@ -161,14 +162,14 @@ public class ReschedulingDescriber implements ChangeDescriber {
                 Date startDate = new Date(event.getStartDate().getTimestamp());
                 Date endDate = new Date(event.getEndDate().getTimestamp());
 
-                DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, context.getLocale());
+                DateFormat longDate = RegionalSettingsUtil.getDateFormat(context.getRegionalSettings(), DateFormat.LONG, context.getLocale());
                 longDate.setTimeZone(context.getTimeZone());
                 if (event.getStartDate().isAllDay()) {
                     longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
                     endDate = forceCorrectDay(endDate);
                 }
 
-                DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, context.getLocale());
+                DateFormat time = RegionalSettingsUtil.getTimeFormat(context.getRegionalSettings(), DateFormat.SHORT, context.getLocale());
                 time.setTimeZone(context.getTimeZone());
 
                 if (isSameDay(eventUpdate, event)) {

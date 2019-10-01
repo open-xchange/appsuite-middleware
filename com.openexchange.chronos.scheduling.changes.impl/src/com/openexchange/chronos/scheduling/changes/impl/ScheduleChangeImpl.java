@@ -165,7 +165,7 @@ public class ScheduleChangeImpl implements ScheduleChange {
             return "";
         }
 
-        MessageContext messageContext = new DefaultMessageContext(wrapper, recipientSettings.getLocale(), recipientSettings.getTimeZone());
+        MessageContext messageContext = new DefaultMessageContext(wrapper, recipientSettings);
 
         // XXX Only describe one event to satisfy templates
         Event event = Utils.selectDescribedEvent(resource, changes);
@@ -181,7 +181,7 @@ public class ScheduleChangeImpl implements ScheduleChange {
         Map<String, Object> env = new HashMap<String, Object>();
         env.put("mail", new NotificationMail(event, participants, resources));
         env.put("templating", templateService.createHelper(env, null, false));
-        env.put("formatters", new DateHelper(event, recipientSettings.getLocale(), recipientSettings.getTimeZone()));
+        env.put("formatters", new DateHelper(event, recipientSettings.getLocale(), recipientSettings.getTimeZone(), recipientSettings.getRegionalSettings()));
         env.put("labels", new LabelHelper(services, event, seriesMaster, originator, recipientSettings, comment, messageContext));
         env.put("participantHelper", new ParticipantHelper(recipientSettings.getLocale()));
         env.put("changes", convertToString(messageContext, changes, event.getRecurrenceId()));
@@ -208,7 +208,7 @@ public class ScheduleChangeImpl implements ScheduleChange {
             if (null == recurrenceId && null == change.getRecurrenceId() || null != recurrenceId && 0 == recurrenceId.compareTo(change.getRecurrenceId())) {
                 for (Description description : change.getDescriptions()) {
                     for (Sentence sentence : description.getSentences()) {
-                        descriptions.add(sentence.getMessage(messageContext.getWrapper().getFormat(), messageContext.getLocale(), messageContext.getTimeZone()));
+                        descriptions.add(sentence.getMessage(messageContext.getWrapper().getFormat(), messageContext.getLocale(), messageContext.getTimeZone(), messageContext.getRegionalSettings()));
                     }
                 }
             }

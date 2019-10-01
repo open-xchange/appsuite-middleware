@@ -56,12 +56,16 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.HumanReadableRecurrences;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.osgi.Services;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.regional.RegionalSettings;
 import com.openexchange.regional.RegionalSettingsService;
+import com.openexchange.regional.RegionalSettingsUtil;
 
 /**
  * {@link DateHelper}
@@ -79,26 +83,40 @@ public class DateHelper {
     private TimeZone timezone;
     private final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-    public DateHelper(Event event, Locale locale, TimeZone tz, int contextId, int userId) {
+    public DateHelper(Event event, Locale locale, TimeZone tz, RegionalSettings regionalSettings) {
         super();
         this.event = event;
-        if (locale != null && tz != null) {
-            RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
-            if (null != regionalSettingsService && contextId > 0 && userId > 0) {
-                timeFormat = regionalSettingsService.getTimeFormat(contextId, userId, locale, DateFormat.SHORT);
-                dateFormat = regionalSettingsService.getDateFormat(contextId, userId, locale, DateFormat.FULL);
-            } else {
-                timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
-                dateFormat = DateFormat.getDateInstance(DateFormat.FULL, locale);
-            }
-            this.locale = locale;
-            this.timezone = tz;
-            weekdayFormat = new SimpleDateFormat("E", locale);
+        this.locale = selectLocale(locale);
+        this.timezone = selectTimezone(event, tz);
 
-            timeFormat.setTimeZone(timezone);
-            dateFormat.setTimeZone(timezone);
-            weekdayFormat.setTimeZone(timezone);
+        timeFormat = RegionalSettingsUtil.getTimeFormat(regionalSettings, DateFormat.SHORT, locale);
+        dateFormat = RegionalSettingsUtil.getDateFormat(regionalSettings, DateFormat.FULL, locale);
+        weekdayFormat = new SimpleDateFormat("E", locale);
+
+        timeFormat.setTimeZone(timezone);
+        dateFormat.setTimeZone(timezone);
+        weekdayFormat.setTimeZone(timezone);
+    }
+
+    public DateHelper(Event event, Locale locale, TimeZone tz, DateFormat df, int contextId, int userId) {
+        super();
+        this.event = event;
+        this.locale = selectLocale(locale);
+        this.timezone = selectTimezone(event, tz);
+
+        RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+        if (null != regionalSettingsService && contextId > 0 && userId > 0) {
+            timeFormat = regionalSettingsService.getTimeFormat(contextId, userId, locale, DateFormat.SHORT);
+            dateFormat = regionalSettingsService.getDateFormat(contextId, userId, locale, DateFormat.FULL);
+        } else {
+            timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
+            dateFormat = null == df ? DateFormat.getDateInstance(DateFormat.FULL, locale) : df;
         }
+        weekdayFormat = new SimpleDateFormat("E", locale);
+
+        timeFormat.setTimeZone(timezone);
+        dateFormat.setTimeZone(timezone);
+        weekdayFormat.setTimeZone(timezone);
     }
 
     public String getRecurrenceDatePosition() {
@@ -224,6 +242,26 @@ public class DateHelper {
     public String getModified() {
         Date date = event.getLastModified();
         return formatDate(date) + " " + formatTime(date);
+    }
+
+    private static Locale selectLocale(Locale locale) {
+        if (null == locale) {
+            return LocaleTools.DEFAULT_LOCALE;
+        }
+        return locale;
+    }
+
+    private static TimeZone selectTimezone(Event event, TimeZone tz) {
+        if (null != tz) {
+            return tz;
+        }
+        if (null != event) {
+            DateTime startDate = event.getStartDate();
+            if (null != startDate && false == startDate.isFloating()) {
+                return startDate.getTimeZone();
+            }
+        }
+        return TimeZone.getDefault();
     }
 
 }

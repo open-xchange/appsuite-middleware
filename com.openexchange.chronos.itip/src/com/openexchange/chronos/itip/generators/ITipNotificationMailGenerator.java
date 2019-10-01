@@ -92,6 +92,8 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -748,11 +750,16 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         User user = participant.getUser();
         int contextId = 0;
         int userId = 0;
+        RegionalSettings regionalSettings = null;
         if (null != ctx && null != user) {
             contextId = ctx.getContextId();
             userId = user.getId();
+            RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
+            if (null != regionalSettingsService) {
+                regionalSettings = regionalSettingsService.get(contextId, userId);
+            }
         }
-        return new DateHelper(updated, participant.getLocale(), participant.getTimeZone(), contextId, userId);
+        return new DateHelper(updated, participant.getLocale(), participant.getTimeZone(), regionalSettings);
     }
 
     @Override

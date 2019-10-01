@@ -52,6 +52,7 @@ package com.openexchange.chronos.scheduling.changes.impl;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.regional.RegionalSettings;
 
 /**
  * {@link MessageContext}
@@ -81,5 +82,12 @@ public interface MessageContext {
      * @return The timezone
      */
     TimeZone getTimeZone();
+
+    /**
+     * Gets customized regional settings to use for the recipient, if configured.
+     * 
+     * @return The preferred regional settings, or <code>null</code> if not configured
+     */
+    RegionalSettings getRegionalSettings();
 
 }

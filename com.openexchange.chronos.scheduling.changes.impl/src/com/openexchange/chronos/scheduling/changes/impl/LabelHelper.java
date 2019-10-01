@@ -93,9 +93,8 @@ public class LabelHelper {
      * @param serviceLookup
      * @param update The {@link Event} to generate the mail for
      * @param seriesMaster The series master event if changes affect a recurrence instance, <code>null</code>, otherwise
-     * @param contextId The context identifer
      * @param originator The originator
-     * @param recipient The recipient
+     * @param recipientSettings The regional settings
      * @param comment The comment to set
      * @param messageContext The message context to use
      */
@@ -109,7 +108,7 @@ public class LabelHelper {
         this.comment = comment;
         this.seriesMaster = seriesMaster;
         this.delegationState = getDelegationState(originator, recipient);
-        this.dateHelper = new DateHelper(update, recipientSettings.getLocale(), recipientSettings.getTimeZone());
+        this.dateHelper = new DateHelper(update, recipientSettings.getLocale(), recipientSettings.getTimeZone(), recipientSettings.getRegionalSettings());
         this.serviceLookup = serviceLookup;
     }
 

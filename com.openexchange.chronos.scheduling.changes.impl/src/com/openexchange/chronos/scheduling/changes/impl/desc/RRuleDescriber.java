@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
+import java.text.DateFormat;
 import java.util.Collections;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Event;
@@ -63,6 +64,7 @@ import com.openexchange.chronos.scheduling.changes.impl.MessageContext;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.java.Strings;
+import com.openexchange.regional.RegionalSettingsUtil;
 
 /**
  * {@link RRuleDescriber}
@@ -93,13 +95,14 @@ public class RRuleDescriber implements ChangeDescriber {
 
                 @Override
                 public Object format(MessageContext context) {
+                    DateFormat dateFormat = RegionalSettingsUtil.getDateFormat(context.getRegionalSettings(), DateFormat.FULL, context.getLocale());
                     HumanReadableRecurrences readableRecurrences = new HumanReadableRecurrences(updatedEvent, context.getLocale());
                     String string = readableRecurrences.getString();
                     StringBuilder stringBuilder = new StringBuilder();
                     if (Strings.isNotEmpty(string)) {
                         stringBuilder.append(string);
                     }
-                    String end = readableRecurrences.getEnd();
+                    String end = readableRecurrences.getEnd(dateFormat);
                     if (Strings.isNotEmpty(end)) {
                         if (0 < stringBuilder.length()) {
                             stringBuilder.append(", ");

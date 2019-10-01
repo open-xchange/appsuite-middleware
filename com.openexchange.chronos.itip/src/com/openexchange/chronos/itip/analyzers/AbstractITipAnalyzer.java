@@ -94,6 +94,8 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
@@ -149,9 +151,11 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     public void describeDiff(final ITipChange change, final TypeWrapper wrapper, final CalendarSession session, ITipMessage message) throws OXException {
         final ContextService contexts = Services.getService(ContextService.class);
         final UserService users = Services.getService(UserService.class);
+        RegionalSettingsService regionalSettingsService = Services.getService(RegionalSettingsService.class);
 
         final Context ctx = contexts.getContext(session.getContextId());
         final User user = users.getUser(session.getUserId(), ctx);
+        RegionalSettings regionalSettings = regionalSettingsService.get(session.getContextId(), session.getUserId());
 
         switch (change.getType()) {
             case CREATE:
@@ -188,7 +192,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             }
             for (Description desc : descs) {
                 for (com.openexchange.chronos.scheduling.changes.Sentence sentence : desc.getSentences()) {
-                    descriptions.add(sentence.getMessage(wrapper.getFormat(), user.getLocale(), TimeZone.getTimeZone(user.getTimeZone())));
+                    descriptions.add(sentence.getMessage(wrapper.getFormat(), user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()), regionalSettings));
                 }
             }
         }

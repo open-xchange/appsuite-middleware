@@ -6,8 +6,8 @@ Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.fileholder,
- com.openexchange.config.lean,
  com.openexchange.annotation,
+ com.openexchange.config.lean,
  com.openexchange.exception,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.i18n,
@@ -17,6 +17,7 @@ Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.osgi.annotation,
  com.openexchange.osgi.util,
  com.openexchange.quota,
+ com.openexchange.regional,
  com.openexchange.search,
  com.openexchange.search.internal.operands,
  com.openexchange.session,

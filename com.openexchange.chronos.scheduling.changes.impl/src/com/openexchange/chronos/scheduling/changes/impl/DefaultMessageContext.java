@@ -52,6 +52,8 @@ package com.openexchange.chronos.scheduling.changes.impl;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.scheduling.RecipientSettings;
+import com.openexchange.regional.RegionalSettings;
 
 /**
  * {@link DefaultMessageContext}
@@ -64,6 +66,17 @@ public class DefaultMessageContext implements MessageContext {
     private final TypeWrapper wrapper;
     private final Locale locale;
     private final TimeZone timeZone;
+    private final RegionalSettings regionalSettings;
+
+    /**
+     * Initializes a new {@link DefaultMessageContext}.
+     * 
+     * @param wrapper The underlying type wrapper
+     * @param recipientSettings Recipient-specific settings to use for rendering
+     */
+    public DefaultMessageContext(TypeWrapper wrapper, RecipientSettings recipientSettings) {
+        this(wrapper, recipientSettings.getLocale(), recipientSettings.getTimeZone(), recipientSettings.getRegionalSettings());
+    }
 
     /**
      * Initializes a new {@link DefaultMessageContext}.
@@ -71,12 +84,14 @@ public class DefaultMessageContext implements MessageContext {
      * @param wrapper The underlying type wrapper
      * @param locale The target locale to use
      * @param timeZone The timezone to consider when formatting date-/time-related properties.
+     * @param regionalSettings The preferred regional settings, or <code>null</code> if not configured
      */
-    public DefaultMessageContext(TypeWrapper wrapper, Locale locale, TimeZone timeZone) {
+    public DefaultMessageContext(TypeWrapper wrapper, Locale locale, TimeZone timeZone, RegionalSettings regionalSettings) {
         super();
         this.wrapper = wrapper;
         this.locale = locale;
         this.timeZone = timeZone;
+        this.regionalSettings = regionalSettings;
     }
 
     @Override
@@ -92,6 +107,11 @@ public class DefaultMessageContext implements MessageContext {
     @Override
     public TimeZone getTimeZone() {
         return timeZone;
+    }
+
+    @Override
+    public RegionalSettings getRegionalSettings() {
+        return regionalSettings;
     }
 
 }

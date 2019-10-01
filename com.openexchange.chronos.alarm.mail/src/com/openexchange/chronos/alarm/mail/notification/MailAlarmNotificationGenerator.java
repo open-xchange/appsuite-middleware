@@ -79,6 +79,7 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
+import com.openexchange.regional.RegionalSettings;
 import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -246,8 +247,10 @@ public class MailAlarmNotificationGenerator {
         return new LabelHelper(dateHelperFor(participant), participant.getTimeZone(), mail, participant.getLocale(), ctx, wrapper, services);
     }
 
-    private DateHelper dateHelperFor(final NotificationParticipant participant) {
-        return new DateHelper(event, participant.getLocale(), participant.getTimeZone(), participant.getContext().getContextId(), participant.getUser().getId());
+    private DateHelper dateHelperFor(final NotificationParticipant participant) throws OXException {
+        RegionalSettingsService regionalSettingsService = requireService(RegionalSettingsService.class, services);
+        RegionalSettings regionalSettings = regionalSettingsService.get(participant.getContext().getContextId(), participant.getUser().getId());
+        return new DateHelper(event, participant.getLocale(), participant.getTimeZone(), regionalSettings);
     }
 
     private static List<NotificationParticipant> getResources(ServiceLookup services, Event event, Context ctx, User user) throws OXException {

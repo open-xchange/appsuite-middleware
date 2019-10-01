@@ -71,6 +71,8 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -90,6 +92,7 @@ public class DefaultRecipientSettings implements RecipientSettings {
     private final CalendarUser recipient;
     private final Locale locale;
     private final TimeZone timeZone;
+    private final RegionalSettings regionalSettings;
     private final HostData hostData;
     private final int msgFormat;
 
@@ -111,6 +114,7 @@ public class DefaultRecipientSettings implements RecipientSettings {
         this.msgFormat = selectMsgFormat(session, recipient);
         this.locale = selectLocale(session, originator, recipient);
         this.timeZone = selectTimeZone(session, originator, recipient, resource);
+        this.regionalSettings = optRegionalSettings(services, contextId, recipient);
     }
 
     @Override
@@ -131,6 +135,11 @@ public class DefaultRecipientSettings implements RecipientSettings {
     @Override
     public TimeZone getTimeZone() {
         return timeZone;
+    }
+
+    @Override
+    public RegionalSettings getRegionalSettings() {
+        return regionalSettings;
     }
 
     @Override
@@ -190,6 +199,18 @@ public class DefaultRecipientSettings implements RecipientSettings {
             }
         }
         return hostname;
+    }
+
+    private static RegionalSettings optRegionalSettings(ServiceLookup services, int contextId, CalendarUser recipient) {
+        if (isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+            RegionalSettingsService regionalSettingsService = services.getOptionalService(RegionalSettingsService.class);
+            if (null == regionalSettingsService) {
+                LOG.warn("", ServiceExceptionCode.absentService(RegionalSettingsService.class));
+                return null;
+            }
+            return regionalSettingsService.get(contextId, recipient.getEntity());
+        }
+        return null;
     }
 
     private static int selectMsgFormat(CalendarSession session, CalendarUser recipient) {
