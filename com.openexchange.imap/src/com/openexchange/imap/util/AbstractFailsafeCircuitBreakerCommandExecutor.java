@@ -51,13 +51,19 @@ package com.openexchange.imap.util;
 
 import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableList;
+import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
 import com.openexchange.net.HostList;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
@@ -80,6 +86,31 @@ import net.jodah.failsafe.function.CheckedRunnable;
  */
 public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
 
+    private static final String METRICS_DIMENSION_PROTOCOL_KEY = "protocol";
+    private static final String METRICS_DIMENSION_PROTOCOL_VALUE = "imap";
+
+    private static final String METRICS_DIMENSION_ACCOUNT_KEY = "account";
+
+    private static final String METRICS_GROUP = "circuit-breakers";
+
+    private static final String METRICS_STATUS_NAME = "status";
+    private static final String METRICS_STATUS_DESC = "The current status of the IMAP circuit breaker";
+
+    private static final String METRICS_FAILURE_THRESHOLD_NAME = "failureThreshold";
+    private static final String METRICS_FAILURE_THRESHOLD_DESC = "The number of successive failures that must occur in order to open the circuit";
+
+    private static final String METRICS_SUCCESS_THRESHOLD_NAME = "successThreshold";
+    private static final String METRICS_SUCCESS_THRESHOLD_DESC = "The number of successive successful executions that must occur when in a half-open state in order to close the circuit";
+
+    private static final String METRICS_DELAY_MILLIS_NAME = "delayMillis";
+    private static final String METRICS_DELAY_MILLIS_DESC = "The number of milliseconds to wait in open state before transitioning to half-open";
+
+    private static final String METRICS_TRIP_COUNT_NAME = "tripCount";
+    private static final String METRICS_TRIP_COUNT_DESC = "The number representing how often the circuit breaker tripped";
+    private static final String METRICS_TRIP_COUNT_UNITS = "trips";
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     /** The circuit breaker instance */
     protected final CircuitBreaker circuitBreaker;
 
@@ -91,6 +122,11 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     /** The ranking for this instance */
     protected final int ranking;
+
+    /** The registered metric descriptors */
+    protected final AtomicReference<List<MetricDescriptor>> metricDescriptors;
+
+    private final AtomicReference<Runnable> onOpenTask;
 
     /**
      * Initializes a new {@link AbstractFailsafeCircuitBreakerCommandExecutor}.
@@ -115,6 +151,9 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
         }
 
+        AtomicReference<Runnable> onOpenTask = new AtomicReference<>(null);
+        this.onOpenTask = onOpenTask;
+        metricDescriptors = new AtomicReference<>(null);
         this.ranking = ranking;
         this.optionalHostList = optHostList;
         this.ports = null == optPorts || optPorts.isEmpty() ? null : optPorts;
@@ -127,6 +166,14 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
                 @Override
                 public void run() throws Exception {
+                    Runnable task = onOpenTask.get();
+                    if (task != null) {
+                        try {
+                            task.run();
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                    }
                     onOpen();
                 }
             })
@@ -167,6 +214,13 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @throws Exception If an error occurs
      */
     protected abstract void onClose() throws Exception;
+
+    /**
+     * Gets a short description for this circuit breaker.
+     *
+     * @return The description
+     */
+    public abstract String getDescription();
 
     /**
      * Gets the optional listing of IMAP hosts to which this circuit breaker applies.
@@ -263,6 +317,102 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
         }
         return super.toString();
+    }
+
+    /**
+     * Invoked when given metric service appeared.
+     *
+     * @param metricService The metric service
+     * @throws Exception If an error occurs
+     */
+    public void onMetricServiceAppeared(MetricService metricService) throws Exception {
+        List<MetricDescriptor> descriptors= new ArrayList<MetricDescriptor>();
+
+        {
+            MetricDescriptor breakerStatusGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_STATUS_NAME, MetricType.GAUGE)
+                .withDescription(METRICS_STATUS_DESC)
+                .withMetricSupplier(() -> {
+                    return circuitBreaker.getState().name();
+                })
+                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .build();
+            metricService.getGauge(breakerStatusGauge);
+            descriptors.add(breakerStatusGauge);
+        }
+
+        {
+            MetricDescriptor failureThresholdGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_FAILURE_THRESHOLD_NAME, MetricType.GAUGE)
+                .withDescription(METRICS_FAILURE_THRESHOLD_DESC)
+                .withMetricSupplier(() -> {
+                    return I(circuitBreaker.getFailureThreshold().numerator);
+                })
+                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .build();
+            metricService.getGauge(failureThresholdGauge);
+            descriptors.add(failureThresholdGauge);
+        }
+
+        {
+            MetricDescriptor successThresholdGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_SUCCESS_THRESHOLD_NAME, MetricType.GAUGE)
+                .withDescription(METRICS_SUCCESS_THRESHOLD_DESC)
+                .withMetricSupplier(() -> {
+                    return I(circuitBreaker.getSuccessThreshold().numerator);
+                })
+                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .build();
+            metricService.getGauge(successThresholdGauge);
+            descriptors.add(successThresholdGauge);
+        }
+
+        {
+            MetricDescriptor delayMillisGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_DELAY_MILLIS_NAME, MetricType.GAUGE)
+                .withDescription(METRICS_DELAY_MILLIS_DESC)
+                .withMetricSupplier(() -> {
+                    return L(circuitBreaker.getDelay().toMillis());
+                })
+                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .build();
+            metricService.getGauge(delayMillisGauge);
+            descriptors.add(delayMillisGauge);
+        }
+
+        {
+            MetricDescriptor tripCounter = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_TRIP_COUNT_NAME, MetricType.COUNTER)
+                .withDescription(METRICS_TRIP_COUNT_DESC)
+                .withUnit(METRICS_TRIP_COUNT_UNITS)
+                .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .build();
+            onOpenTask.set(new Runnable() {
+
+                @Override
+                public void run() {
+                    metricService.getCounter(tripCounter).incement();
+                }
+            });
+            descriptors.add(tripCounter);
+        }
+
+        this.metricDescriptors.set(descriptors);
+    }
+
+    /**
+     * Invoked when given metric service is about to disappear.
+     *
+     * @param metricService The metric service
+     * @throws Exception If an error occurs
+     */
+    public void onMetricServiceDisppearing(MetricService metricService) throws Exception {
+        List<MetricDescriptor> descriptors = this.metricDescriptors.getAndSet(null);
+        if (descriptors != null) {
+            for (MetricDescriptor metricDescriptor : descriptors) {
+                metricService.removeMetric(metricDescriptor);
+            }
+        }
     }
 
     // ------------------------------------------------------------------------------------------------------------------------

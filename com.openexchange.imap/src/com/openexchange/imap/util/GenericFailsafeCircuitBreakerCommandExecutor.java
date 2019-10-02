@@ -104,6 +104,11 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
         LOG.info("Generic IMAP circuit breaker opened");
     }
 
+    @Override
+    public String getDescription() {
+        return "generic";
+    }
+
     /**
      * Marks this generic IMAP circuit breaker to exclude primary account accesses.
      */

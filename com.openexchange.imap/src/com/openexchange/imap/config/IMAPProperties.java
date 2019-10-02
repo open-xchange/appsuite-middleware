@@ -78,6 +78,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
+import com.openexchange.imap.osgi.MetricServiceTracker;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.AbstractFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.imap.util.FailsafeCircuitBreakerCommandExecutor;
@@ -809,6 +810,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                 IMAPStore.addCommandExecutor(breaker);
             }
+            MetricServiceTracker.openMetricServiceTracker();
 
             IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
@@ -820,6 +822,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 @SuppressWarnings("synthetic-access")
                 @Override
                 public void reloadConfiguration(ConfigurationService configService) {
+                    MetricServiceTracker.closeMetricServiceTracker();
                     List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
                     if (null != breakerList) {
                         for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
@@ -833,6 +836,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                         IMAPStore.addCommandExecutor(breaker);
                     }
+                    MetricServiceTracker.openMetricServiceTracker();
                 }
 
             });
@@ -1133,13 +1137,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
+        MetricServiceTracker.closeMetricServiceTracker();
         List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
+        breakers = null;
         if (null != breakerList) {
             for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                 IMAPStore.removeCommandExecutor(breaker);
             }
         }
-        breakers = null;
     }
 
     /**
@@ -1167,6 +1172,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      */
     public String getSpamHandlerName() {
         return spamHandlerName;
+    }
+
+    /**
+     * Gets the breakers
+     *
+     * @return The breakers
+     */
+    public List<AbstractFailsafeCircuitBreakerCommandExecutor> getBreakers() {
+        return breakers;
     }
 
     /**

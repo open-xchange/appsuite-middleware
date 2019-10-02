@@ -49,8 +49,13 @@
 
 package com.openexchange.imap.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
+import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
 import com.sun.mail.iap.Protocol;
 
 /**
@@ -93,6 +98,11 @@ public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     @Override
     protected void onOpen() throws Exception {
         LOG.info("Primary IMAP circuit breaker opened");
+    }
+
+    @Override
+    public String getDescription() {
+        return "primary";
     }
 
     @Override

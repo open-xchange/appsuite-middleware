@@ -75,18 +75,6 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor} applicable for all IMAP end-points with a ranking of <code>0</code> (zero).
-     *
-     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
-     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
-     * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
-     * @throws IllegalArgumentException If invalid/arguments are passed
-     */
-    public FailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
-        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 0);
-    }
-
-    /**
      * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor}.
      *
      * @param hostList The hosts to consider
@@ -126,6 +114,11 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
         } else {
             LOG.info("Generic IMAP circuit breaker opened");
         }
+    }
+
+    @Override
+    public String getDescription() {
+        return optionalHostList.isPresent() ? optionalHostList.get().getHostString() : "";
     }
 
 }
