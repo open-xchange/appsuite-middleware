@@ -1,0 +1,233 @@
+feature_name: OAuth Authentication
+feature_description: Configuration of package `open-xchange-authentication-oauth`, which implements an AuthenticationService using the OAuth 2.0 Resource Owner Password Credentials Grant.
+properties:
+    - key: com.openexchange.authentication.oauth.tokenEndpoint
+      description: |
+        Token endpoint of Authorization Server (full URI)
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.clientId
+      description: |
+        The client ID for authentication at the Authorization Server
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.clientSecret
+      description: |
+        The client secret for authentication at the Authorization Server
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.scope
+      description: |
+        (Optional) Request OAuth scope as space-separated string
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.earlyTokenRefreshSeconds
+      description: |
+        The number of seconds an access token can be refreshed
+        before it actually expires.
+      defaultValue: 60
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.passwordGrantUserNamePart
+      description: |
+        Gets the name part to be used for an issued Resource Owner Password
+        Credentials Grant (https://tools.ietf.org/html/rfc6749#section-4.3)
+        request. The part is taken from the user-provided login name.
+        
+        full - The full string as provided by the user/client
+        local-part - The local part of an email address (local-part@domain),
+                     if the provided name matches such. In case the name does not match
+                     an email address, the full string is taken.
+        domain - The domain part of an email address (local-part@domain),
+                 if the provided name matches such. In case the name does not match
+                 an email address, the full string is taken.
+      defaultValue: full
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.contextLookupSource
+      description: |
+        The value used for determining the context of a user for which a token pair has been obtained.
+        
+        login-name - The login name as provided by the user
+        response-parameter - A parameter of the token JSON response
+      defaultValue: login-name
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.authentication.oauth.contextLookupParameter
+        - com.openexchange.authentication.oauth.contextLookupNamePart
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.contextLookupParameter
+      description: |
+        In case context lookup source is `response-parameter`, what is the parameter name?
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.authentication.oauth.contextLookupSource
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.contextLookupNamePart
+      description: |
+        Gets the name part of the context lookup source value used for
+        determining the context of a user. Possible values are
+        
+        full - The full string of the value
+        local-part - The local part of an email address (local-part@domain),
+                     if the provided name matches such. In case the name does not match
+                     an email address, the full string is taken.
+        domain - The domain part of an email address (local-part@domain),
+                 if the provided name matches such. In case the name does not match
+                 an email address, "defaultcontext" is taken.
+      defaultValue: domain
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.authentication.oauth.contextLookupSource
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.userLookupSource
+      description: |
+        The value used for determining the user within a context for which a token pair has been obtained.
+        
+        login-name - The login name as provided by the user
+        response-parameter - A parameter of the token JSON response
+      defaultValue: login-name
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.authentication.oauth.userLookupParameter
+        - com.openexchange.authentication.oauth.userLookupNamePart
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.userLookupParameter
+      description: |
+        In case user lookup source is `response-parameter`, what is the parameter name?
+      defaultValue:
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.authentication.oauth.userLookupSource
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.userLookupNamePart
+      description: |
+        Gets the name part of the user lookup source value used for
+        determining the user within a context. Possible values are
+        
+        full - The full string as returned by the authorization server
+        local-part - The local part of an email address (local-part@domain),
+                     if the provided name matches such. In case the name does not match
+                     an email address, the full string is taken.
+        domain - The domain part of an email address (local-part@domain),
+                 if the provided name matches such. In case the name does not match
+                 an email address, the full string is taken.
+      defaultValue: local-part
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.authentication.oauth.userLookupSource
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.tokenLockTimeoutSeconds
+      description: |
+        Lock timeout before giving up trying to refresh an access token for
+        a session. If multiple threads try to check or refresh the access token
+        at the same time, only one gets a lock and blocks the others. In case
+        of a timeout, this is logged as a temporary issue and the request continued
+        as usual.
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+
+    - key: com.openexchange.authentication.oauth.tryRecoverStoredTokens
+      description: |
+        Whether token refresh should try to recover valid tokens from
+        the session instance that is present in distributed session storage.
+        This is only tried as a fall-back, after token refresh failed with an
+        `invalid_grant` error.
+        
+        Usually this should not be needed, it might help to circumvent user impact
+        if for any reason user sessions are alive on more than one server concurrently.
+        Due to sticky sessions this should never be the case.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
+      
+    - key: com.openexchange.authentication.oauth.keepPasswordInSession
+      description: |
+        Whether the user password provided during login shall be stored in the
+        session or not.
+        
+        If the user password is needed at runtime, e.g. for email authentication,
+        this must stay set to `true`. But if email authentication uses master auth
+        or OAUTHBEARER/XOAUTH2 and `com.openexchange.secret.secretSource` does not
+        rely on a session password, this can safely be set to `false`. 
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: authentication-oauth.properties 
+      packageName: open-xchange-authentication-oauth
+      tags: ["Authentication", "OAuth"]
