@@ -761,6 +761,7 @@ exit 0
 %dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/contextSets
 %dir /opt/open-xchange/etc/meta
+%dir /opt/open-xchange/etc/security
 %dir /opt/open-xchange/etc/settings
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/

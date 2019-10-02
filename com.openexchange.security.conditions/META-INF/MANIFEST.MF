@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Conditions
+Bundle-SymbolicName: com.openexchange.security.conditions
+Bundle-Version: 7.10.3
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.security.conditions
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Fragment-Host: system.bundle; extension:=framework
+Export-Package: com.openexchange.security.conditions
+
+

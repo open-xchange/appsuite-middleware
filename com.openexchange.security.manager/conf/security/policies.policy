@@ -1,0 +1,57 @@
+# This File can contain security related permissions being applied to OSGi bundles
+# The order matters: the first  rule which matches will be applied
+# For directories, trailing "/*" matches all files contained in that directory.
+# A directory with a trailing "/-" matches all files in the directory and recursively all files
+# in subdirectories contained in that directory.
+# Directory only without suffix to allow listing of files in that directory
+# Java parameters such as ${java.io.tmpdir} can be used
+
+# Format
+#  ALLOW/DENY { [ condition.class "arg1" "arg2" ]
+#             ( permission "arg1" "arg2" ) } "name of permission"
+
+
+ALLOW {
+    ( java.io.FilePermission "${openexchange.propdir}${/}-" "READ" )
+} "Allow access to configuration"
+
+ALLOW {
+    ( java.io.FilePermission "/var/log/-" "READ,WRITE" )
+} "Allow logging"
+
+ALLOW {
+    ( java.io.FilePermission "${java.io.tmpdir}${/}-" "READ,WRITE" )
+} "Allow access to tmp directory"
+
+ALLOW {
+    ( java.io.FilePermission "${java.io.tmpdir}${/}" "READ,WRITE" )
+} "Allow access to tmp directory listing"
+
+ALLOW {
+    ( java.io.FilePermission "${java.home}${/}-" "READ" )
+} "Allow access java runtime"
+
+ALLOW {
+    ( java.io.FilePermission "${user.home}${/}-" "READ" )
+} "Allow access to user home directory"
+
+ALLOW {
+    ( java.io.FilePermission "${user.home}${/}" "READ" )
+} "Allow access to user home directory list"
+
+ALLOW {
+    ( java.io.FilePermission "${user.dir}${/}-" "READ" )
+} "Allow access to java working directory"
+
+ALLOW { [ com.openexchange.security.conditions.BundleCondition "com.openexchange.documentconverter.server" "com.openexchange.osgi" ]
+    ( java.io.FilePermission "/proc/-" "READ" )
+} "Allow access to cpuInfo"
+
+DENY {
+    ( java.io.FilePermission "/-" "READ,WRITE" )
+} "Deny access to any other folders"
+
+# Allow everything else
+ALLOW {
+    ( java.security.AllPermission "*" "*" )
+} "Allow everything"

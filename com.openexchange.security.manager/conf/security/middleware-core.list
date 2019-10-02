@@ -1,0 +1,30 @@
+# File containing a list of properties that should be parsed by the security manager
+# Files and directories specified by these configuration settings will be allowed
+# Format is [file:]config[:RW] with bracketed as optional parameters
+# Default is for read only.  Add RW to allow write
+# File instructs Security manager to only allow the one object, not directory or recursive
+
+# Autoconfig.properties
+com.openexchange.mail.autoconfig.path
+com.openexchange.sessiond.testDir
+
+# i18n
+i18n.language.path
+
+#Import
+com.openexchange.import.mapper.path
+
+# File Items
+com.openexchange.fileItem.spoolPath
+
+#Frontend
+com.openexchange.apps.path
+com.openexchange.apps.tzdata
+com.openexchange.apps.manifestPath
+
+# Server
+UPLOAD_DIRECTORY:RW
+
+# Templates
+com.openexchange.templating.path
+com.openexchange.templating.assets.path
