@@ -387,6 +387,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
                 .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
                 .build();
+            metricService.getCounter(tripCounter);
             onOpenTask.set(new Runnable() {
 
                 @Override
