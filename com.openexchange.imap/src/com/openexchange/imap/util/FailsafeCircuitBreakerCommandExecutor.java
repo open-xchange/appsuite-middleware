@@ -49,40 +49,21 @@
 
 package com.openexchange.imap.util;
 
-import static com.openexchange.exception.ExceptionUtils.isEitherOf;
-import static com.openexchange.java.Autoboxing.I;
-import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
-import com.google.common.collect.ImmutableList;
 import com.openexchange.net.HostList;
-import com.sun.mail.iap.Argument;
-import com.sun.mail.iap.Protocol;
-import com.sun.mail.iap.Response;
-import com.sun.mail.imap.CommandExecutor;
-import com.sun.mail.imap.ResponseEvent.Status;
-import com.sun.mail.imap.ResponseEvent.StatusResponse;
-import net.jodah.failsafe.CircuitBreaker;
-import net.jodah.failsafe.CircuitBreaker.State;
-import net.jodah.failsafe.CircuitBreakerOpenException;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.FailsafeException;
-import net.jodah.failsafe.function.CheckedRunnable;
 
 /**
- * {@link FailsafeCircuitBreakerCommandExecutor}
+ * {@link FailsafeCircuitBreakerCommandExecutor} - A circuit breaker for denoted IMAP end-points.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
+public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
 
     /** The logger constant */
-    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FailsafeCircuitBreakerCommandExecutor.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FailsafeCircuitBreakerCommandExecutor.class);
 
     private static HostList checkHostList(HostList hostList) {
         if (null == hostList || hostList.isEmpty()) {
@@ -93,11 +74,6 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private final CircuitBreaker circuitBreaker;
-    private final Optional<HostList> optionalHostList;
-    private final Set<Integer> ports;
-    private final int ranking;
-
     /**
      * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor} applicable for all IMAP end-points with a ranking of <code>0</code> (zero).
      *
@@ -107,7 +83,7 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
     public FailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
-        this(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 0);
+        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 0);
     }
 
     /**
@@ -122,268 +98,33 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
     public FailsafeCircuitBreakerCommandExecutor(HostList hostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis, int ranking) {
-        this(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking);
-    }
-
-    /**
-     * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor}.
-     *
-     * @param optHostList The optional hosts to consider
-     * @param optPorts The optional ports to consider
-     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
-     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
-     * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
-     * @param ranking The ranking
-     * @throws IllegalArgumentException If invalid/arguments are passed
-     */
-    public FailsafeCircuitBreakerCommandExecutor(Optional<HostList> optHostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis, int ranking) {
-        super();
-        if (failureThreshold <= 0) {
-            throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
-        }
-        if (successThreshold <= 0) {
-            throw new IllegalArgumentException("successThreshold must be greater than 0 (zero).");
-        }
-        if (delayMillis <= 0) {
-            throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
-        }
-
-        this.ranking = ranking;
-        this.optionalHostList = optHostList;
-        this.ports = null == optPorts || optPorts.isEmpty() ? null : optPorts;
-
-        CircuitBreaker circuitBreaker = new CircuitBreaker()
-            .withFailureThreshold(failureThreshold)
-            .withSuccessThreshold(successThreshold)
-            .withDelay(delayMillis, TimeUnit.MILLISECONDS)
-            .onOpen(new CheckedRunnable() {
-
-                @Override
-                public void run() throws Exception {
-                    if (optHostList.isPresent()) {
-                        LOG.info("IMAP circuit breaker opened for: {}", optHostList.get().getHostString());
-                    } else {
-                        LOG.info("Generic IMAP circuit breaker opened");
-                    }
-                }
-            })
-            .onHalfOpen(new CheckedRunnable() {
-
-                @Override
-                public void run() throws Exception {
-                    if (optHostList.isPresent()) {
-                        LOG.info("IMAP circuit breaker half-opened for: {}", optHostList.get().getHostString());
-                    } else {
-                        LOG.info("Generic IMAP circuit breaker half-opened");
-                    }
-                }
-            })
-            .onClose(new CheckedRunnable() {
-
-                @Override
-                public void run() throws Exception {
-                    if (optHostList.isPresent()) {
-                        LOG.info("IMAP circuit breaker closed for: {}", optHostList.get().getHostString());
-                    } else {
-                        LOG.info("Generic IMAP circuit breaker closed");
-                    }
-                }
-            });
-        this.circuitBreaker = circuitBreaker;
-    }
-
-    /**
-     * Gets the optional listing of IMAP hosts to which this circuit breaker applies.
-     *
-     * @return The host list
-     */
-    public Optional<HostList> getHostList() {
-        return optionalHostList;
+        super(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking);
     }
 
     @Override
-    public int getRanking() {
-        return ranking;
-    }
-
-    @Override
-    public boolean isApplicable(Protocol protocol) {
-        if (!optionalHostList.isPresent()) {
-            return true;
-        }
-
-        return optionalHostList.get().contains(protocol.getHost()) && (null == ports || ports.contains(I(protocol.getPort())));
-    }
-
-    @Override
-    public Response[] executeCommand(String command, Argument args, Protocol protocol) {
-        try {
-            return Failsafe.with(circuitBreaker).get(new CircuitBreakerCommandCallable(command, args, protocol));
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
-            // Circuit is open
-            IOException ioe = new IOException("Denied IMAP command since circuit breaker is open.");
-            return new Response[] { Response.byeResponse(ioe) };
-        } catch (FailsafeException e) {
-            // Runnable failed with a checked exception
-            Throwable failure = e.getCause();
-            if (failure instanceof CircuitBreakerCommandFailedException) {
-                return ((CircuitBreakerCommandFailedException) failure).getResponses();
-            }
-            if (failure instanceof Exception) {
-                return new Response[] { Response.byeResponse((Exception) failure) };
-            }
-            if (failure instanceof Error) {
-                throw (Error) failure;
-            }
-            return new Response[] { Response.byeResponse(e) };
-        }
-    }
-
-    @Override
-    public Response readResponse(Protocol protocol) throws IOException {
-        try {
-            return Failsafe.with(circuitBreaker).get(new CircuitBreakerReadResponseCallable(protocol));
-        } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
-            // Circuit is open
-            throw new IOException("Denied reading from IMAP server since circuit breaker is open.");
-        } catch (FailsafeException e) {
-            // Runnable failed with a checked exception
-            Throwable failure = e.getCause();
-            if (failure instanceof IOException) {
-                throw (IOException) failure;
-            }
-            if (failure instanceof Error) {
-                throw (Error) failure;
-            }
-            throw new IOException(failure);
-        }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(128);
+    protected void onClose() throws Exception {
         if (optionalHostList.isPresent()) {
-            sb.append("hosts=").append(optionalHostList.get().getHostString());
+            LOG.info("IMAP circuit breaker closed for: {}", optionalHostList.get().getHostString());
         } else {
-            sb.append("hosts=none");
-        }
-        if (ports != null) {
-            sb.append(", ports=").append(ports);
-        }
-        State state = circuitBreaker.getState();
-        sb.append(", state=").append(state);
-        switch (state) {
-            case CLOSED:
-                sb.append(" (The circuit is closed and fully functional, allowing executions to occur)");
-                break;
-            case HALF_OPEN:
-                sb.append(" (The circuit is temporarily allowing executions to occur)");
-                break;
-            case OPEN:
-                sb.append(" (The circuit is opened and not allowing executions to occur.)");
-                break;
-            default:
-                break;
-
-        }
-        return super.toString();
-    }
-
-    // ------------------------------------------------------------------------------------------------------------------------
-
-    private static class CircuitBreakerReadResponseCallable implements Callable<Response> {
-
-        private final Protocol protocol;
-
-        /**
-         * Initializes a new {@link CircuitBreakerReadResponseCallable}.
-         *
-         * @param protocol The protocol instance
-         */
-        CircuitBreakerReadResponseCallable(Protocol protocol) {
-            super();
-            this.protocol = protocol;
-        }
-
-        @Override
-        public Response call() throws Exception {
-            return protocol.readResponse();
+            LOG.info("Generic IMAP circuit breaker closed");
         }
     }
 
-    private static class CircuitBreakerCommandCallable implements Callable<Response[]> {
-
-        private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(
-            com.sun.mail.iap.ByeIOException.class,
-            java.net.SocketTimeoutException.class,
-            java.io.EOFException.class);
-
-        private final String command;
-        private final Argument args;
-        private final Protocol protocol;
-
-        /**
-         * Initializes a new {@link CircuitBreakerCommandCallable}.
-         *
-         * @param command The command
-         * @param args The optional arguments
-         * @param protocol The protocol instance
-         */
-        CircuitBreakerCommandCallable(String command, Argument args, Protocol protocol) {
-            super();
-            this.command = command;
-            this.args = args;
-            this.protocol = protocol;
-        }
-
-        @Override
-        public Response[] call() throws Exception {
-            // Obtain responses
-            Response[] responses = protocol.executeCommand(command, args);
-
-            // Check status response
-            StatusResponse statusResponse = StatusResponse.statusResponseFor(responses);
-            if (statusResponse != null && Status.BYE == statusResponse.getStatus()) {
-                Response response = statusResponse.getResponse();
-                // Command failed. Check for a synthetic BYE response providing the causing I/O error
-                Exception byeException = response.getByeException();
-                if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
-                    // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
-                    // System.err.println("Failed command: " + command + " (" + statusResponse + ")");
-                    throw new CircuitBreakerCommandFailedException(responses, byeException);
-                }
-            }
-
-            // Command succeeded or failed for any other reason than a network communication error
-            // System.out.println("Succeeded command: " + command + " (" + statusResponse + ")");
-            return responses;
+    @Override
+    protected void onHalfOpen() throws Exception {
+        if (optionalHostList.isPresent()) {
+            LOG.info("IMAP circuit breaker half-opened for: {}", optionalHostList.get().getHostString());
+        } else {
+            LOG.info("Generic IMAP circuit breaker half-opened");
         }
     }
 
-    private static class CircuitBreakerCommandFailedException extends Exception {
-
-        private static final long serialVersionUID = 9014458066755839452L;
-
-        private final Response[] responses;
-
-        /**
-         * Initializes a new {@link CircuitBreakerCommandFailedException}.
-         *
-         * @param responses The responses advertised from IMAP server
-         * @param byeException The BYE exception
-         */
-        public CircuitBreakerCommandFailedException(Response[] responses, Exception byeException) {
-            super(byeException);
-            this.responses = responses;
-        }
-
-        /**
-         * Gets the responses
-         *
-         * @return The responses
-         */
-        public Response[] getResponses() {
-            return responses;
+    @Override
+    protected void onOpen() throws Exception {
+        if (optionalHostList.isPresent()) {
+            LOG.info("IMAP circuit breaker opened for: {}", optionalHostList.get().getHostString());
+        } else {
+            LOG.info("Generic IMAP circuit breaker opened");
         }
     }
 

@@ -71,7 +71,7 @@ public class HostList {
     /**
      * The empty host list.
      */
-    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "<empty>");
+    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "");
 
     /**
      * Accepts a comma-separated list of IP addresses, IP address ranges, and host names.

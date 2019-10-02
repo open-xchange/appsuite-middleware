@@ -50,54 +50,94 @@
 package com.openexchange.imap.util;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.openexchange.java.Strings;
+import com.openexchange.net.HostList;
 import com.sun.mail.iap.Protocol;
 
 /**
- * {@link PrimaryFailsafeCircuitBreakerCommandExecutor} - The special IMAP circuit breaker form primary account.
+ * {@link GenericFailsafeCircuitBreakerCommandExecutor} - The circuit breaker for all IMAP end-points.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
+public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
 
     /** The logger constant */
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PrimaryFailsafeCircuitBreakerCommandExecutor.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GenericFailsafeCircuitBreakerCommandExecutor.class);
 
     private static final String PROP_PRIMARY_ACCOUNT = "mail.imap.primary";
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    private final AtomicReference<Optional<HostList>> optionalHostsToExclude;
+    private final AtomicBoolean excludePrimaryAccount;
+
     /**
-     * Initializes a new {@link PrimaryFailsafeCircuitBreakerCommandExecutor}.
+     * Initializes a new {@link GenericFailsafeCircuitBreakerCommandExecutor}.
      *
      * @param failureThreshold The number of successive failures that must occur in order to open the circuit
      * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public PrimaryFailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
-        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100);
+    public GenericFailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
+        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 0);
+        optionalHostsToExclude = new AtomicReference<>(Optional.empty());
+        excludePrimaryAccount = new AtomicBoolean(false);
     }
 
     @Override
     protected void onClose() throws Exception {
-        LOG.info("Primary IMAP circuit breaker closed");
+        LOG.info("Generic IMAP circuit breaker closed");
     }
 
     @Override
     protected void onHalfOpen() throws Exception {
-        LOG.info("Primary IMAP circuit breaker half-opened");
+        LOG.info("Generic IMAP circuit breaker half-opened");
     }
 
     @Override
     protected void onOpen() throws Exception {
-        LOG.info("Primary IMAP circuit breaker opened");
+        LOG.info("Generic IMAP circuit breaker opened");
+    }
+
+    /**
+     * Marks this generic IMAP circuit breaker to exclude primary account accesses.
+     */
+    public void excludePrimaryAccount() {
+        excludePrimaryAccount.set(true);
+    }
+
+    /**
+     * Adds hosts that are supposed to be excluded.
+     *
+     * @param hosts The hosts to exclude
+     */
+    public void addHostsToExclude(String hosts) {
+        if (Strings.isEmpty(hosts)) {
+            return;
+        }
+
+        Optional<HostList> current;
+        Optional<HostList> newHostList;
+        do {
+            current = optionalHostsToExclude.get();
+            String currentHostString = current.isPresent() ? current.get().getHostString() : "";
+            newHostList = Optional.of(HostList.valueOf(Strings.isEmpty(currentHostString) ? hosts : currentHostString + ", " + hosts));
+        } while (!optionalHostsToExclude.compareAndSet(current, newHostList));
     }
 
     @Override
     public boolean isApplicable(Protocol protocol) {
-        return "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
+        if (excludePrimaryAccount.get() && "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT))) {
+            return false;
+        }
+
+        Optional<HostList> optionalHostList = optionalHostsToExclude.get();
+        return !optionalHostList.isPresent() || !optionalHostList.get().contains(protocol.getHost());
     }
 
 }

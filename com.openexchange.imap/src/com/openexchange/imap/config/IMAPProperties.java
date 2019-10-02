@@ -79,7 +79,9 @@ import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.util.AbstractFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.imap.util.FailsafeCircuitBreakerCommandExecutor;
+import com.openexchange.imap.util.GenericFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.imap.util.PrimaryFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.CharsetDetector;
@@ -437,7 +439,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean enableAttachmentSearch;
 
-    private List<FailsafeCircuitBreakerCommandExecutor> breakers;
+    private List<AbstractFailsafeCircuitBreakerCommandExecutor> breakers;
 
     /**
      * Initializes a new {@link IMAPProperties}
@@ -802,9 +804,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            List<FailsafeCircuitBreakerCommandExecutor> breakerList = initCircuitBreakers(configuration, logBuilder, args);
+            List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = initCircuitBreakers(configuration, logBuilder, args);
             breakers = breakerList;
-            for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
+            for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                 IMAPStore.addCommandExecutor(breaker);
             }
 
@@ -818,9 +820,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 @SuppressWarnings("synthetic-access")
                 @Override
                 public void reloadConfiguration(ConfigurationService configService) {
-                    List<FailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
+                    List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
                     if (null != breakerList) {
-                        for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
+                        for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                             IMAPStore.removeCommandExecutor(breaker);
                         }
                     }
@@ -828,7 +830,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
                     breakerList = initCircuitBreakers(configuration, logBuilder, args);
                     breakers = breakerList;
-                    for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
+                    for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                         IMAPStore.addCommandExecutor(breaker);
                     }
                 }
@@ -841,14 +843,16 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
-    private static List<FailsafeCircuitBreakerCommandExecutor> initCircuitBreakers(ConfigurationService configuration, StringBuilder logBuilder, List<Object> args) {
-        List<FailsafeCircuitBreakerCommandExecutor> breakerList = null;
+    private static List<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakers(ConfigurationService configuration, StringBuilder logBuilder, List<Object> args) {
+        List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = null;
 
         // Load generic breaker
-        Optional<FailsafeCircuitBreakerCommandExecutor> genericBreaker = initCircuitBreakerForName(null, configuration);
-        if (genericBreaker.isPresent()) {
+        GenericFailsafeCircuitBreakerCommandExecutor genericBreaker = null;
+        Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optionalGenericBreaker = initCircuitBreakerForName(null, configuration, null);
+        if (optionalGenericBreaker.isPresent()) {
             breakerList = new ArrayList<>();
-            breakerList.add(genericBreaker.get());
+            genericBreaker = (GenericFailsafeCircuitBreakerCommandExecutor) optionalGenericBreaker.get();
+            breakerList.add(genericBreaker);
             logBuilder.append("    Added generic circuit breaker{}");
             args.add(Strings.getLineSeparator());
         }
@@ -868,12 +872,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
         // Iterate them
         for (String name : names) {
-            Optional<FailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(name, configuration);
+            Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(name, configuration, genericBreaker);
             if (optBreaker.isPresent()) {
                 if (breakerList == null) {
                     breakerList = new ArrayList<>(names.size());
                 }
-                FailsafeCircuitBreakerCommandExecutor circuitBreaker = optBreaker.get();
+                AbstractFailsafeCircuitBreakerCommandExecutor circuitBreaker = optBreaker.get();
                 breakerList.add(circuitBreaker);
                 if ("primary".equals(name)) {
                     logBuilder.append("    Added circuit breaker for primary account{}");
@@ -890,7 +894,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         return breakerList == null ? Collections.emptyList() : breakerList;
     }
 
-    private static Optional<FailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(String infix, ConfigurationService configuration) {
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(String infix, ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
         if (infix == null) {
             // The generic IMAP circuit breaker
             String propertyName = "com.openexchange.imap.breaker.enabled";
@@ -947,7 +951,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 }
             }
 
-            return Optional.of(new FailsafeCircuitBreakerCommandExecutor(failures, success, delayMillis));
+            return Optional.of(new GenericFailsafeCircuitBreakerCommandExecutor(failures, success, delayMillis));
         } // End of generic
 
         if ("primary".equals(infix)) {
@@ -955,6 +959,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             String propertyName = "com.openexchange.imap.breaker.primary.enabled";
             boolean enabled = configuration.getBoolProperty(propertyName, true);
             if (!enabled) {
+                if (genericBreaker != null) {
+                    genericBreaker.excludePrimaryAccount();
+                }
                 return Optional.empty();
             }
 
@@ -1014,6 +1021,15 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         String hosts = configuration.getProperty(propertyName, "");
         if (Strings.isEmpty(hosts)) {
             LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, infix);
+            return Optional.empty();
+        }
+
+        propertyName = "com.openexchange.imap.breaker." + infix + ".enabled";
+        boolean enabled = configuration.getBoolProperty(propertyName, true);
+        if (!enabled) {
+            if (genericBreaker != null) {
+                genericBreaker.addHostsToExclude(hosts);
+            }
             return Optional.empty();
         }
 
@@ -1117,9 +1133,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
-        List<FailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
+        List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
         if (null != breakerList) {
-            for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
+            for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                 IMAPStore.removeCommandExecutor(breaker);
             }
         }
