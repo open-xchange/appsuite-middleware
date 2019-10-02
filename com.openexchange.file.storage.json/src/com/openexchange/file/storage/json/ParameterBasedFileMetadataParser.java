@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -72,7 +73,7 @@ public class ParameterBasedFileMetadataParser {
     private final static ParameterBasedFileMetadataParser INSTANCE = new ParameterBasedFileMetadataParser();
 
     //@formatter:off
-    private static final List<File.Field> POSSIBLE_FIELDS = Arrays.asList(Field.FOLDER_ID, Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE,
+    private static final List<File.Field> POSSIBLE_FIELDS = Arrays.asList(Field.FOLDER_ID, Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.CREATED, Field.LAST_MODIFIED,
         Field.FILE_MD5SUM, Field.DESCRIPTION, Field.ID, Field.VERSION, Field.VERSION_COMMENT, Field.CATEGORIES, Field.COLOR_LABEL, Field.FILE_SIZE, Field.URL);
     //@formatter:on
 
@@ -130,6 +131,14 @@ public class ParameterBasedFileMetadataParser {
         String sizeString = request.getParameter(File.Field.FILE_SIZE.getName());
         if (Strings.isNotEmpty(sizeString)) {
             result.setFileSize(Long.parseLong(sizeString));
+        }
+        String creationDateString = request.getParameter(File.Field.CREATED.getName());
+        if (Strings.isNotEmpty(creationDateString)) {
+            result.setCreated(new Date(Long.parseLong(creationDateString)));
+        }
+        String lastModifiedString = request.getParameter(File.Field.LAST_MODIFIED.getName());
+        if (Strings.isNotEmpty(lastModifiedString)) {
+            result.setLastModified(new Date(Long.parseLong(lastModifiedString)));
         }
         return result;
     }

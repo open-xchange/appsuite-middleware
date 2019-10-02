@@ -90,14 +90,8 @@ public class FileMetadataParser implements FileMetadataParserService{
 
     @Override
     public File parse(final JSONObject object) throws OXException {
-        final DefaultFile file = new DefaultFile();
-
         try {
-        	JSONObject purged = new JSONObject(object);
-        	if (purged.has("last_modified")) {
-        		purged.remove("last_modified");
-        	}
-        	File.Field.inject(jsonHandler, file, purged);
+            return File.Field.inject(jsonHandler, new DefaultFile(), object);
         } catch (RuntimeException x) {
             Throwable cause = x.getCause();
             if (cause != null) {
@@ -109,8 +103,6 @@ public class FileMetadataParser implements FileMetadataParserService{
             }
             throw x;
         }
-
-        return file;
     }
 
     private static final class JSONParserHandler extends AbstractFileFieldHandler {
