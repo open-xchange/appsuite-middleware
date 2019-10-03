@@ -342,8 +342,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             InputStream in = null;
             try {
                 in = file.getStream();
-                in = Streams.getNonEmpty(in);
-                return in == null ? null : file;
+                return in.read() < 0 ? null : file;
             } catch (OXException e) {
                 Throwable cause = e.getCause();
                 throw cause instanceof IOException ? ((IOException) cause) : new IOException(null == cause ? e : cause);
