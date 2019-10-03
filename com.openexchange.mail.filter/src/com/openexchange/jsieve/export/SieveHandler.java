@@ -87,6 +87,7 @@ import com.openexchange.jsieve.export.utils.FailsafeCircuitBreakerBufferedOutput
 import com.openexchange.jsieve.export.utils.FailsafeCircuitBreakerBufferedReader;
 import com.openexchange.jsieve.export.utils.HostAndPort;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mailfilter.internal.CircuitBreakerInfo;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
 import com.openexchange.mailfilter.properties.PreferredSASLMech;
 import com.openexchange.mailfilter.services.Services;
@@ -194,7 +195,7 @@ public class SieveHandler {
     private Long readTimeout = null;
     private int userId = -1;
     private int contextId = -1;
-    private final Optional<CircuitBreaker> optionalCircuitBreaker;
+    private final Optional<CircuitBreakerInfo> optionalCircuitBreaker;
 
     /**
      * Initializes a new {@link SieveHandler}.
@@ -210,7 +211,7 @@ public class SieveHandler {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, Optional<CircuitBreaker> optionalCircuitBreaker, int userId, int contextId) {
+    public SieveHandler(String userName, String authUserName, String authUserPasswd, String host, int port, String authEnc, String oauthToken, Optional<CircuitBreakerInfo> optionalCircuitBreaker, int userId, int contextId) {
         super();
         sieve_user = null == userName ? authUserName : userName;
         sieve_auth = authUserName;

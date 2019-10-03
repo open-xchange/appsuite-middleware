@@ -52,7 +52,7 @@ package com.openexchange.jsieve.export.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import net.jodah.failsafe.CircuitBreaker;
+import com.openexchange.mailfilter.internal.CircuitBreakerInfo;
 import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
@@ -65,17 +65,17 @@ import net.jodah.failsafe.FailsafeException;
  */
 public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
 
-    private final CircuitBreaker circuitBreaker;
+    private final CircuitBreakerInfo circuitBreakerInfo;
 
     /**
      * Initializes a new {@link FailsafeCircuitBreakerBufferedReader}.
      *
      * @param in A reader
-     * @param circuitBreaker The circuit breaker to use
+     * @param circuitBreakerInfo The circuit breaker to use
      */
-    public FailsafeCircuitBreakerBufferedReader(Reader in, CircuitBreaker circuitBreaker) {
+    public FailsafeCircuitBreakerBufferedReader(Reader in, CircuitBreakerInfo circuitBreakerInfo) {
         super(in);
-        this.circuitBreaker = circuitBreaker;
+        this.circuitBreakerInfo = circuitBreakerInfo;
     }
 
     /**
@@ -83,17 +83,29 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
      *
      * @param in A reader
      * @param sz The buffer size
-     * @param circuitBreaker The circuit breaker to use
+     * @param circuitBreakerInfo The circuit breaker to use
      */
-    public FailsafeCircuitBreakerBufferedReader(Reader in, int sz, CircuitBreaker circuitBreaker) {
+    public FailsafeCircuitBreakerBufferedReader(Reader in, int sz, CircuitBreakerInfo circuitBreakerInfo) {
         super(in, sz);
-        this.circuitBreaker = circuitBreaker;
+        this.circuitBreakerInfo = circuitBreakerInfo;
+    }
+
+    /**
+     * Is called when the circuit breaker denied an access attempt because it is currently open and not allowing executions to occur.
+     *
+     * @param exception The thrown exception when an execution is attempted while a configured CircuitBreaker is open
+     */
+    private void onDenied(CircuitBreakerOpenException exception) {
+        Runnable metricTask = circuitBreakerInfo.getOnDeniedMetricTask().get();
+        if (metricTask != null) {
+            metricTask.run();
+        }
     }
 
     @Override
     public int read() throws IOException {
         try {
-            return Failsafe.with(circuitBreaker).get(new NetworkCommunicationErrorAdvertisingCallable<Integer>() {
+            return Failsafe.with(circuitBreakerInfo.getCircuitBreaker()).get(new NetworkCommunicationErrorAdvertisingCallable<Integer>() {
 
                 @Override
                 protected Integer performIOOperation() throws IOException {
@@ -102,6 +114,7 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
             }).getCheckedResult().intValue();
         } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
             // Circuit is open
+            onDenied(e);
             IOException ioe = new IOException("Denied SIEVE read access since circuit breaker is open.");
             throw ioe;
         } catch (FailsafeException e) {
@@ -119,7 +132,7 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
     @Override
     public int read(char[] cbuf, int off, int len) throws IOException {
         try {
-            return Failsafe.with(circuitBreaker).get(new NetworkCommunicationErrorAdvertisingCallable<Integer>() {
+            return Failsafe.with(circuitBreakerInfo.getCircuitBreaker()).get(new NetworkCommunicationErrorAdvertisingCallable<Integer>() {
 
                 @Override
                 protected Integer performIOOperation() throws IOException {
@@ -128,6 +141,7 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
             }).getCheckedResult().intValue();
         } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
             // Circuit is open
+            onDenied(e);
             IOException ioe = new IOException("Denied SIEVE read access since circuit breaker is open.");
             throw ioe;
         } catch (FailsafeException e) {
@@ -145,7 +159,7 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
     @Override
     public String readLine() throws IOException {
         try {
-            return Failsafe.with(circuitBreaker).get(new NetworkCommunicationErrorAdvertisingCallable<String>() {
+            return Failsafe.with(circuitBreakerInfo.getCircuitBreaker()).get(new NetworkCommunicationErrorAdvertisingCallable<String>() {
 
                 @Override
                 protected String performIOOperation() throws IOException {
@@ -154,6 +168,7 @@ public class FailsafeCircuitBreakerBufferedReader extends BufferedReader {
             }).getCheckedResult();
         } catch (@SuppressWarnings("unused") CircuitBreakerOpenException e) {
             // Circuit is open
+            onDenied(e);
             IOException ioe = new IOException("Denied SIEVE read access since circuit breaker is open.");
             throw ioe;
         } catch (FailsafeException e) {

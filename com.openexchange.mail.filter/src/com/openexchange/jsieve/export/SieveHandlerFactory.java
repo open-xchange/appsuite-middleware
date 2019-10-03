@@ -59,6 +59,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.internal.CircuitBreakerInfo;
 import com.openexchange.mailfilter.properties.CredentialSource;
 import com.openexchange.mailfilter.properties.LoginType;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
@@ -85,7 +86,7 @@ public final class SieveHandlerFactory {
      * @return A sieve handler
      * @throws OXException
      */
-    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreaker> optionalCircuitBreaker) throws OXException {
+    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreakerInfo> optionalCircuitBreaker) throws OXException {
         return getSieveHandler(creds, optionalCircuitBreaker, false);
     }
 
@@ -98,7 +99,7 @@ public final class SieveHandlerFactory {
      * @return A sieve handler
      * @throws OXException
      */
-    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreaker> optionalCircuitBreaker, boolean onlyWelcome) throws OXException {
+    public static SieveHandler getSieveHandler(Credentials creds, Optional<CircuitBreakerInfo> optionalCircuitBreaker, boolean onlyWelcome) throws OXException {
         LeanConfigurationService mailFilterConfig = Services.getService(LeanConfigurationService.class);
 
         int userId = creds.getUserid();
@@ -188,7 +189,7 @@ public final class SieveHandlerFactory {
      * @param contextId The context identifier
      * @return The {@link SieveHandler}
      */
-    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, Optional<CircuitBreaker> optionalCircuitBreaker, int userId, int contextId) {
+    private static SieveHandler newSieveHandlerUsing(String host, int port, String userName, String authName, String password, String authEncoding, String oauthToken, Optional<CircuitBreakerInfo> optionalCircuitBreaker, int userId, int contextId) {
         return new SieveHandler(null == userName ? authName : userName, authName, password, host, port, authEncoding, oauthToken, optionalCircuitBreaker, userId, contextId);
     }
 
