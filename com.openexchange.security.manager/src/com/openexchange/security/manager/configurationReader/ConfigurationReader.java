@@ -52,6 +52,7 @@ package com.openexchange.security.manager.configurationReader;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.security.manager.OXSecurityManager;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,19 +118,117 @@ public class ConfigurationReader {
      * @return
      */
     private SecurityAddition getSecurityAddition (String add) {
-        Allow allow = Allow.READ;  // Default is read only
-        if (add.endsWith(":RW")) {
-            add = add.replace(":RW", "");
-            allow = Allow.READ_WRITE;
-        }
-        if (add.endsWith(":W")) {
-            add = add.replace(":W", "");
-            allow = Allow.WRITE;
-        }
-        if (add.startsWith("file:")) {
-            return new SecurityAddition (add.replace("file:", "").trim(), true, allow);
+        Allow allow = getAllow(add);
+        boolean isFile = add.startsWith("file:");
+        add = cleanup(add);
+        if (isFile) {
+            return new SecurityAddition (add, true, allow);
         }
         return new SecurityAddition(add, false, allow);
+    }
+
+    /**
+     * Gets Allow type from the end of a configuration
+     * @param config
+     * @return
+     */
+    private Allow getAllow (String config) {
+        if (config == null) {
+            return null;
+        }
+        Allow allow = Allow.READ;
+        if (config.endsWith(":RW")) {
+            config = config.replace(":RW", "");
+            allow = Allow.READ_WRITE;
+        }
+        if (config.endsWith(":W")) {
+            config = config.replace(":W", "");
+            allow = Allow.WRITE;
+        }
+        config = config.replace(":R", "");
+        return allow;
+    }
+
+    /**
+     * Removes file prefix and write permission suffixes
+     * @param config
+     * @return
+     */
+    private String cleanup(String config) {
+        if (config == null) {
+            return null;
+        }
+        return config.replace(":RW", "").replace(":R", "").replace(":W", "").replace("file:", "").trim();
+    }
+
+    /**
+     * Adds a system variable containg directories, separated with ":"
+     * Example is sun.boot.class.path
+     * @param folderPermissions
+     * @param config
+     */
+    private void addVariable(ArrayList<FolderPermission> folderPermissions, String var) {
+        if (var == null) {
+            return;
+        }
+        Allow allow = getAllow(var);
+        var = cleanup(var);
+        String permissionString = System.getProperty(var.substring(2, var.length() -1));
+        if (permissionString != null) {
+            String[] perms = permissionString.split(":");
+            for (String perm: perms) {
+                FolderPermission folder =
+                    new FolderPermission(perm,
+                        perm,
+                        FolderPermission.Decision.ALLOW,
+                        allow,
+                        FolderPermission.Type.DIRECTORY);
+                folderPermissions.add(folder);
+            }
+        }
+    }
+
+    /**
+     * Add a configuration from the list file
+     * Loads the config from configuration service and adds
+     *
+     * @param folderPermissions
+     * @param config  Config to pull from the config file
+     */
+    private void addConfiguration(ArrayList<FolderPermission> folderPermissions, String config) {
+        SecurityAddition toAdd = getSecurityAddition(config);  // Parse the configuration requirement for permissions
+        String directory = configService.getProperty(toAdd.getPath());  // Get the configured value from configuration service
+        configurationPaths.add(toAdd.getPath());  // Keep track of configuration paths
+        if (directory != null && !directory.isEmpty()) {
+            // Create the folder permission
+            FolderPermission folder =
+                new FolderPermission(config,
+                    directory,
+                    FolderPermission.Decision.ALLOW,
+                    toAdd.getAllow(),
+                    toAdd.isFile() ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE);
+            folderPermissions.add(folder);
+        } else {
+            LOG.debug("Security manager: Missing configuration for " + toAdd.getPath());
+        }
+    }
+
+    /**
+     * Add individual folder from the list file
+     *
+     * @param folderPermissions
+     * @param folder  The folder to add
+     */
+    private void addFolder(ArrayList<FolderPermission> folderPermissions, String folder) {
+        Allow allow = getAllow(folder);
+        folder = cleanup(folder);
+        FolderPermission folderToAdd =
+            new FolderPermission(folder,
+                folder,
+                FolderPermission.Decision.ALLOW,
+                allow,
+                FolderPermission.Type.DIRECTORY);
+        folderPermissions.add(folderToAdd);
     }
 
 
@@ -150,20 +249,15 @@ public class ConfigurationReader {
             configurationPaths = new ArrayList<String>(configurations.size());
             ArrayList<FolderPermission> folderPermissions = new ArrayList<FolderPermission>(configurations.size());
             for (String config : configurations) {
-                SecurityAddition toAdd = getSecurityAddition(config);  // Parse the configuration requirement for permissions
-                String directory = configService.getProperty(toAdd.getPath());  // Get the configured value from configuration service
-                configurationPaths.add(toAdd.getPath());  // Keep track of configuration paths
-                if (directory != null && !directory.isEmpty()) {
-                    // Create the folder permission
-                    FolderPermission folder =
-                        new FolderPermission(config,
-                            directory,
-                            FolderPermission.Decision.ALLOW,
-                            toAdd.getAllow(),
-                            toAdd.isFile() ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE);
-                    folderPermissions.add(folder);
+                if (config.startsWith("$")) {
+                    addVariable(folderPermissions, config);
                 } else {
-                    LOG.debug("Security manager: Missing configuration for " + toAdd.getPath());
+                    if (config.startsWith(File.separator)) {
+                        addFolder(folderPermissions, config);
+                    } else {
+                        addConfiguration(folderPermissions, config);
+                    }
+
                 }
             }
             return folderPermissions;

@@ -43,6 +43,10 @@ ALLOW {
     ( java.io.FilePermission "${user.dir}${/}-" "READ" )
 } "Allow access to java working directory"
 
+ALLOW {
+    ( java.io.FilePermission "/etc/resolv.conf" "READ" )
+} "Allow access resolv.conf"
+
 ALLOW { [ com.openexchange.security.conditions.BundleCondition "com.openexchange.documentconverter.server" "com.openexchange.osgi" ]
     ( java.io.FilePermission "/proc/-" "READ" )
 } "Allow access to cpuInfo"
