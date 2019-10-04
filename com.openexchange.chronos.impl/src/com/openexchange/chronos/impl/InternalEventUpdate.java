@@ -452,13 +452,13 @@ public class InternalEventUpdate implements EventUpdate {
                 /*
                  * (re-)check organizer
                  */
-                Check.internalOrganizerIsAttendee(updatedEvent);
+                Check.internalOrganizerIsAttendee(updatedEvent, folder);
                 break;
             case ATTENDEES:
                 /*
                  * (re-)check organizer
                  */
-                Check.internalOrganizerIsAttendee(updatedEvent);
+                Check.internalOrganizerIsAttendee(updatedEvent, folder);
                 /*
                  * (re-)check classification validity
                  */

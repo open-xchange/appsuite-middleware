@@ -81,6 +81,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 
@@ -125,7 +126,9 @@ public class UpdatePerformer extends AbstractActionPerformer {
             final int owner = analysis.getMessage().getOwner() > 0 ? analysis.getMessage().getOwner() : session.getUserId();
             boolean exceptionCreate = isExceptionCreate(change);
 
-            ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
+            if (!PublicType.getInstance().equals(util.getFolderType(event, session))) {
+                ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
+            }
             Event original = determineOriginalEvent(change, processed, session);
             Event updatedEvent;
 

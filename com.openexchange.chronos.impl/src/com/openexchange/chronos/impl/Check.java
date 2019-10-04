@@ -548,10 +548,14 @@ public class Check extends com.openexchange.chronos.common.Check {
      * Checks that the event's organizer is also contained in the list of attendees, in case it is an <i>internal</i> user.
      *
      * @param event The event to check
+     * @param folder 
      * @throws OXException {@link CalendarExceptionCodes#MISSING_ORGANIZER}
      */
-    public static void internalOrganizerIsAttendee(Event event) throws OXException {
+    public static void internalOrganizerIsAttendee(Event event, CalendarFolder folder) throws OXException {
         Organizer organizer = event.getOrganizer();
+        if (PublicType.getInstance().equals(folder.getType())) {
+            return;
+        }
         if (null != organizer && CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL) && false == contains(event.getAttendees(), organizer)) {
             throw CalendarExceptionCodes.MISSING_ORGANIZER.create();
         }
