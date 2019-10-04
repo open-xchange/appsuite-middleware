@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -86,57 +87,57 @@ public class MetricDescriptor {
         this.metricSupplier = metricSupplier;
         this.fullName = fullName;
         this.description = description;
-        this.dimensions = dimensions;
+        this.dimensions = dimensions == null ? null : ImmutableMap.copyOf(dimensions);
     }
 
 
     /**
-     * Returns the group of this metric
+     * Gets the group name of this metric.
      *
-     * @return the group of this metric
+     * @return The group name of this metric
      */
     public String getGroup() {
         return group;
     }
 
     /**
-     * Returns the name of this metric
+     * Gets the name of this metric.
      *
-     * @return the name of this metric
+     * @return The name of this metric
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Gets the metricType
+     * Gets the metric type.
      *
-     * @return The metricType
+     * @return The metric type
      */
     public MetricType getMetricType() {
         return metricType;
     }
 
     /**
-     * Gets the rate
+     * Gets the rate.
      *
-     * @return the rate
+     * @return The rate
      */
     public TimeUnit getRate() {
         return rate;
     }
 
     /**
-     * Gets the unit
+     * Gets the unit.
      *
-     * @return the unit
+     * @return The unit
      */
     public String getUnit() {
         return unit;
     }
 
     /**
-     * Gets the metric {@link Supplier} or <code>null</code> if none is specified
+     * Gets the metric {@link Supplier} or <code>null</code> if none is specified.
      *
      * @return The metric {@link Supplier} or <code>null</code> if none is specified
      */
@@ -145,7 +146,7 @@ public class MetricDescriptor {
     }
 
     /**
-     * Returns the full name of the metric
+     * Gets the fully qualifying name of the metric.
      *
      * @return The full name of the metric
      */
@@ -154,7 +155,7 @@ public class MetricDescriptor {
     }
 
     /**
-     * Gets the description
+     * Gets the description.
      *
      * @return The description
      */
@@ -163,9 +164,9 @@ public class MetricDescriptor {
     }
 
     /**
-     * Gets the dimensions
+     * Gets the dimensions.
      *
-     * @return The dimensions
+     * @return The dimensions or <code>null</code>
      */
     public Map<String, String> getDimensions() {
         return dimensions;
@@ -337,8 +338,8 @@ public class MetricDescriptor {
 
         /**
          * Adds an additional dimension to this descriptor.
-         *
-         * This dimensions are used to create the {@link ObjectName} for the mbean.
+         * <p>
+         * This dimensions are used to create the {@link ObjectName} for the MBean.
          * So please see {@link ObjectName} descriptions for limitations.
          *
          * @param key The key of the dimension. Must not be 'type' or 'name'
