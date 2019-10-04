@@ -1,21 +1,21 @@
 ---
-title: deleteuser
-icon: far fa-circle
+title: existsuser
+icon: fas fa-question-circle
 tags: Administration, Command Line tools, User
 ---
 
 # NAME
 
-deleteuser - deletes users in a given context.
+createuser - Checks for user existence.
 
 # SYNOPSIS
 
-**deleteuser** [OPTION]...
+**createuser** [OPTION]...
 
 # DESCRIPTION
 
-This command line tool deletes users in a given context. If you delete a user the public folder entries of this user are transferred to the admin user. All other data are deleted. 
-
+This command line tool allows to check whether a user exists in a given context. It uses either the id or the display name of the user
+ 
 # OPTIONS
 
 **-c**, **--contextid** *contextid*
@@ -26,6 +26,9 @@ This command line tool deletes users in a given context. If you delete a user th
 
 **-u**, *--username* *username*
 : Username of the user.
+
+**-d**, *--displayname* *displayname*
+: Display name of the user.
 
 **-A**, **--adminuser** *contextAdmin*
 : Context admin user name for authentication. Optional, depending on your configuration.
@@ -53,4 +56,4 @@ Deletes the user with the specified identifier in the specified context.
 
 # SEE ALSO
 
-[createuser(1)](createuser), [listuser(1)](listuser), [changeuser(1)](changeuser), [getusercapabilities(1)](getusercapabilities)
+[createuser(1)](createuser), [listuser(1)](listuser), [changeuser(1)](changeuser), [deleteuser(1)](deleteuser)
