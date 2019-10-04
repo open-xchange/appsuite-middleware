@@ -835,7 +835,7 @@ public class DataExportServiceImpl implements DataExportService {
                 // Store execution in map. Then open it for being processed while registering a clean-up task that ensures execution is removed from map when finished
                 executions.put(future, execution);
                 execution.allowProcessing(new AllowProcessingRunnable(future, executions));
-                openedForProcessing = false;
+                openedForProcessing = true;
             } finally {
                 if (!openedForProcessing) {
                     if (execution != null) {

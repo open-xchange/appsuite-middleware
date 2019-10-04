@@ -182,11 +182,11 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
 
             Options options;
             {
-                Module calendarModule = getModule();
-                boolean includePublicFolders = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, false, calendarModule);
-                boolean includeSharedFolders = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, false, calendarModule);
-                boolean includeTrashFolder = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_TRASH, false, calendarModule);
-                boolean includeAllVersions = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_ALL_VERSIONS, false, calendarModule);
+                Module infostoreModule = getModule();
+                boolean includePublicFolders = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, false, infostoreModule);
+                boolean includeSharedFolders = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, false, infostoreModule);
+                boolean includeTrashFolder = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_TRASH, false, infostoreModule);
+                boolean includeAllVersions = getBoolOption(InfostoreDataExportPropertyNames.PROP_INCLUDE_ALL_VERSIONS, false, infostoreModule);
 
                 options = new Options(includePublicFolders, includeSharedFolders, includeTrashFolder, includeAllVersions);
             }
