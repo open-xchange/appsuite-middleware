@@ -55,6 +55,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -90,7 +91,7 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
 
     /**
      * Initialises a new {@link AbstractMetricServiceListener}.
-     * 
+     *
      * @param managementService The {@link ManagementService}
      */
     public AbstractMetricServiceListener(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
@@ -182,10 +183,10 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         Hashtable<String, String> properties = new Hashtable<>();
         properties.put("type", metricDescriptor.getGroup());
         properties.put("name", metricDescriptor.getName());
-        if (metricDescriptor.getDimensions() != null && metricDescriptor.getDimensions().isEmpty() == false) {
-            properties.putAll(metricDescriptor.getDimensions());
+        Optional<Map<String, String>> dimensions = metricDescriptor.getDimensions();
+        if (dimensions.isPresent()) {
+            properties.putAll(dimensions.get());
         }
-
         return ObjectName.getInstance(DOMAIN_NAME, properties);
     }
 

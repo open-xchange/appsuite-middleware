@@ -49,12 +49,13 @@
 
 package com.openexchange.metrics;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.management.ObjectName;
+import com.google.common.collect.ImmutableMap;
 
 /**
  *
@@ -87,7 +88,7 @@ public class MetricDescriptor {
         this.metricSupplier = metricSupplier;
         this.fullName = fullName;
         this.description = description;
-        this.dimensions = dimensions == null ? null : ImmutableMap.copyOf(dimensions);
+        this.dimensions = dimensions == null || dimensions.isEmpty() ? null : ImmutableMap.copyOf(dimensions);
     }
 
 
@@ -164,12 +165,12 @@ public class MetricDescriptor {
     }
 
     /**
-     * Gets the dimensions.
+     * Gets the optional dimensions.
      *
-     * @return The dimensions or <code>null</code>
+     * @return The optional dimensions
      */
-    public Map<String, String> getDimensions() {
-        return dimensions;
+    public Optional<Map<String, String>> getDimensions() {
+        return Optional.ofNullable(dimensions);
     }
 
     @Override
