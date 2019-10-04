@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -90,8 +91,12 @@ public class FileMetadataParser implements FileMetadataParserService{
 
     @Override
     public File parse(final JSONObject object) throws OXException {
+        return parse(object, null);
+    }
+
+    public File parse(JSONObject object, TimeZone timeZone) throws OXException {
         try {
-            return File.Field.inject(jsonHandler, new DefaultFile(), object);
+            return File.Field.inject(jsonHandler, new DefaultFile(), object, timeZone);
         } catch (RuntimeException x) {
             Throwable cause = x.getCause();
             if (cause != null) {
@@ -121,11 +126,11 @@ public class FileMetadataParser implements FileMetadataParserService{
             if (!object.has(field.getName())) {
                 return md;
             }
-
+            TimeZone timeZone = get(2, TimeZone.class, args);
             try {
                 Object value = object.get(field.getName());
 
-                value = process(field, value);
+                value = process(field, value, timeZone);
 
                 field.doSwitch(set, md, value);
             } catch (JSONException x) {
@@ -138,8 +143,8 @@ public class FileMetadataParser implements FileMetadataParserService{
             return md;
         }
 
-        private Object process(final Field field, final Object value) throws JSONException, OXException {
-            return FileMetadataFieldParser.convert(field, value);
+        private Object process(final Field field, final Object value, TimeZone timeZone) throws JSONException, OXException {
+            return FileMetadataFieldParser.convert(field, value, timeZone);
         }
     }
 

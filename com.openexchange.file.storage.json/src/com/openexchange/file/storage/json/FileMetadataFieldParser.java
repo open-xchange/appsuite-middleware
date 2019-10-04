@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,11 +82,24 @@ public class FileMetadataFieldParser {
      *
      * @param field The field
      * @param value The fields value
-     * @return The converted object or the original value, if the filed is not supported
+     * @return The converted object or the original value, if the field is not supported
+     */
+    public static Object convert(Field field, Object value) throws JSONException, OXException {
+        return convert(field, value, null);
+    }
+
+    /**
+     * Converts the given value into its internal representation if the given field
+     * is supported.
+     *
+     * @param field The field
+     * @param value The fields value
+     * @param timeZone The client timezone to consider, or <code>null</code> if not set
+     * @return The converted object or the original value, if the field is not supported
      * @throws JSONException
      * @throws OXException
      */
-    public static Object convert(Field field, Object value) throws JSONException, OXException {
+    public static Object convert(Field field, Object value, TimeZone timeZone) throws JSONException, OXException {
         Object val = value;
         if (val == JSONObject.NULL) {
             val = null;
@@ -115,6 +129,13 @@ public class FileMetadataFieldParser {
                 objectPermissions.add(parseObjetPermission(jsonArray.getJSONObject(i)));
             }
             return objectPermissions;
+        case LAST_MODIFIED:
+        case CREATED:
+            if (null != timeZone && null != val && Long.class.isInstance(val)) {
+                long timestamp = ((Long) val).longValue();
+                return Long.valueOf(timestamp - timeZone.getOffset(timestamp));
+            }
+            return val;
         default:
             return val;
         }
