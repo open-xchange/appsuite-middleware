@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -61,6 +62,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ParameterBasedFileMetadataParser}
@@ -92,10 +94,11 @@ public class ParameterBasedFileMetadataParser {
      * Retrieves a {@link File} based on the parameters of the given request
      *
      * @param request The {@link AJAXRequestData} to parse
+     * @param timezone The user/client timezone to consider
      * @return The {@link File}
      * @throws OXException in case the file coulnd't be parsed
      */
-    public File parse(AJAXRequestData request) throws OXException {
+    public File parse(AJAXRequestData request, TimeZone timezone) throws OXException {
         File result = new DefaultFile();
         result.setFolderId(request.getParameter(File.Field.FOLDER_ID.getName()));
         result.setTitle(request.getParameter(File.Field.TITLE.getName()));
@@ -132,13 +135,13 @@ public class ParameterBasedFileMetadataParser {
         if (Strings.isNotEmpty(sizeString)) {
             result.setFileSize(Long.parseLong(sizeString));
         }
-        String creationDateString = request.getParameter(File.Field.CREATED.getName());
-        if (Strings.isNotEmpty(creationDateString)) {
-            result.setCreated(new Date(Long.parseLong(creationDateString)));
+        Date created = parseDateParameter(request, File.Field.CREATED.getName(), timezone);
+        if (null != created) {
+            result.setCreated(created);
         }
-        String lastModifiedString = request.getParameter(File.Field.LAST_MODIFIED.getName());
-        if (Strings.isNotEmpty(lastModifiedString)) {
-            result.setLastModified(new Date(Long.parseLong(lastModifiedString)));
+        Date lastModified = parseDateParameter(request, File.Field.LAST_MODIFIED.getName(), timezone);
+        if (null != lastModified) {
+            result.setLastModified(lastModified);
         }
         return result;
     }
@@ -158,4 +161,22 @@ public class ParameterBasedFileMetadataParser {
         }
         return result;
     }
+
+    private static Date parseDateParameter(AJAXRequestData request, String parameterName, TimeZone timezone) throws OXException {
+        String value = request.getParameter(parameterName);
+        if (Strings.isEmpty(value)) {
+            return null;
+        }
+        long timestamp;
+        try {
+            timestamp = Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, value);
+        }
+        if (null != timezone) {
+            timestamp -= timezone.getOffset(timestamp);
+        }
+        return new Date(timestamp);
+    }
+
 }

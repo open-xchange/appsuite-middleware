@@ -188,6 +188,7 @@ public class InfostoreTestManager implements TestManager {
     public void newAction(File data, java.io.File upload) throws OXException, IOException, JSONException {
         NewInfostoreRequest newRequest = new NewInfostoreRequest(data, upload);
         newRequest.setFailOnError(false);
+        newRequest.setTimeZone(getClient().getValues().getTimeZone());
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
         lastResponse = newResponse;
         if (!lastResponse.hasError()) {
@@ -260,7 +261,7 @@ public class InfostoreTestManager implements TestManager {
         getRequest.setFailOnError(getFailOnError());
         GetInfostoreResponse getResponse = getClient().execute(getRequest);
         lastResponse = getResponse;
-        return getResponse.getDocumentMetadata();
+        return getResponse.getDocumentMetadata(getClient().getValues().getTimeZone());
     }
 
     public List<File> getAll(int folderId) throws OXException, JSONException, IOException {
@@ -297,7 +298,7 @@ public class InfostoreTestManager implements TestManager {
                     Object orig = ((JSONArray) filesJSON.get(i)).get(columncount);
                     Object converted;
                     try {
-                        converted = FileMetadataFieldParser.convert(field, orig);
+                        converted = FileMetadataFieldParser.convert(field, orig, null);
                         field.doSwitch(fileFieldSet, metadata, converted);
                     } catch (OXException e) {
                         // TODO Auto-generated catch block

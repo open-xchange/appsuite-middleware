@@ -85,7 +85,7 @@ public class FileShare extends DefaultFile {
                 default:
                     Field field = File.Field.get(columns[i]);
                     Object orig = jsonFile.get(i);
-                    Object converted = FileMetadataFieldParser.convert(field, orig);
+                    Object converted = FileMetadataFieldParser.convert(field, orig, timeZone);
                     field.doSwitch(fileFieldSet, fileShare, converted);
                     break;
             }
@@ -109,7 +109,7 @@ public class FileShare extends DefaultFile {
                 Field field = File.Field.get(key);
                 if (null != field) {
                     Object orig = jsonObject.get(key);
-                    Object converted = FileMetadataFieldParser.convert(field, orig);
+                    Object converted = FileMetadataFieldParser.convert(field, orig, timeZone);
                     field.doSwitch(fileFieldSet, fileShare, converted);
                 }
             }

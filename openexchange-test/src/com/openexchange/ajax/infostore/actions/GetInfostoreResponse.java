@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import java.util.TimeZone;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -67,4 +68,9 @@ public class GetInfostoreResponse extends AbstractAJAXResponse {
     public File getDocumentMetadata() throws OXException {
         return com.openexchange.file.storage.json.FileMetadataParser.getInstance().parse((JSONObject) getData());
     }
+
+    public File getDocumentMetadata(TimeZone timeZone) throws OXException {
+        return com.openexchange.file.storage.json.FileMetadataParser.getInstance().parse((JSONObject) getData(), timeZone);
+    }
+
 }
