@@ -6,17 +6,6 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -5998,6 +5987,16 @@ msgstr ""
 #. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
 msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr ""
+
+#. Problem parsing the security policy file
+#: com.openexchange.security.manager/src/com/openexchange/security/manager/exceptions/SecurityManagerExceptionMessages.java:63
+msgid "Problem parsing security policy file: %1$s"
+msgstr ""
+
+#. Error when updating the security manager
+#: com.openexchange.security.manager/src/com/openexchange/security/manager/exceptions/SecurityManagerExceptionMessages.java:66
+msgid "Problem updating security manager.  %1$s"
 msgstr ""
 
 #. No appropriate anonymizer available.
