@@ -63,22 +63,32 @@ import javax.management.ObjectName;
  */
 public class MetricDescriptor {
 
-    private String group;
-    private String name;
-    private String unit;
-    private MetricType metricType;
-    private TimeUnit rate;
-    private Supplier<?> metricSupplier;
-    private String fullName;
-    private String description;
-    private Map<String, String> dimensions;
+    private final String group;
+    private final String name;
+    private final String unit;
+    private final MetricType metricType;
+    private final TimeUnit rate;
+    private final Supplier<?> metricSupplier;
+    private final String fullName;
+    private final String description;
+    private final Map<String, String> dimensions;
 
     /**
-     * Initialises a new {@link MetricDescriptor}.
+     * Initializes a new {@link MetricDescriptor}.
      */
-    public MetricDescriptor() {
+    MetricDescriptor(String group, String name, String unit, MetricType metricType, TimeUnit rate, Supplier<?> metricSupplier, String fullName, String description, Map<String, String> dimensions) {
         super();
+        this.group = group;
+        this.name = name;
+        this.unit = unit;
+        this.metricType = metricType;
+        this.rate = rate;
+        this.metricSupplier = metricSupplier;
+        this.fullName = fullName;
+        this.description = description;
+        this.dimensions = dimensions;
     }
+
 
     /**
      * Returns the group of this metric
@@ -152,6 +162,15 @@ public class MetricDescriptor {
         return description;
     }
 
+    /**
+     * Gets the dimensions
+     *
+     * @return The dimensions
+     */
+    public Map<String, String> getDimensions() {
+        return dimensions;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -163,6 +182,7 @@ public class MetricDescriptor {
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((rate == null) ? 0 : rate.hashCode());
         result = prime * result + ((unit == null) ? 0 : unit.hashCode());
+        result = prime * result + ((dimensions == null) ? 0 : dimensions.hashCode());
         return result;
     }
 
@@ -219,105 +239,20 @@ public class MetricDescriptor {
         } else if (!unit.equals(other.unit)) {
             return false;
         }
+        if (dimensions == null) {
+            if (other.dimensions != null) {
+                return false;
+            }
+        } else if (!dimensions.equals(other.dimensions)) {
+            return false;
+        }
         return true;
     }
 
-    ////////////////////////////// SETTERS //////////////////////////////
+    /////////////////////////////// Builder /////////////////////////////////
 
     /**
-     * Sets the rate
-     *
-     * @param rate to set
-     */
-    void setRate(final TimeUnit rate) {
-        this.rate = rate;
-    }
-
-    /**
-     * Sets the unit
-     *
-     * @param unit to set
-     */
-    void setUnit(final String unit) {
-        this.unit = unit;
-    }
-
-    /**
-     * Sets the group for this metric
-     *
-     * @param group the group to set
-     */
-    void setGroup(final String group) {
-        this.group = group;
-    }
-
-    /**
-     * Sets the name for this metric
-     *
-     * @param name the name to set
-     */
-    void setName(final String name) {
-        this.name = name;
-    }
-
-    /**
-     * Sets the metricType
-     *
-     * @param metricType The metricType to set
-     */
-    void setMetricType(final MetricType metricType) {
-        this.metricType = metricType;
-    }
-
-    /**
-     * Sets the metricSupplier
-     *
-     * @param metricSupplier The metricSupplier to set
-     */
-    void setMetricSupplier(final Supplier<?> metricSupplier) {
-        this.metricSupplier = metricSupplier;
-    }
-
-    /**
-     * Sets the full qualified name of the metric
-     *
-     * @param fqn The full qualified name of the metric
-     */
-    void setFQN(final String fqn) {
-        fullName = fqn;
-    }
-
-    /**
-     * Sets the description
-     *
-     * @param description The description to set
-     */
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-
-    /**
-     * Sets the dimensions
-     *
-     * @param dimensions The dimensions to set
-     */
-    public void setDimensions(Map<String, String> dimensions) {
-        this.dimensions = dimensions;
-    }
-
-
-    /**
-     * Gets the dimensions
-     *
-     * @return The dimensions
-     */
-    public Map<String, String> getDimensions() {
-        return dimensions;
-    }
-
-    /**
-     * Initialises a new {@link MetricBuilder}
+     * Initializes a new {@link MetricBuilder}
      *
      * @param group The group
      * @param name The metric's name
@@ -328,18 +263,14 @@ public class MetricDescriptor {
         return new MetricBuilder(group, name, metricType);
     }
 
-    /////////////////////////////// Builder /////////////////////////////////
-
     /**
-     * {@link AbstractBuilder}
+     * The builder ofr an instance of <code>MetricDescriptor</code>.
      */
     public static class MetricBuilder {
 
-        protected static final String MISSING_FIELD = "A %s must be set!";
-
-        protected final String group;
-        protected final String name;
-        protected final MetricType metricType;
+        private final String group;
+        private final String name;
+        private final MetricType metricType;
         private TimeUnit rate = TimeUnit.SECONDS;
         private String unit = "events";
         private Supplier<?> supplier;
@@ -347,13 +278,13 @@ public class MetricDescriptor {
         private Map<String, String> dimensions;
 
         /**
-         * Initialises a new {@link AbstractBuilder}.
+         * Initializes a new {@link AbstractBuilder}.
          *
          * @param group The group for the metric
          * @param name The name for the metric
          * @param metricType The {@link MetricType}
          */
-        public MetricBuilder(final String group, final String name, final MetricType metricType) {
+        MetricBuilder(final String group, final String name, final MetricType metricType) {
             super();
             this.group = group;
             this.name = name;
@@ -433,46 +364,13 @@ public class MetricDescriptor {
         public MetricDescriptor build() {
             checkNotNull(group, "group");
             checkNotNull(name, "name");
-            final MetricDescriptor descriptor = prepare();
-            fill(descriptor);
-            return descriptor;
-        }
-
-        /**
-         * Performs a preliminary check of the descriptor's values
-         */
-        protected void check() {
-            checkNotNull(rate, "rate");
-            checkNotNull(unit, "unit");
-        }
-
-        /**
-         * Prepares the {@link MetricDescriptor}
-         *
-         * @return The prepared {@link MetricDescriptor} as type {@link T}
-         */
-        protected MetricDescriptor prepare() {
-            final MetricDescriptor descriptor = new MetricDescriptor();
-            descriptor.setGroup(group);
-            descriptor.setName(name);
-            return descriptor;
-        }
-
-        /**
-         * Fills values of the specified descriptor
-         *
-         * @param descriptor The descriptor of which the values shall be filled
-         */
-        protected void fill(final MetricDescriptor descriptor) {
-            descriptor.setRate(rate);
-            descriptor.setUnit(unit);
-            descriptor.setMetricSupplier(supplier);
-            descriptor.setMetricType(metricType);
-            descriptor.setFQN(group + "." + name);
-            descriptor.setDescription(description);
+            StringBuilder fqn = new StringBuilder(group).append('.').append(name);
             if (dimensions != null) {
-                descriptor.setDimensions(dimensions);
+                for (Map.Entry<String, String> dimension : dimensions.entrySet()) {
+                    fqn.append(',').append(dimension.getKey()).append('=').append(dimension.getValue());
+                }
             }
+            return new MetricDescriptor(group, name, unit, metricType, rate, supplier, fqn.toString(), description, dimensions);
         }
 
         /**
@@ -489,5 +387,6 @@ public class MetricDescriptor {
             }
             return reference;
         }
-    }
+    } // End of MetricBuilder
+
 }

@@ -337,6 +337,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      */
     public void onMetricServiceAppeared(MetricService metricService) throws Exception {
         List<MetricDescriptor> descriptors= new ArrayList<MetricDescriptor>();
+        String accountValue = getDescription();
 
         {
             MetricDescriptor breakerStatusGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_STATUS_NAME, MetricType.GAUGE)
@@ -345,7 +346,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                     return circuitBreaker.getState().name();
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getGauge(breakerStatusGauge);
             descriptors.add(breakerStatusGauge);
@@ -358,7 +359,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                     return I(circuitBreaker.getFailureThreshold().numerator);
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getGauge(failureThresholdGauge);
             descriptors.add(failureThresholdGauge);
@@ -371,7 +372,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                     return I(circuitBreaker.getSuccessThreshold().numerator);
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getGauge(successThresholdGauge);
             descriptors.add(successThresholdGauge);
@@ -384,7 +385,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                     return L(circuitBreaker.getDelay().toMillis());
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getGauge(delayMillisGauge);
             descriptors.add(delayMillisGauge);
@@ -395,7 +396,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                 .withDescription(METRICS_TRIP_COUNT_DESC)
                 .withUnit(METRICS_TRIP_COUNT_UNITS)
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getCounter(tripCounter);
             onOpenMetricTask.set(new Runnable() {
@@ -413,7 +414,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                 .withDescription(METRICS_DENIALS_DESC)
                 .withUnit(METRICS_DENIALS_UNITS)
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
-                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, getDescription())
+                .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getMeter(denialMeter);
             onDeniedMetricTask.set(new Runnable() {
