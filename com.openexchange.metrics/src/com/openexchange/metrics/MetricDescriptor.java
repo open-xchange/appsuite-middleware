@@ -49,14 +49,14 @@
 
 package com.openexchange.metrics;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.management.ObjectName;
 
 /**
- * 
+ *
  * {@link MetricDescriptor}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -82,7 +82,7 @@ public class MetricDescriptor {
 
     /**
      * Returns the group of this metric
-     * 
+     *
      * @return the group of this metric
      */
     public String getGroup() {
@@ -91,7 +91,7 @@ public class MetricDescriptor {
 
     /**
      * Returns the name of this metric
-     * 
+     *
      * @return the name of this metric
      */
     public String getName() {
@@ -109,7 +109,7 @@ public class MetricDescriptor {
 
     /**
      * Gets the rate
-     * 
+     *
      * @return the rate
      */
     public TimeUnit getRate() {
@@ -118,7 +118,7 @@ public class MetricDescriptor {
 
     /**
      * Gets the unit
-     * 
+     *
      * @return the unit
      */
     public String getUnit() {
@@ -136,7 +136,7 @@ public class MetricDescriptor {
 
     /**
      * Returns the full name of the metric
-     * 
+     *
      * @return The full name of the metric
      */
     public String getFullName() {
@@ -226,7 +226,7 @@ public class MetricDescriptor {
 
     /**
      * Sets the rate
-     * 
+     *
      * @param rate to set
      */
     void setRate(final TimeUnit rate) {
@@ -235,7 +235,7 @@ public class MetricDescriptor {
 
     /**
      * Sets the unit
-     * 
+     *
      * @param unit to set
      */
     void setUnit(final String unit) {
@@ -244,7 +244,7 @@ public class MetricDescriptor {
 
     /**
      * Sets the group for this metric
-     * 
+     *
      * @param group the group to set
      */
     void setGroup(final String group) {
@@ -253,7 +253,7 @@ public class MetricDescriptor {
 
     /**
      * Sets the name for this metric
-     * 
+     *
      * @param name the name to set
      */
     void setName(final String name) {
@@ -280,7 +280,7 @@ public class MetricDescriptor {
 
     /**
      * Sets the full qualified name of the metric
-     * 
+     *
      * @param fqn The full qualified name of the metric
      */
     void setFQN(final String fqn) {
@@ -295,8 +295,8 @@ public class MetricDescriptor {
     public void setDescription(final String description) {
         this.description = description;
     }
-    
-    
+
+
     /**
      * Sets the dimensions
      *
@@ -305,8 +305,8 @@ public class MetricDescriptor {
     public void setDimensions(Map<String, String> dimensions) {
         this.dimensions = dimensions;
     }
-    
-    
+
+
     /**
      * Gets the dimensions
      *
@@ -318,7 +318,7 @@ public class MetricDescriptor {
 
     /**
      * Initialises a new {@link MetricBuilder}
-     * 
+     *
      * @param group The group
      * @param name The metric's name
      * @param metricType metric's type
@@ -348,7 +348,7 @@ public class MetricDescriptor {
 
         /**
          * Initialises a new {@link AbstractBuilder}.
-         * 
+         *
          * @param group The group for the metric
          * @param name The name for the metric
          * @param metricType The {@link MetricType}
@@ -362,7 +362,7 @@ public class MetricDescriptor {
 
         /**
          * Set the {@link TimeUnit} rate
-         * 
+         *
          * @param rate The {@link TimeUnit} rate to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -373,7 +373,7 @@ public class MetricDescriptor {
 
         /**
          * Set the unit
-         * 
+         *
          * @param unit The unit to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -384,7 +384,7 @@ public class MetricDescriptor {
 
         /**
          * Set the {@link Supplier}
-         * 
+         *
          * @param supplier The {@link Supplier} to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -395,7 +395,7 @@ public class MetricDescriptor {
 
         /**
          * Sets the description
-         * 
+         *
          * @param description the description to set
          * @return the {@link MetricBuilder} for chained calls
          */
@@ -403,13 +403,13 @@ public class MetricDescriptor {
             this.description = description;
             return this;
         }
-        
+
         /**
          * Adds an additional dimension to this descriptor.
-         * 
+         *
          * This dimensions are used to create the {@link ObjectName} for the mbean.
          * So please see {@link ObjectName} descriptions for limitations.
-         * 
+         *
          * @param key The key of the dimension. Must not be 'type' or 'name'
          * @param value The value of the dimension
          * @return the {@link MetricBuilder} for chained calls
@@ -419,7 +419,7 @@ public class MetricDescriptor {
                 throw new IllegalArgumentException("The key is not allowed");
             }
             if (dimensions == null) {
-                dimensions = new ConcurrentHashMap<>();
+                dimensions = new LinkedHashMap<>();
             }
             dimensions.put(key, value);
             return this;
@@ -427,7 +427,7 @@ public class MetricDescriptor {
 
         /**
          * Builds and returns the {@link MetricDescriptor}
-         * 
+         *
          * @return the {@link MetricDescriptor}
          */
         public MetricDescriptor build() {
@@ -448,7 +448,7 @@ public class MetricDescriptor {
 
         /**
          * Prepares the {@link MetricDescriptor}
-         * 
+         *
          * @return The prepared {@link MetricDescriptor} as type {@link T}
          */
         protected MetricDescriptor prepare() {
@@ -460,7 +460,7 @@ public class MetricDescriptor {
 
         /**
          * Fills values of the specified descriptor
-         * 
+         *
          * @param descriptor The descriptor of which the values shall be filled
          */
         protected void fill(final MetricDescriptor descriptor) {
@@ -477,7 +477,7 @@ public class MetricDescriptor {
 
         /**
          * Check for <code>null</code> reference
-         * 
+         *
          * @param reference The reference to check for <code>null</code>
          * @param errorMessage The error message for the {@link IllegalArgumentException}
          * @return The reference if not <code>null</code>
