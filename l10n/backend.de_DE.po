@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-09-12 16:00+0200\n"
+"PO-Revision-Date: 2019-10-04 14:59+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -897,7 +897,6 @@ msgid "Resources"
 msgstr "Ressourcen"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
-#: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr "Der gesamte Tag"
 
@@ -1747,6 +1746,7 @@ msgstr "Um das Gerät einzurichten, klicken Sie auf folgenden Link: "
 
 #. The user salutation; e.g. "Dear John Doe,"
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:68
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:68
 msgid "Dear %1$s,"
 msgstr "Liebe/r %1$s,"
 
@@ -3688,10 +3688,12 @@ msgid "Folders"
 msgstr "Ordner"
 
 #. Search in Persons.
+#. The path prefix within generated ZIP archive containing exported contacts
 #. *
 #. * The default file name for a vcard and csv export, when using batch data
 #.
 #: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportStrings.java:71
 #: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:66
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
@@ -3864,6 +3866,183 @@ msgstr ""
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
 msgid "The string cannot be parsed to a valid URL."
 msgstr "Die Zeichenkette konnte nicht in eine gültige URL aufgelöst werden."
+
+#. The prefix for the diagnostics file
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/DataExportStrings.java:70
+#, fuzzy
+msgid "Diagnostics"
+msgstr "Diagnose"
+
+#. The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:71
+msgid ""
+"The data archive that you have requested on %1$s is now ready for download. "
+"You can download the archive until %1$s."
+msgstr ""
+"Das Datenarchiv, das Sie am %1$s angefordert haben, steht nun zum "
+"Herunterladen bereit. Sie können das Archiv bis %1$s herunterladen."
+
+#. The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:74
+msgid ""
+"The data archive that you have requested on %1$s is now ready for download."
+msgstr ""
+"Das Datenarchiv, das Sie am %1$s angefordert haben, steht jetzt zum "
+"Herunterladen bereit."
+
+#. The content of the E-Mail informing about failed data export. E.g. "Unfortunately the data export that you have requested on 09/01/2019 has failed. Please try again."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:77
+msgid ""
+"Unfortunately the data export that you have requested on %1$s has failed. "
+"Please try again."
+msgstr ""
+"Leider ist der Datenexport, den Sie am %1$s angefordert haben, "
+"fehlgeschlagen. Bitte versuchen Sie es erneut."
+
+#. The content of the E-Mail informing about aborted data export. E.g. "The data export that you have requested on 09/01/2019 has been canceled."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:80
+msgid "The data export that you have requested on %1$s has been canceled."
+msgstr "Der Datenexport, den Sie am %1$s angefordert haben, wurde abgebrochen."
+
+#. The subject of the E-Mail for a successful data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:83
+msgid "Your personal data archive is ready for download"
+msgstr "Ihr persönliches Datenarchiv steht zum Herunterladen bereit"
+
+#. The subject of the E-Mail for a failed data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:86
+msgid "Your personal data export failed"
+msgstr "Der Export Ihrer persönlichen Daten ist fehlgeschlagen"
+
+#. The subject of the E-Mail for an aborted data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:89
+msgid "Your personal data export has been canceled"
+msgstr "Der Export Ihrer persönlichen Daten wurde abgebrochen"
+
+#. The label of the button linking to downloadable archives.
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:92
+msgid "Download archives"
+msgstr "Archive herunterladen"
+
+#. The personal part for the no-reply address
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:95
+msgid "Service for dowloading your personal data"
+msgstr "Dienst zum Herunterladen Ihrer persönlichen Daten"
+
+#. The info footer provided for every data export notification E-Mail
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:98
+msgid ""
+"You are receiving this email because you have requested a personal data "
+"download recently."
+msgstr ""
+"Sie erhalten diese E-Mail, weil Sie vor kurzem das Herunterladen "
+"persönlicher Daten angefordert haben."
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:70
+msgid "enabled"
+msgstr "aktiviert"
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:72
+msgid "includePublic"
+msgstr ""
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:74
+msgid "includeShared"
+msgstr ""
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:76
+msgid "includeUnsubscribed"
+msgstr ""
+
+#. The path prefix within generated ZIP archive containing exported appointments
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportStrings.java:71
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Calendar"
+msgstr "Kalender"
+
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:76
+msgid "includeTrash"
+msgstr ""
+
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:78
+msgid "includeAllVersions"
+msgstr ""
+
+#. The path prefix within generated ZIP archive containing exported Drive files
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportStrings.java:71
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
+msgid "Drive"
+msgstr "Drive"
+
+#. The path prefix within generated ZIP archive containing exported E-Mails
+#: com.openexchange.gdpr.dataexport.provider.mail/src/com/openexchange/gdpr/dataexport/provider/mail/internal/MailDataExportStrings.java:71
+msgid "E-Mails"
+msgstr "E-Mails"
+
+#. The path prefix within generated ZIP archive containing exported appointments
+#. *
+#. * The default file name for an ical task export, when using batch data
+#.
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportStrings.java:71
+#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
+msgid "Tasks"
+msgstr "Aufgaben"
+
+#. There is already a running data export.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:69
+msgid "There is already a running data export"
+msgstr "Es gibt bereits einen laufenden Datenexport"
+
+#. There is no data export.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:72
+msgid "There is no data export"
+msgstr "Es ist kein Datenexport vorhanden"
+
+#. The data export is not yet finished. Please try again later.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:75
+msgid "The data export is not yet finished. Please try again later."
+msgstr ""
+"Der Datenexport ist noch nicht abgeschlossen. Versuchen Sie es später erneut."
+
+#. The data export failed.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:78
+msgid "The data export failed"
+msgstr "Der Datenexport ist fehlgeschlagen"
+
+#. A data export has already been requested
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:81
+msgid "A data export has already been requested"
+msgstr "Ein Datenexport wurde bereits angefordert"
+
+#. There is no data export or it has already been completed
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:84
+msgid "There is no data export or it has already been completed"
+msgstr "Es ist kein Datenexport vorhanden oder er wurde bereits abgeschlossen"
+
+#. The data export has been aborted, but he/she tries to retrieve its results
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:87
+msgid "The data export has been aborted"
+msgstr "Der Datenexport wurde abgebrochen"
+
+#. User requested a package number that does not exist
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:90
+msgid "No such package"
+msgstr "Kein solches Paket"
+
+#. User requested to delete a completed data export task, but task is not yet completed
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:93
+msgid "There is no data export or it is not yet completed"
+msgstr "Es ist kein Datenexport vorhanden oder er ist noch nicht abgeschlossen"
 
 #. The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
 #. %s is replaced with some login name.
@@ -4116,6 +4295,202 @@ msgstr "Ihre Sitzung ist abgelaufen. Bitte versuchen Sie es erneut."
 msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr ""
 "Das Kerberos-Ticket für die Sitzung fehlt. Bitte versuchen Sie es erneut."
+
+#. *
+#. * Cannot clone object %1$s.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:71
+msgid "Cannot clone object \"%1$s\"."
+msgstr "Das Objekt \"%1$s\" kann nicht geklont werden."
+
+#. *
+#. * Hash algorithm %s isn't found.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:76
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
+msgid "Hash algorithm \"%s\" could not be found."
+msgstr "Der Hash-Algorithmus \"%s\" konnte nicht gefunden werden."
+
+#. *
+#. * Encoding %s cannot be used.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:81
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:65
+msgid "Encoding \"%s\" cannot be used."
+msgstr "Die Kodierung \"%s\" kann nicht verwendet werden."
+
+#. *
+#. * Cannot find user with identifier %1$s in context %2$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:86
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:77
+msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
+msgstr ""
+"Ein Benutzer mit der ID \"%1$s\" konnte nicht im Kontext %2$d gefunden "
+"werden."
+
+#. *
+#. * Found two user with same identifier %1$s in context %2$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:91
+msgid "Two users with same identifier \"%1$s\" in context %2$d found."
+msgstr ""
+"Es wurden zwei Benutzer mit identischer ID \"%1$s\" im Kontext %2$d gefunden."
+
+#. *
+#. * Problem putting an object into the cache.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:96
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
+msgid "Problem putting/removing an object into/from the cache."
+msgstr "Problem beim Legen/Verschieben eines Objekts in/aus den/m Cache."
+
+#. No permission to modify resources in context %1$s
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:99
+msgid "No permission to modify resources in context \"%1$s\""
+msgstr "Keine Berechtigung zum Ändern von Ressourcen im Kontext \"%1$s\""
+
+#. No permission to access resources in context %1$s
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:102
+msgid "No permission to access resources in context \"%1$s\""
+msgstr "Keine Berechtigung zum Zugriff auf Ressourcen im Kontext \"%1$s\""
+
+#. *
+#. * Missing or unknown password mechanism %1$s
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:107
+msgid "Missing or unknown password mechanism \"%1$s\""
+msgstr "Fehlender oder unbekannter Passwortmechanismus \"%1$s\"."
+
+#. *
+#. * New password contains invalid characters
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:112
+msgid "New password contains invalid characters."
+msgstr "Das neue Passwort enthält ungültige Zeichen."
+
+#. *
+#. * Attributes of user %1$d in context %2$d have been erased.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:117
+msgid "Attributes of user %1$d in context %2$d have been erased."
+msgstr "Attribute des Benutzers %1$d im Kontext %2$d wurden gelöscht."
+
+#. *
+#. * Loading one or more users failed.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:122
+msgid "Loading one or more users failed."
+msgstr "Das Laden eines oder mehrerer Benutzer ist fehlgeschlagen."
+
+#. * Alias entries are missing for user %1$d in context %2$d.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:125
+msgid "Alias entries are missing for user %1$d in context %2$d."
+msgstr "Alias-Einträge für Benutzer %1$d im Kontext %2$d sind nicht vorhanden."
+
+#. * Updating attributes failed in context %1$d for user %2$d.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:128
+msgid "Updating attributes failed in context %1$d for user %2$d."
+msgstr ""
+"Die Aktualisierung der Attribute im Kontext %1$d für Benutzer %2$d ist "
+"fehlgeschlagen."
+
+#. *
+#. * Invalid password length. The password must be of minimum length %1$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
+msgid ""
+"Invalid password length. The password must have a minimum length of %1$d."
+msgstr "Ungültige Passwortlänge. Das Passwort muss mindestens %1$d lang sein."
+
+#. *
+#. * Invalid password length. The password must be of maximum length %1$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
+msgid ""
+"Invalid password length. The password must have a maximum length of %1$d."
+msgstr "Ungültige Passwortlänge. Das Passwort darf höchstens %1$d lang sein."
+
+#. *
+#. * The parameter %s for this user is missing.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:143
+msgid "The parameter \"%s\" for this user is missing."
+msgstr "Der Parameter %s für diesen Benutzer fehlt."
+
+#. *
+#. * %s is not a valid locale.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:148
+msgid "\"%s\" is not a valid locale."
+msgstr "\"%s\" ist keine gültige Sprachangabe."
+
+#. *
+#. * %s is not a valid time zone.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:153
+msgid "\"%s\" is not a valid timezone."
+msgstr "\"%s\" ist keine gültige Zeitzone."
+
+#. This is an internal exception to detect coding problems. A user will never see this exception.
+#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:157
+msgid ""
+"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
+"user's attributes."
+msgstr ""
+"Das Sperren von Attributen mehrerer Benutzer ist nicht erlaubt. Sie haben "
+"versucht, die Attribute von %1$d Benutzern zu sperren."
+
+#. *
+#. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:162
+msgid ""
+"The entered password is illegal and can't be saved. Allowed characters are: "
+"%1$s"
+msgstr ""
+"Das eingegebene Passwort enthält unzulässige Zeichen und kann nicht "
+"gespeichert werden. Zulässige Zeichen: %1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:167
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Das aktuelle Passwort ist falsch. Bitte geben Sie Ihr korrektes aktuelles "
+"Passwort ein und versuchen Sie es erneut."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:172
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Das aktuelle Passwort fehlt. Bitte geben Sie Ihr aktuelles Passwort ein und "
+"versuchen Sie es erneut."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:177
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr ""
+"Das neue Passwort fehlt. Bitte geben Sie Ihr neues Passwort ein und "
+"versuchen Sie es erneut."
+
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:181
+#: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+msgid "Denied concurrent update of user attributes."
+msgstr "Gleichzeitige Aktualisierung von Benutzerattributen verweigert."
 
 #. *
 #. * No recipient(s) has been defined for new message
@@ -4703,14 +5078,6 @@ msgstr "Termine"
 #: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
 msgid "Events"
 msgstr "Ereignisse"
-
-#. *
-#. * The default file name for an ical task export, when using batch data
-#.
-#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
-msgid "Tasks"
-msgstr "Aufgaben"
 
 #. *
 #. * The default file name for an ical task export, when using batch data
@@ -7195,13 +7562,6 @@ msgstr "Verbindung zum Kontext-Speicher fehlgeschlagen"
 msgid "The account \"%1$s\" was not found."
 msgstr "Das Konto \"%1$s\" wurde nicht gefunden."
 
-#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
-#. This should happen in very rare conditions and is not visible to the client.
-#: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:181
-msgid "Denied concurrent update of user attributes."
-msgstr "Gleichzeitige Aktualisierung von Benutzerattributen verweigert."
-
 #. The default display name format for contacts with department: <firstname> <lastname> (department)
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/ContactDisplayNameFormat.java:62
 msgid "%1$s %2$s (%3$s)"
@@ -7260,10 +7620,6 @@ msgstr "Weitere Kontaktordner"
 msgid "Other infostore folders"
 msgstr "Weitere InfoStore-Ordner"
 
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
-msgid "Calendar"
-msgstr "Kalender"
-
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:98
 msgid "Collected addresses"
 msgstr "Gesammelte Adressen"
@@ -7275,10 +7631,6 @@ msgstr "E-Mail-Anhänge"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
 msgid "My files"
 msgstr "Meine Dateien"
-
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
-msgid "Drive"
-msgstr "Drive"
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
 msgid "Shared files"
@@ -8866,30 +9218,6 @@ msgstr "Ihre Suche dauerte zu lange, um durchgeführt werden zu können."
 msgid "Version comment"
 msgstr "Anmerkungen zur Version"
 
-#. *
-#. * Problem putting an object into the cache.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:96
-msgid "Problem putting/removing an object into/from the cache."
-msgstr "Problem beim Legen/Verschieben eines Objekts in/aus den/m Cache."
-
-#. *
-#. * Hash algorithm %s isn't found.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:76
-msgid "Hash algorithm \"%s\" could not be found."
-msgstr "Der Hash-Algorithmus \"%s\" konnte nicht gefunden werden."
-
-#. *
-#. * Encoding %s cannot be used.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:65
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:81
-msgid "Encoding \"%s\" cannot be used."
-msgstr "Die Kodierung \"%s\" kann nicht verwendet werden."
-
 #. No resource group found for identifier \"%1$d\".
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:67
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:69
@@ -8916,175 +9244,10 @@ msgstr "Ressource(n) mit identischer ID \"%1$s.\" gefunden."
 msgid "Cannot find user with E-Mail \"%s\"."
 msgstr "Ein Benutzer mit der E-Mail  \"%s\" konnte nicht gefunden werden."
 
-#. *
-#. * Cannot find user with identifier %1$s in context %2$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:77
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:86
-msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
-msgstr ""
-"Ein Benutzer mit der ID \"%1$s\" konnte nicht im Kontext %2$d gefunden "
-"werden."
-
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:79
 msgid "Cannot find group with identifier \"%1$s\" in context %2$d."
 msgstr ""
 "Eine Gruppe mit der ID \"%1$s\" konnte nicht im Kontext %2$d gefunden werden."
-
-#. *
-#. * Cannot clone object %1$s.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:71
-msgid "Cannot clone object \"%1$s\"."
-msgstr "Das Objekt \"%1$s\" kann nicht geklont werden."
-
-#. *
-#. * Found two user with same identifier %1$s in context %2$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:91
-msgid "Two users with same identifier \"%1$s\" in context %2$d found."
-msgstr ""
-"Es wurden zwei Benutzer mit identischer ID \"%1$s\" im Kontext %2$d gefunden."
-
-#. No permission to modify resources in context %1$s
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:99
-msgid "No permission to modify resources in context \"%1$s\""
-msgstr "Keine Berechtigung zum Ändern von Ressourcen im Kontext \"%1$s\""
-
-#. No permission to access resources in context %1$s
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:102
-msgid "No permission to access resources in context \"%1$s\""
-msgstr "Keine Berechtigung zum Zugriff auf Ressourcen im Kontext \"%1$s\""
-
-#. *
-#. * Missing or unknown password mechanism %1$s
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:107
-msgid "Missing or unknown password mechanism \"%1$s\""
-msgstr "Fehlender oder unbekannter Passwortmechanismus \"%1$s\"."
-
-#. *
-#. * New password contains invalid characters
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:112
-msgid "New password contains invalid characters."
-msgstr "Das neue Passwort enthält ungültige Zeichen."
-
-#. *
-#. * Attributes of user %1$d in context %2$d have been erased.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:117
-msgid "Attributes of user %1$d in context %2$d have been erased."
-msgstr "Attribute des Benutzers %1$d im Kontext %2$d wurden gelöscht."
-
-#. *
-#. * Loading one or more users failed.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:122
-msgid "Loading one or more users failed."
-msgstr "Das Laden eines oder mehrerer Benutzer ist fehlgeschlagen."
-
-#. * Alias entries are missing for user %1$d in context %2$d.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:125
-msgid "Alias entries are missing for user %1$d in context %2$d."
-msgstr "Alias-Einträge für Benutzer %1$d im Kontext %2$d sind nicht vorhanden."
-
-#. * Updating attributes failed in context %1$d for user %2$d.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:128
-msgid "Updating attributes failed in context %1$d for user %2$d."
-msgstr ""
-"Die Aktualisierung der Attribute im Kontext %1$d für Benutzer %2$d ist "
-"fehlgeschlagen."
-
-#. *
-#. * Invalid password length. The password must be of minimum length %1$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
-msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
-msgstr "Ungültige Passwortlänge. Das Passwort muss mindestens %1$d lang sein."
-
-#. *
-#. * Invalid password length. The password must be of maximum length %1$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:138
-msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
-msgstr "Ungültige Passwortlänge. Das Passwort darf höchstens %1$d lang sein."
-
-#. *
-#. * The parameter %s for this user is missing.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:143
-msgid "The parameter \"%s\" for this user is missing."
-msgstr "Der Parameter %s für diesen Benutzer fehlt."
-
-#. *
-#. * %s is not a valid locale.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:148
-msgid "\"%s\" is not a valid locale."
-msgstr "\"%s\" ist keine gültige Sprachangabe."
-
-#. *
-#. * %s is not a valid time zone.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:153
-msgid "\"%s\" is not a valid timezone."
-msgstr "\"%s\" ist keine gültige Zeitzone."
-
-#. This is an internal exception to detect coding problems. A user will never see this exception.
-#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:157
-msgid ""
-"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
-"user's attributes."
-msgstr ""
-"Das Sperren von Attributen mehrerer Benutzer ist nicht erlaubt. Sie haben "
-"versucht, die Attribute von %1$d Benutzern zu sperren."
-
-#. *
-#. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:162
-msgid ""
-"The entered password is illegal and can't be saved. Allowed characters are: "
-"%1$s"
-msgstr ""
-"Das eingegebene Passwort enthält unzulässige Zeichen und kann nicht "
-"gespeichert werden. Zulässige Zeichen: %1$s"
-
-#. *
-#. * The current password is incorrect. Please enter your correct current password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:167
-msgid ""
-"The current password is incorrect. Please enter your correct current "
-"password and try again."
-msgstr ""
-"Das aktuelle Passwort ist falsch. Bitte geben Sie Ihr korrektes aktuelles "
-"Passwort ein und versuchen Sie es erneut."
-
-#. *
-#. * The current password is missing. Please enter your current password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:172
-msgid ""
-"The current password is missing. Please enter your current password and try "
-"again."
-msgstr ""
-"Das aktuelle Passwort fehlt. Bitte geben Sie Ihr aktuelles Passwort ein und "
-"versuchen Sie es erneut."
-
-#. *
-#. * The new password is missing. Please enter your new password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
-msgid ""
-"The new password is missing. Please enter your new password and try again."
-msgstr ""
-"Das neue Passwort fehlt. Bitte geben Sie Ihr neues Passwort ein und "
-"versuchen Sie es erneut."
 
 #. *
 #. * User is missing for the reminder.
@@ -10161,6 +10324,11 @@ msgstr "Nicht unterstützter OAuth-Mailzugriff auf Server %1$s"
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:267
 msgid "Unsupported OAuth transport access to server %1$s"
 msgstr "Nicht unterstützter OAuth-Transportzugriff auf Server %1$s"
+
+#. Although credentials are correct, the mail server denied the connect attempt for any reason
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:270
+msgid "Mail server %1$s denied connect attempt: %3$s"
+msgstr "E-Mail-Server %1$s hat Verbindungsversuch verweigert: %3$s"
 
 #. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
 #. which is only applicable in case a reply is generated, but in-compose message is not a reply
@@ -11333,8 +11501,13 @@ msgstr ""
 "%1$s hat %2$s \"%3$s\" für Sie freigegeben. Zum Anzeigen geben Sie bitte das "
 "Freigabepasswort ein."
 
-#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#. Login when opening a share protected with a password
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+msgid "Please enter your password to log into this account."
+msgstr "Bitte geben Sie Ihr Passwort ein, um sich bei diesem Konto anzumelden."
+
+#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -11342,24 +11515,24 @@ msgstr ""
 "Eine Nachricht mit weiteren Anweisungen zum Einrichten eines neuen Passworts "
 "wurde an %1$s gesendet."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
 msgid "Please set a new password to regain access."
 msgstr "Bitte legen Sie ein neues Passwort fest, um wieder Zugang zu erhalten."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:79
 msgid "The share you are looking for does not exist."
 msgstr "Die von Ihnen gesuchte Freigabe ist nicht vorhanden."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
 msgid "This share cannot be accessed with your Web Browser."
 msgstr ""
 "Auf diese Freigabe kann nicht mit Ihrem Web-Browser zugegriffen werden."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
 msgid "We were unable to process your request."
 msgstr "Wir konnten Ihre Anfrage nicht verarbeiten."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -11367,7 +11540,7 @@ msgstr ""
 "Der gesuchte Ordner bzw. das gesuchte Objekt ist nicht mehr verfügbar. Bitte "
 "klicken Sie auf \"Fortfahren\", um Ihre anderen Freigaben anzuzeigen."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -11376,7 +11549,7 @@ msgstr ""
 "Zurücksetzen des Passworts wird abgebrochen."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11385,7 +11558,7 @@ msgstr ""
 "kontaktieren Sie den Eigentümer, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11394,7 +11567,7 @@ msgstr ""
 "kontaktieren Sie %1$s, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11403,7 +11576,7 @@ msgstr ""
 "kontaktieren Sie den Eigentümer, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -11412,7 +11585,7 @@ msgstr ""
 "kontaktieren Sie %1$s, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11421,7 +11594,7 @@ msgstr ""
 "kontaktieren Sie den Eigentümer, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11430,7 +11603,7 @@ msgstr ""
 "kontaktieren Sie %1$s, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11441,7 +11614,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11452,7 +11625,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11463,7 +11636,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -11474,7 +11647,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11485,7 +11658,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11496,7 +11669,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11507,7 +11680,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11517,7 +11690,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11528,7 +11701,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -11539,7 +11712,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11550,7 +11723,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
