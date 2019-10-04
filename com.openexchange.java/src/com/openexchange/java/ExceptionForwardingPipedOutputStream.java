@@ -51,6 +51,7 @@ package com.openexchange.java;
 
 import java.io.IOException;
 import java.io.PipedOutputStream;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 
 /**
@@ -61,6 +62,7 @@ import com.openexchange.java.ExceptionAwarePipedInputStream;
  */
 public class ExceptionForwardingPipedOutputStream extends PipedOutputStream {
 
+    private final AtomicReference<IOException> exception;
     private final ExceptionAwarePipedInputStream eapis;
 
     /**
@@ -73,11 +75,29 @@ public class ExceptionForwardingPipedOutputStream extends PipedOutputStream {
      */
     public ExceptionForwardingPipedOutputStream(ExceptionAwarePipedInputStream snk) throws IOException {
         super(snk);
+        exception = new AtomicReference<IOException>();
         this.eapis = snk;
+    }
+
+    /**
+     * Sets specified exception that gets re-thrown on further write attempts.
+     *
+     * @param e The exception to set
+     */
+    public void setException(final Exception e) {
+        exception.set((e instanceof IOException) ? (IOException) e : new IOException("Error while reading from connected piped input stream", e));
+    }
+
+    private void checkForException() throws IOException {
+        IOException exception = this.exception.get();
+        if (exception != null) {
+            throw exception;
+        }
     }
 
     @Override
     public void write(int b) throws IOException {
+        checkForException();
         try {
             super.write(b);
         } catch (IOException e) {
@@ -88,6 +108,7 @@ public class ExceptionForwardingPipedOutputStream extends PipedOutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
+        checkForException();
         try {
             super.write(b, off, len);
         } catch (IOException e) {
@@ -98,6 +119,7 @@ public class ExceptionForwardingPipedOutputStream extends PipedOutputStream {
 
     @Override
     public synchronized void flush() throws IOException {
+        checkForException();
         try {
             super.flush();
         } catch (Exception e) {
@@ -109,7 +131,7 @@ public class ExceptionForwardingPipedOutputStream extends PipedOutputStream {
     /**
      * Forwards given exception to connected piped input stream.
      *
-     * @param e The exception to forard
+     * @param e The exception to forward
      */
     public void forwardException(Exception e) {
         eapis.setException(e);

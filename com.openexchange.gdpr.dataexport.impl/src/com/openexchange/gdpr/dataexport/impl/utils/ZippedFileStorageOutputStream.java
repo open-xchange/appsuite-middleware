@@ -59,16 +59,16 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy;
-import com.openexchange.exception.OXException;
+import org.slf4j.Logger;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.gdpr.dataexport.impl.DataExportUtility;
 import com.openexchange.java.BlockingAtomicReference;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.ExceptionForwardingPipedOutputStream;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadRenamer;
 
 /**
@@ -78,6 +78,11 @@ import com.openexchange.threadpool.ThreadRenamer;
  * @since v7.10.3
  */
 public class ZippedFileStorageOutputStream extends OutputStream {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ZippedFileStorageOutputStream.class);
+    }
 
     private final ServiceLookup services;
     private final FileStorage fileStorage;
@@ -398,22 +403,16 @@ public class ZippedFileStorageOutputStream extends OutputStream {
         // Create writer task
         FileStorage fileStorage= this.fileStorage;
         BlockingAtomicReference<String> fileStorageLocationReference = this.fileStorageLocationReference;
-        AbstractTask<Void> fileStorageWriter = new DataExportFileStorageWriterTask(in, fileStorage, fileStorageLocationReference);
+        AbstractTask<Void> fileStorageWriter = new DataExportFileStorageWriterTask(in, out, fileStorage, fileStorageLocationReference);
 
         // Submit/execute writer task
         ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
         if (threadPool == null) {
-            try {
-                ThreadPools.execute(fileStorageWriter);
-            } catch (IOException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        } else {
-            threadPool.submit(fileStorageWriter);
+            throw new IOException(ServiceExceptionCode.absentService(ThreadPoolService.class));
         }
+        threadPool.submit(fileStorageWriter);
 
+        // Return piped output stream, which is consumed by DataExportFileStorageWriterTask instance
         return out;
     }
 
@@ -428,6 +427,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
     private static final class DataExportFileStorageWriterTask extends AbstractTask<Void> {
 
         private final ExceptionAwarePipedInputStream in;
+        private final ExceptionForwardingPipedOutputStream out;
         private final BlockingAtomicReference<String> fileStorageLocationReference;
         private final FileStorage fileStorage;
 
@@ -435,11 +435,14 @@ public class ZippedFileStorageOutputStream extends OutputStream {
          * Initializes a new {@link DataExportFileStorageWriterTask}.
          *
          * @param in The piped input stream to read from
+         * @param out The piped output stream feeding the bytes to piped input stream
          * @param fileStorage The file storage to write to
          * @param fileStorageLocationReference The reference for the resulting file storage location when writing to storage is completed
          */
-        DataExportFileStorageWriterTask(ExceptionAwarePipedInputStream in, FileStorage fileStorage, BlockingAtomicReference<String> fileStorageLocationReference) {
+        DataExportFileStorageWriterTask(ExceptionAwarePipedInputStream in, ExceptionForwardingPipedOutputStream out, FileStorage fileStorage, BlockingAtomicReference<String> fileStorageLocationReference) {
+            super();
             this.in = in;
+            this.out = out;
             this.fileStorageLocationReference = fileStorageLocationReference;
             this.fileStorage = fileStorage;
         }
@@ -450,9 +453,14 @@ public class ZippedFileStorageOutputStream extends OutputStream {
         }
 
         @Override
-        public Void call() throws OXException {
-            String fileStorageLocation = fileStorage.saveNewFile(in);
-            fileStorageLocationReference.set(fileStorageLocation);
+        public Void call() {
+            try {
+                String fileStorageLocation = fileStorage.saveNewFile(in);
+                fileStorageLocationReference.set(fileStorageLocation);
+            } catch (Exception e) {
+                LoggerHolder.LOG.warn("Failed writing into file storage sink", e);
+                out.setException(e);
+            }
             return null;
         }
     }
