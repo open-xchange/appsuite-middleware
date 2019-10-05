@@ -149,18 +149,24 @@ public class DataExportActivator extends HousekeepingActivator {
                 configBuilder.parse(schedule);
             }
 
-            int numberOfConcurrentTasks = configService.getIntProperty("com.openexchange.gdpr.dataexport.numberOfConcurrentTasks", 1);
+            int numberOfConcurrentTasks = configService.getIntProperty("com.openexchange.gdpr.dataexport.numberOfConcurrentTasks", DataExportConstants.DEFAULT_NUMBER_OF_CONCURRENT_TASKS);
             configBuilder.withNumberOfConcurrentTasks(numberOfConcurrentTasks);
 
             {
                 String sCheckForTasksFrequency = configService.getProperty("com.openexchange.gdpr.dataexport.checkForTasksFrequency", "5m").trim();
                 long checkForTasksFrequencyMillis = ConfigTools.parseTimespan(sCheckForTasksFrequency);
+                if (checkForTasksFrequencyMillis < 0) {
+                    checkForTasksFrequencyMillis = DataExportConstants.DEFAULT_CHECK_FOR_TASKS_FREQUENCY;
+                }
                 configBuilder.withCheckForTasksFrequency(checkForTasksFrequencyMillis);
             }
 
             {
                 String sCheckForAbortedTasksFrequency = configService.getProperty("com.openexchange.gdpr.dataexport.checkForAbortedTasksFrequency", "2m").trim();
                 long checkForAbortedTasksFrequency = ConfigTools.parseTimespan(sCheckForAbortedTasksFrequency);
+                if (checkForAbortedTasksFrequency < 0) {
+                    checkForAbortedTasksFrequency = DataExportConstants.DEFAULT_CHECK_FOR_ABORTED_TASKS_FREQUENCY;
+                }
                 configBuilder.withCheckForAbortedTasksFrequency(checkForAbortedTasksFrequency);
             }
 
@@ -171,7 +177,7 @@ public class DataExportActivator extends HousekeepingActivator {
                 String sMaxTimeToLive = configService.getProperty("com.openexchange.gdpr.dataexport.maxTimeToLive", "2W").trim();
                 long maxTimeToLiveMillis = ConfigTools.parseTimespan(sMaxTimeToLive);
                 if (maxTimeToLiveMillis <= 0) {
-                    maxTimeToLiveMillis = 1209600000L; // Two weeks in milliseconds
+                    maxTimeToLiveMillis = DataExportConstants.DEFAULT_MAX_TIME_TO_LIVE; // Two weeks in milliseconds
                 }
                 configBuilder.withMaxTimeToLiveMillis(maxTimeToLiveMillis);
             }
@@ -179,11 +185,14 @@ public class DataExportActivator extends HousekeepingActivator {
             {
                 String sExpirationTime = configService.getProperty("com.openexchange.gdpr.dataexport.expirationTime", "10m").trim();
                 long expirationTimeMillis = ConfigTools.parseTimespan(sExpirationTime);
+                if (expirationTimeMillis < 0) {
+                    expirationTimeMillis = DataExportConstants.DEFAULT_EXPIRATION_TIME;
+                }
                 configBuilder.withExpirationTimeMillis(expirationTimeMillis);
             }
 
             {
-                String sDefaultMaxFileSize = configService.getProperty("com.openexchange.gdpr.dataexport.defaultMaxFileSize", "1073741824").trim();
+                String sDefaultMaxFileSize = configService.getProperty("com.openexchange.gdpr.dataexport.defaultMaxFileSize", Long.toString(DataExportConstants.DFAULT_MAX_FILE_SIZE)).trim();
                 long defaultMaxFileSize;
                 try {
                     defaultMaxFileSize = Long.parseLong(sDefaultMaxFileSize);
@@ -196,7 +205,7 @@ public class DataExportActivator extends HousekeepingActivator {
                 configBuilder.withDefaultMaxFileSize(defaultMaxFileSize);
             }
 
-            int maxFailCountForWorkItem = configService.getIntProperty("com.openexchange.gdpr.dataexport.maxFailCountForWorkItem", 4);
+            int maxFailCountForWorkItem = configService.getIntProperty("com.openexchange.gdpr.dataexport.maxFailCountForWorkItem", DataExportConstants.DEFAULT_MAX_FAIL_COUNT_FOR_WORK_ITEM);
             configBuilder.withMaxFailCountForWorkItem(maxFailCountForWorkItem);
 
             config = configBuilder.build();

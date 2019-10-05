@@ -99,14 +99,14 @@ public class DataExportConfig {
             super();
             active = true;
             rangesOfTheWeek = new HashMap<DayOfWeek, DayOfWeekTimeRanges>(7);
-            numberOfConcurrentTasks = 1;
-            maxFailCountForWorkItem = 4;
-            checkForTasksFrequency = 300000L;
-            checkForAbortedTasksFrequency = 120000L;
-            expirationTimeMillis = 600000L;
+            numberOfConcurrentTasks = DataExportConstants.DEFAULT_NUMBER_OF_CONCURRENT_TASKS;
+            maxFailCountForWorkItem = DataExportConstants.DEFAULT_MAX_FAIL_COUNT_FOR_WORK_ITEM;
+            checkForTasksFrequency = DataExportConstants.DEFAULT_CHECK_FOR_TASKS_FREQUENCY;
+            checkForAbortedTasksFrequency = DataExportConstants.DEFAULT_CHECK_FOR_ABORTED_TASKS_FREQUENCY;
+            expirationTimeMillis = DataExportConstants.DEFAULT_EXPIRATION_TIME;
             maxProcessingTimeMillis = -1L;
-            maxTimeToLiveMillis = 1209600000L;
-            defaultMaxFileSize = 1073741824L;
+            maxTimeToLiveMillis = DataExportConstants.DEFAULT_MAX_TIME_TO_LIVE;
+            defaultMaxFileSize = DataExportConstants.DFAULT_MAX_FILE_SIZE;
         }
 
         /**

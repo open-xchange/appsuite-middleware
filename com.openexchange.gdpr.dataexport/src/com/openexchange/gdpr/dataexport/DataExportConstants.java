@@ -68,6 +68,41 @@ public class DataExportConstants {
     /**
      * The minimum file size for generated result files (512 MB).
      */
-    public static final int MINIMUM_FILE_SIZE = 536870912;
+    public static final long MINIMUM_FILE_SIZE = 536870912L;
+
+    /**
+     * The default value for the max. file size for generated result files (512 MB).
+     */
+    public static final long DFAULT_MAX_FILE_SIZE = 1073741824L;
+
+    /**
+     * The default value for max. time to live for a completed data export (<code>1209600000</code> two weeks in milliseconds).
+     */
+    public static final long DEFAULT_MAX_TIME_TO_LIVE = 1209600000L; // Two weeks in milliseconds
+
+    /**
+     * The default value for the frequency to check for available data export tasks (<code>300000</code> five minutes in milliseconds).
+     */
+    public static final long DEFAULT_CHECK_FOR_TASKS_FREQUENCY = 300000L; // 5 minutes in milliseconds
+
+    /**
+     * The default value for the frequency to check for aborted data export tasks (<code>120000</code> 2 minutes in milliseconds).
+     */
+    public static final long DEFAULT_CHECK_FOR_ABORTED_TASKS_FREQUENCY = 120000L; // 2 minutes in milliseconds
+
+    /**
+     * The default value for the expiration time for an in-processing data export task (<code>600000</code> 10 minutes in milliseconds).
+     */
+    public static final long DEFAULT_EXPIRATION_TIME = 600000L; // 10 minutes in milliseconds
+
+    /**
+     * The default value for allowed number of concurrent data export tasks (<code>1</code>).
+     */
+    public static final int DEFAULT_NUMBER_OF_CONCURRENT_TASKS = 1;
+
+    /**
+     * The default value for max. allowed fail count for a certain work item associated with a data export task (<code>4</code>).
+     */
+    public static final int DEFAULT_MAX_FAIL_COUNT_FOR_WORK_ITEM = 4;
 
 }
