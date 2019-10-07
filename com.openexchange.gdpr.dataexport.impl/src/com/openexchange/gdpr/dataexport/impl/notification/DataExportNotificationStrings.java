@@ -68,7 +68,7 @@ public class DataExportNotificationStrings implements LocalizableStrings {
     public static final String SALUTATION = "Dear %1$s,";
 
     // The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
-    public static final String CONTENT_SUCCESS_WITH_EXPIRATION = "The data archive that you have requested on %1$s is now ready for download. You can download the archive until %1$s.";
+    public static final String CONTENT_SUCCESS_WITH_EXPIRATION = "The data archive that you have requested on %1$s is now ready for download. You can download the archive until %2$s.";
 
     // The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
     public static final String CONTENT_SUCCESS_WITHOUT_EXPIRATION = "The data archive that you have requested on %1$s is now ready for download.";
