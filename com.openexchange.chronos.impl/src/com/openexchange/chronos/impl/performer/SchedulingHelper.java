@@ -193,12 +193,7 @@ public class SchedulingHelper {
                  * prepare notifications and scheduling messages from organizer to attendees
                  */
                 trackCreation(createdResource, originator, consideredRecipients);
-            } else if (hasExternalOrganizer(createdResource)) {
-                /*
-                 * no elevated attendee privileges possible for externally organized events
-                 */
-                throw new UnsupportedOperationException("cannot track creation messages for externally organized events");
-            } else {
+            } else if (false == hasExternalOrganizer(createdResource)) {
                 /*
                  * prepare notifications and scheduling messages from attendee acting on behalf of the organizer to (newly added) attendees
                  */

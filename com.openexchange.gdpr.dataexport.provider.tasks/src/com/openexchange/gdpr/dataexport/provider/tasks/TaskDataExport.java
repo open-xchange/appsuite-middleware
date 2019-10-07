@@ -454,8 +454,8 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
                 return savePointFor(jSavePoint);
             }
             int count = incrementAndGetCount();
-            checkAborted((count % 10 == 0));
-            if (count % 100 == 0) {
+            checkAborted((count % 100 == 0));
+            if (count % 1000 == 0) {
                 sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", I(root)).putSafe("id", I(taskId)));
             }
             batchCount++;

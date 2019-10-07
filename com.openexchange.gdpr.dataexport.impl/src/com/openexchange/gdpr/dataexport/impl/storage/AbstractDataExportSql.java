@@ -491,6 +491,7 @@ public abstract class AbstractDataExportSql<R> {
     void updateSavePoint(UUID taskId, String module, DataExportSavepoint savePoint, int contextId) throws OXException {
         Optional<JSONObject> jSavePoint = savePoint.getSavepoint();
         Optional<DataExportDiagnosticsReport> report = savePoint.getReport();
+        Optional<String> fileStorageLocation = savePoint.getFileStorageLocation();
 
         R schemaReference = getSchemaReference(contextId);
         int rollback = 0;
@@ -500,19 +501,23 @@ public abstract class AbstractDataExportSql<R> {
             Databases.startTransaction(con);
             rollback = 1;
 
-            try (PreparedStatement stmt = con.prepareStatement("UPDATE dataExportTaskWorklist SET savepoint = ? WHERE taskId = ? AND id = ?")) {
+            try (PreparedStatement stmt = con.prepareStatement(jSavePoint.isPresent() && fileStorageLocation.isPresent() ? "UPDATE dataExportTaskWorklist SET savepoint = ?, filestoreLocation = ? WHERE taskId = ? AND id = ?" : "UPDATE dataExportTaskWorklist SET savepoint = ? WHERE taskId = ? AND id = ?")) {
+                int pos = 1;
                 if (jSavePoint.isPresent()) {
                     JSONObject jsp = jSavePoint.get();
                     if (jsp.isEmpty()) {
-                        stmt.setNull(1, Types.VARCHAR);
+                        stmt.setNull(pos++, Types.VARCHAR);
                     } else {
-                        stmt.setString(1, jsp.toString());
+                        stmt.setString(pos++, jsp.toString());
+                    }
+                    if (fileStorageLocation.isPresent()) {
+                        stmt.setString(pos++, fileStorageLocation.get());
                     }
                 } else {
-                    stmt.setNull(1, Types.VARCHAR);
+                    stmt.setNull(pos++, Types.VARCHAR);
                 }
-                stmt.setBytes(2, UUIDs.toByteArray(taskId));
-                stmt.setString(3, module);
+                stmt.setBytes(pos++, UUIDs.toByteArray(taskId));
+                stmt.setString(pos++, module);
                 modified = stmt.executeUpdate() > 0;
             }
 
@@ -891,12 +896,13 @@ public abstract class AbstractDataExportSql<R> {
             DataExportSavepoint.Builder savepoint = DataExportSavepoint.builder();
 
             JSONObject jSavePoint = null;
-            try (PreparedStatement stmt = con.prepareStatement("SELECT savepoint FROM dataExportTaskWorklist WHERE taskId = ? AND id = ? AND savepoint IS NOT NULL")) {
+            String fileStorageLocation = null;
+            try (PreparedStatement stmt = con.prepareStatement("SELECT savepoint, filestoreLocation FROM dataExportTaskWorklist WHERE taskId = ? AND id = ? AND savepoint IS NOT NULL")) {
                 stmt.setBytes(1, UUIDs.toByteArray(taskId));
                 stmt.setString(2, moduleId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        String s = rs.getString("savepoint");
+                        String s = rs.getString(1);
                         if (!rs.wasNull()) {
                             try {
                                 jSavePoint = new JSONObject(s);
@@ -904,11 +910,16 @@ public abstract class AbstractDataExportSql<R> {
                                 // Unable to parse to JSON
                                 LOGGER.warn("Unable to parse save-pont to JSON. Assuming null instead.", e);
                             }
+                            s = rs.getString(2);
+                            if (!rs.wasNull()) {
+                                fileStorageLocation = s;
+                            }
                         }
                     }
                 }
             }
             savepoint.withSavepoint(jSavePoint);
+            savepoint.withFileStorageLocation(fileStorageLocation);
 
             try (PreparedStatement stmt = con.prepareStatement("SELECT messageId, message, timeStamp, moduleId FROM dataExportReport WHERE taskId = ?")) {
                 stmt.setBytes(1, UUIDs.toByteArray(taskId));

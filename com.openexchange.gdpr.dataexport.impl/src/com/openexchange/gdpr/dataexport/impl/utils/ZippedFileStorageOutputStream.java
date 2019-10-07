@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
-import java.util.zip.Deflater;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -94,16 +93,17 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      * Initializes a new {@link ZippedFileStorageOutputStream}.
      *
      * @param fileStorage The file storage to write to
+     * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
      * @param services The service look-up
      * @throws IOException If initialization fails
      */
-    public ZippedFileStorageOutputStream(FileStorage fileStorage, ServiceLookup services) throws IOException {
+    public ZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel, ServiceLookup services) throws IOException {
         super();
         this.fileStorage = fileStorage;
         this.services = services;
         fileStorageLocationReference = new BlockingAtomicReference<String>();
         out = initOutputStream();
-        zipOut = initZipArchiveOutputStream(out);
+        zipOut = initZipArchiveOutputStream(out, compressionLevel);
     }
 
     /**
@@ -387,11 +387,11 @@ public class ZippedFileStorageOutputStream extends OutputStream {
 
     // --------------------------------------------- Init streams---------------------------------------------------------------------------
 
-    private ZipArchiveOutputStream initZipArchiveOutputStream(OutputStream out) {
+    private ZipArchiveOutputStream initZipArchiveOutputStream(OutputStream out, int compressionLevel) {
         ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
         zipOutput.setEncoding("UTF-8");
         zipOutput.setUseLanguageEncodingFlag(true);
-        zipOutput.setLevel(Deflater.DEFAULT_COMPRESSION);
+        zipOutput.setLevel(compressionLevel);
         return zipOutput;
     }
 

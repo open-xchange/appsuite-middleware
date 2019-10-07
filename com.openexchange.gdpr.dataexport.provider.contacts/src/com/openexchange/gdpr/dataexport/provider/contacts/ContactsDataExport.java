@@ -510,8 +510,8 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
                 return savePointFor(jSavePoint);
             }
             int count = incrementAndGetCount();
-            checkAborted((count % 10 == 0));
-            if (count % 100 == 0) {
+            checkAborted((count % 100 == 0));
+            if (count % 1000 == 0) {
                 sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)));
             }
             batchCount++;
@@ -522,23 +522,23 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             try {
                 // Query full contact
                 Contact c = contactService.getContact(session, folder.getFolderId(), Integer.toString(contactId));
-                if (c != null) {                    
+                if (c != null) {
                     if (c.getNumberOfAttachments() > 0) {
                         attachmentBinaries = loadContactAttachmentBinariesElseNull(contactId, folder, session);
                     }
-                    
+
                     if (optionalVCardStorageService.isPresent() && c.getVCardId() != null) {
                         originalVCard = optionalVCardStorageService.get().getVCard(c.getVCardId(), session.getContextId());
                     }
-                    
+
                     if (attachmentBinaries != null) {
                         c.setProperty(PROPERTY_BINARY_ATTACHMENTS, attachmentBinaries);
                     }
-                    
+
                     vCardExport = vcardService.exportContact(c, originalVCard, null);
                     Streams.close(originalVCard);
                     originalVCard = null;
-                    
+
                     boolean exported = sink.export(vCardExport.getClosingStream(), new Item(path, contactId + ".vcf", null));
                     if (!exported) {
                         return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)));

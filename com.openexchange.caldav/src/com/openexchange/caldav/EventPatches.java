@@ -65,6 +65,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -819,6 +820,45 @@ public class EventPatches {
         }
 
         /**
+         * User Agents which tend to automatically add the Organizer as Attendee on updates.
+         */
+        private static final EnumSet<DAVUserAgent> AUTO_ORGANIZER_AGENTS = EnumSet.of(DAVUserAgent.MAC_CALENDAR, DAVUserAgent.IOS);
+
+        /**
+         * Remove the organizer attendee if added by MacOS Calendar in public folders.
+         *
+         * @param resource The event resource
+         * @param importedEvent The imported series master event as supplied by the client
+         * @param importedChangeExceptions The imported change exceptions as supplied by the client
+         */
+        private void removeOrganizerAttendee(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+            if (!resource.exists()  || !AUTO_ORGANIZER_AGENTS.contains(resource.getUserAgent()) || !PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
+                return;
+            }
+            
+            Event orig = resource.getEvent();
+            removeOrganizer(importedEvent, orig);
+            if (importedChangeExceptions != null) {
+                for (Event changeException : importedChangeExceptions) {
+                    removeOrganizer(changeException, orig);
+                }
+            }
+        }
+
+        private void removeOrganizer(Event importedEvent, Event orig) {
+            if (importedEvent != null && importedEvent.getAttendees() != null) {
+                Optional<Attendee> organiser = orig.getAttendees().stream().filter(a -> matches(a, orig.getOrganizer())).findFirst();
+                if (!organiser.isPresent()) {
+                    for (Iterator<Attendee> i = importedEvent.getAttendees().iterator(); i.hasNext();) {
+                        if (CalendarUtils.matches(i.next(), orig.getOrganizer())) {
+                            i.remove();
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
          * Applies all known patches to an event after importing.
          *
          * @param resource The parent event resource
@@ -846,6 +886,7 @@ public class EventPatches {
                 adjustAppleTravelAdvisory(resource, importedEvent);
                 applyManagedAttachments(importedEvent, factory.getConfigViewFactory());
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
+                removeOrganizerAttendee(resource, importedEvent, importedChangeExceptions);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*

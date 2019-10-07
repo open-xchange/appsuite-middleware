@@ -848,39 +848,44 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     private static List<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakers(ConfigurationService configuration, StringBuilder logBuilder, List<Object> args) {
-        List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = null;
-
         // Load generic breaker
         GenericFailsafeCircuitBreakerCommandExecutor genericBreaker = null;
-        Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optionalGenericBreaker = initCircuitBreakerForName(null, configuration, null);
+        Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optionalGenericBreaker = initGenericCircuitBreaker(configuration);
         if (optionalGenericBreaker.isPresent()) {
-            breakerList = new ArrayList<>();
             genericBreaker = (GenericFailsafeCircuitBreakerCommandExecutor) optionalGenericBreaker.get();
-            breakerList.add(genericBreaker);
             logBuilder.append("    Added generic circuit breaker{}");
             args.add(Strings.getLineSeparator());
         }
 
         // Collect names of other breaker-associated properties
-        Set<String> names = new HashSet<>();
+        Set<String> names = null;
         String prefix = "com.openexchange.imap.breaker.";
         for (Iterator<String> it = configuration.propertyNames(); it.hasNext();) {
             String propName = it.next();
             if (propName.startsWith(prefix, 0)) {
                 int pos = propName.indexOf('.', prefix.length());
                 if (pos > 0) {
+                    if (names == null) {
+                        names = new HashSet<>();
+                    }
                     names.add(propName.substring(prefix.length(), pos));
                 }
             }
         }
 
+        // Any collected?
+        if (names == null) {
+            return genericBreaker == null ? Collections.emptyList() : Collections.singletonList(genericBreaker);
+        }
+
         // Iterate them
+        List<AbstractFailsafeCircuitBreakerCommandExecutor> breakerList = new ArrayList<>(names.size() + 1);
+        if (genericBreaker != null) {
+            breakerList.add(genericBreaker);
+        }
         for (String name : names) {
             Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(name, configuration, genericBreaker);
             if (optBreaker.isPresent()) {
-                if (breakerList == null) {
-                    breakerList = new ArrayList<>(names.size());
-                }
                 AbstractFailsafeCircuitBreakerCommandExecutor circuitBreaker = optBreaker.get();
                 breakerList.add(circuitBreaker);
                 if ("primary".equals(name)) {
@@ -895,7 +900,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             }
         }
 
-        return breakerList == null ? Collections.emptyList() : breakerList;
+        return breakerList;
+    }
+
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initGenericCircuitBreaker(ConfigurationService configuration) {
+        return initCircuitBreakerForName(null, configuration, null);
     }
 
     private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(String infix, ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
@@ -1195,7 +1204,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.hostExtractingGreetingListener;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), hostExtractingGreetingListener, e);
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default {} instead.", I(userId), I(contextId), hostExtractingGreetingListener, e);
             return hostExtractingGreetingListener;
         }
     }

@@ -127,7 +127,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             newEvent.setOrganizer(prepareOrganizer(session, folder, event.getOrganizer(), getResolvableEntities(session, folder, event)));
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
-            Check.internalOrganizerIsAttendee(newEvent);
+            Check.internalOrganizerIsAttendee(newEvent, folder);
             newEvent.setAttendeePrivileges(event.containsAttendeePrivileges() ? Check.attendeePrivilegesAreValid(event.getAttendeePrivileges(), folder, newEvent.getOrganizer()) : null);
         }
         /*

@@ -56,6 +56,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.session.Session;
 
 /**
@@ -92,4 +93,5 @@ public interface ITipIntegrationUtility {
      */
     boolean isActingOnBehalfOf(Event event, Session session);
 
+    Type getFolderType(Event event, CalendarSession session) throws OXException;
 }

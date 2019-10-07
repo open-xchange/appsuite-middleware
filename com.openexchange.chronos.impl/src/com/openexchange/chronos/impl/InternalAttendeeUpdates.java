@@ -241,14 +241,19 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
         /*
          * always start with attendee for default calendar user in folder
          */
-        Attendee defaultAttendee = getDefaultAttendee(session, folder, requestedAttendees);
-        attendeesToInsert.add(defaultAttendee);
+        Attendee defaultAttendee = null;
+        if (!PublicType.getInstance().equals(folder.getType())) {
+            defaultAttendee = getDefaultAttendee(session, folder, requestedAttendees);
+            attendeesToInsert.add(defaultAttendee);
+        }
         if (null != requestedAttendees && 0 < requestedAttendees.size()) {
             /*
              * prepare & add all further attendees
              */
             List<Attendee> attendeeList = new ArrayList<Attendee>();
-            attendeeList.add(defaultAttendee);
+            if (defaultAttendee != null) {
+                attendeeList.add(defaultAttendee);
+            }
             attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
         }
         /*
