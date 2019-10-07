@@ -74,7 +74,7 @@ From a working 7.10.0 node register the newly upgraded x.y.z node.
 registerserver -A oxadminmaster -P secret -n oxserver-xyz
 ```
 
-Make a note of the new server identifier as it will be used later on to point all contexts that reside with in the schema that is going to be upgraded to the new x.y.z node. Also ensure that the name of the newly registered x.y.z server is set 
+Make a note of the new server identifier as it will be used later on to point all contexts that reside within the schema that is going to be upgraded to the new x.y.z node. Also ensure that the name of the newly registered x.y.z server is set 
 via the `SERVER_NAME` property in the `system.properties`.
 
 ## Step 4
@@ -98,7 +98,7 @@ be temporary disabled for the upgrade phase.
 
 ## Step 5
 
-Point all contexts, that reside with in the candidate schema that is to be updated, to the x.y.z node by using the command line tool ```changeserver``` (also from a working 7.10.0 node):
+Point all contexts, that reside within the candidate schema that is to be updated, to the x.y.z node by using the command line tool ```changeserver``` (also from a working 7.10.0 node):
 
 ```bash
 changeserver -A oxadminmaster -P secret -s 8 -m oxdatabase_5
