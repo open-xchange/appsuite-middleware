@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.Deflater;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
@@ -149,7 +150,7 @@ public class DataExportSinkImpl implements DataExportSink {
         ZippedFileStorageOutputStream out = zipOutReference.get();
         if (out == null) {
             try {
-                out = new ZippedFileStorageOutputStream(fileStorage, services);
+                out = new ZippedFileStorageOutputStream(fileStorage, Deflater.NO_COMPRESSION, services);
                 if (optFileStorageLocation != null) {
                     // Continue writing to ZIP archive
                     InputStream in = null;

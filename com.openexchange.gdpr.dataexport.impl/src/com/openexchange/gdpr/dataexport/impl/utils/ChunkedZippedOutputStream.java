@@ -54,6 +54,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.zip.Deflater;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
@@ -278,7 +279,7 @@ public class ChunkedZippedOutputStream {
     }
 
     private void constructNewStream() throws IOException {
-        zipOutputStream = new ZippedFileStorageOutputStream(fileStorage, services);
+        zipOutputStream = new ZippedFileStorageOutputStream(fileStorage, Deflater.DEFAULT_COMPRESSION, services);
         currentSize = 0;
     }
 
