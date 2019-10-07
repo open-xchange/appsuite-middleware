@@ -85,7 +85,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
- * @author choeger
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  */
 public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
 

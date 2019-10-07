@@ -61,7 +61,7 @@ import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.tools.GenericChecks;
 
 /**
- * @author choeger
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  *
  */
 public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPluginInterface {
