@@ -1195,7 +1195,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.hostExtractingGreetingListener;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), hostExtractingGreetingListener, e);
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default {} instead.", I(userId), I(contextId), hostExtractingGreetingListener, e);
             return hostExtractingGreetingListener;
         }
     }
