@@ -58,12 +58,10 @@ import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.reseller.plugins.OXResellerPluginInterface;
 import com.openexchange.admin.reseller.rmi.impl.OXReseller;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerContextImpl;
 import com.openexchange.admin.reseller.rmi.impl.OXResellerUserImpl;
 import com.openexchange.admin.reseller.rmi.impl.ResellerAuth;
-import com.openexchange.admin.reseller.services.PluginInterfaces;
 import com.openexchange.admin.reseller.tools.AdminCacheExtended;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
@@ -71,7 +69,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 public class Activator extends HousekeepingActivator {
 
@@ -111,18 +108,6 @@ public class Activator extends HousekeepingActivator {
 
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
             track(DBMigrationExecutorService.class, new ResellerDBMigrationServiceTracker(this, context));
-
-            // Plugin interfaces
-            {
-                final int defaultRanking = 100;
-                final RankingAwareNearRegistryServiceTracker<OXResellerPluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResellerPluginInterface>(context, OXResellerPluginInterface.class, defaultRanking);
-                rememberTracker(rtracker);
-
-                final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().resellerPlugins(rtracker);
-
-                PluginInterfaces.setInstance(builder.build());
-            }
-
             openTrackers();
         } catch (StorageException e) {
             LOG.error("Error while creating one instance for RMI interface", e);
@@ -134,12 +119,6 @@ public class Activator extends HousekeepingActivator {
             LOG.error("", e);
             throw e;
         }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        PluginInterfaces.setInstance(null);
-        super.stopBundle();
     }
 
     private void initCache(final ConfigurationService service) throws OXGenericException {

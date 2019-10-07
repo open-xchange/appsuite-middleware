@@ -62,7 +62,7 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
- * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author choeger
  *
  */
 public class OXResellerUserImpl implements OXUserPluginInterface {
