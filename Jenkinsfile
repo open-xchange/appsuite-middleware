@@ -186,12 +186,11 @@ spec:
         stage('HTTP API documentation') {
             when {
                 allOf {
-                    branch 'develop'
+                    expression { null != version4Documentation(env.BRANCH_NAME) }
                     anyOf {
                         triggeredBy 'TimerTrigger'
                         triggeredBy cause: 'UserIdCause'
                     }
-                    expression { null != version4Documentation(env.BRANCH_NAME) }
                 }
             }
             steps {
