@@ -1030,6 +1030,14 @@ public class GmailSendTransport extends MailTransport {
         {
             final String str = mimeMessage.getHeader("Reply-To", null);
             if (!com.openexchange.java.Strings.isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setReplyTo(addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Disposition-Notification-To", null);
+            if (!com.openexchange.java.Strings.isEmpty(str)) {
                 if ("true".equalsIgnoreCase(str)) {
                     Address[] fromAddresses = mimeMessage.getFrom();
                     if (fromAddresses.length > 0 && fromAddresses[0] != null) {
@@ -1040,14 +1048,6 @@ public class GmailSendTransport extends MailTransport {
                     checkRecipients(addresses);
                     mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
                 }
-            }
-        }
-        {
-            final String str = mimeMessage.getHeader("Disposition-Notification-To", null);
-            if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
             }
         }
     }
