@@ -337,31 +337,42 @@ public class DataExportSinkImpl implements DataExportSink {
             throw new IllegalArgumentException("Save-point must not be null");
         }
 
-        // Write save-point to storage
-        DataExportSavepoint savePoint = DataExportSavepoint.builder().withSavepoint(jSavePoint).withReport(optionalReport.orElse(null)).build();
-        storageService.setSavePoint(task.getId(), moduleId, savePoint, task.getUserId(), task.getContextId());
-
         // Complete currently "in progress" ZIP archive
-        ZippedFileStorageOutputStream zipOutput = zipOutReference.getAndSet(null);
-        if (zipOutput != null) {
-            Streams.flush(zipOutput);
-            Streams.close(zipOutput);
+        String currentFileStorageLocation = null;
+        try {
+            ZippedFileStorageOutputStream zipOutput = zipOutReference.getAndSet(null);
+            if (zipOutput != null) {
+                Streams.flush(zipOutput);
+                Streams.close(zipOutput);
 
-            // Acquire current file storage location
-            String currentFileStorageLocation = zipOutput.awaitFileStorageLocation();
+                // Acquire current file storage location
+                currentFileStorageLocation = zipOutput.awaitFileStorageLocation();
 
-            // Check whether previous file storage location needs to be dropped
-            String existentFileStorageLocation = optExistentFileStorageLocation.getAndSet(null);
-            if (existentFileStorageLocation != null) {
-                DataExportUtility.deleteQuietly(existentFileStorageLocation, fileStorage);
+                // Check whether previous file storage location needs to be dropped
+                String existentFileStorageLocation = optExistentFileStorageLocation.getAndSet(null);
+                if (existentFileStorageLocation != null) {
+                    DataExportUtility.deleteQuietly(existentFileStorageLocation, fileStorage);
+                }
+
+                // Re-initialize stream
+                optExistentFileStorageLocation.set(currentFileStorageLocation);
+                getZipOutputStream();
             }
 
-            // Re-initialize stream
-            optExistentFileStorageLocation.set(currentFileStorageLocation);
-            getZipOutputStream();
-        }
+            // Write save-point to storage
+            DataExportSavepoint savePoint = DataExportSavepoint.builder().withSavepoint(jSavePoint).withReport(optionalReport.orElse(null)).withFileStorageLocation(currentFileStorageLocation).build();
+            storageService.setSavePoint(task.getId(), moduleId, savePoint, task.getUserId(), task.getContextId());
 
-        LOG.debug("Set save-point ``{}'' for \"{}\" data export {} of user {} in context {}", jSavePoint, moduleId, UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+            // Avoid premature deletion
+            currentFileStorageLocation = null;
+
+            LOG.debug("Set save-point ``{}'' for \"{}\" data export {} of user {} in context {}", jSavePoint, moduleId, UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+        } finally {
+            if (currentFileStorageLocation != null) {
+                // Something went wrong
+                DataExportUtility.deleteQuietly(currentFileStorageLocation, fileStorage);
+            }
+        }
     }
 
     @Override

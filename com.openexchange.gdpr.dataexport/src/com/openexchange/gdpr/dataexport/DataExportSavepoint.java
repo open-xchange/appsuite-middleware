@@ -75,6 +75,7 @@ public class DataExportSavepoint {
 
         private JSONObject savepoint;
         private DataExportDiagnosticsReport report;
+        private String fileStorageLocation;
 
         /**
          * Initializes a new {@link Builder}.
@@ -123,13 +124,25 @@ public class DataExportSavepoint {
             return this;
         }
 
+
+        /**
+         * Sets the file storage location
+         *
+         * @param fileStorageLocation The file storage location to set
+         * @return This builder
+         */
+        public Builder withFileStorageLocation(String fileStorageLocation) {
+            this.fileStorageLocation = fileStorageLocation;
+            return this;
+        }
+
         /**
          * Creates the instance of <code>DataExportSavepoint</code> from this builder's arguments
          *
          * @return The <code>DataExportSavepoint</code> instance
          */
         public DataExportSavepoint build() {
-            return new DataExportSavepoint(savepoint, report);
+            return new DataExportSavepoint(savepoint, fileStorageLocation, report);
         }
     }
 
@@ -137,15 +150,18 @@ public class DataExportSavepoint {
 
     private final JSONObject savepoint;
     private final DataExportDiagnosticsReport report;
+    private final String fileStorageLocation;
 
     /**
      * Initializes a new {@link DataExportSavepoint}.
      *
      * @param savepoint The save-point
+     * @param fileStorageLocation The file storage location
      * @param report The report
      */
-    DataExportSavepoint(JSONObject savepoint, DataExportDiagnosticsReport report) {
+    DataExportSavepoint(JSONObject savepoint, String fileStorageLocation, DataExportDiagnosticsReport report) {
         super();
+        this.fileStorageLocation = fileStorageLocation;
         this.savepoint = savepoint == null ? null : ImmutableJSONObject.immutableFor(savepoint);
         this.report = report == null ? new DataExportDiagnosticsReport() : report;
     }
@@ -166,6 +182,15 @@ public class DataExportSavepoint {
      */
     public Optional<JSONObject> getSavepoint() {
         return Optional.ofNullable(savepoint);
+    }
+
+    /**
+     * Gets the optional file storage location
+     *
+     * @return The file storage location
+     */
+    public Optional<String> getFileStorageLocation() {
+        return Optional.ofNullable(fileStorageLocation);
     }
 
     @Override
