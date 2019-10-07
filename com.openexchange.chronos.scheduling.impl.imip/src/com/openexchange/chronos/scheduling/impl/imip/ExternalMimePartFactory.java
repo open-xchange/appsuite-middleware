@@ -53,8 +53,6 @@ import static com.openexchange.chronos.scheduling.common.Constants.ALTERNATIVE;
 import static com.openexchange.chronos.scheduling.common.Constants.CANCLE_FILE_NAME;
 import static com.openexchange.chronos.scheduling.common.Constants.INVITE_FILE_NAME;
 import static com.openexchange.chronos.scheduling.common.Constants.MIXED;
-import static com.openexchange.chronos.scheduling.common.Constants.MULTIPART_ALTERNATIVE;
-import static com.openexchange.chronos.scheduling.common.Constants.MULTIPART_MIXED;
 import static com.openexchange.chronos.scheduling.common.Constants.RESPONSE_FILE_NAME;
 import java.io.IOException;
 import java.util.Collections;
@@ -101,7 +99,7 @@ import com.openexchange.server.ServiceLookup;
 public class ExternalMimePartFactory extends AbstractMimePartFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalMimePartFactory.class);
-    
+
     private static final String CHARSET = MailProperties.getInstance().getDefaultMimeCharset();
 
     private ICalService iCalService;
@@ -132,34 +130,32 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
     @Override
     public MimeMultipart create() throws OXException, MessagingException {
         boolean addAttachments = addAttachments();
-        ContentType ct = new ContentType(addAttachments ? MULTIPART_ALTERNATIVE : MULTIPART_MIXED);
-        ct.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
-        MimeMultipart multipart = new MimeMultipart(addAttachments ? ALTERNATIVE : MIXED);
-
-        {
-            /*
-             * Set text, HTML and embedded iCal part
-             */
-            MimeMultipart part = new MimeMultipart(ALTERNATIVE);
-            part.addBodyPart(generateTextPart());
-            part.addBodyPart(generateHtmlPart());
-            part.addBodyPart(generateIcalPart(addAttachments));
-            MimeBodyPart bodyPart = new MimeBodyPart();
-            MessageUtility.setContent(part, bodyPart);
-            multipart.addBodyPart(bodyPart);
+        MimeMultipart multipart = new MimeMultipart(MIXED);
+        /*
+         * Add event's attachments
+         */
+        if (addAttachments) {
+            multipart = generateAttachmentPart(multipart);
         }
+
+        /*
+         * Set text, HTML and embedded iCal part
+         */
+        MimeBodyPart part = new MimeBodyPart();
+        {
+            MimeMultipart alternative = new MimeMultipart(ALTERNATIVE);
+            alternative.addBodyPart(generateTextPart());
+            alternative.addBodyPart(generateHtmlPart());
+            alternative.addBodyPart(generateIcalPart(addAttachments));
+            MessageUtility.setContent(alternative, part);
+        }
+        multipart.addBodyPart(part);
 
         /*
          * Add the iCal file as attachment
          */
         multipart.addBodyPart(generateIcalAttachmentPart(addAttachments));
 
-        /*
-         * Add event's attachments
-         */
-        if (addAttachments) {
-            return generateAttachmentPart(multipart);
-        }
         return multipart;
     }
 
@@ -199,6 +195,9 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
         ct.setPrimaryType("application");
         ct.setSubType("ics");
         ct.setNameParameter(fileName);
+        ct.setParameter("method", message.getMethod().name());
+        ct.setCharsetParameter(CHARSET);
+
         MimeBodyPart part = generateIcal(ct, addAttachments, false);
         /*
          * Content-Disposition & Content-Transfer-Encoding
@@ -218,7 +217,7 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
         ct.setSubType("calendar");
         ct.setParameter("method", message.getMethod().name());
         ct.setCharsetParameter(CHARSET);
-        
+
         return generateIcal(ct, addAttachments, true);
     }
 
