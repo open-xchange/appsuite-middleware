@@ -147,6 +147,76 @@ properties:
       file: openid.properties 
       packageName: open-xchange-oidc
       tags: ["OpenID"]
+  
+    - key: com.openexchange.oidc.contextLookupClaim
+      description: |
+        Name of the ID token claim that will be used by the default backend to resolve a context.
+      defaultValue: sub
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.oidc.contextLookupNamePart
+      file: openid.properties 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.contextLookupNamePart
+      description: |
+        Gets the name part of the ID token claim value used for
+        determining the context of a user. Possible values are
+        
+        full - The full string as returned by the authorization server
+        local-part - The local part of an email address (local-part@domain),
+                     if the provided name matches such. In case the name does not match
+                     an email address, the full string is taken.
+        domain - The domain part of an email address (local-part@domain),
+                 if the provided name matches such. In case the name does not match
+                 an email address, "defaultcontext" is taken.
+      defaultValue: domain
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.oidc.contextLookupClaim
+      file: openid.properties 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.userLookupClaim
+      description: |
+        Name of the ID token claim that will be used by the default backend to resolve a user.
+      defaultValue: sub
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.oidc.userLookupNamePart
+      file: openid.properties 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.userLookupNamePart
+      description: |
+        Gets the name part of the ID token claim value used for
+        determining a user within a context. Possible values are
+        
+        full - The full string as returned by the authorization server
+        local-part - The local part of an email address (local-part@domain),
+                     if the provided name matches such. In case the name does not match
+                     an email address, the full string is taken.
+        domain - The domain part of an email address (local-part@domain),
+                 if the provided name matches such. In case the name does not match
+                 an email address, the full string is taken.
+      defaultValue: local-part
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.oidc.userLookupClaim
+      file: openid.properties 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
       
     - key: com.openexchange.oidc.opLogoutEndpoint
       description: |
@@ -276,3 +346,74 @@ properties:
       file: openid.properties 
       packageName: open-xchange-oidc
       tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.enablePasswordGrant
+      description: |
+        Enable API logins with username/password by using the Resource Owner
+        Password Credentials Grant (https://tools.ietf.org/html/rfc6749#section-4.3) to authenticate.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related:
+        - com.openexchange.oidc.passwordGrantUserNamePart
+      file: openid.properties 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.passwordGrantUserNamePart
+      description: |
+        Gets the name part to be used for an issued Resource Owner Password
+        Credentials Grant (https://tools.ietf.org/html/rfc6749#section-4.3)
+        request. The part is taken from the user-provided login name.
+        
+        full - The full string as provided by the user/client
+        local-part - The local part of an email address (local-part@domain),
+                     if the provided name matches such. In case the name does not match
+                     an email address, the full string is taken.
+        domain - The domain part of an email address (local-part@domain),
+                 if the provided name matches such. In case the name does not match
+                 an email address, the full string is taken.
+      defaultValue: full
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - com.openexchange.oidc.enablePasswordGrant
+      file: openid.properties 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.tokenLockTimeoutSeconds
+      description: |
+        Lock timeout before giving up trying to refresh an access token for
+        a session. If multiple threads try to check or refresh the access token
+        at the same time, only one gets a lock and blocks the others. In case
+        of a timeout, this is logged as a temporary issue and the request continued
+        as usual.
+      defaultValue: 5
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.tryRecoverStoredTokens
+      description: |
+        Whether token refresh should try to recover valid tokens from
+        the session instance that is present in distributed session storage.
+        This is only tried as a fall-back, after token refresh failed with an
+        `invalid_grant` error.
+        
+        Usually this should not be needed, it might help to circumvent user impact
+        if for any reason user sessions are alive on more than one server concurrently.
+        Due to sticky sessions this should never be the case.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: openid.properties
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+

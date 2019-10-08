@@ -6,7 +6,7 @@ tags: OpenId, SSO, Configuration
 
 # Introduction
 
-With version 7.10.0 Appsuite introduces the support for Single Sign On (SSO) with OpenID which is also compatible with version 7.8.4. OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0 protocol. 
+With version 7.10.0 App Suite introduces the support for Single Sign On (SSO) with OpenID which is also compatible with version 7.8.4. OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0 protocol. 
 It enables Clients to verify the identity of the End-User based on the authentication performed by an Authorization Server, as well as to obtain basic profile information about the End-User in an interoperable and REST-like manner. 
 The implementation supports handling of multiple OpenID providers (OP) for different hosts from one single instance. Logout with termination of the OPs session is available alongside an autologin mechanism which checks 
 for a valid OP session before login. So far only the code flow for login and a third party initiated login are supported. There is also no possibility to gather additional user information from an OP after authorization so far. 
@@ -15,11 +15,12 @@ The session status mechanism with two communicating IFrames like suggested by th
 The full OpenID specification can be found [here](http://openid.net/specs/openid-connect-core-1_0.html).
 
 # Feature overview
-* Code flow authorization
+* Web SSO using Authorization Code Grant
+* HTTP API login with username/password using Resource Owner Password Credentials Grant
 * Autologin with valid session confirmation on OP side
 * Direct autologin via session storage in own OIDC Cookie
 * Logout with additional redirect to OP for session termination
-* Direct logout from Appsuite
+* Direct logout from App Suite
 * OAuth token refresh
 * Third Party initiated login
 * Multiple registration of OpenID backends in one instance
@@ -29,10 +30,17 @@ The full OpenID specification can be found [here](http://openid.net/specs/openid
 So far only code flow is supported for login. The logout mechanisms are either with termination of the OP session or without. 
 There are also two autologin flows supported, one with redirect to the OP for a valid session check and one without.
 
-## Login code flow
+## Web SSO login flow
 The following diagram describes the whole code flow login process. The current implementation does not gather additional user informations like described in step 6.
 
 ![Code flow login](openid_connect_1.0_sso/APIgw_Relationship Oauth2.png "Code flow login")
+
+## API login flow
+
+OX Mail, Exchange-ActiveSync, CalDAV/CardDAV or other clients/protocols might only support direct username/password authentication. It is possible to still use OpenID Connect for according authentication requests, by using the [Resource Owner Password Credentials Grant](https://tools.ietf.org/html/rfc6749#section-4.3), which is
+part of the OAuth 2.0 Core Framework. This is an optional feature that needs to be enabled explicitly via the `com.openexchange.oidc.enablePasswordGrant` configuration property.
+
+**Important:** Internally, this feature registers an according `AuthenticationService`. It is therefore required that no other package providing `open-xchange-authentication` is installed. For compatibility reasons `open-xchange-oidc` will not conflict with according packages like `open-xchange-authentication-database`!
 
 
 ## Autologin with check for a valid OP session
@@ -40,7 +48,7 @@ The following diagram describes the whole code flow login process. The current i
 
 If no valid session is present on side of the OP, the user is asked to login first. The handling on side of the Relying party is untouched by this scenario. 
 
-## Autologin directly in Appsuite
+## Autologin directly in App Suite
 ![Autologin direct](openid_connect_1.0_sso/Autologin direct.png "Autologin direct")
 
 If no OIDC cookie exists, the standard login procedure is triggered.
@@ -64,7 +72,7 @@ The according project is `com.openexchange.sample.c2id-logout-page-jsp`. The exa
 * `state`: A generated state property, to verify the response later.
 
 
-## Direct Logout from Appsuite
+## Direct Logout from App Suite
 ![Logout direct](openid_connect_1.0_sso/Logout direct.png "Logout direct")
 
 The direct logout without termination of the OP session is enabled by default, the property is `com.openexchange.oidc.ssoLogout` which is set to `false`.
@@ -90,9 +98,9 @@ The custom OpenId cookie is needed, because the standard autologin mechanism has
 
 ## Tokens
 
-The OAuth Access and Refresh tokens are both stored in the user session, alongside with the IDToken of the user. The refresh token is automatically used to get a new Access token, when needed. 
-The IDToken stores the users unique identification in the `subject` field. How the needed uid and cid are extracted from this information, depends on the content. 
-For the default implementation it is assumed, that the uid and cid are stored in `uid@cid` format.
+The OAuth access and refresh tokens are both stored in the user session, alongside with the ID token of the user. The refresh token is automatically used to get a new Access token, when needed.
+The IDToken usually stores the users unique identification in the `sub` field, but can use other claims to identify App Suite users, too. How contexts and users are resolved from an ID token is configurable and can also be overridden with custom OIDC Backends.
+
 
 # Operators Guide
 
@@ -100,11 +108,27 @@ If you want to enable this feature without starting the implemented core backend
 For an overview of all possible properties and their description, take a look at all [OpenID properties](https://documentation.open-xchange.com/components/middleware/config/{{ site.baseurl }}/index.html#mode=features&feature=OpenID)
 
 ## Configuration
-You can find a description of every property on the property documentation site or just take a look at the `com.openexchange.oidc.OIDCConfig` and `com.openexchange.oidc.OIDCBackendConfig` classes. 
-Like mentioned before, it is recomended to extend the core implementation of those interfaces for easier maintenance.
+You can find a description of every property on the property documentation site [by searching for `oidc`](https://documentation.open-xchange.com/components/middleware/config/{{ site.baseurl }}/#mode=search&term=oidc). Alternatively, take a look at the `com.openexchange.oidc.OIDCConfig` and `com.openexchange.oidc.OIDCBackendConfig` classes. 
 
 If you don't specify a distinct UI web path for your backend, via `com.openexchange.oidc.uiWebPath`, you have to configure the default path of the web UI, which is used in several places, via `/opt/open-xchange/etc/server.properties`. 
 If you haven't already (because of other requirements), set [com.openexchange.UIWebPath](https://documentation.open-xchange.com/components/middleware/config/{{ site.baseurl }}/index.html#com.openexchange.UIWebPath) to `/appsuite/`.
+
+### User resolution
+
+For OX session creation, an according OX user entity needs to be resolved based on the issued ID token. Per default, it is expectedt that the `sub` claim contains a value in the form of `<user-name>@<context-name>`. `<context-name>` must be a valid login mapping of the context or the numeric context identifier. `<user-name>` must match the provisioned user name.
+
+The resolution behavior is configurable to use different claims and different patterns to match claim values to lookup values. For details, see configuration documentations for the following properties:
+
+* com.openexchange.oidc.contextLookupClaim
+* com.openexchange.oidc.contextLookupNamePart
+* com.openexchange.oidc.userLookupClaim
+* com.openexchange.oidc.userLookupNamePart
+
+With a customized OIDC backend, the resolution behavior can be overridden based on customer requirements.
+
+### Autologin configuration
+
+If you want to use the OpenId login feature, you have to make sure that the regular autologin mechanism is disabled by setting the assosiated Sessiond property to false `com.openexchange.sessiond.autologin=false`. This is a crucial precondition for any of the provided autologin mechanisms. 
 
 ### Frontend Configuration
 
