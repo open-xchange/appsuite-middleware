@@ -324,17 +324,14 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return restrictionsset;
     }
 
-
     public final String getParentName() {
         return this.parentName;
     }
-
 
     public void setParentName(final String parentName) {
         this.parentNameset = true;
         this.parentName = parentName;
     }
-
 
     public final boolean isParentNameset() {
         return this.parentNameset;
@@ -412,70 +409,98 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ResellerAdmin other = (ResellerAdmin) obj;
         if (displayname == null) {
-            if (other.displayname != null)
+            if (other.displayname != null) {
                 return false;
-        } else if (!displayname.equals(other.displayname))
+            }
+        } else if (!displayname.equals(other.displayname)) {
             return false;
-        if (displaynameset != other.displaynameset)
+        }
+        if (displaynameset != other.displaynameset) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
-        if (idset != other.idset)
+        }
+        if (idset != other.idset) {
             return false;
+        }
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
-        if (nameset != other.nameset)
+        }
+        if (nameset != other.nameset) {
             return false;
+        }
         if (parentId == null) {
-            if (other.parentId != null)
+            if (other.parentId != null) {
                 return false;
-        } else if (!parentId.equals(other.parentId))
+            }
+        } else if (!parentId.equals(other.parentId)) {
             return false;
-        if (parentIdset != other.parentIdset)
+        }
+        if (parentIdset != other.parentIdset) {
             return false;
+        }
         if (parentName == null) {
-            if (other.parentName != null)
+            if (other.parentName != null) {
                 return false;
-        } else if (!parentName.equals(other.parentName))
+            }
+        } else if (!parentName.equals(other.parentName)) {
             return false;
-        if (parentNameset != other.parentNameset)
+        }
+        if (parentNameset != other.parentNameset) {
             return false;
+        }
         if (password == null) {
-            if (other.password != null)
+            if (other.password != null) {
                 return false;
-        } else if (!password.equals(other.password))
+            }
+        } else if (!password.equals(other.password)) {
             return false;
+        }
         if (passwordMech == null) {
-            if (other.passwordMech != null)
+            if (other.passwordMech != null) {
                 return false;
-        } else if (!passwordMech.equals(other.passwordMech))
+            }
+        } else if (!passwordMech.equals(other.passwordMech)) {
             return false;
-        if (passwordMechset != other.passwordMechset)
+        }
+        if (passwordMechset != other.passwordMechset) {
             return false;
-        if (passwordset != other.passwordset)
+        }
+        if (passwordset != other.passwordset) {
             return false;
-        if (!Arrays.equals(restrictions, other.restrictions))
+        }
+        if (!Arrays.equals(restrictions, other.restrictions)) {
             return false;
-        if (restrictionsset != other.restrictionsset)
+        }
+        if (restrictionsset != other.restrictionsset) {
             return false;
-        if (!Arrays.equals(salt, other.salt))
+        }
+        if (!Arrays.equals(salt, other.salt)) {
             return false;
-        if (saltSet != other.saltSet)
+        }
+        if (saltSet != other.saltSet) {
             return false;
+        }
         return true;
     }
 

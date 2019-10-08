@@ -50,6 +50,8 @@
 package com.openexchange.admin.reseller.rmi.impl;
 
 import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -136,22 +138,22 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             GenericChecks.checkChangeValidPasswordMech(adm);
 
-            // if no password mech supplied, use the old one as set in db
             final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { adm })[0];
-            if ( null != parent && dbadm.getParentId().intValue() != parent.getId() ) {
+            if (null != parent && false == dbadm.getParentId().equals(parent.getId())) {
                 LOGGER.error("unathorized access to {} by {}", dbadm.getName(), creds.getLogin());
                 throw new InvalidCredentialsException("authentication failed");
             }
+            // if no password mech supplied, use the old one as set in db
             if (adm.getPasswordMech() == null) {
                 adm.setPasswordMech(dbadm.getPasswordMech());
             }
 
             final Integer changedParentId = adm.getParentId();
             if ( changedParentId != null && 0 != changedParentId.intValue() ) {
-                if ( !oxresell.existsAdmin(new ResellerAdmin(changedParentId)) ) {
+                if (!oxresell.existsAdmin(new ResellerAdmin(i(changedParentId)))) {
                     throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, "with parentId=" + changedParentId);
                 }
-                final ResellerAdmin changedParentAdmin = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(changedParentId)})[0];
+                final ResellerAdmin changedParentAdmin = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(i(changedParentId)) })[0];
                 if ( changedParentAdmin.getParentId().intValue() > 0 ) {
                     throw new OXResellerException(Code.CANNOT_SET_PARENTID_TO_SUBSUBADMIN);
                 }
@@ -178,9 +180,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             checkRestrictionsPerSubadmin(adm);
 
-            adm.setParentId(null != parent ? parent.getId() : 0);
+            adm.setParentId(null != parent ? parent.getId() : I(0));
             adm.setParentName(null != parent ? parent.getName() : null);
 
+            
             // Trigger plugin extensions
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -286,17 +289,17 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 }
             }
 
-            adm.setParentId(null != parent ? parent.getId() : 0);
+            adm.setParentId(null != parent ? parent.getId() : I(0));
             adm.setParentName(null != parent ? parent.getName() : null);
 
             checkRestrictionsPerSubadmin(adm);
 
             ResellerAdmin ra = oxresell.create(adm);
 
-            final List<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
 
             // Trigger plugin extensions
             {
+                final List<OXResellerPluginInterface> interfacelist = new ArrayList<OXResellerPluginInterface>();
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXResellerPluginInterface oxresellpi : pluginInterfaces.getResellerPlugins().getServiceList()) {
@@ -325,7 +328,6 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                     }
                 }
             }
-
 
             return ra;
         } catch (StorageException e) {
