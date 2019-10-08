@@ -46,44 +46,56 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.oidc.impl;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.oidc.OIDCConfig;
-import com.openexchange.oidc.OIDCProperty;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.oidc.tools;
+
+import org.mockito.Mockito;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.openexchange.authentication.LoginInfo;
+import com.openexchange.exception.OXException;
+import com.openexchange.oidc.OIDCBackend;
+import com.openexchange.oidc.impl.OIDCPasswordGrantAuthentication;
+import com.openexchange.oidc.osgi.OIDCBackendRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 
 
 /**
- * Default implementation of the OpenID feature configuration.
+ * {@link MockablePasswordGrantAuthentication}
  *
- * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class OIDCConfigImpl implements OIDCConfig{
+public class MockablePasswordGrantAuthentication extends OIDCPasswordGrantAuthentication {
 
-    private final LeanConfigurationService leanConfigurationService;
-
-    public OIDCConfigImpl(LeanConfigurationService leanConfigurationService) {
-        this.leanConfigurationService = leanConfigurationService;
+    public MockablePasswordGrantAuthentication(OIDCBackendRegistry backends) {
+        this(backends, Mockito.mock(ServerConfigService.class));
     }
 
-    public OIDCConfigImpl(ServiceLookup serviceLookup) {
-        this.leanConfigurationService = serviceLookup.getService(LeanConfigurationService.class);
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enabled);
+    public MockablePasswordGrantAuthentication(OIDCBackendRegistry backends, ServerConfigService serverConfigService) {
+        super(backends, serverConfigService);
     }
 
     @Override
-    public boolean startDefaultBackend() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);
+    public TokenRequest buildTokenRequest(OIDCBackend backend, String username, String password) throws OXException {
+        return super.buildTokenRequest(backend, username, password);
     }
 
     @Override
-    public boolean isPasswordGrantEnabled() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enablePasswordGrant);
+    public TokenResponse sendTokenRequest(OIDCBackend backend, TokenRequest request) throws OXException {
+        return super.sendTokenRequest(backend, request);
     }
+
+    @Override
+    protected OIDCBackend getBackend(LoginInfo loginInfo) {
+        // Return default backend
+        for (OIDCBackend backend : backends.getAllRegisteredBackends()) {
+            if ("".equals(backend.getPath())) {
+                return backend;
+            }
+        }
+
+        return null;
+    }
+
 }

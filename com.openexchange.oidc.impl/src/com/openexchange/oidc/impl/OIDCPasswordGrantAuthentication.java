@@ -46,44 +46,29 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.oidc.impl;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.oidc.OIDCConfig;
-import com.openexchange.oidc.OIDCProperty;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.oidc.osgi.OIDCBackendRegistry;
+import com.openexchange.oidc.spi.AbstractOIDCPasswordGrantAuthentication;
+import com.openexchange.serverconfig.ServerConfigService;
 
 /**
- * Default implementation of the OpenID feature configuration.
+ * {@link OIDCPasswordGrantAuthentication}
  *
- * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class OIDCConfigImpl implements OIDCConfig{
+public class OIDCPasswordGrantAuthentication extends AbstractOIDCPasswordGrantAuthentication {
 
-    private final LeanConfigurationService leanConfigurationService;
-
-    public OIDCConfigImpl(LeanConfigurationService leanConfigurationService) {
-        this.leanConfigurationService = leanConfigurationService;
+    /**
+     * Initializes a new {@link OIDCPasswordGrantAuthentication}.
+     * @param backends
+     * @param serverConfigService
+     */
+    public OIDCPasswordGrantAuthentication(OIDCBackendRegistry backends, ServerConfigService serverConfigService) {
+        super(backends, serverConfigService);
     }
 
-    public OIDCConfigImpl(ServiceLookup serviceLookup) {
-        this.leanConfigurationService = serviceLookup.getService(LeanConfigurationService.class);
-    }
 
-    @Override
-    public boolean isEnabled() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enabled);
-    }
-
-    @Override
-    public boolean startDefaultBackend() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);
-    }
-
-    @Override
-    public boolean isPasswordGrantEnabled() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enablePasswordGrant);
-    }
 }

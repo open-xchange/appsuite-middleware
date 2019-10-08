@@ -69,6 +69,7 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.session.Session;
@@ -90,7 +91,7 @@ public interface OIDCBackend {
 
     /**
      * Get this backends configuration.
-     * 
+     *
      * @return the configuration
      */
     OIDCBackendConfig getBackendConfig();
@@ -111,7 +112,7 @@ public interface OIDCBackend {
 
     /**
      * Process a given {@link HTTPRequest}
-     * 
+     *
      * @param request The {@link HTTPRequest} to process
      * @return the processed request
      */
@@ -119,14 +120,14 @@ public interface OIDCBackend {
 
     /**
      * Load the {@link ClientAuthentication} for this backend.
-     * 
+     *
      * @return the {@link ClientAuthentication} object
      */
     ClientAuthentication getClientAuthentication();
 
     /**
      * Process the given {@link TokenRequest}
-     * 
+     *
      * @param tokenRequest The {@link TokenRequest} to process
      * @return the processed request
      */
@@ -134,7 +135,7 @@ public interface OIDCBackend {
 
     /**
      * Load this backends used {@link JWSAlgorithm}.
-     * 
+     *
      * @return The used {@link JWSAlgorithm}
      * @throws OXException
      */
@@ -143,7 +144,7 @@ public interface OIDCBackend {
     /**
      * Process the given {@link AuthenticationRequest.Builder} with the information from
      * the given {@link HttpServletRequest}.
-     * 
+     *
      * @param requestBuilder The {@link AuthenticationRequest.Builder} to process
      * @param request The additional information in {@link HttpServletRequest} form
      * @return The processed {@link AuthorizationRequest}
@@ -152,24 +153,24 @@ public interface OIDCBackend {
 
     /**
      * Validate the given idToken with the given nounce String.
-     * 
+     *
      * @param idToken The {@link JWT} to validate
-     * @param nounce The nounce to be used
+     * @param nonce The nonce to be used or <code>null</code>
      * @return A valid {@link IDTokenClaimsSet}
      * @throws OXException If something fails
      */
-    IDTokenClaimsSet validateIdToken(JWT idToken, String nounce) throws OXException;
+    IDTokenClaimsSet validateIdToken(JWT idToken, String nonce) throws OXException;
 
     /**
      * Load this backends scope.
-     * 
+     *
      * @return The {@link Scope}
      */
     Scope getScope();
 
     /**
      * Build the login request to login the user on the OXServer.
-     * 
+     *
      * @param request The {@link HttpServletRequest}
      * @param userID The userID of the user to login
      * @param contextID The contextID of the user to login
@@ -182,7 +183,7 @@ public interface OIDCBackend {
     /**
      * Resolve the given {@link OIDCTokenResponse} to an {@link AuthenticationInfo} with all needed
      * user information.
-     * 
+     *
      * @param request The {@link HttpServletRequest} with additional information
      * @param tokens The {@link OIDCTokenResponse} with additional information
      * @return The {@link AuthenticationInfo}
@@ -191,8 +192,20 @@ public interface OIDCBackend {
     AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokens) throws OXException;
 
     /**
+     * Resolves the given {@link OIDCTokenResponse} to an {@link AuthenticationInfo} based on a
+     * non-SSO login request. The openid token is the result of a resource owner password credentials
+     * grant that was performed with the given {@link LoginInfo} instance.
+     *
+     * @param loginInfo The {@link LoginInfo} with additional information
+     * @param tokens The {@link OIDCTokenResponse} with additional information
+     * @return The {@link AuthenticationInfo}
+     * @throws OXException If something fails
+     */
+    AuthenticationInfo resolveAuthenticationResponse(LoginInfo loginInfo, OIDCTokenResponse tokens) throws OXException;
+
+    /**
      * Enhance the given {@link Authenticated} with potential given states.
-     * 
+     *
      * @param defaultAuthenticated The {@link Authenticated} to enhance
      * @param state The {@link Map} with potential information
      * @return The enhanced {@link Authenticated}
@@ -201,25 +214,25 @@ public interface OIDCBackend {
 
     /**
      * Get the OP logout request for the given {@link Session}.
-     * 
+     *
      * @param session The {@link Session} that should be terminated.
      * @return The {@link LogoutRequest} to logout a user from the OP
      * @throws OXException If anything fails
      */
     LogoutRequest getLogoutFromIDPRequest(Session session) throws OXException;
-    
+
     /**
      * Finishing touches that should be applied after a logout.
-     * 
+     *
      * @param request The {@link HttpServletRequest}
      * @param response The {@link HttpServletResponse}
      * @throws IOException If anything fails
      */
     void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException;
-    
+
     /**
      * Update the given {@link Session} with the given Access and Refresh OAuth tokens.
-     * 
+     *
      * @param session The {@link Session}, that should be updated
      * @param tokenMap The {@link Map} with the tokens that should be wrote into the session
      * @throws OXException If anything fails
@@ -228,16 +241,17 @@ public interface OIDCBackend {
 
     /**
      * Triggers the OAuth token update mechanism for the given {@link Session}.
-     * 
+     *
      * @param session The {@link Session} which OAuth tokens should be updated.
      * @return true if everything went fine, false otherwise
      * @throws OXException If anything fails
      */
+    @Deprecated
     boolean updateOauthTokens(Session session) throws OXException;
 
     /**
      * Determines if the given {@link Session}s {@link AccessToken} is expired.
-     * 
+     *
      * @param session The {@link Session} which OAuth tokens should be checked
      * @return true, if the {@link AccessToken} expired. false otherwise
      * @throws OXException If anything fails
@@ -246,14 +260,14 @@ public interface OIDCBackend {
 
     /**
      * Set this backends {@link LoginConfiguration}.
-     * 
+     *
      * @param loginConfiguration The {@link LoginConfiguration} to set
      */
     void setLoginConfiguration(LoginConfiguration loginConfiguration);
 
     /**
      * Logout the user to whom the given {@link Session} belongs.
-     * 
+     *
      * @param session The {@link Session} that should be terminated.
      * @param request The {@link HttpServletRequest}
      * @param response The {@link HttpServletResponse}
@@ -263,10 +277,10 @@ public interface OIDCBackend {
 
     /**
      * Perform an Appsuite login. If autologin is enabled, the user will be logged in into his session. The
-     * autologin mechanism will check if a valid OIDCCookie is available with all needed information. The 
+     * autologin mechanism will check if a valid OIDCCookie is available with all needed information. The
      * method will redirect the user to the Appsuite UI afterwards. If <code>respondWithJson</code> is set true,
      * the redirect location will be wrapped into a JSON Object.
-     * 
+     *
      * @param request The {@link HttpServletRequest}
      * @param response The {@link HttpServletResponse}
      * @param respondWithJson Should the UI location should be wrapped into a JSON Object or not
@@ -275,4 +289,5 @@ public interface OIDCBackend {
      * @throws JSONException
      */
     void performLogin(HttpServletRequest request, HttpServletResponse response, boolean respondWithJson) throws IOException, OXException, JSONException;
+
 }

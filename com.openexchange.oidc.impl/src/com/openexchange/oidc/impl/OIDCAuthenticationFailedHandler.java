@@ -46,44 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.oidc.impl;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.oidc.OIDCConfig;
-import com.openexchange.oidc.OIDCProperty;
-import com.openexchange.server.ServiceLookup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.AuthType;
+import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.session.Session;
 
 
 /**
- * Default implementation of the OpenID feature configuration.
+ * {@link OIDCAuthenticationFailedHandler}
  *
- * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class OIDCConfigImpl implements OIDCConfig{
+public class OIDCAuthenticationFailedHandler implements AuthenticationFailedHandler {
 
-    private final LeanConfigurationService leanConfigurationService;
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCAuthenticationFailedHandler.class);
 
-    public OIDCConfigImpl(LeanConfigurationService leanConfigurationService) {
-        this.leanConfigurationService = leanConfigurationService;
-    }
-
-    public OIDCConfigImpl(ServiceLookup serviceLookup) {
-        this.leanConfigurationService = serviceLookup.getService(LeanConfigurationService.class);
+    public OIDCAuthenticationFailedHandler() {
+        super();
     }
 
     @Override
-    public boolean isEnabled() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enabled);
+    public AuthenticationFailureHandlerResult handleAuthenticationFailed(OXException failedAuthentication, Service service, MailConfig mailConfig, Session session) throws OXException {
+        if (!AuthType.isOAuthType(mailConfig.getAuthType())) {
+            LOG.debug("Skipping non-oauth session: {}", session.getSessionID());
+            return AuthenticationFailureHandlerResult.createContinueResult();
+        }
+
+        if (!session.containsParameter(OIDCTools.IDTOKEN)) {
+            LOG.debug("Skipping unmanaged session: {}", session.getSessionID());
+            return AuthenticationFailureHandlerResult.createContinueResult();
+        }
+
+        // re-throw; let SessionInspector handle eager refresh alone
+        return AuthenticationFailureHandlerResult.createErrorResult(failedAuthentication);
     }
 
-    @Override
-    public boolean startDefaultBackend() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);
-    }
-
-    @Override
-    public boolean isPasswordGrantEnabled() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enablePasswordGrant);
-    }
 }

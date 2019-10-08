@@ -10,4 +10,5 @@ Package: open-xchange-oidc
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
+Provides: open-xchange-authentication
 Description: The Open-Xchange Server OpenId Bundle

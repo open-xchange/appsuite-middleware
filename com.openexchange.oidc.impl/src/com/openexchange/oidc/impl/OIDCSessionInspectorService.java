@@ -2,15 +2,25 @@ package com.openexchange.oidc.impl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackend;
+import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.OIDCBackendRegistry;
+import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.inspector.Reason;
 import com.openexchange.session.inspector.SessionInspectorService;
+import com.openexchange.session.oauth.RefreshResult;
+import com.openexchange.session.oauth.RefreshResult.FailReason;
+import com.openexchange.session.oauth.SessionOAuthTokenService;
+import com.openexchange.session.oauth.TokenRefreshConfig;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link OIDCSessionInspectorService} Is triggered on each Request, that comes
@@ -22,26 +32,68 @@ import com.openexchange.session.inspector.SessionInspectorService;
  */
 public class OIDCSessionInspectorService implements SessionInspectorService{
 
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCSessionInspectorService.class);
+
     private final OIDCBackendRegistry oidcBackends;
 
-    public OIDCSessionInspectorService(OIDCBackendRegistry oidcBackendRegistry) {
+    private final SessionOAuthTokenService tokenService;
+
+    public OIDCSessionInspectorService(OIDCBackendRegistry oidcBackendRegistry, SessionOAuthTokenService tokenService) {
         super();
         this.oidcBackends = oidcBackendRegistry;
+        this.tokenService = tokenService;
     }
 
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (session.getParameter(OIDCTools.IDTOKEN) == null) {
             // session not managed by us
+            LOG.debug("Skipping unmanaged session: {}", session.getSessionID());
             return Reply.NEUTRAL;
         }
 
         OIDCBackend backend = this.loadBackendForSession(session);
         if (null == backend) {
+            LOG.warn("Unable to load OIDC backend for session due to missing path parameter: {}", session.getSessionID());
             return Reply.NEUTRAL;
         }
-        if (backend.isTokenExpired(session) && !backend.updateOauthTokens(session)) {
-            backend.logoutCurrentUser(session, request, response);
+
+        try {
+            OIDCBackendConfig config = backend.getBackendConfig();
+            OIDCTokenRefresher refresher = new OIDCTokenRefresher(backend, session);
+            TokenRefreshConfig refreshConfig = OIDCTools.getTokenRefreshConfig(config);
+            RefreshResult result = tokenService.checkOrRefreshTokens(session, refresher, refreshConfig);
+            if (result.isSuccess()) {
+                return Reply.NEUTRAL;
+            }
+
+            return handleErrorResult(session, result);
+        } catch (OXException e) {
+            LOG.error("Error while checking oauth tokens for session '{}'", session.getSessionID(), e);
+            // try to perform request anyway on best effort
+            return Reply.NEUTRAL;
+        } catch (InterruptedException e) {
+            LOG.warn("Thread was interrupted while checking session oauth tokens");
+            // keep interrupted state
+            Thread.currentThread().interrupt();
+            return Reply.STOP;
+        }
+    }
+
+    private Reply handleErrorResult(Session session, RefreshResult result) throws OXException {
+        RefreshResult.FailReason failReason = result.getFailReason();
+        if (failReason == FailReason.INVALID_REFRESH_TOKEN || failReason == FailReason.PERMANENT_ERROR) {
+            LOG.info("Terminating session '{}' due to oauth token refresh error: {}", session.getSessionID(), failReason.name());
+            SessiondService sessiondService = Services.getService(SessiondService.class);
+            sessiondService.removeSession(session.getSessionID());
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+        }
+
+        // try to perform request anyway on best effort
+        if (result.hasException()) {
+            LOG.warn("Error while refreshing oauth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc(), result.getException());
+        } else {
+            LOG.warn("Error while refreshing oauth tokens for session '{}': {}", session.getSessionID(), result.getErrorDesc());
         }
         return Reply.NEUTRAL;
     }

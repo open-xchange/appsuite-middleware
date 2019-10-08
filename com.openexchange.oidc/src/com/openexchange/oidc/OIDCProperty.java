@@ -48,6 +48,7 @@
  */
 package com.openexchange.oidc;
 
+import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.lean.Property;
 
 
@@ -65,7 +66,13 @@ public enum OIDCProperty implements Property {
     /**
      * startDefaultBackend - Start the default core OpenID backend.
      */
-    startDefaultBackend(OIDCProperty.PREFIX, Boolean.FALSE);
+    startDefaultBackend(OIDCProperty.PREFIX, Boolean.FALSE),
+    /**
+     * enablePasswordGrant - Whether an {@link AuthenticationService} shall be registered, that
+     * handles username/password logins for the core login servlet by using the Resource Owner
+     * Password Credentials Grant {@link https://tools.ietf.org/html/rfc6749#section-4.3} to authenticate.
+     */
+    enablePasswordGrant(OIDCProperty.PREFIX, Boolean.FALSE);
 
 
     public static final String EMPTY = "";

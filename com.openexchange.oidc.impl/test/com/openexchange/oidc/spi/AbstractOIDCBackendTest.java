@@ -3,14 +3,13 @@ package com.openexchange.oidc.spi;
 
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,11 +25,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.oauth2.sdk.AccessTokenResponse;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
-import com.nimbusds.oauth2.sdk.token.AccessTokenType;
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import com.nimbusds.oauth2.sdk.token.Tokens;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -117,6 +111,7 @@ public class AbstractOIDCBackendTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(mockedSessiondService);
         PowerMockito.mockStatic(OIDCTools.class);
         PowerMockito.stub(PowerMockito.method(AbstractOIDCBackend.class, "getBackendConfig")).toReturn(mockedBackendConfig);
         this.testBackend = new OIDCCoreBackend() {
@@ -127,6 +122,7 @@ public class AbstractOIDCBackendTest {
             }
 
         };
+        Mockito.when(mockedSession.getParameter(Session.PARAM_LOCK)).thenReturn(new ReentrantLock());
     }
 
     @Test
@@ -170,121 +166,6 @@ public class AbstractOIDCBackendTest {
         assertTrue("Not the number of scopes that were expected, should be two", scopeList.size() == 2);
         assertTrue("Scope is not what expected", scopeList.get(0).equals(SCOPE_ONE));
         assertTrue("Scope is not what expected", scopeList.get(1).equals(SCOPE_TWO));
-    }
-
-    @Test
-    public void updateOauthTokens_TokenGatheringFailTest() throws Exception {
-
-        // Spy on the AbstractOIDCBackend to mock private method
-        AbstractOIDCBackend abstractBackend = PowerMockito.spy(new OIDCCoreBackend() {
-
-            @Override
-            public OIDCBackendConfig getBackendConfig() {
-                return mockedBackendConfig;
-            }
-
-        });
-
-        // Mock the token response to give null tokens back
-        AccessTokenResponse tokenResponse = new AccessTokenResponse(new Tokens(new AccessToken(AccessTokenType.BEARER) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public String toAuthorizationHeader() {
-                return null;
-            }
-
-        }, new RefreshToken())) {
-            @Override
-            public Tokens getTokens() {
-                return null;
-            }
-        };
-
-
-        PowerMockito.doReturn(tokenResponse).when(abstractBackend, "loadAccessToken", this.mockedSession);
-
-        try {
-            boolean updateOauthTokens = abstractBackend.updateOauthTokens(this.mockedSession);
-            assertFalse("False expected, got true", updateOauthTokens);
-        } catch (OXException e) {
-            e.printStackTrace();
-            fail("No errors should occur");
-        }
-    }
-
-    @Test
-    public void updateOauthTokens_PassTest() throws Exception {
-        // Spy on the AbstractOIDCBackend to mock private method
-        AbstractOIDCBackend abstractBackend = PowerMockito.spy(new OIDCCoreBackend() {
-
-            @Override
-            public OIDCBackendConfig getBackendConfig() {
-                return mockedBackendConfig;
-            }
-
-        });
-
-        // Mock the token response to give null tokens back
-        AccessTokenResponse tokenResponse = new AccessTokenResponse(new Tokens(new AccessToken(AccessTokenType.BEARER) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public String toAuthorizationHeader() {
-                return null;
-            }
-
-        }, new RefreshToken()));
-
-        PowerMockito.doReturn(tokenResponse).when(abstractBackend, "loadAccessToken", this.mockedSession);
-        PowerMockito.doNothing().when(abstractBackend, "updateSession", ArgumentMatchers.any(Session.class), ArgumentMatchers.any(Map.class));
-        try {
-            boolean updateOauthTokens = abstractBackend.updateOauthTokens(this.mockedSession);
-            assertTrue("True expected, got false", updateOauthTokens);
-        } catch (OXException e) {
-            e.printStackTrace();
-            fail("No errors should occur");
-        }
-    }
-
-    @Test
-    public void isTokenExpired_TrueTest() {
-        Mockito.when(I(mockedBackendConfig.getOauthRefreshTime())).thenReturn(I(10000));
-        Mockito.when(mockedSession.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)).thenReturn(String.valueOf(new Date().getTime()));
-        Mockito.when(B(mockedSession.containsParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE))).thenReturn(B(true));
-        try {
-            boolean result = this.testBackend.isTokenExpired(mockedSession);
-            assertTrue("True expected, got false", result);
-        } catch (OXException e) {
-            e.printStackTrace();
-            fail("No error should happen");
-        }
-    }
-
-    @Test
-    public void isTokenExpired_FalseTest() {
-        Mockito.when(I(mockedBackendConfig.getOauthRefreshTime())).thenReturn(I(10000));
-        Mockito.when(mockedSession.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)).thenReturn(String.valueOf(new Date().getTime() + 100000));
-        Mockito.when(B(mockedSession.containsParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE))).thenReturn(B(true));
-        try {
-            boolean result = this.testBackend.isTokenExpired(mockedSession);
-            assertFalse("False expected, got true", result);
-        } catch (OXException e) {
-            e.printStackTrace();
-            fail("No error should happen");
-        }
-    }
-
-    @Test
-    public void isTokenExpired_NoParamTest() {
-        Mockito.when(I(mockedBackendConfig.getOauthRefreshTime())).thenReturn(I(0));
-        try {
-            boolean result = this.testBackend.isTokenExpired(mockedSession);
-            assertFalse("False expected, got true", result);
-        } catch (OXException e) {
-            e.printStackTrace();
-            fail("No error should happen");
-        }
     }
 
     @Test
