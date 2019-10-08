@@ -909,7 +909,7 @@ public class CalendarUtils {
      * @see <a href="https://tools.ietf.org/html/rfc4791#section-9.9">RFC 4791, section 9.9</a>
      */
     public static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
-        if (null == event.getStartDate()) {
+        if (null == event.getStartDate() || (null == from && null == until)) {
             return true;
         }
         /*
@@ -949,24 +949,21 @@ public class CalendarUtils {
             // VEVENT has the DTEND property? Y
             // (start < DTEND AND end > DTSTART)
             return start < dtEnd && end > dtStart;
-        } else {
-            // VEVENT has the DTEND property? N
-            if (false == event.getStartDate().isAllDay()) {
-                // DTSTART property is a DATE-TIME value? Y
-                // (start <= DTSTART AND end > DTSTART)
-                return start <= dtStart && end > dtStart;
-            } else {
-                // DTSTART property is a DATE-TIME value? N
-                // (start < DTSTART+P1D AND end > DTSTART)
-                if (end > dtStart) {
-                    Calendar calendar = initCalendar(timeZone, dtStart);
-                    calendar.add(Calendar.DATE, 1);
-                    return start < calendar.getTimeInMillis();
-                } else {
-                    return false;
-                }
-            }
         }
+        // VEVENT has the DTEND property? N
+        if (false == event.getStartDate().isAllDay()) {
+            // DTSTART property is a DATE-TIME value? Y
+            // (start <= DTSTART AND end > DTSTART)
+            return start <= dtStart && end > dtStart;
+        }
+        // DTSTART property is a DATE-TIME value? N
+        // (start < DTSTART+P1D AND end > DTSTART)
+        if (end > dtStart) {
+            Calendar calendar = initCalendar(timeZone, dtStart);
+            calendar.add(Calendar.DATE, 1);
+            return start < calendar.getTimeInMillis();
+        }
+        return false;
     }
 
     /**

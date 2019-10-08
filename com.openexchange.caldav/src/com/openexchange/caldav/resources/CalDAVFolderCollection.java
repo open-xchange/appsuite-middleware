@@ -158,6 +158,24 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
         }
     }
 
+    /**
+     * Gets the start time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The start of the configured synchronization interval
+     */
+    public Date getMinDateTime() {
+        return minDateTime.getMinDateTime();
+    }
+
+    /**
+     * Gets the end time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The end of the configured synchronization interval
+     */
+    public Date getMaxDateTime() {
+        return maxDateTime.getMaxDateTime();
+    }
+
     @Override
     public String getResourceType() throws WebdavProtocolException {
         return new StringBuilder(super.getResourceType()).append('<').append(CaldavProtocol.CAL_NS.getPrefix()).append(":calendar/>").toString();
