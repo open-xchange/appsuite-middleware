@@ -371,6 +371,16 @@ public final class PropertyNames {
     public static final DavPropertyName CALENDAR_QUERY = DavPropertyName.create("calendar-query", NS_CALDAV);
 
     /**
+     * min-date-time xmlns="urn:ietf:params:xml:ns:caldav"
+     */
+    public static final DavPropertyName MIN_DATE_TIME = DavPropertyName.create("min-date-time", NS_CALDAV);
+
+    /**
+     * max-date-time xmlns="urn:ietf:params:xml:ns:caldav"
+     */
+    public static final DavPropertyName MAX_DATE_TIME = DavPropertyName.create("max-date-time", NS_CALDAV);
+
+    /**
      * dropbox-home-URL xmlns="http://calendarserver.org/ns/"
      */
     public static final DavPropertyName DROPBOX_HOME_URL = DavPropertyName.create("dropbox-home-URL", NS_CALENDARSERVER);
