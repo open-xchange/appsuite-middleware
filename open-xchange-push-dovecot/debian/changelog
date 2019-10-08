@@ -1,3 +1,9 @@
+open-xchange-push-dovecot (7.8.4-64) stable; urgency=medium
+
+  * Build for patch 2019-10-14 (5437)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 08 Oct 2019 11:03:02 +0200
+
 open-xchange-push-dovecot (7.8.4-63) stable; urgency=medium
 
   * Build for patch 2019-09-30 (5418)
