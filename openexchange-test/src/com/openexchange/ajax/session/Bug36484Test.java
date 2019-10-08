@@ -59,7 +59,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
-import com.openexchange.ajax.session.actions.StoreRequest;
 import com.openexchange.test.pool.TestUser;
 
 /**
@@ -88,8 +87,7 @@ public class Bug36484Test extends AbstractAJAXSession {
         FormLoginResponse loginResponse = client.execute(new FormLoginRequest(acquiredUser.getLogin(), acquiredUser.getPassword()));
         String firstSessionID = loginResponse.getSessionId();
         assertNotNull("No session ID", firstSessionID);
-        client.getSession().setId(firstSessionID);
-        client.execute(new StoreRequest(firstSessionID));
+
         /*
          * perform second form login from other IP (faked via X-Forwarded-For header)
          */

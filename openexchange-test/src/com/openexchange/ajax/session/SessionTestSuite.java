@@ -61,8 +61,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     LoginTest.class,
-    StoreTest.class,
-    RedirectTest.class,
     Bug12437Test.class,
     DuplicateAuthIdTest.class,
     RedeemTest.class,

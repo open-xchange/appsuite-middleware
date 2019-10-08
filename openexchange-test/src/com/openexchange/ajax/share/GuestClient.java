@@ -241,6 +241,10 @@ public class GuestClient extends AJAXClient {
         this(new ClientConfig(url).setAJAXSession(ajaxSession).setCredentials(username, password).setClient(client).setFailOnNonRedirect(failOnNonRedirect).setMustLogout(mustLogout));
     }
 
+    public GuestClient(AJAXSession ajaxSession, String url, String username, String password, String client, boolean staySignedIn, boolean failOnNonRedirect, boolean mustLogout) throws Exception {
+        this(new ClientConfig(url).setAJAXSession(ajaxSession).setCredentials(username, password).setClient(client).setStaySignedIn(staySignedIn).setFailOnNonRedirect(failOnNonRedirect).setMustLogout(mustLogout));
+    }
+
     public GuestClient(ClientConfig config) throws Exception {
         super(getOrCreateSession(config), config.mustLogout);
         prepareClient(getHttpClient(), config.username, config.password);
@@ -305,6 +309,8 @@ public class GuestClient extends AJAXClient {
 
         boolean mustLogout;
 
+        boolean staySignedIn;
+
         String client;
 
         AJAXSession ajaxSession;
@@ -356,6 +362,11 @@ public class GuestClient extends AJAXClient {
             return this;
         }
 
+        public ClientConfig setStaySignedIn(boolean staySignedIn) {
+            this.staySignedIn = staySignedIn;
+            return this;
+        }
+
     }
 
     private LoginResponse login(ResolveShareResponse shareResponse, ClientConfig config) throws Exception {
@@ -363,7 +374,7 @@ public class GuestClient extends AJAXClient {
         if ("guest".equals(shareResponse.getLoginType()) || "guest_password".equals(shareResponse.getLoginType())) {
             String loginName = Strings.isNotEmpty(shareResponse.getLoginName()) ? shareResponse.getLoginName() : config.username;
             GuestCredentials credentials = new GuestCredentials(loginName, config.password);
-            loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(),  credentials, config.client, false);
+            loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, true, false);
         } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
         } else {
