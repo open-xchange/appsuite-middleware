@@ -49,16 +49,13 @@
 
 package com.openexchange.gdpr.dataexport.provider.tasks;
 
-import com.openexchange.i18n.LocalizableStrings;
-
-
 /**
  * {@link TasksDataExportPropertyNames}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class TasksDataExportPropertyNames implements LocalizableStrings {
+public class TasksDataExportPropertyNames {
 
     /**
      * Initializes a new {@link TasksDataExportPropertyNames}.
