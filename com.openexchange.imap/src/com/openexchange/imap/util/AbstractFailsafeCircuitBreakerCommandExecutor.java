@@ -69,11 +69,13 @@ import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConsta
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_NAME;
 import static com.openexchange.metrics.circuitbreaker.MetricCircuitBreakerConstants.METRICS_TRIP_COUNT_UNITS;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableList;
@@ -89,7 +91,6 @@ import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 import net.jodah.failsafe.CircuitBreaker;
-import net.jodah.failsafe.CircuitBreaker.State;
 import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
@@ -103,8 +104,17 @@ import net.jodah.failsafe.function.CheckedRunnable;
  */
 public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
 
-    /** The circuit breaker instance */
-    protected final CircuitBreaker circuitBreaker;
+    /** The failure threshold */
+    protected final int failureThreshold;
+
+    /** The success threshold */
+    protected final int successThreshold;
+
+    /** The delay in milliseconds */
+    protected final long delayMillis;
+
+    /** the existent circuit breakers */
+    protected final ConcurrentMap<Object, CircuitBreakerInfo> circuitBreakers;
 
     /** The optional listing of hosts to which the circuit breaker applies */
     protected final Optional<HostList> optionalHostList;
@@ -118,8 +128,8 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     /** The registered metric descriptors */
     protected final AtomicReference<List<MetricDescriptor>> metricDescriptors;
 
-    private final AtomicReference<Runnable> onOpenMetricTask;
-    private final AtomicReference<Runnable> onDeniedMetricTask;
+    /** The reference for the metric service */
+    protected final AtomicReference<MetricService> metricServiceReference;
 
     /**
      * Initializes a new {@link AbstractFailsafeCircuitBreakerCommandExecutor}.
@@ -144,23 +154,35 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
         }
 
-        AtomicReference<Runnable> onOpenMetricTask = new AtomicReference<>(null);
-        this.onOpenMetricTask = onOpenMetricTask;
-        onDeniedMetricTask = new AtomicReference<>(null);
+        this.failureThreshold = failureThreshold;
+        this.successThreshold = successThreshold;
+        this.delayMillis = delayMillis;
+        circuitBreakers = new ConcurrentHashMap<>(10, 0.9F, 1);
+
+        metricServiceReference = new AtomicReference<>(null);
         metricDescriptors = new AtomicReference<>(null);
         this.ranking = ranking;
         this.optionalHostList = optHostList;
         this.ports = null == optPorts || optPorts.isEmpty() ? null : optPorts;
+    }
 
-        CircuitBreaker circuitBreaker = new CircuitBreaker()
-            .withFailureThreshold(failureThreshold)
+    /**
+     * Creates a circuit breaker instance.
+     *
+     * @param key The key identifying the circuit breaker to create
+     * @return The circuit breaker
+     */
+    protected CircuitBreakerInfo createCircuitBreaker(String key) {
+        CircuitBreaker circuitBreaker = new CircuitBreaker();
+        CircuitBreakerInfo breakerInfo = new CircuitBreakerInfo(key, circuitBreaker);
+        circuitBreaker.withFailureThreshold(failureThreshold)
             .withSuccessThreshold(successThreshold)
             .withDelay(delayMillis, TimeUnit.MILLISECONDS)
             .onOpen(new CheckedRunnable() {
 
                 @Override
                 public void run() throws Exception {
-                    Runnable metricTask = onOpenMetricTask.get();
+                    Runnable metricTask = breakerInfo.getOnOpenMetricTaskReference().get();
                     if (metricTask != null) {
                         try {
                             metricTask.run();
@@ -168,54 +190,66 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                             // Ignore
                         }
                     }
-                    onOpen();
+                    onOpen(breakerInfo);
                 }
             })
             .onHalfOpen(new CheckedRunnable() {
 
                 @Override
                 public void run() throws Exception {
-                    onHalfOpen();
+                    onHalfOpen(breakerInfo);
                 }
             })
             .onClose(new CheckedRunnable() {
 
                 @Override
                 public void run() throws Exception {
-                    onClose();
+                    onClose(breakerInfo);
                 }
             });
-        this.circuitBreaker = circuitBreaker;
+        return breakerInfo;
     }
+
+    /**
+     * Gets the circuit breaker for specified IMAP protocol instance.
+     *
+     * @param protocol The IMAP protocol
+     * @return The associated circuit breaker
+     */
+    protected abstract CircuitBreakerInfo circuitBreakerFor(Protocol protocol);
 
     /**
      * Is called when the circuit breaker is opened: The circuit is opened and not allowing executions to occur.
      *
+     * @param breakerInfo The circuit breaker that went into open state
      * @throws Exception If an error occurs
      */
-    protected abstract void onOpen() throws Exception;
+    protected abstract void onOpen(CircuitBreakerInfo breakerInfo) throws Exception;
 
     /**
      * Is called when the circuit breaker is half-opened: The circuit is temporarily allowing executions to occur.
      *
+     * @param breakerInfo The circuit breaker that went into half-open state
      * @throws Exception If an error occurs
      */
-    protected abstract void onHalfOpen() throws Exception;
+    protected abstract void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception;
 
     /**
      * Is called when the circuit breaker is closed: The circuit is closed and fully functional, allowing executions to occur.
      *
+     * @param breakerInfo The circuit breaker that went into closed state
      * @throws Exception If an error occurs
      */
-    protected abstract void onClose() throws Exception;
+    protected abstract void onClose(CircuitBreakerInfo breakerInfo) throws Exception;
 
     /**
      * Is called when the circuit breaker denied an access attempt because it is currently open and not allowing executions to occur.
      *
      * @param exception The thrown exception when an execution is attempted while a configured CircuitBreaker is open
+     * @param breakerInfo The circuit breaker that denied access attempt
      */
-    protected void onDenied(CircuitBreakerOpenException exception) {
-        Runnable metricTask = onDeniedMetricTask.get();
+    protected void onDenied(CircuitBreakerOpenException exception, CircuitBreakerInfo breakerInfo) {
+        Runnable metricTask = breakerInfo.getOnDeniedMetricTaskReference().get();
         if (metricTask != null) {
             metricTask.run();
         }
@@ -253,11 +287,12 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     @Override
     public Response[] executeCommand(String command, Argument args, Protocol protocol) {
+        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(circuitBreaker).get(new CircuitBreakerCommandCallable(command, args, protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(command, args, protocol));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
-            onDenied(e);
+            onDenied(e, breakerInfo);
             IOException ioe = new IOException("Denied IMAP command since circuit breaker is open.");
             return new Response[] { Response.byeResponse(ioe) };
         } catch (FailsafeException e) {
@@ -278,11 +313,12 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
 
     @Override
     public Response readResponse(Protocol protocol) throws IOException {
+        CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(circuitBreaker).get(new CircuitBreakerReadResponseCallable(protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerReadResponseCallable(protocol));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
-            onDenied(e);
+            onDenied(e, breakerInfo);
             throw new IOException("Denied reading from IMAP server since circuit breaker is open.");
         } catch (FailsafeException e) {
             // Runnable failed with a checked exception
@@ -308,26 +344,11 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         if (ports != null) {
             sb.append(", ports=").append(ports);
         }
-        State state = circuitBreaker.getState();
-        sb.append(", state=").append(state);
-        switch (state) {
-            case CLOSED:
-                sb.append(" (The circuit is closed and fully functional, allowing executions to occur)");
-                break;
-            case HALF_OPEN:
-                sb.append(" (The circuit is temporarily allowing executions to occur)");
-                break;
-            case OPEN:
-                sb.append(" (The circuit is opened and not allowing executions to occur.)");
-                break;
-            default:
-                break;
-
+        for (CircuitBreakerInfo breakerInfo : circuitBreakers.values()) {
+            sb.append(", \"").append(breakerInfo.getKey()).append("\" state=").append(breakerInfo.getCircuitBreaker().getState());
         }
-        return super.toString();
+        return sb.toString();
     }
-
-    private static final String METRICS_DIMENSION_PROTOCOL_VALUE = "imap";
 
     /**
      * Invoked when given metric service appeared.
@@ -336,14 +357,35 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @throws Exception If an error occurs
      */
     public void onMetricServiceAppeared(MetricService metricService) throws Exception {
-        List<MetricDescriptor> descriptors= new ArrayList<MetricDescriptor>();
-        String accountValue = getDescription();
+        metricServiceReference.set(metricService);
+
+        List<MetricDescriptor> descriptors = new CopyOnWriteArrayList<MetricDescriptor>();
+        for (CircuitBreakerInfo breakerInfo : circuitBreakers.values()) {
+            initMetricsFor(breakerInfo.getKey(), breakerInfo, metricService, descriptors);
+        }
+        this.metricDescriptors.set(descriptors);
+    }
+
+    private static final String METRICS_DIMENSION_PROTOCOL_VALUE = "imap";
+
+    /**
+     * Invoked when given metric service appeared.
+     *
+     * @param accountValue The account value; either socket address or host name
+     * @param breakerInfo The circuit breaker for which to track metrics
+     * @param metricService The metric service
+     * @param descriptors The listing of descriptors to add to
+     */
+    protected void initMetricsFor(String accountValue, CircuitBreakerInfo breakerInfo, MetricService metricService, List<MetricDescriptor> descriptors) {
+        if (metricService == null || descriptors == null) {
+            return;
+        }
 
         {
             MetricDescriptor breakerStatusGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_STATUS_NAME, MetricType.GAUGE)
                 .withDescription(MetricCircuitBreakerConstants.METRICS_STATUS_DESC)
                 .withMetricSupplier(() -> {
-                    return circuitBreaker.getState().name();
+                    return breakerInfo.getCircuitBreaker().getState().name();
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
                 .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
@@ -356,7 +398,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             MetricDescriptor failureThresholdGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_FAILURE_THRESHOLD_NAME, MetricType.GAUGE)
                 .withDescription(METRICS_FAILURE_THRESHOLD_DESC)
                 .withMetricSupplier(() -> {
-                    return I(circuitBreaker.getFailureThreshold().numerator);
+                    return I(breakerInfo.getCircuitBreaker().getFailureThreshold().numerator);
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
                 .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
@@ -369,7 +411,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             MetricDescriptor successThresholdGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_SUCCESS_THRESHOLD_NAME, MetricType.GAUGE)
                 .withDescription(METRICS_SUCCESS_THRESHOLD_DESC)
                 .withMetricSupplier(() -> {
-                    return I(circuitBreaker.getSuccessThreshold().numerator);
+                    return I(breakerInfo.getCircuitBreaker().getSuccessThreshold().numerator);
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
                 .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
@@ -382,7 +424,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             MetricDescriptor delayMillisGauge = MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_DELAY_MILLIS_NAME, MetricType.GAUGE)
                 .withDescription(METRICS_DELAY_MILLIS_DESC)
                 .withMetricSupplier(() -> {
-                    return L(circuitBreaker.getDelay().toMillis());
+                    return L(breakerInfo.getCircuitBreaker().getDelay().toMillis());
                 })
                 .addDimension(METRICS_DIMENSION_PROTOCOL_KEY, METRICS_DIMENSION_PROTOCOL_VALUE)
                 .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
@@ -399,7 +441,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                 .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getCounter(tripCounter);
-            onOpenMetricTask.set(new Runnable() {
+            breakerInfo.getOnOpenMetricTaskReference().set(new Runnable() {
 
                 @Override
                 public void run() {
@@ -417,7 +459,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
                 .addDimension(METRICS_DIMENSION_ACCOUNT_KEY, accountValue)
                 .build();
             metricService.getMeter(denialMeter);
-            onDeniedMetricTask.set(new Runnable() {
+            breakerInfo.getOnDeniedMetricTaskReference().set(new Runnable() {
 
                 @Override
                 public void run() {
@@ -426,8 +468,6 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
             });
             descriptors.add(denialMeter);
         }
-
-        this.metricDescriptors.set(descriptors);
     }
 
     /**
@@ -437,8 +477,13 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @throws Exception If an error occurs
      */
     public void onMetricServiceDisppearing(MetricService metricService) throws Exception {
-        onDeniedMetricTask.set(null);
-        onOpenMetricTask.set(null);
+        metricServiceReference.set(null);
+
+        for (CircuitBreakerInfo breakerInfo : circuitBreakers.values()) {
+            breakerInfo.getOnOpenMetricTaskReference().set(null);
+            breakerInfo.getOnDeniedMetricTaskReference().set(null);
+        }
+
         List<MetricDescriptor> descriptors = this.metricDescriptors.getAndSet(null);
         if (descriptors != null) {
             for (MetricDescriptor metricDescriptor : descriptors) {

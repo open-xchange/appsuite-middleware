@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.net.HostList;
+import com.sun.mail.iap.Protocol;
 
 /**
  * {@link FailsafeCircuitBreakerCommandExecutor} - A circuit breaker for denoted IMAP end-points.
@@ -74,6 +75,8 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    private final String key;
+
     /**
      * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor}.
      *
@@ -87,33 +90,36 @@ public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircu
      */
     public FailsafeCircuitBreakerCommandExecutor(HostList hostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis, int ranking) {
         super(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking);
+        key = hostList.getHostString();
     }
 
     @Override
-    protected void onClose() throws Exception {
-        if (optionalHostList.isPresent()) {
-            LOG.info("IMAP circuit breaker closed for: {}", optionalHostList.get().getHostString());
-        } else {
-            LOG.info("Generic IMAP circuit breaker closed");
+    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
+        CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
+        if (breakerInfo == null) {
+            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
+            breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
+            if (breakerInfo == null) {
+                breakerInfo = newBreakerInfo;
+                initMetricsFor(key, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
+            }
         }
+        return breakerInfo;
     }
 
     @Override
-    protected void onHalfOpen() throws Exception {
-        if (optionalHostList.isPresent()) {
-            LOG.info("IMAP circuit breaker half-opened for: {}", optionalHostList.get().getHostString());
-        } else {
-            LOG.info("Generic IMAP circuit breaker half-opened");
-        }
+    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker closed for {}", breakerInfo.getKey());
     }
 
     @Override
-    protected void onOpen() throws Exception {
-        if (optionalHostList.isPresent()) {
-            LOG.info("IMAP circuit breaker opened for: {}", optionalHostList.get().getHostString());
-        } else {
-            LOG.info("Generic IMAP circuit breaker opened");
-        }
+    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker half-opened for {}", breakerInfo.getKey());
+    }
+
+    @Override
+    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker opened for {}", breakerInfo.getKey());
     }
 
     @Override

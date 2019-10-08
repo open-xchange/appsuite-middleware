@@ -62,7 +62,7 @@ import com.openexchange.metrics.types.Metric;
  */
 public class HistogramMetricRegisterer implements MetricRegisterer {
 
-    private MetricRegistry registry;
+    private final MetricRegistry registry;
 
     /**
      * Initialises a new {@link HistogramMetricRegisterer}.
@@ -74,12 +74,12 @@ public class HistogramMetricRegisterer implements MetricRegisterer {
 
     @Override
     public Metric register(MetricDescriptor descriptor) {
-        return new DropwizardHistogram(registry.histogram(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+        return new DropwizardHistogram(registry.histogram(getNameFor(descriptor)));
     }
 
     @Override
     public void unregister(MetricDescriptor descriptor) {
-        registry.remove(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));
+        registry.remove(getNameFor(descriptor));
     }
 
 }

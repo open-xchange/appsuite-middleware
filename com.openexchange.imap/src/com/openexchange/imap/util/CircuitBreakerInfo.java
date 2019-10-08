@@ -47,40 +47,72 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.impl.registerers;
+package com.openexchange.imap.util;
 
-import com.codahale.metrics.MetricRegistry;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricRegisterer;
-import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
-import com.openexchange.metrics.types.Metric;
+import java.util.concurrent.atomic.AtomicReference;
+import net.jodah.failsafe.CircuitBreaker;
 
 /**
- * {@link GaugeMetricRegisterer}
+ * {@link CircuitBreakerInfo} - Circuit breaker information.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class GaugeMetricRegisterer implements MetricRegisterer {
+public class CircuitBreakerInfo {
 
-    private final MetricRegistry registry;
+    private final String key;
+    private final CircuitBreaker circuitBreaker;
+    private final AtomicReference<Runnable> onOpenMetricTask;
+    private final AtomicReference<Runnable> onDeniedMetricTask;
 
     /**
-     * Initialises a new {@link GaugeMetricRegisterer}.
+     * Initializes a new {@link CircuitBreakerInfo}.
+     *
+     * @param key The key identifying the circuit breaker to create
+     * @param circuitBreaker The circuit breaker
      */
-    public GaugeMetricRegisterer(MetricRegistry registry) {
+    public CircuitBreakerInfo(String key, CircuitBreaker circuitBreaker) {
         super();
-        this.registry = registry;
+        this.key = key;
+        this.circuitBreaker = circuitBreaker;
+        onOpenMetricTask = new AtomicReference<>(null);
+        onDeniedMetricTask = new AtomicReference<>(null);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public Metric register(MetricDescriptor descriptor) {
-        return new DropwizardGauge(registry.gauge(getNameFor(descriptor), () -> () -> descriptor.getMetricSupplier().get()));
+    /**
+     * Gets the key
+     *
+     * @return The key
+     */
+    public String getKey() {
+        return key;
     }
 
-    @Override
-    public void unregister(MetricDescriptor descriptor) {
-        registry.remove(getNameFor(descriptor));
+    /**
+     * Gets the circuit breaker
+     *
+     * @return The circuit breaker
+     */
+    public CircuitBreaker getCircuitBreaker() {
+        return circuitBreaker;
+    }
+
+    /**
+     * Gets the "on open" metric task reference
+     *
+     * @return The "on open" metric task reference
+     */
+    public AtomicReference<Runnable> getOnOpenMetricTaskReference() {
+        return onOpenMetricTask;
+    }
+
+    /**
+     * Gets the "on denied" metric task reference
+     *
+     * @return The "on denied" metric task reference
+     */
+    public AtomicReference<Runnable> getOnDeniedMetricTaskReference() {
+        return onDeniedMetricTask;
     }
 
 }
