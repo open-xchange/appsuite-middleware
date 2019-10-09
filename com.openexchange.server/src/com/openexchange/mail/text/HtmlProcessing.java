@@ -355,6 +355,20 @@ public final class HtmlProcessing {
                         retval = htmlService.htmlFormat(retval.getContent(), true, null, maxContentSize);
                     }
                 }
+            } else {
+                int maxSize = maxContentSize;
+                if (!(maxSize >= 10000) && !(maxSize <= 0)) {
+                    maxSize = 10000;
+                }
+                if ((maxSize > 0) && (maxSize < content.length())) {
+                    int endOfSentence = content.indexOf('.', maxSize);
+                    if (endOfSentence > 0) {
+                        retval.setContent(content.substring(0, endOfSentence + 1));
+                    } else {
+                        retval.setContent(content.substring(0, maxSize));
+                    }
+                    retval.setTruncated(true);
+                }
             }
         }
         return retval;
