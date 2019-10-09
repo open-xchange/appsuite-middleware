@@ -110,6 +110,10 @@ public class CalendarDataExportProvider extends AbstractDataExportProvider<Calen
             return false;
         }
 
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar.enabled", true, session)) {
+            return false;
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasCalendar()) {
             return false;
@@ -120,6 +124,10 @@ public class CalendarDataExportProvider extends AbstractDataExportProvider<Calen
 
     @Override
     public Optional<Module> getModule(Session session) throws OXException {
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar.enabled", true, session)) {
+            return Optional.empty();
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasCalendar()) {
             return Optional.empty();
@@ -133,11 +141,15 @@ public class CalendarDataExportProvider extends AbstractDataExportProvider<Calen
 
         Map<String, Object> properties = new LinkedHashMap<String, Object>(6);
         properties.put(CalendarDataExportPropertyNames.PROP_ENABLED, Boolean.TRUE);
-        properties.put(CalendarDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
-        if (hasSharedFolders) {
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar." + CalendarDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, true, session)) {
+            properties.put(CalendarDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
+        }
+        if (hasSharedFolders && getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar." + CalendarDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, true, session)) {
             properties.put(CalendarDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, Boolean.FALSE);
         }
-        properties.put(CalendarDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, Boolean.FALSE);
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar." + CalendarDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, true, session)) {
+            properties.put(CalendarDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, Boolean.FALSE);
+        }
 
         return Optional.of(Module.valueOf(ID_CALENDAR, properties));
     }

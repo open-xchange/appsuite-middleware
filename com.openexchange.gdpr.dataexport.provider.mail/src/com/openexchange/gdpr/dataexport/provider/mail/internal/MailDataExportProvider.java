@@ -124,7 +124,12 @@ public class MailDataExportProvider extends AbstractDataExportProvider<MailDataE
                 mailModule = module;
             }
         }
+
         if (mailModule == null) {
+            return false;
+        }
+
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.mail.enabled", true, session)) {
             return false;
         }
 
@@ -167,6 +172,10 @@ public class MailDataExportProvider extends AbstractDataExportProvider<MailDataE
 
     @Override
     public Optional<Module> getModule(Session session) throws OXException {
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.mail.enabled", true, session)) {
+            return Optional.empty();
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasWebMail()) {
             return Optional.empty();
@@ -195,14 +204,16 @@ public class MailDataExportProvider extends AbstractDataExportProvider<MailDataE
 
         Map<String, Object> properties = new LinkedHashMap<String, Object>(6);
         properties.put(MailDataExportPropertyNames.PROP_ENABLED, Boolean.TRUE);
-        properties.put(MailDataExportPropertyNames.PROP_INCLUDE_TRASH_FOLDER, Boolean.FALSE);
-        if (hasPublicFolders) {
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.mail." + MailDataExportPropertyNames.PROP_INCLUDE_TRASH_FOLDER, true, session)) {
+            properties.put(MailDataExportPropertyNames.PROP_INCLUDE_TRASH_FOLDER, Boolean.FALSE);
+        }
+        if (hasPublicFolders && getBoolProperty("com.openexchange.gdpr.dataexport.provider.mail." + MailDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, true, session)) {
             properties.put(MailDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
         }
-        if (hasSharedFolders) {
+        if (hasSharedFolders && getBoolProperty("com.openexchange.gdpr.dataexport.provider.mail." + MailDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, true, session)) {
             properties.put(MailDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, Boolean.FALSE);
         }
-        if (hasSubscription) {
+        if (hasSubscription && getBoolProperty("com.openexchange.gdpr.dataexport.provider.mail." + MailDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, true, session)) {
             properties.put(MailDataExportPropertyNames.PROP_INCLUDE_UNSUBSCRIBED, Boolean.FALSE);
         }
 

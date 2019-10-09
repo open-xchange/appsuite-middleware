@@ -112,6 +112,10 @@ public class ContactsDataExportProvider extends AbstractDataExportProvider<Conta
             return false;
         }
 
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.contacts.enabled", true, session)) {
+            return false;
+        }
+
         boolean enabled = getBoolOption(ContactsDataExportPropertyNames.PROP_ENABLED, true, contactsModule);
         if (!enabled) {
             return false;
@@ -137,6 +141,10 @@ public class ContactsDataExportProvider extends AbstractDataExportProvider<Conta
 
     @Override
     public Optional<Module> getModule(Session session) throws OXException {
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.contacts.enabled", true, session)) {
+            return Optional.empty();
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasContact()) {
             // User may only see his own user contact
@@ -151,8 +159,10 @@ public class ContactsDataExportProvider extends AbstractDataExportProvider<Conta
 
         Map<String, Object> properties = new LinkedHashMap<String, Object>(6);
         properties.put(ContactsDataExportPropertyNames.PROP_ENABLED, Boolean.TRUE);
-        properties.put(ContactsDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
-        if (hasSharedFolders) {
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.contacts." + ContactsDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, true, session)) {
+            properties.put(ContactsDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
+        }
+        if (hasSharedFolders && getBoolProperty("com.openexchange.gdpr.dataexport.provider.contacts." + ContactsDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, true, session)) {
             properties.put(ContactsDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, Boolean.FALSE);
         }
 

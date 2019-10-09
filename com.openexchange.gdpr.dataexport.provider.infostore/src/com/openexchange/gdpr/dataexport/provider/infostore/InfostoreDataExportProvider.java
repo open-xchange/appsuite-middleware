@@ -109,6 +109,10 @@ public class InfostoreDataExportProvider extends AbstractDataExportProvider<Info
             return false;
         }
 
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.infostore.enabled", true, session)) {
+            return false;
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasInfostore()) {
             return false;
@@ -119,6 +123,10 @@ public class InfostoreDataExportProvider extends AbstractDataExportProvider<Info
 
     @Override
     public Optional<Module> getModule(Session session) throws OXException {
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.infostore.enabled", true, session)) {
+            return Optional.empty();
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasInfostore()) {
             return Optional.empty();
@@ -126,10 +134,18 @@ public class InfostoreDataExportProvider extends AbstractDataExportProvider<Info
 
         Map<String, Object> properties = new LinkedHashMap<String, Object>(6);
         properties.put(InfostoreDataExportPropertyNames.PROP_ENABLED, Boolean.TRUE);
-        properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
-        properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, Boolean.FALSE);
-        properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_TRASH, Boolean.FALSE);
-        properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_ALL_VERSIONS, Boolean.FALSE);
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar." + InfostoreDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, true, session)) {
+            properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
+        }
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar." + InfostoreDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, true, session)) {
+            properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, Boolean.FALSE);
+        }
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar." + InfostoreDataExportPropertyNames.PROP_INCLUDE_TRASH, true, session)) {
+            properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_TRASH, Boolean.FALSE);
+        }
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.calendar." + InfostoreDataExportPropertyNames.PROP_INCLUDE_ALL_VERSIONS, true, session)) {
+            properties.put(InfostoreDataExportPropertyNames.PROP_INCLUDE_ALL_VERSIONS, Boolean.FALSE);
+        }
 
         return Optional.of(Module.valueOf(ID_INFOSTORE, properties));
     }

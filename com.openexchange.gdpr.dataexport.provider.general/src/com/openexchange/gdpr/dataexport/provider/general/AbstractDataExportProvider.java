@@ -55,6 +55,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.json.JSONObject;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExportProvider;
 import com.openexchange.gdpr.dataexport.DataExportSink;
@@ -62,6 +65,7 @@ import com.openexchange.gdpr.dataexport.DataExportTask;
 import com.openexchange.gdpr.dataexport.ExportResult;
 import com.openexchange.gdpr.dataexport.PauseResult;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractDataExportProvider}
@@ -85,6 +89,25 @@ public abstract class AbstractDataExportProvider<T extends AbstractDataExportPro
         super();
         this.services = services;
         runningExports = new ConcurrentHashMap<UUID, T>(16, 0.9F, 1);
+    }
+
+    /**
+     * Gets the value for named boolean property.
+     *
+     * @param propertyName The property name
+     * @param def The default value to assume
+     * @param session The session providing user information
+     * @return The boolean value
+     * @throws OXException If property's boolean cannot be returned
+     */
+    protected boolean getBoolProperty(String propertyName, boolean def, Session session) throws OXException {
+        ConfigViewFactory configViewFactory = services.getOptionalService(ConfigViewFactory.class);
+        if (configViewFactory == null) {
+            return def;
+        }
+
+        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+        return ConfigViews.getDefinedBoolPropertyFrom(propertyName, def, view);
     }
 
     /**
