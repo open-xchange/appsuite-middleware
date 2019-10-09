@@ -53,6 +53,7 @@ import java.net.InetAddress;
 import java.util.Optional;
 import org.slf4j.Logger;
 import com.sun.mail.iap.Protocol;
+import net.jodah.failsafe.util.Ratio;
 
 /**
  * {@link PrimaryFailsafeCircuitBreakerCommandExecutor} - The special IMAP circuit breaker form primary account.
@@ -72,12 +73,12 @@ public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     /**
      * Initializes a new {@link PrimaryFailsafeCircuitBreakerCommandExecutor}.
      *
-     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
-     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
+     * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
+     * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public PrimaryFailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
+    public PrimaryFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis) {
         super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100);
     }
 

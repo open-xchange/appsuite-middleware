@@ -94,6 +94,7 @@ import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
 import net.jodah.failsafe.function.CheckedRunnable;
+import net.jodah.failsafe.util.Ratio;
 
 /**
  * {@link AbstractFailsafeCircuitBreakerCommandExecutor} - An abstract circuit breaker for IMAP end-points.
@@ -104,10 +105,10 @@ import net.jodah.failsafe.function.CheckedRunnable;
 public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends AbstractMetricAwareCommandExecutor {
 
     /** The failure threshold */
-    protected final int failureThreshold;
+    protected final Ratio failureThreshold;
 
     /** The success threshold */
-    protected final int successThreshold;
+    protected final Ratio successThreshold;
 
     /** The delay in milliseconds */
     protected final long delayMillis;
@@ -135,18 +136,18 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
      *
      * @param optHostList The optional hosts to consider
      * @param optPorts The optional ports to consider
-     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
-     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
+     * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
+     * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
      * @param ranking The ranking
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    protected AbstractFailsafeCircuitBreakerCommandExecutor(Optional<HostList> optHostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis, int ranking) {
+    protected AbstractFailsafeCircuitBreakerCommandExecutor(Optional<HostList> optHostList, Set<Integer> optPorts, Ratio failureThreshold, Ratio successThreshold, long delayMillis, int ranking) {
         super();
-        if (failureThreshold <= 0) {
+        if (failureThreshold.numerator <= 0) {
             throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
         }
-        if (successThreshold <= 0) {
+        if (successThreshold.numerator <= 0) {
             throw new IllegalArgumentException("successThreshold must be greater than 0 (zero).");
         }
         if (delayMillis <= 0) {
@@ -174,8 +175,8 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends Abst
     protected CircuitBreakerInfo createCircuitBreaker(String key) {
         CircuitBreaker circuitBreaker = new CircuitBreaker();
         CircuitBreakerInfo breakerInfo = new CircuitBreakerInfo(key, circuitBreaker);
-        circuitBreaker.withFailureThreshold(failureThreshold)
-            .withSuccessThreshold(successThreshold)
+        circuitBreaker.withFailureThreshold(failureThreshold.numerator, failureThreshold.denominator)
+            .withSuccessThreshold(successThreshold.numerator, successThreshold.denominator)
             .withDelay(delayMillis, TimeUnit.MILLISECONDS)
             .onOpen(new CheckedRunnable() {
 

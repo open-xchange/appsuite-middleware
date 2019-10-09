@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 import com.sun.mail.iap.Protocol;
+import net.jodah.failsafe.util.Ratio;
 
 /**
  * {@link GenericFailsafeCircuitBreakerCommandExecutor} - The circuit breaker for all IMAP end-points.
@@ -78,12 +79,12 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     /**
      * Initializes a new {@link GenericFailsafeCircuitBreakerCommandExecutor}.
      *
-     * @param failureThreshold The number of successive failures that must occur in order to open the circuit
-     * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
+     * @param failureThreshold The ratio of successive failures that must occur in order to open the circuit
+     * @param successThreshold The ratio of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public GenericFailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
+    public GenericFailsafeCircuitBreakerCommandExecutor(Ratio failureThreshold, Ratio successThreshold, long delayMillis) {
         super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 10);
         optionalHostsToExclude = new AtomicReference<>(Optional.empty());
         excludePrimaryAccount = new AtomicBoolean(false);
