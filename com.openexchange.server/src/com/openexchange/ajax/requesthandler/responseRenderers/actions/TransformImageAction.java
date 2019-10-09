@@ -447,7 +447,11 @@ public class TransformImageAction implements IFileResponseRendererAction {
                             if (null == (transformedImage = performTransformImage(session, repetitiveFile, xformParams, cacheKey, fileName))) {
                                 resultFile = repetitiveFile;
                             }
-                        } catch (final IOException e) {
+                        } catch (javax.imageio.IIOException e) {
+                            // Image transformation failed because image could not be read by image reader
+                            resultFile = repetitiveFile;
+                            return resultFile;
+                        } catch (IOException e) {
                             final String message = e.getMessage();
 
                             if (null != message) {
