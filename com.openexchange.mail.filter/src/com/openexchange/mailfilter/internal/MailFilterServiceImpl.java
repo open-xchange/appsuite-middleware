@@ -244,9 +244,29 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 if (failureThreshold <= 0) {
                     throw new IllegalArgumentException("failureThreshold must be greater than 0 (zero).");
                 }
+                int failureExecutions = failureThreshold;
+                {
+                    String tmp = config.getProperty(MailFilterProperty.failureExecutions.getFQPropertyName(), MailFilterProperty.failureExecutions.getDefaultValue().toString()).trim();
+                    if (Strings.isNotEmpty(tmp)) {
+                        failureExecutions = Integer.parseInt(tmp);
+                        if (failureExecutions < failureThreshold) {
+                            failureExecutions = failureThreshold;
+                        }
+                    }
+                }
                 int successThreshold = Integer.parseInt(config.getProperty(MailFilterProperty.successThreshold.getFQPropertyName(), MailFilterProperty.successThreshold.getDefaultValue().toString()).trim());
                 if (successThreshold <= 0) {
                     throw new IllegalArgumentException("successThreshold must be greater than 0 (zero).");
+                }
+                int successExecutions = successThreshold;
+                {
+                    String tmp = config.getProperty(MailFilterProperty.successExecutions.getFQPropertyName(), MailFilterProperty.successExecutions.getDefaultValue().toString()).trim();
+                    if (Strings.isNotEmpty(tmp)) {
+                        successExecutions = Integer.parseInt(tmp);
+                        if (successExecutions < successThreshold) {
+                            successExecutions = successThreshold;
+                        }
+                    }
                 }
                 int delayMillis = Integer.parseInt(config.getProperty(MailFilterProperty.delayMillis.getFQPropertyName(), MailFilterProperty.delayMillis.getDefaultValue().toString()).trim());
                 if (delayMillis <= 0) {
@@ -254,8 +274,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 }
                 AtomicReference<Runnable> onOpenMetricTask = this.onOpenMetricTask;
                 circuitBreaker = new CircuitBreaker()
-                    .withFailureThreshold(failureThreshold)
-                    .withSuccessThreshold(successThreshold)
+                    .withFailureThreshold(failureThreshold, failureExecutions)
+                    .withSuccessThreshold(successThreshold, successExecutions)
                     .withDelay(delayMillis, TimeUnit.MILLISECONDS)
                     .onOpen(new CheckedRunnable() {
 

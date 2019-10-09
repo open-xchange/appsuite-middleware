@@ -210,10 +210,20 @@ public enum MailFilterProperty implements Property {
     failureThreshold("5", true, "com.openexchange.mail.filter.breaker."),
 
     /**
+     * The number of executions to measure the failures against
+     */
+    failureExecutions("", true, "com.openexchange.mail.filter.breaker."),
+
+    /**
      * The success threshold for mail filter circuit breaker, which is the number of successive successful executions that must occur when
      * in a half-open state in order to close the circuit
      */
     successThreshold("2", true, "com.openexchange.mail.filter.breaker."),
+
+    /**
+     * The number of executions to measure the successes against
+     */
+    successExecutions("", true, "com.openexchange.mail.filter.breaker."),
 
     /**
      * The delay in milliseconds for mail filter circuit breaker, which is the number of milliseconds to wait in open state before
