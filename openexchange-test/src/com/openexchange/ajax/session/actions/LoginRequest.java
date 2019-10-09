@@ -128,10 +128,11 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      * @param target The share target path, or <code>null</code> if not specified
      * @param credentials The guest credentials
      * @param client The client identifier; may be <code>null</code>
+     * @param staySignedIn
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      * @return The login request
      */
-    public static LoginRequest createGuestLoginRequest(String share, String target, GuestCredentials credentials, String client, boolean failOnError) {
+    public static LoginRequest createGuestLoginRequest(String share, String target, GuestCredentials credentials, String client, boolean staySignedIn, boolean failOnError) {
         List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "guest"));
         parameters.add(new URLParameter("share", share));
@@ -147,11 +148,12 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
         } else {
             parameters.add(new FieldParameter(PARAM_PASSWORD, credentials.getPassword()));
         }
+        parameters.add(new URLParameter("staySignedIn", staySignedIn));
         return new LoginRequest(parameters.toArray(new Parameter[parameters.size()]), failOnError);
     }
 
     public static LoginRequest createGuestLoginRequest(String share, String target, GuestCredentials credentials, boolean failOnError) {
-        return createGuestLoginRequest(share, target, credentials, null, failOnError);
+        return createGuestLoginRequest(share, target, credentials, null, false, failOnError);
     }
 
     /**

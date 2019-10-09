@@ -138,15 +138,25 @@ public interface Property {
     /**
      * Returns the default value of the {@link Property}
      *
-     * @param clazz The type of the {@link Property}
+     * @param clazz The class of the {@link Property} which it will be casted to.
      * @return the default value of the {@link Property}
      * @throws IllegalArgumentException If specified type does not match the one of the default value
      */
     default <T extends Object> T getDefaultValue(Class<T> clazz) throws IllegalArgumentException {
+        /*
+         * Check data
+         */
+        if (null == clazz) {
+            return null;
+        }
         Object defaultValue = getDefaultValue();
         if (null == defaultValue) {
             return null;
         }
+        
+        /*
+         * Check this order to be able to cast to sub-classes, too
+         */
         if (clazz.isAssignableFrom(defaultValue.getClass())) {
             return clazz.cast(defaultValue);
         }

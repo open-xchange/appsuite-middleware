@@ -50,9 +50,9 @@
 package com.openexchange.contactcollector.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
-import java.util.Dictionary;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
@@ -94,7 +94,8 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
-            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class, UserPermissionService.class };
+            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class, UserPermissionService.class,
+            ConfigViewFactory.class };
     }
 
     @Override

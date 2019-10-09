@@ -49,16 +49,13 @@
 
 package com.openexchange.gdpr.dataexport.provider.contacts;
 
-import com.openexchange.i18n.LocalizableStrings;
-
-
 /**
  * {@link ContactsDataExportPropertyNames}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class ContactsDataExportPropertyNames implements LocalizableStrings {
+public class ContactsDataExportPropertyNames {
 
     /**
      * Initializes a new {@link ContactsDataExportPropertyNames}.

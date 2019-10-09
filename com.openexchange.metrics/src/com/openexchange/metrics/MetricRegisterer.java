@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics;
 
+import java.util.Map;
+import java.util.Optional;
 import com.openexchange.metrics.types.Metric;
 
 /**
@@ -60,16 +62,34 @@ public interface MetricRegisterer {
 
     /**
      * Registers a new {@link Metric} or gets an already existing one
-     * 
-     * @param descriptor The {@link MetricDescriptor} for the {@link Metric}
+     *
+     * @param descriptor The descriptor for the metric
      * @return the new or already existing one {@link Metric}
      */
     Metric register(MetricDescriptor descriptor);
 
     /**
      * Unregisters a {@link Metric} described with the specified {@link MetricDescriptor}
-     * 
-     * @param descriptor The {@link MetricDescriptor}
+     *
+     * @param descriptor The descriptor
      */
     void unregister(MetricDescriptor descriptor);
+
+    /**
+     * Gets a dotted name for given descriptor.
+     *
+     * @param descriptor The descriptor
+     * @return The dotted name for given descriptor
+     */
+    default String getNameFor(MetricDescriptor descriptor) {
+        StringBuilder sb = new StringBuilder(descriptor.getGroup()).append('.').append(descriptor.getName());
+        Optional<Map<String, String>> optionalDimensions = descriptor.getDimensions();
+        if (optionalDimensions.isPresent()) {
+            for (Map.Entry<String, String> dimensionEntry : optionalDimensions.get().entrySet()) {
+                sb.append('.').append(dimensionEntry.getKey()).append('-').append(dimensionEntry.getValue());
+            }
+        }
+        return sb.toString();
+    }
+
 }

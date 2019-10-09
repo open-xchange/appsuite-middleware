@@ -52,9 +52,14 @@ package com.openexchange.ajax.session;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -117,9 +122,12 @@ public class LoginTest extends AbstractLoginTest {
     }
 
     @Test
-    public void testSuccessfulLoginDoesNotSetSessionCookie() throws Exception {
-        // Note: This will fail a while, until UI uses new store action and we can get rid of the session cookie after login
-        rawLogin(USER1);
+    public void testSuccessfulLoginDoesSetSessionCookieTTL_withStaySignedIn() throws Exception {
+        // Changed behaviour with 7.10.3. "session"-cookie is now always set during login, but without TTL if 'staySignedIn' was not set
+        LocalDate today = LocalDate.now(); 
+        LocalDate expectedTTL = today.plus(1, ChronoUnit.WEEKS);
+        LocalDate ttl = null;
+        rawLogin(USER1, true);
         Cookie[] cookies = currentClient.getClient().getState().getCookies();
         boolean found = false;
         List<String> cookieNames = new ArrayList<String>(cookies.length);
@@ -127,9 +135,30 @@ public class LoginTest extends AbstractLoginTest {
             String name = cookie.getName();
             cookieNames.add(name);
             found = found || name.startsWith("open-xchange-session");
+            if (found) {
+                ttl = cookie.getExpiryDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            }
         }
+        assertTrue("open-xchange-session cookie not found", found);
+        assertTrue(expectedTTL.isEqual(ttl));
+    }
 
-        assertFalse("Found session cookie, but shouldn't have: " + cookieNames.toString(), found);
+    @Test
+    public void testSuccessfulLoginDoesSetSessionCookieTTL_withoutStaySignedIn() throws Exception {
+        // Changed behaviour with 7.10.3. "session"-cookie is now always set during login, but without TTL if 'staySignedIn' was not set
+        rawLogin(USER1, false);
+        Cookie[] cookies = currentClient.getClient().getState().getCookies();
+        boolean found = false;
+        List<String> cookieNames = new ArrayList<String>(cookies.length);
+        for (Cookie cookie : cookies) {
+            String name = cookie.getName();
+            cookieNames.add(name);
+            found = found || name.startsWith("open-xchange-session");
+            if (found) {
+                assertNull(cookie.getExpiryDate());
+            }
+        }
+        assertTrue("open-xchange-session cookie not found", found);
     }
 
     @Test
@@ -241,36 +270,6 @@ public class LoginTest extends AbstractLoginTest {
         assertError();
     }
 
-    /**
-     * If a login response lacks the random token the associated login actions (redeem and redirect) have to be unusable, too (even with an
-     * otherwise valid random token).
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testSessionRandomMissingAndUnusable() throws Exception {
-        rawLogin(USER1);
-        /*
-         * if login.properties:com.openexchange.ajax.login.randomToken=true
-         * the response contains the random. only continue when it's absent.
-         */
-        if (!rawResponse.has("random")) {
-            String sessionID = rawResponse.getString("session");
-            //get the otherwise valid random token
-            callGeneral("logintest", "randomtoken", "session", sessionID);
-            assertNoError();
-            Map<String, Object> details = details();
-            Object randomObject = details.get("random");
-            assertNotNull(randomObject);
-
-            HttpMethod redirectMethod = rawMethod("login", "redirect", "session", sessionID, "random", randomObject);
-            assertEquals("action=redirect shouldn't work when randomToken is disabled", 400, redirectMethod.getStatusCode());
-
-            HttpMethod redeemMethod = rawMethod("login", "redeem", "session", sessionID, "random", randomObject);
-            assertEquals("action=redeem shouldn't work when randomToken is disabled", 400, redeemMethod.getStatusCode());
-        }
-    }
-
     @Test
     public void testCookieHashSalt() throws Exception {
         rawLogin(USER1);
@@ -298,12 +297,13 @@ public class LoginTest extends AbstractLoginTest {
     }
 
     private void rawLogin(String user) throws Exception {
+        rawLogin(user, true);
+    }
+
+    private void rawLogin(String user, boolean staySignedIn) throws Exception {
         String[] credentials = credentials(user);
-
         inModule("login");
-
-        raw("login", "name", credentials[0], "password", credentials[1]);
-
+        raw("login", "name", credentials[0], "password", credentials[1], "staySignedIn", String.valueOf(staySignedIn));
     }
 
     private String getHash(String agent, String salt) throws NoSuchAlgorithmException {

@@ -101,7 +101,17 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
      * @param configViewFactory The configuration view
      */
     public CalendarUserAddressSet(int contextID, Resource resource, ConfigViewFactory configViewFactory) {
-        this(Arrays.asList(PrincipalURL.forResource(resource.getIdentifier(), configViewFactory), ResourceId.forResource(contextID, resource.getIdentifier())));
+        this(getAddresses(contextID, resource, configViewFactory));
+    }
+
+    private static List<String> getAddresses(int contextID, Resource resource, ConfigViewFactory configViewFactory) {
+        List<String> addresses = new ArrayList<String>(3);
+        if (Strings.isNotEmpty(resource.getMail())) {
+            addresses.add(CalendarUtils.getURI(resource.getMail()));
+        }
+        addresses.add(PrincipalURL.forResource(resource.getIdentifier(), configViewFactory));
+        addresses.add(ResourceId.forResource(contextID, resource.getIdentifier()));
+        return addresses;
     }
 
     private static List<String> getAddresses(int contextID, User user, ConfigViewFactory configViewFactory) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.reports;
 
+import static com.openexchange.dav.DAVProtocol.CALENDARSERVER_NS;
 import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -291,7 +292,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                         } catch (OXException e) {
                             LOG.warn("error searching resources", e);
                         }
-                    } else if ("email-address-set".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
+                    } else if ("email-address-set".equals(element.getName()) && CALENDARSERVER_NS.equals(element.getNamespace())) {
                         try {
                             Resource[] foundResources = factory.requireService(ResourceService.class).searchResourcesByMail(pattern, factory.getContext());
                             if (null != foundResources && 0 < foundResources.length) {
@@ -307,6 +308,15 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                                 Resource resource = factory.requireService(ResourceService.class).getResource(resourceID, factory.getContext());
                                 if (null != resource) {
                                     resources.add(resource);
+                                }
+                            } catch (OXException e) {
+                                LOG.warn("error searching resources", e);
+                            }
+                        } else {
+                            try {
+                                Resource[] foundResources = factory.requireService(ResourceService.class).searchResourcesByMail(pattern, factory.getContext());
+                                if (null != foundResources && 0 < foundResources.length) {
+                                    resources.addAll(Arrays.asList(foundResources));
                                 }
                             } catch (OXException e) {
                                 LOG.warn("error searching resources", e);

@@ -126,7 +126,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             final int owner = analysis.getMessage().getOwner() > 0 ? analysis.getMessage().getOwner() : session.getUserId();
             boolean exceptionCreate = isExceptionCreate(change);
 
-            if (!PublicType.getInstance().equals(util.getFolderType(event, session))) {
+            if (Strings.isEmpty(event.getFolderId()) || !PublicType.getInstance().equals(util.getFolderType(event, session))) {
                 ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
             }
             Event original = determineOriginalEvent(change, processed, session);

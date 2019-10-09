@@ -47,25 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.oidc.impl;
 
-import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.oidc.osgi.OIDCBackendRegistry;
+import com.openexchange.oidc.spi.AbstractOIDCPasswordGrantAuthentication;
+import com.openexchange.serverconfig.ServerConfigService;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * {@link OIDCPasswordGrantAuthentication}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class StoreResponseParser extends AbstractAJAXParser<StoreResponse> {
+public class OIDCPasswordGrantAuthentication extends AbstractOIDCPasswordGrantAuthentication {
 
-    protected StoreResponseParser(boolean failOnError) {
-        super(failOnError);
+    /**
+     * Initializes a new {@link OIDCPasswordGrantAuthentication}.
+     * @param backends
+     * @param serverConfigService
+     */
+    public OIDCPasswordGrantAuthentication(OIDCBackendRegistry backends, ServerConfigService serverConfigService) {
+        super(backends, serverConfigService);
     }
 
-    @Override
-    protected StoreResponse createResponse(Response response) throws JSONException {
-        StoreResponse retval = new StoreResponse(response);
-        return retval;
-    }
 
 }

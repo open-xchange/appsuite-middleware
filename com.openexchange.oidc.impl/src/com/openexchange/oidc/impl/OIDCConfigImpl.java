@@ -81,4 +81,9 @@ public class OIDCConfigImpl implements OIDCConfig{
     public boolean startDefaultBackend() {
         return this.leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);
     }
+
+    @Override
+    public boolean isPasswordGrantEnabled() {
+        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enablePasswordGrant);
+    }
 }

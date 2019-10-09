@@ -90,18 +90,33 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     }
 
     @Override
-    protected void onClose() throws Exception {
-        LOG.info("Generic IMAP circuit breaker closed");
+    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
+        String key = protocol.getHost();
+        CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
+        if (breakerInfo == null) {
+            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
+            breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
+            if (breakerInfo == null) {
+                breakerInfo = newBreakerInfo;
+                initMetricsFor(key, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
+            }
+        }
+        return breakerInfo;
     }
 
     @Override
-    protected void onHalfOpen() throws Exception {
-        LOG.info("Generic IMAP circuit breaker half-opened");
+    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker closed for {}", breakerInfo.getKey());
     }
 
     @Override
-    protected void onOpen() throws Exception {
-        LOG.info("Generic IMAP circuit breaker opened");
+    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker half-opened for {}", breakerInfo.getKey());
+    }
+
+    @Override
+    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("IMAP circuit breaker opened for {}", breakerInfo.getKey());
     }
 
     @Override

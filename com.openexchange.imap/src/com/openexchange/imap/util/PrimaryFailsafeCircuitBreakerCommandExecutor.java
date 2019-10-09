@@ -49,13 +49,9 @@
 
 package com.openexchange.imap.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.net.InetAddress;
 import java.util.Optional;
 import org.slf4j.Logger;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.MetricType;
 import com.sun.mail.iap.Protocol;
 
 /**
@@ -86,18 +82,42 @@ public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
     }
 
     @Override
-    protected void onClose() throws Exception {
-        LOG.info("Primary IMAP circuit breaker closed");
+    protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
+        InetAddress key = protocol.getInetAddress();
+        CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
+        if (breakerInfo == null) {
+            String id = stringFor(key);
+            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(id);
+            breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
+            if (breakerInfo == null) {
+                breakerInfo = newBreakerInfo;
+                initMetricsFor(id, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
+            }
+        }
+        return breakerInfo;
+    }
+
+    private static String stringFor(InetAddress inetAddress) {
+        String s = inetAddress.toString();
+        if (s.startsWith("/")) {
+            s = s.substring(1);
+        }
+        return s;
     }
 
     @Override
-    protected void onHalfOpen() throws Exception {
-        LOG.info("Primary IMAP circuit breaker half-opened");
+    protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("Primary IMAP circuit breaker closed for end-point {}", breakerInfo.getKey());
     }
 
     @Override
-    protected void onOpen() throws Exception {
-        LOG.info("Primary IMAP circuit breaker opened");
+    protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("Primary IMAP circuit breaker half-opened for end-point {}", breakerInfo.getKey());
+    }
+
+    @Override
+    protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
+        LOG.info("Primary IMAP circuit breaker opened for end-point {}", breakerInfo.getKey());
     }
 
     @Override

@@ -51,21 +51,29 @@ package com.openexchange.oidc.osgi;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.lock.LockService;
+import com.openexchange.login.listener.LoginListener;
+import com.openexchange.mail.api.AuthenticationFailedHandler;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
 import com.openexchange.oidc.hz.PortableLogoutRequestFactory;
+import com.openexchange.oidc.impl.OIDCAuthenticationFailedHandler;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
+import com.openexchange.oidc.impl.OIDCPasswordGrantAuthentication;
 import com.openexchange.oidc.impl.OIDCSessionInspectorService;
 import com.openexchange.oidc.impl.OIDCSessionParameterNamesProvider;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.inspector.SessionInspectorService;
+import com.openexchange.session.oauth.SessionOAuthTokenService;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
@@ -94,7 +102,9 @@ public class OIDCActivator extends HousekeepingActivator{
             SessionReservationService.class,
             ContextService.class,
             UserService.class,
-            SessiondService.class
+            SessiondService.class,
+            ServerConfigService.class,
+            SessionOAuthTokenService.class
         };
     }
 
@@ -114,6 +124,7 @@ public class OIDCActivator extends HousekeepingActivator{
     protected synchronized void startBundle() throws Exception {
         Services.setServices(this);
         trackService(SessionStorageService.class);
+        trackService(LockService.class);
         openTrackers();
 
         OIDCConfigImpl config = new OIDCConfigImpl(this);
@@ -122,9 +133,16 @@ public class OIDCActivator extends HousekeepingActivator{
         if (config.isEnabled()) {
             logger.info("Starting core OpenID Connect support... ");
             getOIDCBackends(this);
-            registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackendRegistry), null);
+            registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackendRegistry, getService(SessionOAuthTokenService.class)));
+            registerService(AuthenticationFailedHandler.class, new OIDCAuthenticationFailedHandler(), 100);
             registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null);
             registerService(CustomPortableFactory.class, new PortableLogoutRequestFactory(), null);
+
+            if (config.isPasswordGrantEnabled()) {
+                OIDCPasswordGrantAuthentication passwordGrantAuth = new OIDCPasswordGrantAuthentication(oidcBackendRegistry, getService(ServerConfigService.class));
+                registerService(AuthenticationService.class, passwordGrantAuth);
+                registerService(LoginListener.class, passwordGrantAuth);
+            }
         } else {
             logger.info("OpenID Connect support is disabled by configuration. Skipping initialization...");
         }

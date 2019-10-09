@@ -100,6 +100,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.resource.Resource;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 
@@ -685,7 +686,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      */
     public static String calendarAddressMatches(String uri, int contextId, User user) throws OXException {
         if (null == uri) {
-            CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
         }
         ResourceId resourceId = ResourceId.parse(uri);
         if (null != resourceId && resourceId.getContextID() == contextId && resourceId.getEntity() == user.getId()) {
@@ -711,6 +712,40 @@ public class Check extends com.openexchange.chronos.common.Check {
          * mismatch, otherwise
          */
         throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(user.getId()), CalendarUserType.INDIVIDUAL);
+    }
+
+    /**
+     * Checks that a calendar user address URI matches a specific resource, i.e. it either matches the resource's resource identifier, or
+     * references the resource's e-mail addresses.
+     * 
+     * @param uri The calendar user address string to check
+     * @param contextId The context identifier
+     * @param resource The internal resource to match against
+     * @return The passed calendar address, after it was checked to match the referenced user
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_CALENDAR_USER}
+     */
+    public static String calendarAddressMatches(String uri, int contextId, Resource resource) throws OXException {
+        if (null == uri) {
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(resource.getIdentifier()), CalendarUserType.INDIVIDUAL);
+        }
+        ResourceId resourceId = ResourceId.parse(uri);
+        if (null != resourceId && resourceId.getContextID() == contextId && resourceId.getEntity() == resource.getIdentifier()) {
+            /*
+             * resource id address matches referenced resource
+             */
+            return uri;
+        }
+        String mailAddress = extractEMailAddress(uri);
+        if (Strings.isNotEmpty(mailAddress) && mailAddress.equalsIgnoreCase(resource.getMail())) {
+            /*
+             * e-mail address matches referenced resource
+             */
+            return uri;
+        }
+        /*
+         * mismatch, otherwise
+         */
+        throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(uri, I(resource.getIdentifier()), CalendarUserType.INDIVIDUAL);
     }
 
 }

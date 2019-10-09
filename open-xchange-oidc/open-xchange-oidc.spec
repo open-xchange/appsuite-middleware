@@ -24,6 +24,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange Server OpenId Bundle
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
+Provides:      open-xchange-authentication
 
 %description
 The Open-Xchange Server OpenId Bundle.

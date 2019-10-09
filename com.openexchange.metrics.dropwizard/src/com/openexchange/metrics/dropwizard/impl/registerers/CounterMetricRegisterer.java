@@ -62,7 +62,7 @@ import com.openexchange.metrics.types.Metric;
  */
 public class CounterMetricRegisterer implements MetricRegisterer {
 
-    private MetricRegistry registry;
+    private final MetricRegistry registry;
 
     /**
      * Initialises a new {@link CounterMetricRegisterer}.
@@ -74,12 +74,12 @@ public class CounterMetricRegisterer implements MetricRegisterer {
 
     @Override
     public Metric register(MetricDescriptor descriptor) {
-        return new DropwizardCounter(registry.counter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+        return new DropwizardCounter(registry.counter(getNameFor(descriptor)));
     }
 
     @Override
     public void unregister(MetricDescriptor descriptor) {
-        registry.remove(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));
+        registry.remove(getNameFor(descriptor));
     }
 
 }

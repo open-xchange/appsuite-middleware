@@ -49,16 +49,13 @@
 
 package com.openexchange.gdpr.dataexport.provider.infostore;
 
-import com.openexchange.i18n.LocalizableStrings;
-
-
 /**
  * {@link InfostoreDataExportPropertyNames}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class InfostoreDataExportPropertyNames implements LocalizableStrings {
+public class InfostoreDataExportPropertyNames {
 
     /**
      * Initializes a new {@link InfostoreDataExportPropertyNames}.

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,37 +47,23 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.session.oauth;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * {@link UnitTests}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class StoreRequest extends AbstractRequest<StoreResponse> {
+@RunWith(Suite.class)
+@SuiteClasses({ SessionOAuthTokenServiceTest.class })
+public class UnitTests {
 
-    private static final String PARAM_SESSION = "session";
-
-    private final boolean failOnError;
-
-    public StoreRequest(final String session) {
-        this(session, true);
-    }
-
-    public StoreRequest(final String session, final boolean failOnError) {
-        super(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_STORE), new URLParameter(PARAM_SESSION, session)
-        });
-        this.failOnError = failOnError;
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends StoreResponse> getParser() {
-        return new StoreResponseParser(failOnError);
-    }
-
-    @Override
-    public Method getMethod() {
-        return Method.GET;
+    public UnitTests() {
+        super();
     }
 }

@@ -118,7 +118,7 @@ public class HttpAuthTest {
             String location = response.getLocation();
             assertNotNull("Location is missing in response.", location);
             int sessionStart = location.indexOf("session=");
-            String sessionId = location.substring(sessionStart + 8, location.indexOf('&', sessionStart + 8));
+            String sessionId = location.substring(sessionStart + 8);
             session.setId(sessionId);
         } finally {
             myClient.logout();

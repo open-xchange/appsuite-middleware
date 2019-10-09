@@ -49,6 +49,7 @@
 
 package com.openexchange.lock;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -95,6 +96,11 @@ public class ReentrantLockAccessControl implements AccessControl {
     @Override
     public boolean tryAcquireGrant() {
         return lock.tryLock();
+    }
+
+    @Override
+    public boolean tryAcquireGrant(long timeout, TimeUnit unit) throws InterruptedException {
+        return lock.tryLock(timeout, unit);
     }
 
     @Override

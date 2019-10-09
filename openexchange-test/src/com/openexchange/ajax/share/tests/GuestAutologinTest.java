@@ -61,8 +61,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.session.actions.AutologinRequest;
 import com.openexchange.ajax.session.actions.AutologinRequest.AutologinParameters;
 import com.openexchange.ajax.session.actions.AutologinResponse;
-import com.openexchange.ajax.session.actions.StoreRequest;
-import com.openexchange.ajax.session.actions.StoreResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -115,10 +113,7 @@ public class GuestAutologinTest extends ShareTest {
         String oldSessionID = sharedSession.getId();
         try {
             getSession().setId(null);
-            GuestClient guestClient = new GuestClient(sharedSession, shareURL, getUsername(recipient), getPassword(recipient), client, true, false);
-            StoreRequest storeRequest = new StoreRequest(sharedSession.getId(), false);
-            StoreResponse storeResponse = guestClient.execute(storeRequest);
-            assertFalse(storeResponse.getErrorMessage(), storeResponse.hasError());
+            GuestClient guestClient = new GuestClient(sharedSession, shareURL, getUsername(recipient), getPassword(recipient), client, true, true, false);
             AutologinRequest autologin = new AutologinRequest(new AutologinParameters(randomUID(), client, AJAXClient.VERSION), false);
             AutologinResponse response = guestClient.execute(autologin);
             assertFalse(response.getErrorMessage(), response.hasError());

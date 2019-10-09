@@ -219,7 +219,7 @@ public interface Session {
     public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
 
     /**
-     * The parameter that holds when the OAuth token expires.
+     * The parameter that holds when the OAuth token expires. Value is string of unix timestamp.
      *
      * @type <code>java.lang.String</code>
      */

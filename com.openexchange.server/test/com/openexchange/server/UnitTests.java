@@ -53,6 +53,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
+import com.openexchange.lock.impl.AccessControlImplTest;
 
 /**
  * Suite for integrated unit tests of the com.openexchange.server bundle.
@@ -113,6 +114,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformerTest.class,
     com.openexchange.folderstorage.database.DatabaseFolderTest.class,
     com.openexchange.config.admin.internal.HideAdminServiceImplTest.class,
+    AccessControlImplTest.class
 })
 public class UnitTests {
 

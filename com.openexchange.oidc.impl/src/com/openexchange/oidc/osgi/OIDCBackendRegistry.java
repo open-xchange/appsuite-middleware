@@ -99,10 +99,13 @@ import com.openexchange.session.Session;
 public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend>{
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCBackendRegistry.class);
-    
+
     private static final String ERROR_WHILE_REMOVING_PATH_FOR_OIDC_BACKEND = "Error while removing path for OIDC Backend";
 
-    private static final String OIDC_PATH = "oidcPath";
+    /**
+     * Server config key for oidc path
+     */
+    public static final String OIDC_PATH = "oidcPath";
 
     private final ServiceLookup services;
     private final ConcurrentList<OIDCBackend> backends;

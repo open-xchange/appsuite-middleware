@@ -49,6 +49,7 @@
 package com.openexchange.oidc;
 
 import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.openexchange.authentication.NamePart;
 import com.openexchange.config.lean.Property;
 
 
@@ -143,17 +144,63 @@ public enum OIDCBackendProperty implements Property {
      * backendPath - This backends servlet path, which is appended to the default /oidc/ path.
      */
     backendPath(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-
     /**
      * hosts - This contains a comma separated list of hosts, that this backend supports.
      */
     hosts(OIDCProperty.PREFIX, "all"),
-
     /**
      * failureRedirect - Defines where a user should be redirected if an error occurs that
      * does not need a special handling.
      */
-    failureRedirect(OIDCProperty.PREFIX, OIDCProperty.EMPTY);
+    failureRedirect(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * contextLookupClaim - Gets the name of the ID token claim that will be used by the
+     * default backend to resolve a context.
+     */
+    contextLookupClaim(OIDCProperty.PREFIX, "sub"),
+    /**
+     * contextLookupNamePart - Gets the {@link NamePart} of the ID token claim value used for
+     * determining the context of a user.
+     *
+     * @see #contextLookupClaim
+     */
+    contextLookupNamePart(OIDCProperty.PREFIX, NamePart.DOMAIN.getConfigName()),
+    /**
+     * userLookupClaim - Gets the name of the ID token claim that will be used by the
+     * default backend to resolve a user.
+     */
+    userLookupClaim(OIDCProperty.PREFIX, "sub"),
+    /**
+     * userLookupNamePart - Gets the {@link NamePart} of the ID token claim value used for
+     * determining a user.
+     *
+     * @see #userLookupClaim
+     */
+    userLookupNamePart(OIDCProperty.PREFIX, NamePart.LOCAL_PART.getConfigName()),
+    /**
+     * passwordGrantUserNamePart - Gets the {@link NamePart} to be used for an issued Resource
+     * Owner Password Credentials Grant ({@link https://tools.ietf.org/html/rfc6749#section-4.3}).
+     * The part is taken from the user-provided login name.
+     *
+     * @see OIDCProperty#enablePasswordGrant
+     */
+    passwordGrantUserNamePart(OIDCProperty.PREFIX, NamePart.FULL.getConfigName()),
+    /**
+     * tokenLockTimeoutSeconds - Lock timeout before giving up trying to refresh an access token for
+     * a session. If multiple threads try to check or refresh the access token
+     * at the same time, only one gets a lock and blocks the others. In case
+     * of a timeout, this is logged as a temporary issue and the request continued
+     * as usual.
+     */
+    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, 5),
+    /**
+     * tryRecoverStoredTokens - Whether token refresh should try to recover valid tokens from
+     * the session instance that is present in {@link SessionStorageService}.
+     * This is only tried as a fall-back, after token refresh failed with an
+     * {@code invalid_grant} error.
+     */
+    tryRecoverStoredTokens(OIDCProperty.PREFIX, "false")
+    ;
 
     private final String fqn;
     private final Object defaultValue;

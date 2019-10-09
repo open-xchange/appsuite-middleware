@@ -1193,6 +1193,12 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     private void parseAddress0(final String address) throws AddressException {
+        if (Strings.isEmpty(address)) {
+            throw new AddressException("Empty address");
+        }
+        if (address.indexOf('@') < 0) {
+            throw new AddressException("Illegal address", address);
+        }
         InternetAddress[] a;
         try {
             // use our address parsing utility routine to parse the string

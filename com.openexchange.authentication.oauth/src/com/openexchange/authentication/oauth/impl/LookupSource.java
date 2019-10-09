@@ -47,18 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.authentication.oauth.impl;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.authentication.NamePart;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * {@link LookupSource} denotes the input value used to resolve a user or context
+ * within App Suite. The taken value might be evaluated further to determine the
+ * actual identifier to lookup the user or context, see {@link NamePart}.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @see NamePart
+ * @since v7.10.3
  */
-public class StoreResponse extends AbstractAJAXResponse {
+public enum LookupSource {
 
-    protected StoreResponse(Response response) {
-        super(response);
+    /**
+     * The name given as user input during login.
+     */
+    LOGIN_NAME("login-name"),
+    /**
+     * A response parameter from the authorization server.
+     */
+    RESPONSE_PARAMETER("response-parameter");
+
+    private final String configName;
+
+    private LookupSource(String configName) {
+        this.configName = configName;
+    }
+
+    /**
+     * Gets the name of this part as it would be defined in a configuration property.
+     * 
+     * @return The configuration name
+     */
+    public String getConfigName() {
+        return configName;
+    }
+
+    /**
+     * Gets the {@link NamePart} for a given config name or <code>null</code> if none matches.
+     * 
+     * @param configName
+     * @return The config name or <code>null</code>
+     */
+    public static LookupSource of(String configName) {
+        for (LookupSource value : LookupSource.values()) {
+            if (value.configName.equals(configName)) {
+                return value;
+            }
+        }
+
+        return null;
     }
 
 }
