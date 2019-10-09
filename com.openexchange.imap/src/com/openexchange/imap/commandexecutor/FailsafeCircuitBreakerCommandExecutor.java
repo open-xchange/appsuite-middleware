@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,87 +47,84 @@
  *
  */
 
-package com.openexchange.imap.util;
+package com.openexchange.imap.commandexecutor;
 
-import java.net.InetAddress;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
+import com.openexchange.net.HostList;
 import com.sun.mail.iap.Protocol;
 
 /**
- * {@link PrimaryFailsafeCircuitBreakerCommandExecutor} - The special IMAP circuit breaker form primary account.
+ * {@link FailsafeCircuitBreakerCommandExecutor} - A circuit breaker for denoted IMAP end-points.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.3
+ * @since v7.8.0
  */
-public class PrimaryFailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
+public class FailsafeCircuitBreakerCommandExecutor extends AbstractFailsafeCircuitBreakerCommandExecutor {
 
     /** The logger constant */
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PrimaryFailsafeCircuitBreakerCommandExecutor.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FailsafeCircuitBreakerCommandExecutor.class);
 
-    private static final String PROP_PRIMARY_ACCOUNT = "mail.imap.primary";
+    private static HostList checkHostList(HostList hostList) {
+        if (null == hostList || hostList.isEmpty()) {
+            throw new IllegalArgumentException("hostList must not be null or empty.");
+        }
+        return hostList;
+    }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    private final String key;
+
     /**
-     * Initializes a new {@link PrimaryFailsafeCircuitBreakerCommandExecutor}.
+     * Initializes a new {@link FailsafeCircuitBreakerCommandExecutor}.
      *
+     * @param hostList The hosts to consider
+     * @param optPorts The optional ports to consider
      * @param failureThreshold The number of successive failures that must occur in order to open the circuit
      * @param successThreshold The number of successive successful executions that must occur when in a half-open state in order to close the circuit
      * @param delayMillis The number of milliseconds to wait in open state before transitioning to half-open
+     * @param ranking The ranking
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public PrimaryFailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
-        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 100);
+    public FailsafeCircuitBreakerCommandExecutor(HostList hostList, Set<Integer> optPorts, int failureThreshold, int successThreshold, long delayMillis, int ranking) {
+        super(Optional.of(checkHostList(hostList)), optPorts, failureThreshold, successThreshold, delayMillis, ranking);
+        key = hostList.getHostString();
     }
 
     @Override
     protected CircuitBreakerInfo circuitBreakerFor(Protocol protocol) {
-        InetAddress key = protocol.getInetAddress();
         CircuitBreakerInfo breakerInfo = circuitBreakers.get(key);
         if (breakerInfo == null) {
-            String id = stringFor(key);
-            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(id);
+            CircuitBreakerInfo newBreakerInfo = createCircuitBreaker(key);
             breakerInfo = circuitBreakers.putIfAbsent(key, newBreakerInfo);
             if (breakerInfo == null) {
                 breakerInfo = newBreakerInfo;
-                initMetricsFor(id, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
+                initMetricsFor(key, newBreakerInfo, metricServiceReference.get(), metricDescriptors.get());
             }
         }
         return breakerInfo;
     }
 
-    private static String stringFor(InetAddress inetAddress) {
-        String s = inetAddress.toString();
-        if (s.startsWith("/")) {
-            s = s.substring(1);
-        }
-        return s;
-    }
-
     @Override
     protected void onClose(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("Primary IMAP circuit breaker closed for end-point {}", breakerInfo.getKey());
+        LOG.info("IMAP circuit breaker closed for {}", breakerInfo.getKey());
     }
 
     @Override
     protected void onHalfOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("Primary IMAP circuit breaker half-opened for end-point {}", breakerInfo.getKey());
+        LOG.info("IMAP circuit breaker half-opened for {}", breakerInfo.getKey());
     }
 
     @Override
     protected void onOpen(CircuitBreakerInfo breakerInfo) throws Exception {
-        LOG.info("Primary IMAP circuit breaker opened for end-point {}", breakerInfo.getKey());
+        LOG.info("IMAP circuit breaker opened for {}", breakerInfo.getKey());
     }
 
     @Override
     public String getDescription() {
-        return "primary";
-    }
-
-    @Override
-    public boolean isApplicable(Protocol protocol) {
-        return "true".equals(protocol.getProps().getProperty(PROP_PRIMARY_ACCOUNT));
+        return optionalHostList.isPresent() ? optionalHostList.get().getHostString() : "";
     }
 
 }

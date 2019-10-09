@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.util;
+package com.openexchange.imap.commandexecutor;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -84,7 +84,7 @@ public class GenericFailsafeCircuitBreakerCommandExecutor extends AbstractFailsa
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
     public GenericFailsafeCircuitBreakerCommandExecutor(int failureThreshold, int successThreshold, long delayMillis) {
-        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 0);
+        super(Optional.empty(), null, failureThreshold, successThreshold, delayMillis, 10);
         optionalHostsToExclude = new AtomicReference<>(Optional.empty());
         excludePrimaryAccount = new AtomicBoolean(false);
     }

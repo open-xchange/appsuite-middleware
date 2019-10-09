@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.util;
+package com.openexchange.imap.commandexecutor;
 
 import static com.openexchange.exception.ExceptionUtils.isEitherOf;
 import static com.openexchange.java.Autoboxing.I;
@@ -87,7 +87,6 @@ import com.openexchange.net.HostList;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.Response;
-import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 import net.jodah.failsafe.CircuitBreaker;
@@ -102,7 +101,7 @@ import net.jodah.failsafe.function.CheckedRunnable;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
+public abstract class AbstractFailsafeCircuitBreakerCommandExecutor extends AbstractMetricAwareCommandExecutor {
 
     /** The failure threshold */
     protected final int failureThreshold;
@@ -256,13 +255,6 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     }
 
     /**
-     * Gets a short description for this circuit breaker.
-     *
-     * @return The description
-     */
-    public abstract String getDescription();
-
-    /**
      * Gets the optional listing of IMAP hosts to which this circuit breaker applies.
      *
      * @return The host list
@@ -289,7 +281,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
     public Response[] executeCommand(String command, Argument args, Protocol protocol) {
         CircuitBreakerInfo breakerInfo = circuitBreakerFor(protocol);
         try {
-            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(command, args, protocol));
+            return Failsafe.with(breakerInfo.getCircuitBreaker()).get(new CircuitBreakerCommandCallable(command, args, protocol, metricServiceReference));
         } catch (CircuitBreakerOpenException e) {
             // Circuit is open
             onDenied(e, breakerInfo);
@@ -350,12 +342,20 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         return sb.toString();
     }
 
+    @Override
+    protected void addMetricDescriptors(List<MetricDescriptor> descriptors, MetricService metricService) {
+        for (CircuitBreakerInfo breakerInfo : circuitBreakers.values()) {
+            initMetricsFor(breakerInfo.getKey(), breakerInfo, metricService, descriptors);
+        }
+    }
+
     /**
      * Invoked when given metric service appeared.
      *
      * @param metricService The metric service
      * @throws Exception If an error occurs
      */
+    @Override
     public void onMetricServiceAppeared(MetricService metricService) throws Exception {
         metricServiceReference.set(metricService);
 
@@ -476,19 +476,13 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
      * @param metricService The metric service
      * @throws Exception If an error occurs
      */
+    @Override
     public void onMetricServiceDisppearing(MetricService metricService) throws Exception {
-        metricServiceReference.set(null);
+        super.onMetricServiceDisppearing(metricService);
 
         for (CircuitBreakerInfo breakerInfo : circuitBreakers.values()) {
             breakerInfo.getOnOpenMetricTaskReference().set(null);
             breakerInfo.getOnDeniedMetricTaskReference().set(null);
-        }
-
-        List<MetricDescriptor> descriptors = this.metricDescriptors.getAndSet(null);
-        if (descriptors != null) {
-            for (MetricDescriptor metricDescriptor : descriptors) {
-                metricService.removeMetric(metricDescriptor);
-            }
         }
     }
 
@@ -524,6 +518,7 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
         private final String command;
         private final Argument args;
         private final Protocol protocol;
+        private final AtomicReference<MetricService> metricServiceReference;
 
         /**
          * Initializes a new {@link CircuitBreakerCommandCallable}.
@@ -531,21 +526,27 @@ public abstract class AbstractFailsafeCircuitBreakerCommandExecutor implements C
          * @param command The command
          * @param args The optional arguments
          * @param protocol The protocol instance
+         * @param metricServiceReference The metric service reference
          */
-        CircuitBreakerCommandCallable(String command, Argument args, Protocol protocol) {
+        CircuitBreakerCommandCallable(String command, Argument args, Protocol protocol, AtomicReference<MetricService> metricServiceReference) {
             super();
             this.command = command;
             this.args = args;
             this.protocol = protocol;
+            this.metricServiceReference = metricServiceReference;
         }
 
         @Override
         public Response[] call() throws Exception {
+            MetricService metricService = metricServiceReference.get();
+
             // Obtain responses
-            Response[] responses = protocol.executeCommand(command, args);
+            ExecutedCommand executedCommand = MonitoringCommandExecutor.executeCommand(command, args, protocol, Optional.ofNullable(metricService));
+            Response[] responses = executedCommand.responses;
 
             // Check status response
-            StatusResponse statusResponse = StatusResponse.statusResponseFor(responses);
+            Optional<StatusResponse> optionalStatusResponse = executedCommand.optionalStatusResponse;
+            StatusResponse statusResponse = optionalStatusResponse.isPresent() ? executedCommand.optionalStatusResponse.get() : StatusResponse.statusResponseFor(responses);
             if (statusResponse != null && Status.BYE == statusResponse.getStatus()) {
                 Response response = statusResponse.getResponse();
                 // Command failed. Check for a synthetic BYE response providing the causing I/O error
