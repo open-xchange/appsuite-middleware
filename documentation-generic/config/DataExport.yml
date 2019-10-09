@@ -153,3 +153,223 @@ properties:
       file: dataexport.properties
       packageName: open-xchange-gdpr-dataexport
       tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.calendar.enabled
+      description: |
+        Whether calendar module is supposed to be offered for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.calendar.includePublic
+      description: |
+        Whether the user should be allowed to include public calendar folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.calendar.includeShared
+      description: |
+        Whether the user should be allowed to include shared calendar folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.calendar.includeUnsubscribed
+      description: |
+        Whether the user should be allowed to include unsubscribed calendar folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.contacts.enabled
+      description: |
+        Whether contacts module is supposed to be offered for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.contacts.includePublic
+      description: |
+        Whether the user should be allowed to include public contact folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.contacts.includeShared
+      description: |
+        Whether the user should be allowed to include shared contact folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.infostore.enabled
+      description: |
+        Whether infostore (aka Drive) module is supposed to be offered for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.infostore.includePublic
+      description: |
+        Whether the user should be allowed to include public infostore folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.infostore.includeShared
+      description: |
+        Whether the user should be allowed to include shared infostore folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.infostore.includeTrash
+      description: |
+        Whether the user should be allowed to include trash infostore folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"] 
+    - key: com.openexchange.gdpr.dataexport.provider.infostore.includeAllVersions
+      description: |
+        Whether the user should be allowed to include all file versions from infostore for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"] 
+    - key: com.openexchange.gdpr.dataexport.provider.mail.enabled
+      description: |
+        Whether mail module is supposed to be offered for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.mail.includePublic
+      description: |
+        Whether the user should be allowed to include public mail folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.mail.includeShared
+      description: |
+        Whether the user should be allowed to include shared mail folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.mail.includeTrash
+      description: |
+        Whether the user should be allowed to include trash mail folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"] 
+    - key: com.openexchange.gdpr.dataexport.provider.mail.includeUnsubscribed
+      description: |
+        Whether the user should be allowed to include unsubscribed mail folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"] 
+    - key: com.openexchange.gdpr.dataexport.provider.tasks.enabled
+      description: |
+        Whether tasks module is supposed to be offered for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.tasks.includePublic
+      description: |
+        Whether the user should be allowed to include public task folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.provider.tasks.includeShared
+      description: |
+        Whether the user should be allowed to include shared task folders for data export.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
