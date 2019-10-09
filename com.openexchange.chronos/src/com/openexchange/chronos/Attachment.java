@@ -68,6 +68,7 @@ public class Attachment {
     private String formatType;
     private long size;
 	private String filename;
+    private String checksum;
 
     /**
      * Initializes a new {@link Attachment}.
@@ -142,73 +143,27 @@ public class Attachment {
         this.created = created;
     }
 
+    /**
+     * Gets the checksum of the attachment's binary data, if available.
+     *
+     * @return The checksum, or <code>null</code> if not available
+     */
+    public String getChecksum() {
+        return checksum;
+    }
+
+    /**
+     * Sets the checksum of the attachment's binary data
+     *
+     * @param checksum The checksum
+     */
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
+    }
+
     @Override
     public String toString() {
         return "Attachment [managedId=" + managedId + ", uri=" + uri + ", filename=" + filename + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((created == null) ? 0 : created.hashCode());
-        result = prime * result + ((filename == null) ? 0 : filename.hashCode());
-        result = prime * result + ((formatType == null) ? 0 : formatType.hashCode());
-        result = prime * result + managedId;
-        result = prime * result + (int) (size ^ (size >>> 32));
-        result = prime * result + ((uri == null) ? 0 : uri.hashCode());
-        // Ignore IFileHolder
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Attachment other = (Attachment) obj;
-        if (managedId != other.managedId) {
-            return false;
-        }
-        if (size != other.size) {
-            return false;
-        }
-        if (created == null) {
-            if (other.created != null) {
-                return false;
-            }
-        } else if (!created.equals(other.created)) {
-            return false;
-        }
-        if (filename == null) {
-            if (other.filename != null) {
-                return false;
-            }
-        } else if (!filename.equals(other.filename)) {
-            return false;
-        }
-        if (formatType == null) {
-            if (other.formatType != null) {
-                return false;
-            }
-        } else if (!formatType.equals(other.formatType)) {
-            return false;
-        }
-        if (uri == null) {
-            if (other.uri != null) {
-                return false;
-            }
-        } else if (!uri.equals(other.uri)) {
-            return false;
-        }
-        // Ignore IFileHolder
-        return true;
     }
 
 }
