@@ -108,6 +108,18 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
+    /** The group name for IMAP metrics */
+    private static final String METRICS_GROUP = "imap";
+
+    /** The name for request rate metric */
+    private static final String METRICS_REQUEST_RATE_NAME = "requestRate";
+
+    /** The name for error rate metric */
+    private static final String METRICS_ERROR_RATE_NAME = "errorRate";
+
+    /** The key for server dimension */
+    private static final String METRICS_DIMENSION_SERVER_KEY = "server";
+
     /**
      * Executes given command with specified arguments using passed protocol instance while adding metrics in case optional metric service
      * is present.
@@ -125,14 +137,16 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
 
         MetricService metricService = optionalMetricService.get();
 
-        Timer requestMeter = metricService.getTimer(MetricDescriptor.newBuilder("imap", "RequestRate", MetricType.TIMER)
+        String serverInfo = new StringBuilder(protocol.getHost()).append(':').append(protocol.getPort()).toString();
+
+        Timer requestMeter = metricService.getTimer(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_REQUEST_RATE_NAME, MetricType.TIMER)
             .withDescription("Overall IMAP request timer per target server")
-            .addDimension("server", protocol.getHost() + ':' + protocol.getPort())
+            .addDimension(METRICS_DIMENSION_SERVER_KEY, serverInfo)
             .build());
 
-        Meter errorMeter = metricService.getMeter(MetricDescriptor.newBuilder("imap", "ErrorRate", MetricType.METER)
+        Meter errorMeter = metricService.getMeter(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_ERROR_RATE_NAME, MetricType.METER)
             .withDescription("Failed IMAP request meter per target server")
-            .addDimension("server", protocol.getHost() + ':' + protocol.getPort())
+            .addDimension(METRICS_DIMENSION_SERVER_KEY, serverInfo)
             .build());
 
         long duration = -1;
