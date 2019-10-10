@@ -88,28 +88,25 @@ public class SchemaTombstoneCleaner {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SchemaTombstoneCleaner.class);
 
     private final Set<TombstoneTableCleaner> tombstoneCleaner = Stream.of(new AttachmentTombstoneCleaner(), new CalendarTombstoneCleaner(), new ContactTombstoneCleaner(), new FolderTombstoneCleaner(), new GroupTombstoneCleaner(), new InfostoreTombstoneCleaner(), new ObjectPermissionTombstoneCleaner(), new ResourceTombstoneCleaner(), new TaskTombstoneCleaner()).collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
-    private final String schemaName;
-    private final Integer writePoolId;
     private final DatabaseService databaseService;
+    private final Integer distinctContextIdPerSchema;
 
     /**
      * Constructor that should be used if you already have a connection for the target schema
      *
      * @param databaseService {@link DatabaseService} used to retrieve {@link Connection}s
-     * @param schemaName {@link String} containing the name of the schema to process
-     * @param writePoolId {@link Integer} containing the write pool identifier
+     * @param distinctContextIdPerSchema {@link Integer} ContextId representing one schema
      */
-    public SchemaTombstoneCleaner(final DatabaseService databaseService, String schemaName, Integer writePoolId) {
+    public SchemaTombstoneCleaner(final DatabaseService databaseService, final Integer distinctContextIdPerSchema) {
         this.databaseService = databaseService;
-        this.schemaName = schemaName;
-        this.writePoolId = writePoolId;
+        this.distinctContextIdPerSchema = distinctContextIdPerSchema;
     }
 
     /**
      * Default constructor that should be used if you do not yet have a {@link Connection} to the target schema
      */
     public SchemaTombstoneCleaner() {
-        this(null, null, null);
+        this(null, null);
     }
 
     /**
@@ -124,31 +121,40 @@ public class SchemaTombstoneCleaner {
 
         Map<String, Integer> tableCleanupResults = new HashMap<>();
         Connection writeConnection = null;
+        boolean rollback = true;
         try {
-            writeConnection = databaseService.getNoTimeout(this.writePoolId.intValue(), schemaName);
+            writeConnection = databaseService.getForUpdateTask(this.distinctContextIdPerSchema.intValue());
             writeConnection.setAutoCommit(false);
             Map<String, Integer> cleanup = cleanup(writeConnection, timestamp);
             writeConnection.commit();
             tableCleanupResults.putAll(cleanup);
-        } catch (final SQLException | OXException e) {
-            Databases.rollback(writeConnection);
-            LOG.error("Cannot clean up data in schema '{}': {}", schemaName, e.getMessage(), e);
+            rollback = false;
+        } catch (SQLException | OXException e) {
+            try {
+                LOG.error("Cannot clean up data in schema '{}': {}", databaseService.getSchemaName(this.distinctContextIdPerSchema.intValue()), e.getMessage(), e);
+            } catch (OXException e1) {
+                LOG.error("Unable to retrieve schema name for context with id {}: {}.", this.distinctContextIdPerSchema, e1.getMessage(), e1);
+            }
         } finally {
+            if (rollback) {
+                Databases.rollback(writeConnection);
+            }
             Databases.autocommit(writeConnection);
-            databaseService.backNoTimeoout(writePoolId.intValue(), writeConnection);
+            databaseService.backForUpdateTask(distinctContextIdPerSchema.intValue(), writeConnection);
         }
         return tableCleanupResults;
     }
 
     private void validateParams() {
         Validate.notNull(this.databaseService, "DatabaseService might not be null. Use param constructor if you do not yet have a connection.");
-        Validate.notNull(this.schemaName, "SchemaName might not be null. Use param constructor if you do not yet have a connection.");
-        Validate.notNull(this.writePoolId, "WritePoolId might not be null. Use param constructor if you do not yet have a connection.");
+        Validate.notNull(this.distinctContextIdPerSchema, "Context id for for a schema cannot be null.");
     }
 
     /**
      * Cleans up based on the given connection and timestamp. All entries older than the timestamp will be removed.
      *
+     * @param writeConnection {@link Connection} to a schema.
+     * @param timestamp long defining what will be removed.
      * @return {@link Map} containing the result of the cleanup in a 'table name' - 'number of removed rows' mapping
      * @see SchemaTombstoneCleaner#SchemaCleaner()
      */
