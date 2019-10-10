@@ -59,8 +59,10 @@ import com.openexchange.exception.OXException;
  */
 public class TokenRefreshResponse {
 
+    /** The constant for the special token refresh response for missing refresh token */
     public static TokenRefreshResponse MISSING_REFRESH_TOKEN = new TokenRefreshResponse(new Error(ErrorType.PERMANENT, "missing_token", "Session contained no refresh token"));
 
+    /** The enumeration of known error types */
     public static enum ErrorType {
         /**
          * Access token could not be refreshed because the sessions refresh token
@@ -78,6 +80,9 @@ public class TokenRefreshResponse {
         PERMANENT;
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+    
+    /** The error for a token refresh response */
     public static class Error {
 
         private final ErrorType type;
@@ -139,14 +144,26 @@ public class TokenRefreshResponse {
             return sb.toString();
         }
     }
+    
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final OAuthTokens tokens;
     private final Error error;
 
+    /**
+     * Initializes a new {@link TokenRefreshResponse}.
+     * 
+     * @param tokens The OAuth tokens
+     */
     public TokenRefreshResponse(OAuthTokens tokens) {
         this(tokens, null);
     }
 
+    /**
+     * Initializes a new {@link TokenRefreshResponse}.
+     * 
+     * @param error The error
+     */
     public TokenRefreshResponse(Error error) {
         this(null, error);
     }
@@ -161,14 +178,31 @@ public class TokenRefreshResponse {
         this.error = error;
     }
 
+    /**
+     * Checks if this token refresh response was successful.
+     * 
+     * @return <code>true</code> if successful; otherwise <code>false</code>
+     */
     public boolean isSuccess() {
         return tokens != null;
     }
 
+    /**
+     * Gets the refreshed tokens.
+     * 
+     * @return The refreshed tokens or <code>null</code>
+     * @see #isSuccess()
+     */
     public OAuthTokens getTokens() {
         return tokens;
     }
 
+    /**
+     * Gets the error.
+     * 
+     * @return The error or <code>null</code>
+     * @see #isSuccess()
+     */
     public Error getError() {
         return error;
     }

@@ -59,10 +59,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class TokenRefreshConfig {
 
+    /**
+     * Creates a new builder instance.
+     * 
+     * @return The new builder
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
 
+    /** The builder for an instance of <code>TokenRefreshConfig</code> */
     public static final class Builder {
 
         private long refreshThreshold = 0L;
@@ -71,7 +77,12 @@ public class TokenRefreshConfig {
         private TimeUnit lockTimeoutUnit = TimeUnit.SECONDS;
         private boolean tryRecoverStoredTokens = false;
 
-        Builder() {}
+        /**
+         * Initializes a new {@link Builder}.
+         */
+        Builder() {
+            super();
+        }
 
         /**
          * Threshold within an access token is eagerly considered expired
@@ -130,7 +141,6 @@ public class TokenRefreshConfig {
          * Creates a new {@link TokenRefreshConfig} instance
          * 
          * @return The configuration
-         *
          * @throws IllegalArgumentException if refresh threshold or lock timeout have been set to values < 0
          */
         public TokenRefreshConfig build() throws IllegalArgumentException {
@@ -143,6 +153,8 @@ public class TokenRefreshConfig {
             return new TokenRefreshConfig(refreshThreshold, refreshThresholdUnit, lockTimeout, lockTimeoutUnit, tryRecoverStoredTokens);
         }
     }
+    
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final long refreshThreshold;
     private final TimeUnit refreshThresholdUnit;
@@ -150,7 +162,16 @@ public class TokenRefreshConfig {
     private final TimeUnit lockTimeoutUnit;
     private final boolean tryRecoverStoredTokens;
 
-    public TokenRefreshConfig(long refreshThreshold, TimeUnit refreshThresholdUnit, long lockTimeout, TimeUnit lockTimeoutUnit, boolean tryRecoverStoredTokens) {
+    /**
+     * Initializes a new {@link TokenRefreshConfig}.
+     * 
+     * @param refreshThreshold The refresh threshold
+     * @param refreshThresholdUnit The time unit for the refresh threshold
+     * @param lockTimeout The lock timeout
+     * @param lockTimeoutUnit The time unit for the lock timeout
+     * @param tryRecoverStoredTokens Whether to try recovering stored tokens or not
+     */
+    TokenRefreshConfig(long refreshThreshold, TimeUnit refreshThresholdUnit, long lockTimeout, TimeUnit lockTimeoutUnit, boolean tryRecoverStoredTokens) {
         super();
         this.refreshThreshold = refreshThreshold;
         this.refreshThresholdUnit = refreshThresholdUnit;
