@@ -56,6 +56,7 @@ import com.sun.mail.iap.Protocol;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -135,14 +136,14 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
      * @param protocol The protocol instance
      * @return The matching command executor or <code>null</code>
      */
-    public abstract CommandExecutor getMatchingCommandExecutorFor(Protocol protocol);
+    public abstract Optional<CommandExecutor> getMatchingCommandExecutorFor(Protocol protocol);
 
     // ------------------------------------------------ Implementations ------------------------------------------------
 
     private static class ConcurrentCommandExecutorCollection extends CommandExecutorCollection {
 
         private final List<CommandExecutor> commandExecutors;
-        private final Cache<HostAndPortAndUser, ImmutableReference<CommandExecutor>> matchingCommandExecutors;
+        private final Cache<HostAndPortAndUser, Optional<CommandExecutor>> matchingCommandExecutors;
 
         /**
          * Initializes a new {@link CommandExecutorCollection}.
@@ -192,11 +193,11 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         }
 
         @Override
-        public CommandExecutor getMatchingCommandExecutorFor(Protocol protocol) {
+        public Optional<CommandExecutor> getMatchingCommandExecutorFor(Protocol protocol) {
             HostAndPortAndUser hostAndPortAndUser = new HostAndPortAndUser(protocol);
-            ImmutableReference<CommandExecutor> executorRef = matchingCommandExecutors.getIfPresent(hostAndPortAndUser);
-            if (executorRef != null) {
-                return executorRef.getValue();
+            Optional<CommandExecutor> optionalCommandExecutor = matchingCommandExecutors.getIfPresent(hostAndPortAndUser);
+            if (optionalCommandExecutor != null) {
+                return optionalCommandExecutor;
             }
 
             CommandExecutor matching = null;
@@ -205,8 +206,9 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
                     matching = commandExecutor;
                 }
             }
-            matchingCommandExecutors.put(hostAndPortAndUser, new ImmutableReference<CommandExecutor>(matching));
-            return matching;
+            optionalCommandExecutor = Optional.ofNullable(matching);
+            matchingCommandExecutors.put(hostAndPortAndUser, optionalCommandExecutor);
+            return optionalCommandExecutor;
         }
     }
 
@@ -249,14 +251,14 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         }
 
         @Override
-        public CommandExecutor getMatchingCommandExecutorFor(Protocol protocol) {
+        public Optional<CommandExecutor> getMatchingCommandExecutorFor(Protocol protocol) {
             CommandExecutor matching = null;
             for (CommandExecutor commandExecutor : commandExecutors) {
                 if (commandExecutor.isApplicable(protocol) && (matching == null || commandExecutor.getRanking() > matching.getRanking())) {
                     matching = commandExecutor;
                 }
             }
-            return matching;
+            return Optional.ofNullable(matching);
         }
     }
 

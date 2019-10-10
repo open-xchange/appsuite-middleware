@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -156,11 +157,11 @@ public class Protocol {
 
 	    // Read server greeting
 	    {
-	        CommandExecutor commandExecutor = IMAPStore.getMatchingCommandExecutors(this);
-	        if (commandExecutor == null) {
-	            processGreeting(readResponse());
+	        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+	        if (optionalCommandExecutor.isPresent()) {
+	            processGreeting(optionalCommandExecutor.get().readResponse(this));
 	        } else {
-	            processGreeting(commandExecutor.readResponse(this));
+	            processGreeting(readResponse());
 	        }
 	    }
 	    
@@ -421,14 +422,14 @@ public class Protocol {
      */
     public synchronized Response[] command(String command, Argument args) {
         // Determine suitable executor
-        CommandExecutor commandExecutor = IMAPStore.getMatchingCommandExecutors(this);
-        if (commandExecutor == null) {
-            // No matching executor available
-            return executeCommand(command, args);
+        Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(this);
+        if (optionalCommandExecutor.isPresent()) {            
+            // Issue command using matching executor
+            return optionalCommandExecutor.get().executeCommand(command, args, this);
         }
 
-        // Issue command using matching executor
-        return commandExecutor.executeCommand(command, args, this);
+        // No matching executor available
+        return executeCommand(command, args);
     }
 
     /**

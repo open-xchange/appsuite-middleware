@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -297,11 +298,11 @@ public class IMAPStore extends Store
      * Gets the matching command executor for given protocol instance.
      *
      * @param commandEvent The protocol instance
-     * @return The matching command executor or <code>null</code>
+     * @return The optional matching command executor
      */
-    public static CommandExecutor getMatchingCommandExecutors(Protocol protocol) {
+    public static Optional<CommandExecutor> getMatchingCommandExecutor(Protocol protocol) {
         CommandExecutorCollection collection = COMMAND_EXECUTORS_REF.get();
-        return null == collection ? null : collection.getMatchingCommandExecutorFor(protocol);
+        return null == collection ? Optional.empty() : collection.getMatchingCommandExecutorFor(protocol);
     }
 
     /**
