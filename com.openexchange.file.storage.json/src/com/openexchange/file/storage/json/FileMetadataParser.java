@@ -95,6 +95,9 @@ public class FileMetadataParser implements FileMetadataParserService{
     }
 
     public File parse(JSONObject object, TimeZone timeZone) throws OXException {
+        if (null == object) {
+            return null;
+        }
         try {
             return File.Field.inject(jsonHandler, new DefaultFile(), object, timeZone);
         } catch (RuntimeException x) {
