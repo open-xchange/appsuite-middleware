@@ -110,6 +110,10 @@ public class TasksDataExportProvider extends AbstractDataExportProvider<TaskData
             return false;
         }
 
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.tasks.enabled", true, session)) {
+            return false;
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasTask()) {
             return false;
@@ -120,6 +124,10 @@ public class TasksDataExportProvider extends AbstractDataExportProvider<TaskData
 
     @Override
     public Optional<Module> getModule(Session session) throws OXException {
+        if (!getBoolProperty("com.openexchange.gdpr.dataexport.provider.tasks.enabled", true, session)) {
+            return Optional.empty();
+        }
+
         UserConfigurationService userConfigService = services.getServiceSafe(UserConfigurationService.class);
         if (!userConfigService.getUserConfiguration(session).hasTask()) {
             return Optional.empty();
@@ -133,8 +141,10 @@ public class TasksDataExportProvider extends AbstractDataExportProvider<TaskData
 
         Map<String, Object> properties = new LinkedHashMap<String, Object>(6);
         properties.put(TasksDataExportPropertyNames.PROP_ENABLED, Boolean.TRUE);
-        properties.put(TasksDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
-        if (hasSharedFolders) {
+        if (getBoolProperty("com.openexchange.gdpr.dataexport.provider.tasks." + TasksDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, true, session)) {
+            properties.put(TasksDataExportPropertyNames.PROP_INCLUDE_PUBLIC_FOLDERS, Boolean.FALSE);
+        }
+        if (hasSharedFolders && getBoolProperty("com.openexchange.gdpr.dataexport.provider.tasks." + TasksDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, true, session)) {
             properties.put(TasksDataExportPropertyNames.PROP_INCLUDE_SHARED_FOLDERS, Boolean.FALSE);
         }
 

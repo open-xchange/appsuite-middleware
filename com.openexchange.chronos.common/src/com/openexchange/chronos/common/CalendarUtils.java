@@ -2056,6 +2056,12 @@ public class CalendarUtils {
                 if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
                     return item1.getManagedId() == item2.getManagedId();
                 }
+                if (null != item1.getChecksum() && item1.getChecksum().equals(item2.getChecksum()) &&
+                    null != item1.getFilename() && item1.getFilename().equals(item2.getFilename()) &&
+                    null != item1.getFormatType() && item1.getFormatType().equals(item2.getFormatType()) &&
+                    0 < item1.getSize() && item1.getSize() == item2.getSize()) {
+                    return true;
+                }
                 return false;
             }
         };

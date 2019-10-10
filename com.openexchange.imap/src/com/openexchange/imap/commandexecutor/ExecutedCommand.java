@@ -47,72 +47,45 @@
  *
  */
 
-package com.openexchange.imap.util;
+package com.openexchange.imap.commandexecutor;
 
-import java.util.concurrent.atomic.AtomicReference;
-import net.jodah.failsafe.CircuitBreaker;
+import java.util.Optional;
+import com.sun.mail.iap.Response;
+import com.sun.mail.imap.ResponseEvent.StatusResponse;
 
 /**
- * {@link CircuitBreakerInfo} - Circuit breaker information.
+ * {@link ExecutedCommand} - Represents an executed IMAP command.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class CircuitBreakerInfo {
+public class ExecutedCommand {
 
-    private final String key;
-    private final CircuitBreaker circuitBreaker;
-    private final AtomicReference<Runnable> onOpenMetricTask;
-    private final AtomicReference<Runnable> onDeniedMetricTask;
+    /** The determined status response */
+    public final Optional<StatusResponse> optionalStatusResponse;
+
+    /** The response array */
+    public final Response[] responses;
 
     /**
-     * Initializes a new {@link CircuitBreakerInfo}.
+     * Initializes a new {@link ExecutedCommand}.
      *
-     * @param key The key identifying the circuit breaker to create
-     * @param circuitBreaker The circuit breaker
+     * @param responses The response array
      */
-    public CircuitBreakerInfo(String key, CircuitBreaker circuitBreaker) {
+    public ExecutedCommand(Response[] responses) {
+        this(null, responses);
+    }
+
+    /**
+     * Initializes a new {@link ExecutedCommand}.
+     *
+     * @param statusResponse The status response or <code>null</code>
+     * @param responses The response array
+     */
+    public ExecutedCommand(StatusResponse statusResponse, Response[] responses) {
         super();
-        this.key = key;
-        this.circuitBreaker = circuitBreaker;
-        onOpenMetricTask = new AtomicReference<>(null);
-        onDeniedMetricTask = new AtomicReference<>(null);
-    }
-
-    /**
-     * Gets the key
-     *
-     * @return The key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * Gets the circuit breaker
-     *
-     * @return The circuit breaker
-     */
-    public CircuitBreaker getCircuitBreaker() {
-        return circuitBreaker;
-    }
-
-    /**
-     * Gets the "on open" metric task reference
-     *
-     * @return The "on open" metric task reference
-     */
-    public AtomicReference<Runnable> getOnOpenMetricTaskReference() {
-        return onOpenMetricTask;
-    }
-
-    /**
-     * Gets the "on denied" metric task reference
-     *
-     * @return The "on denied" metric task reference
-     */
-    public AtomicReference<Runnable> getOnDeniedMetricTaskReference() {
-        return onDeniedMetricTask;
+        this.optionalStatusResponse = Optional.ofNullable(statusResponse);
+        this.responses = responses;
     }
 
 }

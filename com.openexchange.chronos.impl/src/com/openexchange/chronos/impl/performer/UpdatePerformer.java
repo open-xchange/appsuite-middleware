@@ -347,12 +347,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      */
     protected InternalUpdateResult updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
         /*
-         * check if folder view on event is allowed as needed
+         * check if folder view on event is allowed
          */
-        boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
-        if (false == assumeExternalOrganizerUpdate) {
-            Check.eventIsInFolder(originalEvent, folder);
-        }
+        Check.eventIsInFolder(originalEvent, folder);
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
@@ -369,6 +366,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * prepare event update & check conflicts as needed
          */
+        boolean assumeExternalOrganizerUpdate = assumeExternalOrganizerUpdate(originalEvent, eventData);
         List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent) : null;
         Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? loadEventData(originalEvent.getSeriesId()) : null;
         InternalEventUpdate eventUpdate = new InternalEventUpdate(
@@ -453,8 +451,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     /**
      * Determines if an incoming event update can be treated as initiated by the (external) organizer of a scheduling object resource or
-     * not. If yes, certain checks may be skipped, i.e. the existence check in the calendar user's folder, or the check against allowed
-     * attendee changes.
+     * not. If yes, certain checks may be skipped, e.g. the check against allowed attendee changes.
      * <p/>
      * An update is considered as <i>organizer-update</i> under certain circumstances, particularly:
      * <ul>

@@ -56,8 +56,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.openexchange.imap.commandexecutor.AbstractMetricAwareCommandExecutor;
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.imap.util.AbstractFailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.metrics.MetricService;
 
 
@@ -117,13 +117,13 @@ public class MetricServiceTracker implements ServiceTrackerCustomizer<MetricServ
     @Override
     public MetricService addingService(ServiceReference<MetricService> reference) {
         MetricService service = context.getService(reference);
-        List<AbstractFailsafeCircuitBreakerCommandExecutor> breakers = IMAPProperties.getInstance().getBreakers();
-        if (breakers != null) {
-            for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakers) {
+        List<AbstractMetricAwareCommandExecutor> commandExecutors = IMAPProperties.getInstance().getCommandExecutors();
+        if (commandExecutors != null) {
+            for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutors) {
                 try {
-                    breaker.onMetricServiceAppeared(service);
+                    commandExecutor.onMetricServiceAppeared(service);
                 } catch (Exception e) {
-                    LoggerHolder.LOG.warn("Failed to apply metric service to IMAP circuit breaker: {}", breaker.getDescription(), e);
+                    LoggerHolder.LOG.warn("Failed to apply metric service to IMAP command executor: {}", commandExecutor.getDescription(), e);
                 }
             }
         }
@@ -138,13 +138,13 @@ public class MetricServiceTracker implements ServiceTrackerCustomizer<MetricServ
     @Override
     public void removedService(ServiceReference<MetricService> reference, MetricService service) {
         context.ungetService(reference);
-        List<AbstractFailsafeCircuitBreakerCommandExecutor> breakers = IMAPProperties.getInstance().getBreakers();
-        if (breakers != null) {
-            for (AbstractFailsafeCircuitBreakerCommandExecutor breaker : breakers) {
+        List<AbstractMetricAwareCommandExecutor> commandExecutors = IMAPProperties.getInstance().getCommandExecutors();
+        if (commandExecutors != null) {
+            for (AbstractMetricAwareCommandExecutor commandExecutor : commandExecutors) {
                 try {
-                    breaker.onMetricServiceDisppearing(service);
+                    commandExecutor.onMetricServiceDisppearing(service);
                 } catch (Exception e) {
-                    LoggerHolder.LOG.warn("Failed to remove metric service from IMAP circuit breaker: {}", breaker.getDescription(), e);
+                    LoggerHolder.LOG.warn("Failed to remove metric service from IMAP command executor: {}", commandExecutor.getDescription(), e);
                 }
             }
         }

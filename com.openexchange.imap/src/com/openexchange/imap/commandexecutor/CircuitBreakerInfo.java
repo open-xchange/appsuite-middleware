@@ -47,123 +47,72 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.imap.commandexecutor;
 
-import java.util.Date;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import java.util.concurrent.atomic.AtomicReference;
+import net.jodah.failsafe.CircuitBreaker;
 
 /**
- * {@link Attachment}
+ * {@link CircuitBreakerInfo} - Circuit breaker information.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.1.1">RFC 5545, section 3.8.1.1</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class Attachment {
+public class CircuitBreakerInfo {
 
-    private int managedId;
-    private String uri;
-    private IFileHolder data;
-    private Date created;
-    private String formatType;
-    private long size;
-	private String filename;
-    private String checksum;
+    private final String key;
+    private final CircuitBreaker circuitBreaker;
+    private final AtomicReference<Runnable> onOpenMetricTask;
+    private final AtomicReference<Runnable> onDeniedMetricTask;
 
     /**
-     * Initializes a new {@link Attachment}.
-     */
-	public Attachment() {
-		super();
-	}
-
-    /**
-     * Gets the attachment's format- / MIME-type.
+     * Initializes a new {@link CircuitBreakerInfo}.
      *
-     * @return The format type
+     * @param key The key identifying the circuit breaker to create
+     * @param circuitBreaker The circuit breaker
      */
-	public String getFormatType() {
-		return formatType;
-	}
-
-    /**
-     * Sets the attachment's format- / MIME-type.
-     *
-     * @param formatType The format type
-     */
-	public void setFormatType(String formatType) {
-		this.formatType = formatType;
-	}
-
-    public long getSize() {
-		return size;
-	}
-
-    public void setSize(long size) {
-		this.size = size;
-	}
-
-	public String getFilename() {
-		return filename;
-	}
-
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-
-    public int getManagedId() {
-		return managedId;
-	}
-
-    public void setManagedId(int managedId) {
-		this.managedId = managedId;
-	}
-
-	public IFileHolder getData() {
-		return data;
-	}
-
-	public void setData(IFileHolder data) {
-		this.data = data;
-	}
-
-	public String getUri() {
-		return uri;
-	}
-
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
+    public CircuitBreakerInfo(String key, CircuitBreaker circuitBreaker) {
+        super();
+        this.key = key;
+        this.circuitBreaker = circuitBreaker;
+        onOpenMetricTask = new AtomicReference<>(null);
+        onDeniedMetricTask = new AtomicReference<>(null);
     }
 
     /**
-     * Gets the checksum of the attachment's binary data, if available.
+     * Gets the key
      *
-     * @return The checksum, or <code>null</code> if not available
+     * @return The key
      */
-    public String getChecksum() {
-        return checksum;
+    public String getKey() {
+        return key;
     }
 
     /**
-     * Sets the checksum of the attachment's binary data
+     * Gets the circuit breaker
      *
-     * @param checksum The checksum
+     * @return The circuit breaker
      */
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
+    public CircuitBreaker getCircuitBreaker() {
+        return circuitBreaker;
     }
 
-    @Override
-    public String toString() {
-        return "Attachment [managedId=" + managedId + ", uri=" + uri + ", filename=" + filename + "]";
+    /**
+     * Gets the "on open" metric task reference
+     *
+     * @return The "on open" metric task reference
+     */
+    public AtomicReference<Runnable> getOnOpenMetricTaskReference() {
+        return onOpenMetricTask;
+    }
+
+    /**
+     * Gets the "on denied" metric task reference
+     *
+     * @return The "on denied" metric task reference
+     */
+    public AtomicReference<Runnable> getOnDeniedMetricTaskReference() {
+        return onDeniedMetricTask;
     }
 
 }

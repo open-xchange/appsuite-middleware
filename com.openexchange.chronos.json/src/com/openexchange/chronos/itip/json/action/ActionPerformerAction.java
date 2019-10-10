@@ -63,7 +63,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attachment;
@@ -164,7 +163,7 @@ public class ActionPerformerAction extends AbstractITipAction {
                         if (Strings.isEmpty(attachment.getUri())) {
                             continue;
                         }
-                        IFileHolder attachmentData = optAttachmentData(request, getContentId(attachment.getUri()));
+                        ThresholdFileHolder attachmentData = optAttachmentData(request, getContentId(attachment.getUri()));
                         if (null == attachmentData) {
                             attachmentData = optAttachmentData(request, prepareUri(attachment.getUri()));
                             if (null == attachmentData) {
@@ -174,6 +173,7 @@ public class ActionPerformerAction extends AbstractITipAction {
                             }
                         }
                         attachment.setData(attachmentData);
+                        attachment.setChecksum(attachmentData.getMD5());
                         attachment.setUri(null);
                         if (Strings.isNotEmpty(attachmentData.getName())) {
                             attachment.setFilename(attachmentData.getName());
@@ -257,7 +257,7 @@ public class ActionPerformerAction extends AbstractITipAction {
      * @param contentId The content identifier of the attachment to retrieve
      * @return The attachment data loaded into a file holder, or <code>null</code> if not found
      */
-    private IFileHolder optAttachmentData(AJAXRequestData requestData, String contentId) throws OXException {
+    private ThresholdFileHolder optAttachmentData(AJAXRequestData requestData, String contentId) throws OXException {
         ConversionService conversionEngine = services.getServiceSafe(ConversionService.class);
         DataSource dataSource = conversionEngine.getDataSource("com.openexchange.mail.attachment");
         if (null == dataSource) {

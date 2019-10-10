@@ -50,14 +50,11 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -127,16 +124,13 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.setParticipants(new Participant[] { user, user2 });
         clone.setUsers(new UserParticipant[] { user, user2 });
         catm2.update(clone);
-
+        AbstractAJAXResponse updateResponse = catm2.getLastResponse();
+        assertTrue("Should fail.", updateResponse.hasError());
+        String errorCode = updateResponse.getException().getErrorCode();
         if (shared) {
-            assertTrue("Error expected.", catm2.getLastResponse().hasError());
-            assertEquals("Wrong error.", OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber(), catm2.getLastResponse().getException().getCode());
+            assertTrue("Wrong error.", "APP-0062".equals(errorCode) || "CAL-4006".equals(errorCode));
         } else {
-            assertFalse("No error expected.", catm2.getLastResponse().hasError());
-
-            Appointment loaded = catm.get(appointment);
-            assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
-            assertEquals("Expected two users.", 2, loaded.getUsers().length);
+            assertTrue("Wrong error.", "APP-0059".equals(errorCode) || "CAL-4006".equals(errorCode));
         }
     }
 

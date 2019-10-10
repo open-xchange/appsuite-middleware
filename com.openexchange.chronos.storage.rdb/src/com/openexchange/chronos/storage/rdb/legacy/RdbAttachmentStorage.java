@@ -324,7 +324,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     private static Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException {
         Map<String, List<Attachment>> attachmentsById = new HashMap<String, List<Attachment>>();
         String sql = new StringBuilder()
-            .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date FROM prg_attachment ")
+            .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date,checksum FROM prg_attachment ")
             .append("WHERE cid=? AND attached IN (").append(getParameters(objectIDs.length)).append(") AND module=?;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -343,6 +343,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                     attachment.setFilename(resultSet.getString("filename"));
                     //                    attachment.setContentId(resultSet.getString("file_id"));
                     attachment.setCreated(new Date(resultSet.getLong("creation_date")));
+                    attachment.setChecksum(resultSet.getString("checksum"));
                     put(attachmentsById, asString(resultSet.getInt("attached")), attachment);
                 }
             }
@@ -437,6 +438,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         } else if (null != attachment.getData()) {
             metadata.setFilesize(attachment.getData().getLength());
         }
+        metadata.setChecksum(attachment.getChecksum());
         return metadata;
     }
 

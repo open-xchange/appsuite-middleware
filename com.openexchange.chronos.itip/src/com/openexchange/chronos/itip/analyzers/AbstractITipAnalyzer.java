@@ -450,13 +450,16 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             @Override
             protected boolean matches(Attachment item1, Attachment item2) {
                 /*
-                 * match via managed id or URI
+                 * match via managed id, URI or checksum
                  */
                 if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
                     return item1.getManagedId() == item2.getManagedId();
                 }
                 if (null != item1.getUri() && null != item2.getUri()) {
                     return item1.getUri().equals(item2.getUri());
+                }
+                if (null != item1.getChecksum() && null != item2.getChecksum()) {
+                    return item1.getChecksum().equals(item2.getChecksum());
                 }
                 /*
                  * match via metadata

@@ -798,7 +798,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             String addr = s.substring(start, end).trim();
             String pers = null;
             if (rfc822 && start_personal >= 0) {
-                pers = unquote(MimeMessageUtility.decodeMultiEncodedHeader(s.substring(start_personal, end_personal).trim()));
+                pers = unquote(s.substring(start_personal, end_personal).trim());
                 if (isEmpty(pers)) {
                     pers = null;
                 }
@@ -1245,6 +1245,9 @@ public final class QuotedInternetAddress extends InternetAddress {
     public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
         String n = init(name, true);
         personal = n;
+        if (isEmpty(personal)) {
+            personal = null;
+        }
         if (n != null) {
             if (charset == null) {
                 // use default charset
@@ -1303,6 +1306,10 @@ public final class QuotedInternetAddress extends InternetAddress {
         if (encodedPersonal != null) {
             try {
                 personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal), true);
+                if (isEmpty(personal)) {
+                    encodedPersonal = null;
+                    personal = null;
+                }
                 return personal;
             } catch (Exception ex) {
                 // 1. ParseException: either its an unencoded string or
@@ -1382,7 +1389,13 @@ public final class QuotedInternetAddress extends InternetAddress {
                         LOG.error("", e);
                     }
                 }
-                return new StringBuilder(32).append(quotePhrase(encodedPersonal, false)).append(" <").append(address).append('>').toString();
+
+                if (isEmpty(personal)) {
+                    encodedPersonal = null;
+                    personal = null;
+                }
+
+                return encodedPersonal == null ? address : new StringBuilder(32).append(quotePhrase(encodedPersonal, false)).append(" <").append(address).append('>').toString();
             } else if (toUpperCase(address).endsWith("/TYPE=PLMN")) {
                 return new StringBuilder().append('<').append(address).append('>').toString();
             } else if (isGroup() || isSimple()) {
