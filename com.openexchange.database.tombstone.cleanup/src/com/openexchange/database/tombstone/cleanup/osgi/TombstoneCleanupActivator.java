@@ -59,6 +59,7 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.tombstone.cleanup.TombstoneCleanerWorker;
 import com.openexchange.database.tombstone.cleanup.config.TombstoneCleanupConfig;
@@ -87,7 +88,7 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ClusterTimerService.class, DatabaseService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ClusterTimerService.class, DatabaseService.class, ContextService.class };
     }
 
     @Override
@@ -121,7 +122,7 @@ public class TombstoneCleanupActivator extends HousekeepingActivator implements 
         ClusterTimerService clusterTimerService = Tools.requireService(ClusterTimerService.class, this);
 
         // we have to set an initial delay as the HazelcastInstance will be registered latest. Therefore switching to TimeUnit.Minutes instead of handling via days
-        this.tombstoneCleanerWorker = new TombstoneCleanerWorker(timespan);
+        this.tombstoneCleanerWorker = new TombstoneCleanerWorker(this, timespan);
         this.cleanupTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, this.tombstoneCleanerWorker, 60, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
 
         if (REGISTERED.compareAndSet(false, true)) {
