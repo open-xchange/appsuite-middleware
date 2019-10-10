@@ -192,7 +192,7 @@ public enum OIDCBackendProperty implements Property {
      * of a timeout, this is logged as a temporary issue and the request continued
      * as usual.
      */
-    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, 5),
+    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, "5"),
     /**
      * tryRecoverStoredTokens - Whether token refresh should try to recover valid tokens from
      * the session instance that is present in {@link SessionStorageService}.
