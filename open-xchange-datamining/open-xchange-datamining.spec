@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 13
+%define         ox_release 14
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -58,6 +58,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Thu Oct 10 2019 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2019-10-14 (5439)
 * Mon Sep 23 2019 Karsten Will <karsten.will@open-xchange.com>
 Build for patch 2019-09-30 (5420)
 * Mon Sep 02 2019 Karsten Will <karsten.will@open-xchange.com>

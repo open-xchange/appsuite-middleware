@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.10.2-14) stable; urgency=medium
+
+  * Build for patch 2019-10-14 (5439)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Thu, 10 Oct 2019 16:01:52 +0200
+
 open-xchange-grizzly (7.10.2-13) stable; urgency=medium
 
   * Build for patch 2019-09-30 (5420)
