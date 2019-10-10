@@ -200,8 +200,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
             }
 
             CommandExecutor matching = null;
-            for (Iterator<CommandExecutor> it = commandExecutors.iterator(); it.hasNext();) {
-                CommandExecutor commandExecutor = it.next();
+            for (CommandExecutor commandExecutor : commandExecutors) {
                 if (commandExecutor.isApplicable(protocol) && (matching == null || commandExecutor.getRanking() > matching.getRanking())) {
                     matching = commandExecutor;
                 }
@@ -252,8 +251,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         @Override
         public CommandExecutor getMatchingCommandExecutorFor(Protocol protocol) {
             CommandExecutor matching = null;
-            for (Iterator<CommandExecutor> it = commandExecutors.iterator(); it.hasNext();) {
-                CommandExecutor commandExecutor = it.next();
+            for (CommandExecutor commandExecutor : commandExecutors) {
                 if (commandExecutor.isApplicable(protocol) && (matching == null || commandExecutor.getRanking() > matching.getRanking())) {
                     matching = commandExecutor;
                 }
