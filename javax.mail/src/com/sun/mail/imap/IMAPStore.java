@@ -308,11 +308,11 @@ public class IMAPStore extends Store
     /**
      * Gets a snapshot of the currently available executors.
      *
-     * @return The executors or <code>null</code> if none registered
+     * @return The executors or an empty <code>Optional</code> if none registered
      */
-    public static CommandExecutorCollection getCommandExecutors() {
+    public static Optional<CommandExecutorCollection> getCommandExecutors() {
         CommandExecutorCollection collection = COMMAND_EXECUTORS_REF.get();
-        return null == collection ? null : collection.snapshot();
+        return null == collection ? Optional.empty() : Optional.of(collection.snapshot());
     }
 
     protected final String name;		// name of this protocol
