@@ -71,9 +71,9 @@ public class OAuthUtilsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(SessiondService.class);
-        track(SessionStorageService.class);
-        track(LockService.class);
+        trackService(SessiondService.class);
+        trackService(SessionStorageService.class);
+        trackService(LockService.class);
         openTrackers();
 
         registerService(SessionOAuthTokenService.class, new DefaultSessionOAuthTokenService(this));
