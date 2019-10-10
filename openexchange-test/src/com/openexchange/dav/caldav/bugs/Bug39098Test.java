@@ -51,13 +51,13 @@ package com.openexchange.dav.caldav.bugs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -71,35 +71,65 @@ public class Bug39098Test extends CalDAVTest {
 
     @Test
     public void testCreateInAsiaShanghai() throws Exception {
+
         /*
          * create appointment on client
          */
+        TimeZone asiaShanghai = TimeZone.getTimeZone("Asia/Shanghai");
+        Date startDate = TimeTools.D("may 30 at 7 pm", asiaShanghai);
+        Date endDate = TimeTools.D("may 30 at 8 pm", asiaShanghai);
         String uid = randomUID();
-        String iCal = "BEGIN:VCALENDAR\r\n" + "VERSION:2.0\r\n" + "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\r\n" + "CALSCALE:GREGORIAN\r\n" + "BEGIN:VTIMEZONE\r\n" + "TZID:Asia/Shanghai\r\n" + "BEGIN:STANDARD\r\n" + "TZOFFSETFROM:+0900\r\n" + "RRULE:FREQ=YEARLY;UNTIL=19910914T150000Z;BYMONTH=9;BYDAY=3SU\r\n" + "DTSTART:19890917T000000\r\n" + "TZNAME:GMT+8\r\n" + "TZOFFSETTO:+0800\r\n" + "END:STANDARD\r\n" + "BEGIN:DAYLIGHT\r\n" + "TZOFFSETFROM:+0800\r\n" + "DTSTART:19910414T000000\r\n" + "TZNAME:GMT+8\r\n" + "TZOFFSETTO:+0900\r\n" + "RDATE:19910414T000000\r\n" + "END:DAYLIGHT\r\n" + "END:VTIMEZONE\r\n" + "BEGIN:VEVENT\r\n" + "CREATED:20150629T100123Z\r\n" + "UID:" + uid + "\r\n" + "DTSTART;TZID=Asia/Shanghai:20150630T190000\r\n" + "DTEND;TZID=Asia/Shanghai:20150630T200000\r\n" + "TRANSP:OPAQUE\r\n" + "SUMMARY:test\r\n" + "DTSTAMP:20150629T100123Z\r\n" + "SEQUENCE:0\r\n" + "END:VEVENT\r\n" + "END:VCALENDAR\r\n";
+        String iCal = // @formatter:off
+            "BEGIN:VCALENDAR\r\n" +
+            "VERSION:2.0\r\n" +
+            "PRODID:-//Apple Inc.//Mac OS X 10.10.3//EN\r\n" +
+            "CALSCALE:GREGORIAN\r\n" +
+            "BEGIN:VTIMEZONE\r\n" +
+            "TZID:Asia/Shanghai\r\n" +
+            "BEGIN:STANDARD\r\n" +
+            "TZOFFSETFROM:+0900\r\n" +
+            "RRULE:FREQ=YEARLY;UNTIL=19910914T150000Z;BYMONTH=9;BYDAY=3SU\r\n" +
+            "DTSTART:19890917T000000\r\n" +
+            "TZNAME:GMT+8\r\n" +
+            "TZOFFSETTO:+0800\r\n" +
+            "END:STANDARD\r\n" +
+            "BEGIN:DAYLIGHT\r\n" +
+            "TZOFFSETFROM:+0800\r\n" +
+            "DTSTART:19910414T000000\r\n" +
+            "TZNAME:GMT+8\r\n" +
+            "TZOFFSETTO:+0900\r\n" +
+            "RDATE:19910414T000000\r\n" +
+            "END:DAYLIGHT\r\n" +
+            "END:VTIMEZONE\r\n" +
+            "BEGIN:VEVENT\r\n" +
+            "CREATED:20150629T100123Z\r\n" +
+            "UID:" + uid + "\r\n" +
+            "DTSTART;TZID=Asia/Shanghai:" + format(startDate, asiaShanghai) + "\r\n" +
+            "DTEND;TZID=Asia/Shanghai:" + format(endDate, asiaShanghai) + "\r\n" +
+            "TRANSP:OPAQUE\r\n" +
+            "SUMMARY:test\r\n" +
+            "DTSTAMP:20150629T100123Z\r\n" +
+            "SEQUENCE:0\r\n" +
+            "END:VEVENT\r\n" +
+            "END:VCALENDAR\r\n"
+        ; // @formatter:on
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(uid, iCal));
         /*
          * verify appointment on server
          */
-        TimeZone userTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
-        Calendar calendar = Calendar.getInstance(userTimeZone);
-        calendar.set(2015, 5, 30, 19, 0, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        Date expectedStartDate = calendar.getTime();
-        calendar.set(2015, 5, 30, 20, 0, 0);
-        Date expectedEndDate = calendar.getTime();
         Appointment appointment = getAppointment(uid);
         assertNotNull("appointment not found on server", appointment);
         rememberForCleanUp(appointment);
-        assertEquals(expectedStartDate, appointment.getStartDate());
-        assertEquals(expectedEndDate, appointment.getEndDate());
+        assertEquals(startDate, appointment.getStartDate());
+        assertEquals(endDate, appointment.getEndDate());
         /*
          * verify appointment on client
          */
         ICalResource iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        assertEquals(expectedStartDate, iCalResource.getVEvent().getDTStart());
-        assertEquals(expectedEndDate, iCalResource.getVEvent().getDTEnd());
+        assertEquals(startDate, iCalResource.getVEvent().getDTStart());
+        assertEquals(endDate, iCalResource.getVEvent().getDTEnd());
     }
 
 }
