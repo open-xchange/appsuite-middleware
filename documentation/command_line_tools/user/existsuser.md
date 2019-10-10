@@ -1,6 +1,6 @@
 ---
 title: existsuser
-icon: fas fa-question-circle
+icon: fa question-circle
 tags: Administration, Command Line tools, User
 ---
 

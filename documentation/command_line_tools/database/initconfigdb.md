@@ -1,6 +1,6 @@
 ---
 title: initconfigdb
-icon: fas fa-database
+icon: fa-database
 tags: Administration, Command Line tools, Database
 ---
 

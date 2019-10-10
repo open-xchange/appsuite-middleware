@@ -1,6 +1,6 @@
 ---
 title: getuserconfigurationsource
-icon: fas fa-book-reader
+icon: fa-book
 tags: Administration, Command Line tools, User, Capabilities
 ---
 
