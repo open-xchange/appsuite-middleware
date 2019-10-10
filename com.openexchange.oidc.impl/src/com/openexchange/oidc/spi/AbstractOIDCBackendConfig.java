@@ -273,7 +273,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link int} value
      */
     protected int loadIntProperty(final OIDCBackendProperty backendProperty) {
-        return Integer.parseInt(this.loadStringProperty(backendProperty));
+        if (Strings.isEmpty(this.customPropertyPrefix)) {
+            return this.leanConfigurationService.getIntProperty(backendProperty);
+        }
+
+        return this.leanConfigurationService.getIntProperty(this.getCustomProperty(backendProperty));
     }
 
     /**
@@ -284,7 +288,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link boolean} value
      */
     protected boolean loadBooleanProperty(final OIDCBackendProperty backendProperty) {
-        return Boolean.parseBoolean(this.loadStringProperty(backendProperty));
+        if (Strings.isEmpty(this.customPropertyPrefix)) {
+            return this.leanConfigurationService.getBooleanProperty(backendProperty);
+        }
+
+        return this.leanConfigurationService.getBooleanProperty(this.getCustomProperty(backendProperty));
     }
 
     protected NamePart loadNamePartProperty(OIDCBackendProperty backendProperty) {

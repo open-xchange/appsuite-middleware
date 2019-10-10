@@ -114,7 +114,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * ssoLogout - Whether to redirect to the OP on logout trigger from client or not
      */
-    ssoLogout(OIDCProperty.PREFIX, "false"),
+    ssoLogout(OIDCProperty.PREFIX, Boolean.FALSE),
     /**
      * redirectURILogout - Where to redirect the user after a valid logout
      */
@@ -135,7 +135,7 @@ public enum OIDCBackendProperty implements Property {
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"
      * grant type must be registered for this client.
      */
-    oauthRefreshTime(OIDCProperty.PREFIX, "60000"),
+    oauthRefreshTime(OIDCProperty.PREFIX, 60000),
     /**
      * uiWebPath - This backends UI path
      */
@@ -192,14 +192,14 @@ public enum OIDCBackendProperty implements Property {
      * of a timeout, this is logged as a temporary issue and the request continued
      * as usual.
      */
-    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, "5"),
+    tokenLockTimeoutSeconds(OIDCProperty.PREFIX, 5),
     /**
      * tryRecoverStoredTokens - Whether token refresh should try to recover valid tokens from
      * the session instance that is present in {@link SessionStorageService}.
      * This is only tried as a fall-back, after token refresh failed with an
      * {@code invalid_grant} error.
      */
-    tryRecoverStoredTokens(OIDCProperty.PREFIX, "false")
+    tryRecoverStoredTokens(OIDCProperty.PREFIX, Boolean.FALSE)
     ;
 
     private final String fqn;
