@@ -87,9 +87,11 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
     private static final String CALDAV_SYNC = "caldav_sync";
     private static final String CARDDAV_SYNC = "carddav_sync";
     private static final String DAVDROID = "davdroid";
+    private static final String DAVX5 = "davx5";
     private static final String WINDOWS_PHONE = "windows_phone";
     private static final String WINDOWS = "windows";
     private static final String KONQUEROR = "konqueror";
+    private static final String OUTLOOK_CALDAV_SYNCHRONIZER = "outlook_caldav";
     private static final String GENERIC_CALDAV = "generic_caldav";
     private static final String GENERIC_CARDDAV = "generic_carddav";
     private static final String UNKNOWN = "unknown";
@@ -114,17 +116,6 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                             return new DAVClientInfo(DAVUserAgent.IOS.getReadableName(), "ios", null, IOS_DAV, null, IOS_DAV, ClientInfoType.DAV);
                         }
 
-                        // DAVx5/2.0.7-ose (2018/12/23; dav4android; okhttp/3.12.0) Android/8.1.0
-                        // Maybe DAVx5 (formerly Davdroid)
-                        if (sUserAgent.contains("DAVx5") || sUserAgent.contains("dav4android")) {
-                            return new DAVClientInfo("DAVx5", "android", null, DAVDROID, null, DAVDROID, ClientInfoType.DAV);
-                        }
-
-                        // CalDavSynchronizer/1.22
-                        // Maybe Outlook CalDAV Synchronizer
-                        if (sUserAgent.contains("CalDavSynchronizer")) {
-                            return new DAVClientInfo("Outlook CalDAV Synchronizer", WINDOWS, null, WINDOWS, null, WINDOWS, ClientInfoType.DAV);
-                        }
                     }
 
                     // Unknown User-Agent
@@ -180,7 +171,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                         return new DAVClientInfo(KONQUEROR, "linux", null, KONQUEROR, null, KONQUEROR, ClientInfoType.DAV);
                     }
                 }
-                return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily);
+                return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, UNKNOWN.equals(client) ? userAgent.getReadableName() : client, clientVersion, clientFamily);
             }
         };
         clientInfoCache = CacheBuilder.newBuilder().initialCapacity(128).maximumSize(65536).expireAfterAccess(2, TimeUnit.HOURS).build(loader);
@@ -257,6 +248,10 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                 return CARDDAV_SYNC;
             case DAVDROID:
                 return DAVDROID;
+            case DAVX5:
+                return DAVX5;
+            case OUTLOOK_CALDAV_SYNCHRONIZER:
+                return OUTLOOK_CALDAV_SYNCHRONIZER;
             case WINDOWS_PHONE:
                 return WINDOWS_PHONE;
             case WINDOWS:

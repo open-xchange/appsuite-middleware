@@ -68,7 +68,7 @@ public enum DAVUserAgent {
     CARDDAV_SYNC("CardDAV-Sync on Android (CardDAV)"),
     SMOOTH_SYNC("SmoothSync on Android (CalDAV/CardDAV)"),
     DAVDROID("DAVdroid on Android (CalDAV/CardDAV)"),
-    DAVX5("DAV\u2075 on Android (CalDAV/CardDAV)"),
+    DAVX5("DAVx\u2075 on Android (CalDAV/CardDAV)"),
     OUTLOOK_CALDAV_SYNCHRONIZER("Outlook CalDav Synchronizer (CalDAV/CardDAV)"),
     WINDOWS_PHONE("Windows Phone Contacts and Calendar (CalDAV/CardDAV)"),
     WINDOWS("Windows Contacts and Calendar (CalDAV/CardDAV)"),
