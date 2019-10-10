@@ -76,7 +76,6 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventsResult;
-import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.configuration.ServerConfig;
@@ -407,7 +406,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         return buildStaticFacetValue(id, displayName, filterFields, id);
     }
 
-    private static Facet getRangeFacet() throws OXException {
+    private static Facet getRangeFacet() {
         List<String> fields = Collections.singletonList(CalendarFacetType.RANGE.getId());
         return newExclusiveBuilder(CalendarFacetType.RANGE)
             .addValue(buildRangeFacetValue(CalendarFacetValues.RANGE_ONE_MONTH, CalendarStrings.RANGE_ONE_MONTH, fields))
