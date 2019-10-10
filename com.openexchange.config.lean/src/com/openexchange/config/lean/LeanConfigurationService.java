@@ -76,6 +76,7 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @return The integer value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Integer</code>
      */
     int getIntProperty(Property property);
 
@@ -85,6 +86,7 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @return The boolean value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Boolean</code>
      */
     boolean getBooleanProperty(Property property);
 
@@ -94,6 +96,7 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @return The float value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Float</code>
      */
     float getFloatProperty(Property property);
 
@@ -103,6 +106,7 @@ public interface LeanConfigurationService {
      *
      * @param property The {@link Property} to fetch
      * @return The long value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
      */
     long getLongProperty(Property property);
 
@@ -125,6 +129,7 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @return The {@link Integer} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Integer</code>
      */
     int getIntProperty(int userId, int contextId, Property property);
 
@@ -136,6 +141,7 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @return The {@link Boolean} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Boolean</code>
      */
     boolean getBooleanProperty(int userId, int contextId, Property property);
 
@@ -147,6 +153,7 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @return The {@link Float} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Float</code>
      */
     float getFloatProperty(int userId, int contextId, Property property);
 
@@ -158,6 +165,7 @@ public interface LeanConfigurationService {
      * @param contextId The context identifier
      * @param property The {@link Property} name to fetch
      * @return The {@link Long} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
      */
     long getLongProperty(int userId, int contextId, Property property);
 
@@ -183,6 +191,7 @@ public interface LeanConfigurationService {
      *                  each path parameter.
      *
      * @return The integer value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Integer</code>
      */
     int getIntProperty(Property property, Map<String, String> optionals);
 
@@ -195,6 +204,7 @@ public interface LeanConfigurationService {
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
      * @return The boolean value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Boolean</code>
      */
     boolean getBooleanProperty(Property property, Map<String, String> optionals);
 
@@ -207,6 +217,7 @@ public interface LeanConfigurationService {
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
      * @return The float value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Float</code>
      */
     float getFloatProperty(Property property, Map<String, String> optionals);
 
@@ -219,6 +230,7 @@ public interface LeanConfigurationService {
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
      * @return The long value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
      */
     long getLongProperty(Property property, Map<String, String> optionals);
 
@@ -247,6 +259,7 @@ public interface LeanConfigurationService {
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
      * @return The {@link Integer} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Integer</code>
      */
     int getIntProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 
@@ -261,6 +274,7 @@ public interface LeanConfigurationService {
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
      * @return The {@link Boolean} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Boolean</code>
      */
     boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 
@@ -275,6 +289,7 @@ public interface LeanConfigurationService {
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
      * @return The {@link Float} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Float</code>
      */
     float getFloatProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 
@@ -289,6 +304,7 @@ public interface LeanConfigurationService {
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
      * @return The {@link Long} value of the property
+     * @throws IllegalArgumentException If value cannot be converted to <code>Long</code>
      */
     long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 

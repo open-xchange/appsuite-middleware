@@ -207,9 +207,11 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      * @param property The {@link Property}
      * @param coerceTo The type T to coerce the value of the property
      * @return The value T of the property from the {@link ConfigurationService} or the default value
+     * @throws IllegalArgumentException If given coercion type is not applicable
      */
     @SuppressWarnings("unchecked")
     private <T> T getProperty(Property property, Class<T> coerceTo, Map<String, String> optionals) {
+        boolean tryToRecover = true;
         String value = null;
         try {
             ConfigurationService configService = this.configService;
@@ -233,9 +235,14 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
                 if (String.class.equals(coerceTo)) {
                     return (T) value;
                 }
-                throw x;
+                // Otherwise impossible to recover from wrong coercion type
+                tryToRecover = false;
+                throw new IllegalArgumentException("The value '" + value + "' of property '" + property.getFQPropertyName(optionals) + "' cannot be converted to the specified type '" + coerceTo.getCanonicalName() + "'", x);
             }
         } catch (Exception e) {
+            if (!tryToRecover) {
+                throw e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e);
+            }
             T defaultValue = property.getDefaultValue(coerceTo);
             LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(optionals), coerceTo.getSimpleName(), defaultValue, e);
             return defaultValue;
