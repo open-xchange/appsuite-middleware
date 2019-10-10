@@ -49,7 +49,22 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.add;
+import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
+import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
+import static com.openexchange.chronos.common.CalendarUtils.combine;
+import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
+import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
 import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.coversDifferentTimePeriod;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
@@ -61,7 +76,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -93,11 +107,6 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.CalendarFolder;
-import com.openexchange.chronos.impl.Check;
-import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.InternalAttendeeUpdates;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -538,24 +547,16 @@ public class InternalEventUpdate implements EventUpdate {
         boolean isAttendeeSchedulingResource = isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity());
         boolean ignoreForbiddenAttendeenChanges = b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE));
         if (isAttendeeSchedulingResource && ignoreForbiddenAttendeenChanges) {
-            EnumSet<EventField> consideredFields = EnumSet.of(
-                EventField.ALARMS, EventField.ATTENDEES, EventField.TRANSP, EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
-            );
-            for (Iterator<EventField> iterator = updatedFields.iterator(); iterator.hasNext();) {
-                if (false == consideredFields.contains(iterator.next())) {
-                    iterator.remove();
-                }
-            }
+            //TODO: TRANSP is not yet handled as per-user property, so ignore changes in attendee scheduling resources for now
+            updatedFields.retainAll(EnumSet.of(
+                EventField.ALARMS, EventField.ATTENDEES, /* EventField.TRANSP,*/ EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
+            ));
         }
         /*
          * strip any 'per-user' properties
          */
         updatedFields.remove(EventField.FOLDER_ID);
         updatedFields.remove(EventField.ALARMS);
-        if (isAttendeeSchedulingResource) {
-            //TODO: TRANSP is not yet handled as per-user property, so ignore changes in attendee scheduling resources for now
-            updatedFields.remove(EventField.TRANSP);
-        }
         /*
          * (virtually) apply all changes of the passed event update
          */
