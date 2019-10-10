@@ -139,7 +139,7 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
 
         String serverInfo = new StringBuilder(protocol.getHost()).append('@').append(protocol.getPort()).toString();
 
-        Timer requestMeter = metricService.getTimer(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_REQUEST_RATE_NAME, MetricType.TIMER)
+        Timer requestTimer = metricService.getTimer(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_REQUEST_RATE_NAME, MetricType.TIMER)
             .withDescription("Overall IMAP request timer per target server")
             .addDimension(METRICS_DIMENSION_SERVER_KEY, serverInfo)
             .build());
@@ -171,7 +171,7 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
             return new ExecutedCommand(statusResponse, responses);
         } finally {
             if (duration >= 0) {
-                requestMeter.update(duration, TimeUnit.NANOSECONDS);
+                requestTimer.update(duration, TimeUnit.NANOSECONDS);
             }
         }
     }
