@@ -68,6 +68,8 @@ public enum DAVUserAgent {
     CARDDAV_SYNC("CardDAV-Sync on Android (CardDAV)"),
     SMOOTH_SYNC("SmoothSync on Android (CalDAV/CardDAV)"),
     DAVDROID("DAVdroid on Android (CalDAV/CardDAV)"),
+    DAVX5("DAV\u2075 on Android (CalDAV/CardDAV)"),
+    OUTLOOK_CALDAV_SYNCHRONIZER("Outlook CalDav Synchronizer (CalDAV/CardDAV)"),
     WINDOWS_PHONE("Windows Phone Contacts and Calendar (CalDAV/CardDAV)"),
     WINDOWS("Windows Contacts and Calendar (CalDAV/CardDAV)"),
     GENERIC_CALDAV("Sync Client (CalDAV)"),
@@ -110,6 +112,9 @@ public enum DAVUserAgent {
             if (userAgent.contains("SmoothSync")) {
                 return SMOOTH_SYNC;
             }
+            if (userAgent.contains("DAVx5")) {
+                return DAVUserAgent.DAVX5;
+            }
             if (userAgent.contains("DAVdroid")) {
                 return DAVUserAgent.DAVDROID;
             }
@@ -118,6 +123,9 @@ public enum DAVUserAgent {
             }
             if (userAgent.contains("iOS") && userAgent.contains("dataaccessd") && false == userAgent.contains("Android")) {
                 return IOS;
+            }
+            if (userAgent.contains("CalDavSynchronizer")) {
+                return OUTLOOK_CALDAV_SYNCHRONIZER;
             }
             if (userAgent.startsWith("MSFT-WP")) {
                 return WINDOWS_PHONE;
