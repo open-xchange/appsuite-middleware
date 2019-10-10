@@ -346,16 +346,60 @@ public class MetricDescriptor {
          * @param key The key of the dimension. Must not be 'type' or 'name'
          * @param value The value of the dimension
          * @return the {@link MetricBuilder} for chained calls
+         * @throws IllegalArgumentException If either key or value are invalid
          */
         public MetricBuilder addDimension(String key, String value) {
+            if (key == null) {
+                throw new IllegalArgumentException("The key must not be null");
+            }
+            if (value == null) {
+                throw new IllegalArgumentException("The value must not be null");
+            }
             if ("type".equals(key) || "name".equals(key)) {
                 throw new IllegalArgumentException("The key is not allowed");
             }
+            checkKey(key);
+            checkValue(value);
+
             if (dimensions == null) {
                 dimensions = new LinkedHashMap<>();
             }
             dimensions.put(key, value);
             return this;
+        }
+
+        private static void checkKey(String key) {
+            int len = key.length();
+            for (int i = len; i-- > 0;) {
+                char c = key.charAt(i);
+                switch (c) {
+                    case '*':
+                    case '?':
+                    case ',':
+                    case ':':
+                    case '\n':
+                        String ichar = ((c == '\n') ? "\\n" : "" + c);
+                        throw new IllegalArgumentException("Invalid character in key: '" + ichar + "'");
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private static void checkValue(String value) {
+            int len = value.length();
+            for (int i = len; i-- > 0;) {
+                char c = value.charAt(i);
+                switch (c) {
+                    case '=':
+                    case ':':
+                    case '\n':
+                        String ichar = ((c == '\n') ? "\\n" : "" + c);
+                        throw new IllegalArgumentException("Invalid character '" + ichar + "' in value");
+                    default:
+                        break;
+                }
+            }
         }
 
         /**

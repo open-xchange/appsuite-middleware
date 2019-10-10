@@ -137,7 +137,7 @@ public class MonitoringCommandExecutor extends AbstractMetricAwareCommandExecuto
 
         MetricService metricService = optionalMetricService.get();
 
-        String serverInfo = new StringBuilder(protocol.getHost()).append(':').append(protocol.getPort()).toString();
+        String serverInfo = new StringBuilder(protocol.getHost()).append('@').append(protocol.getPort()).toString();
 
         Timer requestMeter = metricService.getTimer(MetricDescriptor.newBuilder(METRICS_GROUP, METRICS_REQUEST_RATE_NAME, MetricType.TIMER)
             .withDescription("Overall IMAP request timer per target server")
