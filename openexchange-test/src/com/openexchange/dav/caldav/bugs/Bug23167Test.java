@@ -85,7 +85,7 @@ public class Bug23167Test extends CalDAVTest {
          * create appointment series on server
          */
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(TimeTools.D("One year ago in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        calendar.setTime(TimeTools.D("last week in the morning", TimeZone.getTimeZone("Europe/Berlin")));
         Appointment appointment = new Appointment();
         appointment.setUid(randomUID());
         appointment.setTitle("Bug23167Test");

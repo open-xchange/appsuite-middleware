@@ -145,17 +145,6 @@ public class CalendarEventCorrectOrganizerSentByTask extends UpdateTaskAdapter {
                 }
             }
         }
-
-        for (int i = 343193; i < 343201; i++) {
-            Event event = new Event();
-            event.setId(Appointment2Event.asString(i));
-            Organizer organizer = new Organizer();
-            organizer.setEntity(4);
-            organizer.setUri(Appointment2Event.getURI("tobias@local.ox"));
-            event.setOrganizer(organizer);
-            Collections.put(eventsWithCorrectedOrganizerPerContext, I(1), event);
-        }
-
         return eventsWithCorrectedOrganizerPerContext;
     }
 

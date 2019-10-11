@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.find.basic.calendar;
 
 import java.util.Date;
 
@@ -71,20 +71,6 @@ public class RangeOption {
     public RangeOption() {
         super();
     }
-
-    /**
-     * Initializes a new {@link RangeOption} base on the supplied calendar parameters.
-     *
-     * @param parameters The calendar parameters to extract the sort options from
-     */
-    public RangeOption(CalendarParameters parameters) {
-        this();
-        Date from = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        setRange(from, until);
-    }
-
-
 
     /**
      * Sets the from/to range based on the supplied <i>from</i> and <i>until</i> values..

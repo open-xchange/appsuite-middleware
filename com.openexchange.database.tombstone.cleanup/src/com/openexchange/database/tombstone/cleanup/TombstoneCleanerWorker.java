@@ -50,21 +50,20 @@
 package com.openexchange.database.tombstone.cleanup;
 
 import static com.openexchange.java.Autoboxing.L;
-import java.sql.Connection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.tombstone.cleanup.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link TombstoneCleanerWorker}
@@ -79,54 +78,56 @@ public class TombstoneCleanerWorker implements Runnable {
     private final long timespan;
     private final AtomicBoolean active;
 
-    public TombstoneCleanerWorker(long timespan) {
-        this.timespan = timespan;
+    private final ServiceLookup serviceLookup;
+
+    public TombstoneCleanerWorker(ServiceLookup lServiceLookup, long lTimespan) {
+        this.serviceLookup = lServiceLookup;
+        this.timespan = lTimespan;
         this.active = new AtomicBoolean(true);
     }
 
     @Override
     public void run() {
-        try {
-            DatabaseService databaseService = Services.getService(DatabaseService.class);
+        Thread.currentThread().setName(TombstoneCleanerWorker.class.getSimpleName());
 
+        try {
             Thread currentThread = Thread.currentThread();
             if (currentThread.isInterrupted() || false == active.get()) {
                 LOG.info("Periodic cleanup task for tombstone data interrupted or stopped.");
                 return;
             }
 
-            Connection connection = null;
-            Map<String, Integer> map = new HashMap<String, Integer>();
-            try {
-                connection = databaseService.getReadOnly();
-                map.putAll(databaseService.getAllSchemata(connection));
-            } catch (OXException e) {
-                LOG.error("Unexpected error while retrieving schema information.", e);
-            } finally {
-                databaseService.backReadOnly(connection);
-            }
-            Map<String, Integer> schemata = map;
-            if (schemata.isEmpty() || active.get() == false || currentThread.isInterrupted()) {
+            ContextService contextService = serviceLookup.getServiceSafe(ContextService.class);
+            List<Integer> distinctContextsPerSchema = contextService.getDistinctContextsPerSchema();
+            if (distinctContextsPerSchema.isEmpty() || active.get() == false || currentThread.isInterrupted()) {
                 LOG.info("Schema map has been empty or thread has been interrupted. Skip cleaning up.");
                 return;
             }
 
+            DatabaseService databaseService = Services.getService(DatabaseService.class);
             // filter schemata that are not up to date
-            for (Iterator<Map.Entry<String, Integer>> iterator = schemata.entrySet().iterator(); active.get() && iterator.hasNext();) {
-                Entry<String, Integer> schema = iterator.next();
-                Integer writePoolId = schema.getValue();
-                String schemaName = schema.getKey();
+            for (Iterator<Integer> iterator = distinctContextsPerSchema.iterator(); active.get() && iterator.hasNext();) {
+                Integer contextId = iterator.next();
+                if (contextId == null) {
+                    iterator.remove();
+                    continue;
+                }
                 try {
-                    UpdateStatus status = Updater.getInstance().getStatus(schemaName, writePoolId.intValue());
+                    UpdateStatus status = Updater.getInstance().getStatus(contextId.intValue());
                     if (!status.isExecutedSuccessfully(com.openexchange.database.tombstone.cleanup.update.InitialTombstoneCleanupUpdateTask.class.getName()) || status.blockingUpdatesRunning() || status.needsBlockingUpdates()) {
                         //skip update for the schema
                         iterator.remove();
                     }
                 } catch (OXException e) {
-                    LOG.warn("Unable to retrieve update status for schema {}. Skip this schema for cleanup.", schemaName, e);
+                    try {
+                        LOG.warn("Unable to retrieve update status for schema {}. Skip this schema for cleanup.", databaseService.getSchemaName(contextId.intValue()), e);
+                    } catch (OXException e1) {
+                        LOG.error("Unable to retrieve schema name for context with id {}: {}.", contextId, e1.getMessage(), e1);
+                    }
+                    iterator.remove();
                 }
             }
-            if (schemata.isEmpty()) {
+            if (distinctContextsPerSchema.isEmpty()) {
                 LOG.info("No schema available that already ran the update task. Skip cleaning up.");
                 return;
             }
@@ -135,17 +136,28 @@ public class TombstoneCleanerWorker implements Runnable {
 
             LOG.info("Starting daily cleanup of tombstone tables. All entries before {} will be removed.", new Date(timestamp));
 
-            for (Iterator<Entry<String, Integer>> schemaEntryIter = schemata.entrySet().iterator(); active.get() && currentThread.isInterrupted() == false && schemaEntryIter.hasNext();) {
+            for (Iterator<Integer> contextIdIter = distinctContextsPerSchema.iterator(); active.get() && currentThread.isInterrupted() == false && contextIdIter.hasNext();) {
                 long beforeSchema = System.currentTimeMillis();
-                Entry<String, Integer> schema = schemaEntryIter.next();
-                SchemaTombstoneCleaner schemaCleaner = new SchemaTombstoneCleaner(databaseService, schema.getKey(), schema.getValue());
+                Integer contextId = contextIdIter.next();
+                if (contextId == null) {
+                    contextIdIter.remove();
+                    continue;
+                }
+                SchemaTombstoneCleaner schemaCleaner = new SchemaTombstoneCleaner(databaseService, contextId);
                 Map<String, Integer> cleanedTables = schemaCleaner.cleanup(timestamp);
-                schemaCleaner.logResults(schema.getKey(), cleanedTables);
+                schemaCleaner.logResults(databaseService.getSchemaName(contextId.intValue()), cleanedTables);
                 long afterSchema = System.currentTimeMillis();
-                LOG.info("Successfully purged {} tombstone records on schema {} ({} seconds elapsed).", cleanedTables.values().stream().filter(x -> x.intValue() > 0).collect(Collectors.summingInt(x -> x.intValue())), schema.getKey(), L(TimeUnit.MILLISECONDS.toSeconds(afterSchema - beforeSchema)));
+                try {
+                    Integer purgedRecords = cleanedTables.values().stream().filter(x -> x.intValue() > 0).collect(Collectors.summingInt(x -> x.intValue()));
+                    if (purgedRecords != null && purgedRecords.intValue() > 0) {
+                        LOG.info("Successfully purged {} tombstone records on schema {} ({} seconds elapsed).", purgedRecords, databaseService.getSchemaName(contextId.intValue()), L(TimeUnit.MILLISECONDS.toSeconds(afterSchema - beforeSchema)));
+                    }
+                } catch (OXException e1) {
+                    LOG.error("Unable to retrieve schema name for context with id {}: {}.", contextId, e1.getMessage(), e1);
+                }
             }
             long after = System.currentTimeMillis();
-            LOG.info("Finished daily cleanup of tombstone tables in schemas {}. Processing took {}ms.", Strings.concat(",", schemata.keySet()), L(after - before));
+            LOG.info("Finished daily cleanup of tombstone tables in all schemas that were up-to-date. Processing took {}ms.", L(after - before));
         } catch (Exception e) {
             LOG.error("Error during periodic tombstone cleanup task: {}", e.getMessage(), e);
         }

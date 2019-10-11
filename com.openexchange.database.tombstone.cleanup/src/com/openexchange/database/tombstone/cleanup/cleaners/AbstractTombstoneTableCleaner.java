@@ -77,7 +77,7 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
             LOG.error("Error while checking table design: {}. Skip cleaning up this table.", e.getMessage(), e);
             return Collections.emptyMap();
         } catch (OXException e) {
-            LOG.warn("Table(s) is/are in an inappropriate design: {}. Skip cleaning up this table.", e);
+            LOG.warn("Table(s) is/are in an inappropriate design: {}. Skip cleaning up this table.", e.getMessage(), e);
             return Collections.emptyMap();
         }
         return cleanupSafe(connection, timestamp);

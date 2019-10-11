@@ -55,8 +55,7 @@ import com.openexchange.admin.rmi.dataobjects.EnforceableDataObject;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 
 /**
- * @author choeger
- *
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  */
 public class ResellerAdmin extends EnforceableDataObject implements PasswordMechObject, Cloneable {
 
@@ -96,6 +95,10 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     private Restriction[] restrictions;
 
     private boolean restrictionsset = false;
+
+    private String parentName;
+
+    private boolean parentNameset = false;
 
     public ResellerAdmin() {
         super();
@@ -321,6 +324,19 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return restrictionsset;
     }
 
+    public final String getParentName() {
+        return this.parentName;
+    }
+
+    public void setParentName(final String parentName) {
+        this.parentNameset = true;
+        this.parentName = parentName;
+    }
+
+    public final boolean isParentNameset() {
+        return this.parentNameset;
+    }
+
     @Override
     public final String toString() {
         StringBuilder ret = new StringBuilder();
@@ -378,14 +394,16 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         result = prime * result + (nameset ? 1231 : 1237);
         result = prime * result + ((parentId == null) ? 0 : parentId.hashCode());
         result = prime * result + (parentIdset ? 1231 : 1237);
+        result = prime * result + ((parentName == null) ? 0 : parentName.hashCode());
+        result = prime * result + (parentNameset ? 1231 : 1237);
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         result = prime * result + (passwordMechset ? 1231 : 1237);
         result = prime * result + (passwordset ? 1231 : 1237);
-        result = prime * result + ((salt == null) ? 0 : Arrays.hashCode(salt));
-        result = prime * result + (saltSet ? 1231 : 1237);
-        result = prime * result + ((restrictions == null) ? 0 : Arrays.hashCode(restrictions));
+        result = prime * result + Arrays.hashCode(restrictions);
         result = prime * result + (restrictionsset ? 1231 : 1237);
+        result = prime * result + Arrays.hashCode(salt);
+        result = prime * result + (saltSet ? 1231 : 1237);
         return result;
     }
 
@@ -441,6 +459,16 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         if (parentIdset != other.parentIdset) {
             return false;
         }
+        if (parentName == null) {
+            if (other.parentName != null) {
+                return false;
+            }
+        } else if (!parentName.equals(other.parentName)) {
+            return false;
+        }
+        if (parentNameset != other.parentNameset) {
+            return false;
+        }
         if (password == null) {
             if (other.password != null) {
                 return false;
@@ -461,24 +489,16 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         if (passwordset != other.passwordset) {
             return false;
         }
-        if (salt == null) {
-            if (other.salt != null) {
-                return false;
-            }
-        } else if (!Arrays.equals(salt, other.salt)) {
-            return false;
-        }
-        if (saltSet != other.saltSet) {
-            return false;
-        }
-        if (restrictions == null) {
-            if (other.restrictions != null) {
-                return false;
-            }
-        } else if (!Arrays.equals(restrictions, other.restrictions)) {
+        if (!Arrays.equals(restrictions, other.restrictions)) {
             return false;
         }
         if (restrictionsset != other.restrictionsset) {
+            return false;
+        }
+        if (!Arrays.equals(salt, other.salt)) {
+            return false;
+        }
+        if (saltSet != other.saltSet) {
             return false;
         }
         return true;

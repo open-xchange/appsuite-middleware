@@ -58,6 +58,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.stream.IntStream;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectOrganizerSentByTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -94,8 +95,8 @@ public class ChronosStoragePurgeLegacyDataTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         String[] tableNames = new String[] {
-            "prg_dates", "del_dates", "prg_dates_members", "del_dates_members",
-            "prg_date_rights", "del_date_rights", "dateExternal", "delDateExternal"
+            "delDateExternal", "dateExternal", "del_date_rights", "prg_date_rights",
+            "del_dates_members", "prg_dates_members", "del_dates", "prg_dates"
         };
         Connection connection = params.getConnection();
         boolean committed = false;
@@ -131,11 +132,15 @@ public class ChronosStoragePurgeLegacyDataTask extends UpdateTaskAdapter {
     }
 
     private static int clearTableIfExists(Connection connection, String tableName) throws SQLException {
+        if (false == tableExists(connection, tableName)) {
+            return 0;
+        }
         try (Statement stmt = connection.createStatement()) {
-            if (false == tableExists(connection, tableName)) {
-                return 0;
-            }
-            return stmt.executeUpdate("DELETE FROM " + tableName + ';');
+            stmt.addBatch("CREATE TABLE " + tableName + "_empty LIKE " + tableName + ";");
+            stmt.addBatch("ALTER TABLE " + tableName + "_empty ENGINE=InnoDB;");
+            stmt.addBatch("RENAME TABLE " + tableName + " TO " + tableName + "_old, " + tableName + "_empty TO " + tableName + ";");
+            stmt.addBatch("DROP TABLE " + tableName + "_old;");
+            return IntStream.of(stmt.executeBatch()).sum();
         }
     }
 

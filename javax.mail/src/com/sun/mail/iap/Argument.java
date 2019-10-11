@@ -48,6 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.util.ASCIIUtility;
@@ -472,8 +473,18 @@ public class Argument {
 	// If we are using synchronized literals, wait for the server's
 	// continuation signal
 	if (!nonSync) {
-	    CommandExecutor commandExecutor = IMAPStore.getMatchingCommandExecutors(protocol);
-	    if (commandExecutor == null) {
+	    Optional<CommandExecutor> optionalCommandExecutor = IMAPStore.getMatchingCommandExecutor(protocol);
+	    if (optionalCommandExecutor.isPresent()) {
+	        for (; ;) {
+                Response r = optionalCommandExecutor.get().readResponse(protocol);
+                if (r.isContinuation())
+                    break;
+                if (r.isTagged())
+                    throw new LiteralException(r);
+                // XXX - throw away untagged responses;
+                //   violates IMAP spec, hope no servers do this
+            }
+	    } else {
 	        for (; ;) {
 	            Response r = protocol.readResponse();
 	            if (r.isContinuation())
@@ -483,16 +494,6 @@ public class Argument {
 	            // XXX - throw away untagged responses;
 	            //	 violates IMAP spec, hope no servers do this
 	        }	        
-	    } else {
-	        for (; ;) {
-                Response r = commandExecutor.readResponse(protocol);
-                if (r.isContinuation())
-                    break;
-                if (r.isTagged())
-                    throw new LiteralException(r);
-                // XXX - throw away untagged responses;
-                //   violates IMAP spec, hope no servers do this
-            }
 	    }
 	}
 	return os;
