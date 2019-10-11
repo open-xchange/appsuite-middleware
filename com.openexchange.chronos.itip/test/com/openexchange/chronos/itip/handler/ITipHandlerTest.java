@@ -49,15 +49,22 @@
 
 package com.openexchange.chronos.itip.handler;
 
+import static com.openexchange.java.Autoboxing.B;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.SchedulingControl;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link ITipHandlerTest}
@@ -65,6 +72,8 @@ import com.openexchange.chronos.service.CalendarParameters;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Services.class })
 public class ITipHandlerTest {
 
     private ITipHandler handler = new ITipHandler(null, null);
@@ -75,9 +84,16 @@ public class ITipHandlerTest {
     @Mock
     private CalendarParameters calendarParameters;
 
+    @Mock
+    private ConfigurationService configurationService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+
+        expectLegacyScheduling();
     }
 
     @Test
@@ -114,6 +130,20 @@ public class ITipHandlerTest {
         Mockito.when(calendarParameters.get(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.class)).thenReturn(SchedulingControl.NONE);
 
         Assert.assertFalse(handler.shouldHandle(calendarEvent));
+    }
+
+    @Test
+    public void testHandle_configurationServiceMissing_return() {
+        expectLegacySchedulingDisabled();
+        Assert.assertFalse(handler.shouldHandle(calendarEvent));
+    }
+
+    private void expectLegacyScheduling() {
+        PowerMockito.when(B(configurationService.getBoolProperty("com.openexchange.calendar.useLegacyScheduling", false))).thenReturn(Boolean.TRUE);
+    }
+
+    private void expectLegacySchedulingDisabled() {
+        PowerMockito.when(B(configurationService.getBoolProperty("com.openexchange.calendar.useLegacyScheduling", false))).thenReturn(Boolean.FALSE);
     }
 
 }

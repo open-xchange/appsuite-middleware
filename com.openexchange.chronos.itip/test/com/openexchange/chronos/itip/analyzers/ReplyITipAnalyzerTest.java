@@ -88,6 +88,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.junit.Assert;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -123,6 +124,9 @@ public class ReplyITipAnalyzerTest {
 
     @Mock
     private ContextService contextService;
+    
+    @Mock
+    private RegionalSettingsService regionalSettingsService;
 
     private CalendarSession session;
 
@@ -151,10 +155,12 @@ public class ReplyITipAnalyzerTest {
         PowerMockito.when(Services.getService(UserService.class, true)).thenReturn(this.userService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
         PowerMockito.when(Services.getService(ContextService.class, true)).thenReturn(this.contextService);
+        PowerMockito.when(Services.getService(RegionalSettingsService.class)).thenReturn(this.regionalSettingsService);
 
         // Mock settings
         PowerMockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(context);
         PowerMockito.when(userService.getUser(ArgumentMatchers.anyInt(), ArgumentMatchers.any())).thenReturn(user);
+        PowerMockito.when(regionalSettingsService.get(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(null);
     }
 
     @Test(expected = OXException.class)
