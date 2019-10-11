@@ -52,6 +52,7 @@ package com.openexchange.chronos.scheduling.changes.impl;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.DescriptionService;
@@ -76,7 +77,7 @@ import com.openexchange.chronos.service.EventUpdate;
 public class DescriptionServiceImpl implements DescriptionService {
 
     //@formatter:off
-    private static final ChangeDescriber[] DESCRIBERS = {
+    private static final List<ChangeDescriber> DESCRIBERS = ImmutableList.of(
         new SplitDescriber(),
         new RRuleDescriber(),
         new ReschedulingDescriber(),
@@ -86,9 +87,8 @@ public class DescriptionServiceImpl implements DescriptionService {
         new DescriptionDescriber(), 
         new TransparencyDescriber(),
         new AttachmentDescriber(),
-        new AttendeeDescriber(),
-        
-    };
+        new AttendeeDescriber()
+    );
     //@formatter:on
 
     /**
