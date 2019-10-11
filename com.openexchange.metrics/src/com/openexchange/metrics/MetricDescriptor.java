@@ -413,7 +413,7 @@ public class MetricDescriptor {
             StringBuilder fqn = new StringBuilder(group).append('.').append(name);
             if (dimensions != null) {
                 for (Map.Entry<String, String> dimension : dimensions.entrySet()) {
-                    fqn.append(',').append(dimension.getKey()).append('=').append(dimension.getValue());
+                    fqn.append('.').append(dimension.getKey()).append('-').append(dimension.getValue());
                 }
             }
             return new MetricDescriptor(group, name, unit, metricType, rate, supplier, fqn.toString(), description, dimensions);
