@@ -303,7 +303,7 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
         if (configReader == null) {
             return Reloadables.getInterestsForAll();
         }
-        return Reloadables.interestsForProperties(configReader.getConfigurationPaths());
+        return Reloadables.interestsForProperties(configReader.getReloadableConfigurationPaths());
     }
 
 
