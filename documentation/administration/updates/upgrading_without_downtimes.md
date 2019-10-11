@@ -19,7 +19,6 @@ correctly, at least not without the extra component and extra configuration we d
 To overcome this situation and minimise the downtimes, we have come up with the idea of upgrading one database schema at a time, while keeping the rest of the schemata intact and subsequently the cluster with the old version operational. 
 In order to have no downtimes on the cluster and simulate the multi-version support, an extra component is needed, that is a secondary load balancer. The use of that component and its place in the architecture is explained below. 
 Also, starting with 7.10.0 a new property was introduced for the migration/upgrade purpose. The value of that new property is a URL which points to the secondary load balancer. 
-With that being said please note that we do **NOT** support multi-version setups and operations.
 
 Now, in a nutshell, the upgrade process consists out of the following steps. The initial step is to set the value of the migration property to all nodes with the old version in the cluster. The purpose of that URL is to redirect users 
 to the correct node (see [Q and A](#q-and-a) section). Then, one node is taken out of the main load balancer and upgraded as [usual](http://oxpedia.org/wiki/index.php?title=Running_a_cluster#Updating_a_Cluster). 
