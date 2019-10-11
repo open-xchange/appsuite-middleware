@@ -269,4 +269,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Although credentials are correct, the mail server denied the connect attempt for any reason
     public static final String DENIED_CONNECT_ATTEMPT_MSG = "Mail server %1$s denied connect attempt: %3$s";
 
+    // User tried to send an email, which has been composed as a reply or forward referencing a message, which no longer exists
+    public static final String ORIGINAL_MAIL_NOT_FOUND_MSG = "As the original email no longer exists, your email has been sent as a new one.";
+
 }

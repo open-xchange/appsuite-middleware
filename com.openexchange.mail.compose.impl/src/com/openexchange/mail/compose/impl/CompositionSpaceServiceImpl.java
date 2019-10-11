@@ -66,6 +66,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -530,14 +531,25 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
             // Reply or (inline) forward?
             Meta meta = m.getMeta();
+            Optional<MailMessage> originalMail = null;
             {
                 MetaType metaType = meta.getType();
                 if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
-                    MailMessage originalMail = requireMailMessage(meta.getReplyFor(), mailInterface);
-                    setReplyHeaders(originalMail, sourceMessage);
+                    MailPath replyFor = meta.getReplyFor();
+                    originalMail = optionalMailMessage(replyFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), sourceMessage);
+                    } else {
+                        warnings.add(MailExceptionCode.ORIGINAL_MAIL_NOT_FOUND.create(replyFor.getMailID(), replyFor.getFolder()));
+                    }
                 } else if (metaType == MetaType.FORWARD_INLINE) {
-                    MailMessage originalMail = requireMailMessage(meta.getForwardsFor().get(0), mailInterface);
-                    setReplyHeaders(originalMail, sourceMessage);
+                    MailPath forwardFor = meta.getForwardsFor().get(0);
+                    originalMail = optionalMailMessage(forwardFor, mailInterface);
+                    if (originalMail.isPresent()) {
+                        setReplyHeaders(originalMail.get(), sourceMessage);
+                    } else {
+                        warnings.add(MailExceptionCode.ORIGINAL_MAIL_NOT_FOUND.create(forwardFor.getMailID(), forwardFor.getFolder()));
+                    }
                 }
             }
 
@@ -565,18 +577,24 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             {
                 MetaType metaType = meta.getType();
                 if (metaType == MetaType.REPLY || metaType == MetaType.REPLY_ALL) {
-                    MailPath replyFor = meta.getReplyFor();
-                    try {
-                        mailInterface.updateMessageFlags(replyFor.getFolderArgument(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, null, true);
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to mark original mail '{}' as answered", replyFor, e);
+                    if (originalMail == null || originalMail.isPresent()) {
+                        MailPath replyFor = meta.getReplyFor();
+                        try {
+                            mailInterface.updateMessageFlags(replyFor.getFolderArgument(), new String[] { replyFor.getMailID() }, MailMessage.FLAG_ANSWERED, null, true);
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to mark original mail '{}' as answered", replyFor, e);
+                            warnings.add(MailExceptionCode.FLAG_FAIL.create());
+                        }
                     }
                 } else if (metaType == MetaType.FORWARD_INLINE) {
-                    MailPath forwardFor = meta.getForwardsFor().get(0);
-                    try {
-                        mailInterface.updateMessageFlags(forwardFor.getFolderArgument(), new String[] { forwardFor.getMailID() }, MailMessage.FLAG_FORWARDED, null, true);
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to mark original mail '{}' as forwarded", forwardFor, e);
+                    if (originalMail == null || originalMail.isPresent()) {
+                        MailPath forwardFor = meta.getForwardsFor().get(0);
+                        try {
+                            mailInterface.updateMessageFlags(forwardFor.getFolderArgument(), new String[] { forwardFor.getMailID() }, MailMessage.FLAG_FORWARDED, null, true);
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to mark original mail '{}' as forwarded", forwardFor, e);
+                            warnings.add(MailExceptionCode.FLAG_FAIL.create());
+                        }
                     }
                 }
                 MailPath editFor = meta.getEditFor();
@@ -2022,11 +2040,27 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
      * @throws OXException If mail cannot be returned
      */
     private MailMessage requireMailMessage(MailPath mailPath, MailServletInterface mailInterface) throws OXException {
-        MailMessage mailMessage = mailInterface.getMessage(mailPath.getFolderArgument(), mailPath.getMailID(), false);
-        if (null == mailMessage) {
+        Optional<MailMessage> optionalMailMessage = optionalMailMessage(mailPath, mailInterface);
+        if (!optionalMailMessage.isPresent()) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailPath.getMailID(), mailPath.getFolderArgument());
         }
-        return mailMessage;
+        return optionalMailMessage.get();
+    }
+
+    /**
+     * Gets the optional referenced mail
+     *
+     * @param mailPath The mail path for the mail
+     * @param mailInterface The service to use
+     * @return The optional mail
+     * @throws OXException If mail cannot be returned
+     */
+    private Optional<MailMessage> optionalMailMessage(MailPath mailPath, MailServletInterface mailInterface) throws OXException {
+        MailMessage mailMessage = mailInterface.getMessage(mailPath.getFolderArgument(), mailPath.getMailID(), false);
+        if (null == mailMessage) {
+            return Optional.empty();
+        }
+        return Optional.of(mailMessage);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
