@@ -3935,9 +3935,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
                 if (disabled) {
                     if (null == optReason) {
-                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
+                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
                     } else {
-                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId, optReason);
+                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId), optReason);
                     }
                 }
                 return disabled;
@@ -3947,14 +3947,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 // Increment
                 boolean incremented = incrementOrResetAccount(mailAccess, false, failedAuthInfo.count, accountId, userId, contextId, con);
                 if (incremented) {
-                    LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", failedAuthInfo.count + 1, mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
+                    LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count + 1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
                     return false;
                 }
             } else {
                 // Reset
                 boolean resetted = incrementOrResetAccount(mailAccess, true, failedAuthInfo.count, accountId, userId, contextId, con);
                 if (resetted) {
-                    LOG.debug("Set failed auth count to {} for {} account {} ({}) of user {} in context {}", 1, mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
+                    LOG.debug("Set failed auth count to {} for {} account {} ({}) of user {} in context {}", I(1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
                     return false;
                 }
             }
@@ -4220,7 +4220,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             String transcribed = cryptoService.encrypt(decrypted, newSecret);
 
                             // Add to batch update
-                            transcribedPasswords.put(id, transcribed);
+                            transcribedPasswords.put(I(id), transcribed);
                         }
                     }
                 }
@@ -4263,7 +4263,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             String transcribed = cryptoService.encrypt(decrypted, newSecret);
 
                             // Add to batch update
-                            transcribedPasswords.put(id, transcribed);
+                            transcribedPasswords.put(I(id), transcribed);
                         }
                     }
                 }
