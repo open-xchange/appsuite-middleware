@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.security.manager.impl.FolderPermission;
 import com.openexchange.security.manager.impl.FolderPermission.Allow;
+import com.openexchange.config.Reloadables;
 
 /**
  * {@link ConfigurationReader}
@@ -71,7 +72,7 @@ public class ConfigurationReader {
 
     private final OXSecurityManager securityManager;
     private final ConfigurationService configService;
-    private ArrayList<String> configurationPaths;
+    private ArrayList<String> reloadableConfigurationPaths;
 
     /**
      * Private class that specifies which configuration should be loaded, and what permission applies
@@ -108,7 +109,7 @@ public class ConfigurationReader {
     public ConfigurationReader(OXSecurityManager securityManager, ConfigurationService configService) {
         this.securityManager = securityManager;
         this.configService = configService;
-        this.configurationPaths = new ArrayList<String>(1);
+        this.reloadableConfigurationPaths = new ArrayList<String>(1);
     }
 
     /**
@@ -125,6 +126,21 @@ public class ConfigurationReader {
             return new SecurityAddition (add, true, allow);
         }
         return new SecurityAddition(add, false, allow);
+    }
+
+    /**
+     * Validate that the path is a valid property name
+     * Add to reloadable list for the security manager
+     *
+     * @param config  Configuration
+     */
+    private void addReloadConfigurationPath(String config) {
+        try {
+            Reloadables.validatePropertyName(config);
+            reloadableConfigurationPaths.add(config);
+        } catch (IllegalArgumentException e) {
+            // NTD.  Not a valid reloadable config path
+        }
     }
 
     /**
@@ -198,7 +214,7 @@ public class ConfigurationReader {
     private void addConfiguration(ArrayList<FolderPermission> folderPermissions, String config) {
         SecurityAddition toAdd = getSecurityAddition(config);  // Parse the configuration requirement for permissions
         String directory = configService.getProperty(toAdd.getPath());  // Get the configured value from configuration service
-        configurationPaths.add(toAdd.getPath());  // Keep track of configuration paths
+        addReloadConfigurationPath(toAdd.getPath());  // Keep track of configuration paths
         if (directory != null && !directory.isEmpty()) {
             // Create the folder permission
             FolderPermission folder =
@@ -246,7 +262,7 @@ public class ConfigurationReader {
             LOG.error("Problem loading list of configuration settings from config file for security settings", e);
         }
         if (configurations != null) {
-            configurationPaths = new ArrayList<String>(configurations.size());
+            reloadableConfigurationPaths = new ArrayList<String>(configurations.size());
             ArrayList<FolderPermission> folderPermissions = new ArrayList<FolderPermission>(configurations.size());
             for (String config : configurations) {
                 if (config.startsWith("$")) {
@@ -267,12 +283,12 @@ public class ConfigurationReader {
 
 
     /**
-     * Return a list of configuration paths that were loaded.
+     * Return a list of reloadable configuration paths that were loaded.
      *
      * @return  List of configuration paths
      */
-    public String[] getConfigurationPaths() {
-        return this.configurationPaths.toArray(new String[configurationPaths.size()]);
+    public String[] getReloadableConfigurationPaths() {
+        return this.reloadableConfigurationPaths.toArray(new String[reloadableConfigurationPaths.size()]);
     }
 
 }

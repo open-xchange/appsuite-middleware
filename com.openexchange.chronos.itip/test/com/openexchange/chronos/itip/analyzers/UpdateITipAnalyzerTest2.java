@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.itip.analyzers;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import java.util.Collections;
@@ -90,6 +89,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.MockUser;
+import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -130,6 +130,9 @@ public class UpdateITipAnalyzerTest2 {
 
     @Mock
     private ContextService contextService;
+    
+    @Mock
+    private RegionalSettingsService regionalSettingsService;
 
     private CalendarSession session;
 
@@ -164,10 +167,12 @@ public class UpdateITipAnalyzerTest2 {
         PowerMockito.when(Services.getService(UserService.class, true)).thenReturn(this.userService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
         PowerMockito.when(Services.getService(ContextService.class, true)).thenReturn(this.contextService);
+        PowerMockito.when(Services.getService(RegionalSettingsService.class)).thenReturn(this.regionalSettingsService);
 
         // Mock settings
         PowerMockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(context);
         PowerMockito.when(userService.getUser(ArgumentMatchers.anyInt(), ArgumentMatchers.any())).thenReturn(user);
+        PowerMockito.when(regionalSettingsService.get(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(null);
 
     }
 
@@ -191,8 +196,6 @@ public class UpdateITipAnalyzerTest2 {
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
         Assert.assertThat("Timezone was changed", newEvent.getEndDate(), is(original.getEndDate()));
-
-        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(1)));
     }
 
     @Test
@@ -211,8 +214,6 @@ public class UpdateITipAnalyzerTest2 {
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(u));
         Assert.assertThat("Timezone was changed", newEvent.getStartDate(), is(original.getStartDate()));
-
-        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(1)));
     }
 
     @Test
@@ -234,8 +235,6 @@ public class UpdateITipAnalyzerTest2 {
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
         Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(update.getEndDate()));
-
-        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(1)));
     }
 
     @Test
@@ -257,8 +256,6 @@ public class UpdateITipAnalyzerTest2 {
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
         Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(update.getEndDate()));
-
-        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(2)));
     }
 
     @Test
@@ -280,8 +277,6 @@ public class UpdateITipAnalyzerTest2 {
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Assert.assertThat("Timezone wasn't changed", newEvent.getStartDate(), is(u));
         Assert.assertThat("Timezone wasn't changed", newEvent.getEndDate(), is(update.getEndDate()));
-
-        Assert.assertThat("Diff description contains more elements then expected", I(analyze.getChanges().get(0).getDiffDescription().size()), is(I(3)));
     }
     // End tests for 57883 -->
 
