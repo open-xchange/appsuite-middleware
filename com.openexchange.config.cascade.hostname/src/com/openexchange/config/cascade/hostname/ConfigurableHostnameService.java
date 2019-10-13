@@ -64,7 +64,8 @@ public class ConfigurableHostnameService implements HostnameService {
     private final ConfigViewFactory configViews;
 
     private static final String HOSTNAME_KEY = "com.openexchange.hostname";
-    private static final String GUEST_HOSTNAME_KEY = "com.openexchange.guestHostname";
+    private static final String OLD_GUEST_HOSTNAME_KEY = "com.openexchange.guestHostname";
+    private static final String DEFAULT_GUEST_HOSTNAME_KEY = "com.openexchange.share.guestHostname";
 
     /**
      * Initializes a new {@link ConfigurableHostnameService}.
@@ -83,7 +84,14 @@ public class ConfigurableHostnameService implements HostnameService {
 
     @Override
     public String getGuestHostname(int userId, int contextId) {
-        return getHostname(GUEST_HOSTNAME_KEY, userId, contextId);
+        String hostname = getHostname(OLD_GUEST_HOSTNAME_KEY, userId, contextId);
+        if (null != hostname) {
+            org.slf4j.LoggerFactory.getLogger(ConfigurableHostnameService.class).warn(
+                "Using deprecated definition from \"{}\" as guest hostname. This property will be removed in future versions in favor of the default property, " + 
+                "so switch to \"{}\" now.", OLD_GUEST_HOSTNAME_KEY, DEFAULT_GUEST_HOSTNAME_KEY);
+            return hostname;
+        }        
+        return getHostname(DEFAULT_GUEST_HOSTNAME_KEY, userId, contextId);
     }
 
     private String getHostname(String property, int userId, int contextId) {

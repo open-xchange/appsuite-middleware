@@ -2,6 +2,8 @@
 package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -24,9 +26,12 @@ public class Bug17963Test_DateWithoutTime extends ManagedAppointmentTest {
             + "SUMMARY:Team-Meeting\n"
             + "END:VEVENT\n";
 
-        ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical);
+        ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical, false);
         ICalImportResponse response = getClient().execute(request);
+
         ImportResult[] imports = response.getImports();
         assertEquals(1, imports.length);
+        assertTrue(response.getImports()[0].hasError());
+        assertNotNull(response.getImports()[0].getException());
     }
 }

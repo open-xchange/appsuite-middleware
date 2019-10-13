@@ -10,13 +10,3 @@ properties:
       file: hostnameconfigcascade.properties
       packageName: open-xchange-hostname-config-cascade
       tags: ["Hosting", "Notification"]
-    - key: com.openexchange.guestHostname
-      description: |
-        Configures the guest hostname through the config cascade.
-      defaultValue: 
-      version: 7.0.1
-      reloadable: true
-      configcascadeAware: true
-      file: hostnameconfigcascade.properties
-      packageName: open-xchange-hostname-config-cascade
-      tags: ["Share", "Hosting", "Notification"]

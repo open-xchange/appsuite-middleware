@@ -1258,19 +1258,19 @@ public final class MailAccountDescription implements Serializable {
         transportProperties.put(name, value);
     }
 
-    private static Object[] parseServerAndPort(final String server, final int defaultPort) {
-        final int pos = server.indexOf(':');
-        if (pos == -1) {
-            return new Object[] { server, Integer.valueOf(defaultPort) };
-        }
-        int port;
-        try {
-            port = Integer.parseInt(server.substring(pos + 1));
-        } catch (NumberFormatException e) {
-            LOG.warn("Unable to parse port out of URL: {}. Using default port instead: {}", server, defaultPort, e);
-            port = defaultPort;
-        }
-        return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
-    }
+//    private static Object[] parseServerAndPort(final String server, final int defaultPort) {
+//        final int pos = server.indexOf(':');
+//        if (pos == -1) {
+//            return new Object[] { server, Integer.valueOf(defaultPort) };
+//        }
+//        int port;
+//        try {
+//            port = Integer.parseInt(server.substring(pos + 1));
+//        } catch (NumberFormatException e) {
+//            LOG.warn("Unable to parse port out of URL: {}. Using default port instead: {}", server, I(defaultPort), e);
+//            port = defaultPort;
+//        }
+//        return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
+//    }
 
 }

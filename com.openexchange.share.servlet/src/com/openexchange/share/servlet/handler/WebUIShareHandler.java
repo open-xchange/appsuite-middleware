@@ -61,6 +61,7 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
@@ -139,16 +140,16 @@ public class WebUIShareHandler extends AbstractShareHandler {
         ShareTargetPath targetPath = shareRequest.getTargetPath();
         switch (targetPath.getModule()) {
             // Mail
-            case FolderObject.MAIL: return  t -> String.format(
-                t.translate(ShareServletStrings.SHARE_PASSWORD));
+            case FolderObject.MAIL: 
+                return  t -> String.format(t.translate(ShareServletStrings.SHARE_PASSWORD));
             // Other share
-            default: return t -> String.format(
-                t.translate(ShareServletStrings.SHARE_WITH_TARGET),
-                FullNameBuilder.buildFullName(sharingUser, t),
-                t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
-                shareRequest.getTargetProxy().getLocalizedTitle(t));
+            default: 
+                return t -> String.format(
+                    t.translate(RecipientType.ANONYMOUS.equals(shareRequest.getGuest().getRecipientType()) ? ShareServletStrings.SHARE_WITH_TARGET : ShareServletStrings.SHARE_WITH_TARGET_AND_GUEST_PASSWORD),
+                    FullNameBuilder.buildFullName(sharingUser, t),
+                    t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
+                    shareRequest.getTargetProxy().getLocalizedTitle(t));
         }
-
     }
 
     private ShareHandlerReply redirectToLoginPage(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
