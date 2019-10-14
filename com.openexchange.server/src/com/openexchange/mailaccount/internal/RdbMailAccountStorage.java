@@ -3931,19 +3931,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt = null;
 
             boolean lastCountExpired = (System.currentTimeMillis() - failedAuthInfo.start) > getFailedAuthTimeSpan(userId, contextId);
-            if (lastCountExpired == false && failedAuthInfo.count + 1 > getFailedAuthThreshold(userId, contextId)) {
-                // Exceeded...
-                boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
-                if (disabled) {
-                    if (null == optReason) {
-                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
-                    } else {
-                        LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId), optReason);
-                    }
-                }
-                return disabled;
-            }
-
             if (lastCountExpired) {
                 // Reset
                 boolean resetted = incrementOrResetAccount(mailAccess, true, failedAuthInfo.count, accountId, userId, contextId, con);
@@ -3952,6 +3939,19 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     return false;
                 }
             } else {
+                if (failedAuthInfo.count + 1 > getFailedAuthThreshold(userId, contextId)) {
+                    // Exceeded...
+                    boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
+                    if (disabled) {
+                        if (null == optReason) {
+                            LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
+                        } else {
+                            LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId), optReason);
+                        }
+                    }
+                    return disabled;
+                }
+
                 // Increment
                 boolean incremented = incrementOrResetAccount(mailAccess, false, failedAuthInfo.count, accountId, userId, contextId, con);
                 if (incremented) {
