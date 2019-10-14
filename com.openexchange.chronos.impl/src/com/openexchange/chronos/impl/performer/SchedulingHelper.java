@@ -844,7 +844,12 @@ public class SchedulingHelper {
 
     private ScheduleChange describeReply(CalendarObjectResource updatedResource, List<EventUpdate> attendeeEventUpdates, Event seriesMaster, CalendarUser originator, CalendarUser recipient) throws OXException {
         List<Change> changeDescriptions = getChangeDescriptionsFor(attendeeEventUpdates, EventField.ATTENDEES);
-        Attendee matchingAttendee = extractAttendee(updatedResource, originator);
+        Attendee matchingAttendee;
+        if (null != changeDescriptions && 0 < changeDescriptions.size()) {
+            matchingAttendee = extractAttendee(updatedResource, originator, changeDescriptions.get(0));
+        } else {
+            matchingAttendee = extractAttendee(updatedResource, originator);
+        }
         String comment = null != matchingAttendee ? matchingAttendee.getComment() : null;
         ParticipationStatus partStat = null != matchingAttendee ? matchingAttendee.getPartStat() : null;
         if (null != seriesMaster && contains(seriesMaster.getAttendees(), recipient)) {
@@ -1182,6 +1187,39 @@ public class SchedulingHelper {
      * @return The matching attendee, or <code>null</code> if not set or found
      */
     private static Attendee extractAttendee(CalendarObjectResource resource, CalendarUser calendarUser) {
+        for (Event event : resource.getEvents()) {
+            Attendee attende = CalendarUtils.find(event.getAttendees(), calendarUser);
+            if (null != attende) {
+                return attende;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the (first) attendee matching a specific calendar user found in the supplied calendar object resource.
+     * 
+     * @param resource The calendar object resource to get the attendee comment from
+     * @param calendarUser The calendar user to lookup the attendee for
+     * @param changeDescription The change description to prefer the attendee for, or <code>null</code> if not available
+     * @return The matching attendee, or <code>null</code> if not set or found
+     */
+    private static Attendee extractAttendee(CalendarObjectResource resource, CalendarUser calendarUser, Change changeDescription) {
+        /*
+         * extract attendee from matching change decription if possible
+         */
+        if (null != changeDescription) {
+            Event event = resource.getChangeException(changeDescription.getRecurrenceId());
+            if (null != event) {
+                Attendee attende = CalendarUtils.find(event.getAttendees(), calendarUser);
+                if (null != attende) {
+                    return attende;
+                }
+            }
+        }
+        /*
+         * extract first matching attendee from resource, otherwise
+         */
         for (Event event : resource.getEvents()) {
             Attendee attende = CalendarUtils.find(event.getAttendees(), calendarUser);
             if (null != attende) {
