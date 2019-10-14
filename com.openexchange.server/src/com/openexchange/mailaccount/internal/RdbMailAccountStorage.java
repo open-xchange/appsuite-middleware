@@ -3930,7 +3930,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = null;
             stmt = null;
 
-            if (failedAuthInfo.count + 1 > getFailedAuthThreshold(userId, contextId)) {
+            boolean lastCountExpired = (System.currentTimeMillis() - failedAuthInfo.start) > getFailedAuthTimeSpan(userId, contextId);
+            if (lastCountExpired == false && failedAuthInfo.count + 1 > getFailedAuthThreshold(userId, contextId)) {
                 // Exceeded...
                 boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
                 if (disabled) {
@@ -3943,18 +3944,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 return disabled;
             }
 
-            if ((System.currentTimeMillis() - failedAuthInfo.start) <= getFailedAuthTimeSpan(userId, contextId)) {
-                // Increment
-                boolean incremented = incrementOrResetAccount(mailAccess, false, failedAuthInfo.count, accountId, userId, contextId, con);
-                if (incremented) {
-                    LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count + 1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
-                    return false;
-                }
-            } else {
+            if (lastCountExpired) {
                 // Reset
                 boolean resetted = incrementOrResetAccount(mailAccess, true, failedAuthInfo.count, accountId, userId, contextId, con);
                 if (resetted) {
                     LOG.debug("Set failed auth count to {} for {} account {} ({}) of user {} in context {}", I(1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
+                    return false;
+                }
+            } else {
+                // Increment
+                boolean incremented = incrementOrResetAccount(mailAccess, false, failedAuthInfo.count, accountId, userId, contextId, con);
+                if (incremented) {
+                    LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count + 1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
                     return false;
                 }
             }
