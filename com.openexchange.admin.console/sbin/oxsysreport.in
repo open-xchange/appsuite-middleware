@@ -615,6 +615,8 @@ exclude_secret_entries() {
     local _whitelist='enabledMailCapableKey|UserAttributePassword|forgotPassword|secretSource'
     local _blacklist="pass(word|wd|crypt)*${_pattern}"
     local _blacklist="${_blacklist}|secret(source|random)*${_pattern}"
+    local _blacklist="${_blacklist}|accountSID${_pattern}"
+    local _blacklist="${_blacklist}|authtoken${_pattern}"
     local _blacklist="${_blacklist}|key${_pattern}"
     local _blacklist="${_blacklist}|salt${_pattern}"
     local _blacklist="${_blacklist}|(${_separator}|\.|JMX|JDBC|[[:blank:]])login(name)*${_pattern}"
