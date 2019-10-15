@@ -90,12 +90,6 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InternalAttendeeUpdates.class);
 
-    /**
-     * Attendee fields that, when modified, indicate that a <i>reply</i> of the associated calendar object resource is assumed, usually
-     * leading to appropriate notifications and scheduling messages being sent out to the organizer.
-     */
-    private static final AttendeeField[] REPLY_FIELDS = { AttendeeField.PARTSTAT, AttendeeField.COMMENT };
-
     private final CalendarSession session;
     private final CalendarFolder folder;
     private final List<Attendee> originalAttendees;
@@ -192,12 +186,7 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
      * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
      */
     public boolean isReply(CalendarUser calendarUser) {
-        for (ItemUpdate<Attendee, AttendeeField> itemUpdate : getUpdatedItems()) {
-            if (matches(itemUpdate.getOriginal(), calendarUser)) {
-                return itemUpdate.containsAnyChangeOf(REPLY_FIELDS);
-            }
-        }
-        return false;
+        return Utils.isReply(this, calendarUser);
     }
 
     /**

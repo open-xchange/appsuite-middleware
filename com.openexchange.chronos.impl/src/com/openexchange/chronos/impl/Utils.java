@@ -49,7 +49,19 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
+import static com.openexchange.chronos.common.CalendarUtils.hasFurtherOccurrences;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
@@ -104,7 +116,10 @@ import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -155,6 +170,12 @@ public class Utils {
         EventField.ID, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
         EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP
     };
+
+    /**
+     * Attendee fields that, when modified, indicate that a <i>reply</i> of the associated calendar object resource is assumed, usually
+     * leading to appropriate notifications and scheduling messages being sent out to the organizer.
+     */
+    private static final AttendeeField[] REPLY_FIELDS = { AttendeeField.PARTSTAT, AttendeeField.COMMENT };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
@@ -829,6 +850,42 @@ public class Utils {
         }
         return false == AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT).equals(originalAttendee, updatedAttendee) ||
             false == AttendeeMapper.getInstance().get(AttendeeField.COMMENT).equals(originalAttendee, updatedAttendee);
+    }
+
+    /**
+     * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
+     * calendar object resource or not, depending on the modified attendee fields.
+     * 
+     * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
+     */
+    public static boolean isReply(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, CalendarUser calendarUser) {
+        for (ItemUpdate<Attendee, AttendeeField> itemUpdate : attendeeUpdates.getUpdatedItems()) {
+            if (matches(itemUpdate.getOriginal(), calendarUser)) {
+                return itemUpdate.containsAnyChangeOf(REPLY_FIELDS);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Extracts those event updates that represent a <i>reply</i> scheduling operation from a specific calendar user's point of view.
+     * 
+     * @param eventUpdates The event updates to extract the replies from
+     * @param calendarUser The calendar user to extract the replies for
+     * @return The event updates representing <i>reply</i> scheduling operations, or an empty list if there are none
+     * @see #isReply(CollectionUpdate, CalendarUser)
+     */
+    public static List<EventUpdate> extractReplies(List<EventUpdate> eventUpdates, CalendarUser calendarUser) {
+        if (null == eventUpdates || eventUpdates.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<EventUpdate> replyEventUpdates = new ArrayList<EventUpdate>(eventUpdates);
+        for (Iterator<EventUpdate> iterator = replyEventUpdates.iterator(); iterator.hasNext();) {
+            if (false == isReply(iterator.next().getAttendeeUpdates(), calendarUser)) {
+                iterator.remove();
+            }
+        }
+        return replyEventUpdates;
     }
 
     /**
