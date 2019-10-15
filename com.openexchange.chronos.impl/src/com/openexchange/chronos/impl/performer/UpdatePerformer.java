@@ -529,7 +529,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         /*
                          * remove attendee from existing change exception
                          */
-                        attendeeEventUpdates.addAll(delete(loadExceptionData(originalEvent, recurrenceId), userAttendee));
+                        Event originalChangeException = loadExceptionData(originalEvent, recurrenceId);
+                        Attendee originalAttendee = find(originalChangeException.getAttendees(), calendarUserId);
+                        if (null != originalAttendee) {
+                            attendeeEventUpdates.addAll(delete(originalChangeException, originalAttendee));
+                        }
                     } else {
                         /*
                          * creation of new delete exception for this attendee
