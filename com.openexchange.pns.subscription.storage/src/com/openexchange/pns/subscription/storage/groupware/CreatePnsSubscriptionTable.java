@@ -69,7 +69,7 @@ public final class CreatePnsSubscriptionTable extends AbstractCreateTableImpl {
             "cid INT4 UNSIGNED NOT NULL," +
             "user INT4 UNSIGNED NOT NULL," +
             "token VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-            "client VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
+            "client VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
             "transport VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
             "last_modified BIGINT(64) NOT NULL," +
             "all_flag TINYINT UNSIGNED NOT NULL default '0'," +
