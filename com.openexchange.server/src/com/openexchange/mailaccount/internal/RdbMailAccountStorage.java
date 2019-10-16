@@ -3955,7 +3955,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 // Increment
                 boolean incremented = incrementOrResetAccount(mailAccess, false, failedAuthInfo.count, accountId, userId, contextId, con);
                 if (incremented) {
-                    LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count + 1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
+                    if (null == optReason) {
+                        LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count + 1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
+                    } else {
+                        LOG.debug("Incremented failed auth count to {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count + 1), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId), optReason);
+                    }
                     return false;
                 }
             }
