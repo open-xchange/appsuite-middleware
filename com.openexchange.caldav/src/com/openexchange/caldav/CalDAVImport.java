@@ -132,25 +132,31 @@ public class CalDAVImport {
                 LOG.debug("Skipping event marked with \"{}\": {}", Lightning.X_MOZ_FAKED_MASTER.getId(), importedEvent);
                 continue;
             }
-            /*
-             * check against min-/max-date-time, if configured
-             */
-            if (false == CalendarUtils.isInRange(importedEvent, resource.getParent().getMinDateTime(), null, TimeZones.UTC) && (
-                null == importedEvent.getRecurrenceRule() || false == resource.getFactory().requireService(RecurrenceService.class).iterateEventOccurrences(
-                    importedEvent, resource.getParent().getMinDateTime(), null).hasNext())) {
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "min-date-time", url, HttpServletResponse.SC_FORBIDDEN);
-            }
-            if (false == CalendarUtils.isInRange(importedEvent, null, resource.getParent().getMaxDateTime(), TimeZones.UTC)) {
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-date-time", url, HttpServletResponse.SC_FORBIDDEN);
-            }
-            if (null == uid) {
-                uid = importedEvent.getUid();
-            } else if (false == uid.equals(importedEvent.getUid())) {
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
-            }
             if (looksLikeException(importedEvent)) {
+                /*
+                 * take over change exception event
+                 */
                 changeExceptions.add(importedEvent);
             } else {
+                /*
+                 * check against min-/max-date-time, if configured
+                 */
+                if (false == CalendarUtils.isInRange(importedEvent, resource.getParent().getMinDateTime(), null, TimeZones.UTC) && (
+                    null == importedEvent.getRecurrenceRule() || false == resource.getFactory().requireService(RecurrenceService.class).iterateEventOccurrences(
+                        importedEvent, resource.getParent().getMinDateTime(), null).hasNext())) {
+                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "min-date-time", url, HttpServletResponse.SC_FORBIDDEN);
+                }
+                if (false == CalendarUtils.isInRange(importedEvent, null, resource.getParent().getMaxDateTime(), TimeZones.UTC)) {
+                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-date-time", url, HttpServletResponse.SC_FORBIDDEN);
+                }
+                if (null == uid) {
+                    uid = importedEvent.getUid();
+                } else if (false == uid.equals(importedEvent.getUid())) {
+                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+                }
+                /*
+                 * take over series master or non-recurring event
+                 */
                 if (null == event) {
                     event = importedEvent;
                 } else {

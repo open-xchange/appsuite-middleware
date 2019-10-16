@@ -73,6 +73,7 @@ import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionTables
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddExpiresColumTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddIndexTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsReindexTask;
+import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsUseUtf8mb4ForClientColumnTask;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryInvalidator;
@@ -134,7 +135,14 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         // Register update task, create table job and delete listener
         boolean registerGroupwareStuff = true;
         if (registerGroupwareStuff) {
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(), new PnsSubscriptionsReindexTask(), new PnsSubscriptionsAddExpiresColumTask(), new PnsSubscriptionsAddIndexTask(), new PnsSubscriptionTablesUtf8Mb4UpdateTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
+                new PnsCreateTableTask(),
+                new PnsSubscriptionsReindexTask(),
+                new PnsSubscriptionsAddExpiresColumTask(),
+                new PnsSubscriptionsAddIndexTask(),
+                new PnsSubscriptionTablesUtf8Mb4UpdateTask(),
+                new PnsSubscriptionsUseUtf8mb4ForClientColumnTask()
+            ));
             registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
             registerService(DeleteListener.class, new PnsDeleteListener(persistentRegistry));
         }

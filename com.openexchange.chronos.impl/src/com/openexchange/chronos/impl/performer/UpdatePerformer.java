@@ -64,6 +64,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.chronos.impl.Utils.extractReplies;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -541,7 +542,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         attendeeEventUpdates.addAll(deleteFromRecurrence(originalEvent, recurrenceId, userAttendee));
                     }
                 }
-                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
+                /*
+                 * track reply scheduling messages as needed
+                 */
+                List<EventUpdate> attendeeReplies = extractReplies(attendeeEventUpdates, calendarUser);
+                if (0 < attendeeReplies.size()) {
+                    schedulingHelper.trackReply(getUpdatedResource(attendeeReplies), attendeeReplies);
+                }
                 return true;
             }
         }
