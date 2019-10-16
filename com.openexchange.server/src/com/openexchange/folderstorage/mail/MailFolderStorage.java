@@ -355,7 +355,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
 
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 return new SortableId[0];
             }
 
@@ -554,7 +554,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("session.password");
             }
             mailAccess = mailAccessFor(session, accountId);
@@ -581,7 +581,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("session.password");
             }
             mailAccess = mailAccessFor(session, accountId);
@@ -676,7 +676,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("session.password");
             }
             mailAccess = mailAccessFor(session, accountId);
@@ -751,7 +751,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("session.password");
             }
             mailAccess = mailAccessFor(session, accountId);
@@ -821,7 +821,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, 0)) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("session.password");
             }
             mailAccess = mailAccessFor(session, 0);
@@ -862,7 +862,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 return false;
             }
             mailAccess = mailAccessFor(session, accountId);
@@ -888,7 +888,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 return true;
             }
             mailAccess = mailAccessFor(session, accountId);
@@ -1005,7 +1005,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         final String fullName = argument.getFullname();
         final Folder retval;
         final boolean hasSubfolders;
-        if (cannotConnect(session)) {
+        if (cannotConnect(session, accountId)) {
             String accountName = "default" + argument.getAccountId();
             return new DummyFolder(treeId, MailFolderUtility.prepareFullname(accountId, argument.getFullname()), accountName, accountName, argument.getFullname(), session.getUserId());
         }
@@ -1309,10 +1309,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 return new SortableId[0];
             }
 
-            if (cannotConnect(session)) {
-                return new SortableId[0];
-            }
-
             if (PRIVATE_FOLDER_ID.equals(parentId)) {
                 /*
                  * Get all user mail accounts
@@ -1366,6 +1362,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             final String fullname = argument.getFullname();
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             if (null == mailAccessArg) {
+                if (cannotConnect(session, accountId)) {
+                    return new SortableId[0];
+                }
+
                 mailAccess = mailAccessFor(session, accountId);
                 mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             } else {
@@ -1635,7 +1635,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, argument.getAccountId())) {
                 return false;
             }
             mailAccess = mailAccessFor(session, argument.getAccountId());
@@ -1686,7 +1686,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-            if (cannotConnect(session)) {
+            if (cannotConnect(session, accountId)) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("session.password");
             }
             mailAccess = mailAccessFor(session, accountId);
@@ -1753,7 +1753,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             {
                 final int pos = fullname.lastIndexOf(separator);
                 if (pos == -1) {
-                    oldParent = "";
+                    oldParent = MailFolder.DEFAULT_FOLDER_ID;
                     oldName = fullname;
                 } else {
                     oldParent = fullname.substring(0, pos);
@@ -2270,13 +2270,24 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         }
     }
 
-    private boolean cannotConnect(Session session) throws OXException {
-        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
-        if (passwordSource == PasswordSource.SESSION && session.getPassword() == null) {
+    private boolean cannotConnect(Session session, int accountId) throws OXException {
+        return !canConnect(session, accountId);
+    }
+
+    private boolean canConnect(Session session, int accountId) throws OXException {
+        if (accountId != MailAccount.DEFAULT_ID || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             return true;
         }
 
-        return false;
+        // Check master password in case master access is configured
+        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
+        if (PasswordSource.GLOBAL.equals(passwordSource)) {
+            String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
+            return masterPw == null ? false : true;
+        }
+
+        // Check presence of session password as common user/password login is assumed
+        return session.getPassword() == null ? false : true;
     }
 
     private static void postEvent(int accountId, String fullname, boolean contentRelated, StorageParameters params) {

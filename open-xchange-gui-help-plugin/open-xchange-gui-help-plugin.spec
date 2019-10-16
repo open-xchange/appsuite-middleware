@@ -18,7 +18,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 63
+%define         ox_release 64
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -58,6 +58,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Oct 08 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-10-14 (5437)
 * Mon Sep 23 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-09-30 (5418)
 * Mon Sep 02 2019 Marcus Klein <marcus.klein@open-xchange.com>

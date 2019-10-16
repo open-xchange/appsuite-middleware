@@ -61,6 +61,7 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.java.HTMLDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 
 /**
@@ -139,6 +140,9 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
                     // CLient requested possibly harmful content for inline display. Deny.
                     throw new FileResponseRendererActionException(HttpServletResponse.SC_FORBIDDEN, "Denied to output possibly harmful content");
                 }
+                if (Strings.isNotEmpty(checkedDownload.getFileName())) {
+                    contentTypeByFileName = FileResponseRenderer.getContentTypeByFileName(checkedDownload.getFileName());
+                }
             }
             /*
              * Set stream
@@ -169,7 +173,9 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
             } else if (data.getDelivery().equalsIgnoreCase(IDataWrapper.VIEW) && null != data.getFileName()) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append("inline");
-                DownloadUtility.appendFilenameParameter(data.getFileName(), null, data.getUserAgent(), sb);
+                String checkedContentDisposition = checkedDownload.getContentDisposition();
+                int pos = checkedContentDisposition.indexOf(';');
+                sb.append(pos > 0 ? checkedContentDisposition.substring(pos) : checkedContentDisposition);
                 data.getResponse().setHeader("Content-Disposition", sb.toString());
             }
             /*
