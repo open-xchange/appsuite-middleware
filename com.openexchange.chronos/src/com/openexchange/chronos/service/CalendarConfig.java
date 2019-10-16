@@ -138,7 +138,7 @@ public interface CalendarConfig {
      * 
      * @param userId The identifier of the user to get the notification preference for
      * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
-     * @see com.openexchange.groupware.notify.NotificationConfig.NotificationProperty#NOTIFY_ON_DELETE
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
      */
     boolean isNotifyOnDelete(int userId);
 
