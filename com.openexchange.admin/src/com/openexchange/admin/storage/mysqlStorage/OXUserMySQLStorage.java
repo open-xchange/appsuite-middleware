@@ -1354,25 +1354,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * Get a {@link Boolean} for the specified property name
+     * Gets a user-specific {@link Boolean} for the specified property name
      *
      * @param userId The ID of the user to be created
      * @param contextId The ID of the context, the user gets created in
-     * @param propertyName The name of the property to get
-     * @param defaultValue The default value for the boolean to use
+     * @param propertyName The name of the boolean property to get
+     * @param defaultValue The default value for the <code>Boolean</code> to use
      * @return A {@link Boolean} or the default value
      */
     private Boolean getConfigViewValue(int userId, int contextId, String propertyName, Boolean defaultValue) {
         ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (viewFactory != null) {
-            ConfigView view;
             try {
-                view = viewFactory.getView(userId, contextId);
+                ConfigView view = viewFactory.getView(userId, contextId);
                 return view.get(propertyName, Boolean.class);
             } catch (OXException e) {
                 if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                     LOG.debug("Context {} is being created. Therefore can't load context sensitive properties. Try to load \"{}\" on global view.", I(contextId), propertyName, e);
-                    return getConfigViewValue(propertyName, null);
+                    return getConfigViewValue(propertyName, null, viewFactory);
                 }
                 LOG.warn("Unable to load {}.", propertyName, e);
             }
@@ -1381,23 +1380,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * Get a {@link Boolean} for the specified property name
+     * Gets a {@link Boolean} for the specified property name
      *
-     * @param userId The ID of the user to be created
-     * @param contextId The ID of the context, the user gets created in
-     * @param propertyName The name of the property to get
-     * @param defaultValue The default value for the boolean to use
+     * @param propertyName The name of the boolean property to get
+     * @param defaultValue The default value for the <code>Boolean</code> to use
+     * @param viewFactory The view factory
      * @return A {@link Boolean} or the default value
      */
-    private Boolean getConfigViewValue(String propertyName, Boolean defaultValue) {
-        ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (viewFactory != null) {
-            try {
-                ConfigView view = viewFactory.getView();
-                return view.get(propertyName, Boolean.class);
-            } catch (OXException e) {
-                LOG.warn("Unable to load {}.", propertyName, e);
-            }
+    private Boolean getConfigViewValue(String propertyName, Boolean defaultValue, ConfigViewFactory viewFactory) {
+        try {
+            ConfigView view = viewFactory.getView();
+            return view.get(propertyName, Boolean.class);
+        } catch (OXException e) {
+            LOG.warn("Unable to load {}.", propertyName, e);
         }
         return defaultValue;
     }
