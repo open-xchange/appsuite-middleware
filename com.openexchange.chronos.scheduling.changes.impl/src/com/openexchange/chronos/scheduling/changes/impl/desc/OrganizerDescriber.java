@@ -74,7 +74,10 @@ public class OrganizerDescriber extends AbstractChangeDescriber<Organizer> {
 
     @Override
     List<SentenceImpl> describe(Organizer original, Organizer updated) {
-        return Collections.singletonList(new SentenceImpl(Messages.ORGANIZER_CHANGE).add(updated.getEMail(), ArgumentType.EMPHASIZED));
+        if (updated != null) {
+            return Collections.singletonList(new SentenceImpl(Messages.ORGANIZER_CHANGE).add(updated.getEMail(), ArgumentType.EMPHASIZED));
+        }
+        return Collections.emptyList();
     }
 
 }
