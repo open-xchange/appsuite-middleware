@@ -63,7 +63,9 @@ import com.openexchange.modules.model.Metadata;
  * {@link UWAWidget}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @deprecated with 7.10.3. Used for OX6 UI which is no longer supported.
  */
+@Deprecated
 public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
     private static final long serialVersionUID = -2197679662094962986L;
