@@ -323,7 +323,7 @@ public class LoginServlet extends AJAXServlet {
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 LOG.debug("Deprecated action 'store' called by {}.", req.getParameter(PARAMETER_SESSION));
-                resp.setHeader("Deprecation", "version:7.10.3");
+                resp.setHeader("Deprecation", "version=\"v7.10.3\"");
                 resp.setStatus(200);
                 resp.flushBuffer();
             }
