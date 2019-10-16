@@ -142,9 +142,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2662
     ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
 
-    # SoftwareChange_Request-2665
-    ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
-
     # SoftwareChange_Request-2672
     ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
     ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
@@ -737,6 +734,18 @@ EOF
 
       ox_remove_property ${pkey_sessiond} ${pfile_sessiond}
       ox_remove_property ${pkey_share} ${pfile_share}
+
+      ox_scr_done ${SCR}
+    }
+
+    # obsoletes SoftwareChange_Request-2665
+    SCR=SCR-548
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/notification.properties
+
+      ox_remove_property imipForInternalUsers ${pfile}
+      ox_remove_property notify_participants_on_delete ${pfile}
+      ox_remove_property com.openexchange.calendar.notify.poolenabled ${pfile}
 
       ox_scr_done ${SCR}
     }
