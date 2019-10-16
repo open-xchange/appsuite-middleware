@@ -1,3 +1,9 @@
+open-xchange-smtp (7.10.1-23) stable; urgency=medium
+
+  * Build for patch 2019-12-02 (5454)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 16 Oct 2019 16:29:35 +0200
+
 open-xchange-smtp (7.10.1-22) stable; urgency=medium
 
   * Build for patch 2019-10-14 (5438)
