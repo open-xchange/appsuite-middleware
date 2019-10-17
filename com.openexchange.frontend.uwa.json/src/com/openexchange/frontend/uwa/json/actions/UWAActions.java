@@ -61,7 +61,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * {@link UWAActions}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @deprecated with 7.10.3. Used for OX6 UI which is no longer supported.
  */
+@Deprecated
 public class UWAActions implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>(6);

@@ -68,9 +68,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
 
     public enum NotificationProperty{
 
-        NOTIFY_ON_DELETE("notify_participants_on_delete"),
         OBJECT_LINK("object_link"),
-        INTERNAL_IMIP("imipForInternalUsers"),
         FROM_SOURCE("com.openexchange.notification.fromSource");
 
 

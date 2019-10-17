@@ -515,7 +515,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
                 config.setInterestedInStateChanges(usm.isNotifyAppointmentsConfirmParticipant());
             }
 
-            config.setSendITIP(this.config.getBoolProperty("imipForInternalUsers", false));
+            config.setSendITIP(false);
         } else {
             config.setInterestedInChanges(false);
             config.setInterestedInStateChanges(false);

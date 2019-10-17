@@ -50,95 +50,90 @@
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
 import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.I;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TimeZone;
 import org.junit.Before;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.chronos.Event;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.service.EventUpdate;
 
 /**
- * {@link AbstractDescriptionTest}
+ * {@link OrganizerDescriptionTest}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
  * @since v7.10.3
  */
-public abstract class AbstractDescriptionTest {
+@RunWith(PowerMockRunner.class)
+public class OrganizerDescriptionTest extends AbstractDescriptionTest {
 
-    private static final String FORMAT = "text";
-
-    final EventField field;
-
-    @Mock
-    protected EventUpdate eventUpdate;
-
-    @Mock
-    protected Set<EventField> fields;
-
-    @Mock
-    protected Event original;
-
-    @Mock
-    protected Event updated;
-
-    protected String descriptionMessage;
+    private Organizer oldOrganizer;
+    private Organizer newOrganizer;
 
     /**
-     * Initializes a new {@link AbstractDescriptionTest}.
-     * 
-     * @param field The field to test
-     * @param descriptionMessage The introduction message of the description
+     * Initializes a new {@link OrganizerDescriptionTest}.
      */
-    public AbstractDescriptionTest(EventField field, String descriptionMessage) {
-        super();
-        this.field = field;
-        this.descriptionMessage = descriptionMessage;
+    public OrganizerDescriptionTest() {
+        super(EventField.ORGANIZER, "The organizer of the appointment has changed");
     }
 
-    protected EventField getTestedField() {
-        return field;
-    }
+    private OrganizerDescriber describer;
 
-    @SuppressWarnings("unused")
+    @Override
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        PowerMockito.when(eventUpdate.getOriginal()).thenReturn(original);
-        PowerMockito.when(eventUpdate.getUpdate()).thenReturn(updated);
-
-        PowerMockito.when(eventUpdate.getUpdatedFields()).thenReturn(fields);
-        PowerMockito.when(B(fields.contains(getTestedField()))).thenReturn(Boolean.TRUE);
+        super.setUp();
+        describer = new OrganizerDescriber();
+        oldOrganizer = new Organizer();
+        oldOrganizer.setEMail("old@organizer.com");
+        newOrganizer = new Organizer();
+        newOrganizer.setEMail("new@organizer.com");
     }
 
-    protected void testDescription(Description description) {
-        assertThat("Should not be null", description, notNullValue());
-        assertThat("Not matching size", I(description.getChangedFields().size()), is((I(1))));
-        assertThat("Wrong field", description.getChangedFields().get(0), is(getTestedField()));
+    @Test
+    public void testOrganizer_SetNewOrganizer_DescriptionAvailable() {
+        setOrganizer(null, newOrganizer);
+
+        Description description = describer.describe(eventUpdate);
+        testDescription(description);
+        checkMessage(description, newOrganizer.getEMail());
     }
 
-    protected void checkMessage(Description description, String containee) {
-        checkMessage(description);
-        assertTrue(getMessage(description).contains(containee));
+    /**
+     * Tests that no {@link NullPointerException} occurs when the organizer is removed.
+     */
+    @Test
+    public void testOrganizer_removeOrganizer_DescriptionAvailable() {
+        setOrganizer(oldOrganizer, null);
+
+        Description description = describer.describe(eventUpdate);
+        assertTrue(description.getSentences().isEmpty());
     }
 
-    protected void checkMessage(Description description) {
-        assertThat("Not matching size", I(description.getSentences().size()), is((I(1))));
-        assertTrue(getMessage(description).startsWith(descriptionMessage));
+    @Test
+    public void testOrganizer_ChangeOrganizer_DescriptionAvailable() {
+        setOrganizer(oldOrganizer, newOrganizer);
+
+        Description description = describer.describe(eventUpdate);
+        testDescription(description);
+        checkMessage(description, newOrganizer.getEMail());
     }
 
-    protected String getMessage(Description description) {
-        return description.getSentences().get(0).getMessage(FORMAT, Locale.ENGLISH, TimeZone.getDefault(), null);
+    @Test
+    public void testOrganizer_NoValues_DescriptionUnavailable() {
+        PowerMockito.when(B(fields.contains(getTestedField()))).thenReturn(Boolean.FALSE);
+
+        Description description = describer.describe(eventUpdate);
+        assertThat(description, nullValue());
     }
 
+    // -------------------- HELPERS --------------------
+    private void setOrganizer(Organizer originalOrganizer, Organizer updatedOrganizer) {
+        PowerMockito.when(original.getOrganizer()).thenReturn(originalOrganizer);
+        PowerMockito.when(updated.getOrganizer()).thenReturn(updatedOrganizer);
+    }
 }

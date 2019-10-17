@@ -344,7 +344,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         /*
          * Send delete notification
          */
-        sendNotification(null, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL, State.Type.DELETED), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
+        sendNotification(null, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL, State.Type.DELETED), false, true, true);
     }
 
     /**

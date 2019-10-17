@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl.session;
 import static com.openexchange.chronos.impl.Utils.PROVIDER_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.List;
@@ -64,8 +63,6 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
@@ -235,16 +232,10 @@ public class CalendarUserSettings {
      * calendar owner in case the operation is performed by another user on his behalf.
      * 
      * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
-     * @see com.openexchange.groupware.notify.NotificationConfig.NotificationProperty#NOTIFY_ON_DELETE
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
      */
     public boolean isNotifyOnDelete() {
-        try {
-            ConfigView configView = requireService(ConfigViewFactory.class, services).getView(userId, contextId);
-            return b(configView.opt("notify_participants_on_delete", Boolean.class, Boolean.TRUE));
-        } catch (OXException e) {
-            LOG.warn("Error getting notification preferences from confic cascade", e);
-        }
-        return true;
+        return isNotifyOnUpdate();
     }
 
     /**
