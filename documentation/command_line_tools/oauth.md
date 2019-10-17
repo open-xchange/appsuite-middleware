@@ -1,4 +1,4 @@
 ---
 title: OAuth
-icon: fa-sign-in
+icon: fa fa-sign-in
 ---
