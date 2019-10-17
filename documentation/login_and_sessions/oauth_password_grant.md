@@ -1,5 +1,7 @@
 ---
 title: OAuth Password Grant Authentication Plugin
+icon: fa fa-plug
+tags: OpenId, SSO, Configuration
 ---
 
 # Introduction

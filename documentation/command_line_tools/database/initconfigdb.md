@@ -1,6 +1,6 @@
 ---
 title: initconfigdb
-icon: fa-database
+icon: far fa-circle
 tags: Administration, Command Line tools, Database
 ---
 
