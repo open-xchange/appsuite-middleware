@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -909,14 +910,28 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     public Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException {
         Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
 
+        /*
+         * Add capabilities based on user permissions
+         */
         {
-            Set<String> capabilities = new TreeSet<String>();
-            UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(userId, contextId);
-            // Capabilities by user permission bits
-            for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
-                capabilities.add(p.getCapabilityName());
+            User user = null;
+            Context context = null;
+            if (contextId > 0) {
+                context = requireService(ContextService.class, services).getContext(contextId);
+                if (userId > 0) {
+                    user = requireService(UserService.class, services).getUser(userId, context);
+                }
             }
 
+            Set<String> capabilities = new TreeSet<String>();
+            CapabilitySet capabilitySet = new CapabilitySet(64);
+            applyUserPermissions(capabilitySet, user, context);
+            for (Iterator<Capability> iterator = capabilitySet.iterator(); iterator.hasNext();) {
+                Capability capability = iterator.next();
+                if (null != capability) {
+                    capabilities.add(capability.getId());
+                }
+            }
             Map<String, Set<String>> arr = new LinkedHashMap<String, Set<String>>(3);
             arr.put("granted", capabilities);
             arr.put("denied", new HashSet<String>(0));
