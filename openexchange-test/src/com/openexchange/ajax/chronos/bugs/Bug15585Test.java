@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
@@ -74,16 +73,22 @@ public class Bug15585Test extends AbstractChronosTest {
     @Test
     public void testConflictTitle() throws Throwable {
         EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug15585Test", folderId);
-        eventManager.createEvent(event, true);
+        EventData storedEvent = eventManager.createEvent(event, true);
 
         ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.TRUE, null, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         CalendarResult data = response.getData();
         assertNotNull(data.getConflicts());
-        assertEquals(1, data.getConflicts().size());
-        ChronosConflictDataRaw conflict = data.getConflicts().get(0);
-        assertNotNull(conflict.getEvent());
-        assertNotNull(conflict.getEvent().getSummary());
+        ChronosConflictDataRaw matchingConflict = null;
+        for (ChronosConflictDataRaw c : data.getConflicts()) {
+            if (null != c.getEvent() && storedEvent.getId().equals(c.getEvent().getId())) {
+                matchingConflict = c;
+                break;
+            }
+        }
+        assertNotNull(matchingConflict);
+        assertNotNull(matchingConflict.getEvent());
+        assertNotNull(matchingConflict.getEvent().getSummary());
     }
 }
