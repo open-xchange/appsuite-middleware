@@ -1,3 +1,9 @@
+open-xchange-upsell-multiple (7.10.3-1) stable; urgency=medium
+
+  * First preview for 7.10.3 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 17 Oct 2019 10:04:57 +0200
+
 open-xchange-upsell-multiple (7.10.3-0) unstable; urgency=medium
 
   * prepare for 7.10.3 release

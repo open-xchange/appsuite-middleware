@@ -1,3 +1,9 @@
+open-xchange-file-storage-googledrive (7.10.3-1) stable; urgency=medium
+
+  * First preview for 7.10.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 17 Oct 2019 10:04:02 +0200
+
 open-xchange-file-storage-googledrive (7.10.3-0) unstable; urgency=medium
 
   * prepare for 7.10.3 release
