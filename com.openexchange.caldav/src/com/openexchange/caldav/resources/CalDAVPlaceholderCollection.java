@@ -69,6 +69,7 @@ import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.PlaceholderCollection;
+import com.openexchange.dav.resources.SyncToken;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -258,7 +259,7 @@ public class CalDAVPlaceholderCollection<T> extends CalDAVFolderCollection<T> {
     }
 
     @Override
-    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+    protected SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken) throws OXException {
         return null;
     }
 

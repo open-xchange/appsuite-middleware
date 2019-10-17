@@ -329,7 +329,7 @@ public final class PushManagerRegistry implements PushListenerService {
                         PermanentListenerJob job = jobQueue.scheduleJob(pushUser, extendedService);
                         if (null != job) {
                             startedOnes.add(job);
-                            //LOG.debug("Scheduled to start permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
+                            LOG.debug("Scheduled to start permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService, new Throwable("Start permanent push listener trace"));
                         }
                     }
                 } catch (OXException e) {

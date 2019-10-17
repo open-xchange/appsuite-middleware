@@ -368,9 +368,16 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         {
             final String str = mimeMessage.getHeader("Disposition-Notification-To", null);
             if (!com.openexchange.java.Strings.isEmpty(str)) {
-                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
-                checkRecipients(addresses);
-                mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
+                if ("true".equalsIgnoreCase(str)) {
+                    Address[] fromAddresses = mimeMessage.getFrom();
+                    if (fromAddresses.length > 0 && fromAddresses[0] != null) {
+                        mimeMessage.setHeader("Disposition-Notification-To", fromAddresses[0].toString());
+                    }
+                } else {
+                    final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                    checkRecipients(addresses);
+                    mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
+                }
             }
         }
     }

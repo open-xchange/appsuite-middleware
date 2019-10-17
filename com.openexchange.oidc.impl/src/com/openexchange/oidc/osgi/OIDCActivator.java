@@ -131,9 +131,9 @@ public class OIDCActivator extends HousekeepingActivator{
 
         //register default oidc backend if configured
         if (config.startDefaultBackend()) {
-            context.registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
+            registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
         }
-        context.registerService(SessionStorageParameterNamesProvider.class, new OIDCSessionParameterNamesProvider(), null);
+        registerService(SessionStorageParameterNamesProvider.class, new OIDCSessionParameterNamesProvider());
     }
 
     @Override

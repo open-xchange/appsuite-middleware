@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -90,17 +91,15 @@ public class FileMetadataParser implements FileMetadataParserService{
 
     @Override
     public File parse(final JSONObject object) throws OXException {
-        final DefaultFile file = new DefaultFile();
+        return parse(object, null);
+    }
 
+    public File parse(JSONObject object, TimeZone timeZone) throws OXException {
         try {
-        	JSONObject purged = new JSONObject(object);
-        	if (purged.has("last_modified")) {
-        		purged.remove("last_modified");
-        	}
-        	File.Field.inject(jsonHandler, file, purged);
-        } catch (final RuntimeException x) {
+            return File.Field.inject(jsonHandler, new DefaultFile(), object, timeZone);
+        } catch (RuntimeException x) {
             Throwable cause = x.getCause();
-            if(cause != null) {
+            if (cause != null) {
                 if (OXException.class.isInstance(cause)) {
                     throw (OXException) cause;
                 } else if (JSONException.class.isInstance(cause)) {
@@ -109,8 +108,6 @@ public class FileMetadataParser implements FileMetadataParserService{
             }
             throw x;
         }
-
-        return file;
     }
 
     private static final class JSONParserHandler extends AbstractFileFieldHandler {
@@ -129,11 +126,11 @@ public class FileMetadataParser implements FileMetadataParserService{
             if(!object.has(field.getName())) {
                 return md;
             }
-
+            TimeZone timeZone = get(2, TimeZone.class, args);
             try {
                 Object value = object.get(field.getName());
 
-                value = process(field, value);
+                value = process(field, value, timeZone);
 
                 field.doSwitch(set, md, value);
             } catch (final JSONException x) {
@@ -146,8 +143,8 @@ public class FileMetadataParser implements FileMetadataParserService{
             return md;
         }
 
-        private Object process(final Field field, final Object value) throws JSONException, OXException {
-            return FileMetadataFieldParser.convert(field, value);
+        private Object process(final Field field, final Object value, TimeZone timeZone) throws JSONException, OXException {
+            return FileMetadataFieldParser.convert(field, value, timeZone);
         }
     }
 

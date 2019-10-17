@@ -1,3 +1,9 @@
+open-xchange-realtime-json (7.10.2-14) stable; urgency=medium
+
+  * Build for patch 2019-10-14 (5439)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 10 Oct 2019 16:02:39 +0200
+
 open-xchange-realtime-json (7.10.2-13) stable; urgency=medium
 
   * Build for patch 2019-09-30 (5420)

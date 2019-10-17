@@ -74,7 +74,6 @@ import com.openexchange.dav.mixins.Principal;
 import com.openexchange.dav.mixins.ShareAccess;
 import com.openexchange.dav.mixins.ShareResourceURI;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
-import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
@@ -90,7 +89,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -122,7 +120,8 @@ public abstract class FolderCollection<T> extends DAVCollection {
         this.factory = factory;
         this.folder = folder;
         if (null != folder) {
-            includeProperties(new CTag(this), new SyncToken(this), new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner()));
+            includeProperties(new CTag(this), new com.openexchange.dav.mixins.SyncToken(this), 
+                new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner()));
             if (supportsPermissions(folder)) {
                 includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this));
             }
@@ -243,27 +242,29 @@ public abstract class FolderCollection<T> extends DAVCollection {
     /**
      * Gets an updated {@link SyncStatus} based on the supplied sync token for this collection.
      *
-     * @param syncToken The last sync token as supplied by the client, or <code>null</code> for the initial synchronization
+     * @param token The last sync token as supplied by the client, or <code>null</code> for the initial synchronization
      * @return The sync status
      */
     public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
-        Date since = null;
-        if (Strings.isNotEmpty(token)) {
-            try {
-                since = new Date(Long.parseLong(token));
-            } catch (NumberFormatException e) {
-                OXException cause = OXException.general("Invalid sync token \"" + token + "\"", e);
-                throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
-            }
+        /*
+         * parse & check provided token
+         */
+        SyncToken syncToken;
+        try {
+            syncToken = SyncToken.parse(token);
+        } catch (IllegalArgumentException e) {
+            OXException cause = OXException.general("Invalid sync token \"" + token + "\"", e);
+            throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
-        if (null != since && 0L < since.getTime()) {
+        Date since = new Date(syncToken.getTimestamp());
+        if (0L < since.getTime() && false == syncToken.isInitial() && false == syncToken.isTruncated()) {
             checkDataAvailability(since, token);
         }
+        /*
+         * get & return sync-status
+         */
         try {
-            /*
-             * get sync-status
-             */
-            return getSyncStatus(since);
+            return getSyncStatus(syncToken);
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -411,13 +412,12 @@ public abstract class FolderCollection<T> extends DAVCollection {
     protected abstract WebdavPath constructPathForChildResource(T object);
 
     /**
-     * Create a 'sync-status' multistatus report considering all changes since
-     * the supplied time.
+     * Create a 'sync-status' multistatus report considering all changes since the supplied sync-token.
      *
-     * @param since the time, or <code>null</code> for the initial synchronization
-     * @return the sync status
+     * @param syncToken The requested sync-token to generate the sync-status for
+     * @return The sync status
      */
-    protected abstract SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException;
+    protected abstract SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken) throws OXException;
 
     /**
      * Gets a new folder with "settable" properties to apply any property changes. The actual {@link #save()}-operation that is called

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.infostore.actions;
 
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,6 +69,7 @@ import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreReq
 public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     private boolean failOnError;
+    private TimeZone timeZone;
 
     public static final String INFOSTORE_URL = "/ajax/infostore";
 
@@ -77,6 +79,24 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
 
     public boolean getFailOnError() {
         return failOnError;
+    }
+
+    /**
+     * Gets the timeZone
+     *
+     * @return The timeZone
+     */
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    /**
+     * Sets the timeZone
+     *
+     * @param timeZone The timeZone to set
+     */
+    public void setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
     }
 
     @Override
@@ -90,20 +110,25 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
     }
 
     public JSONObject writeJSON(File data) {
-        return convertToJSON(data, null);
+        return writeJSON(data, null);
     }
 
     public JSONObject writeJSON(File data, Field[] fields) {
-        return convertToJSON(data, fields);
+        return convertToJSON(data, fields, getTimeZone());
     }
 
     public static JSONObject convertToJSON(File data, Field[] fields) {
+        return convertToJSON(data, fields, null);
+    }
+
+    public static JSONObject convertToJSON(File data, Field[] fields, TimeZone timeZone) {
+        String timezoneId = null != timeZone ? timeZone.getID() : "UTC";
         FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
         if (fields == null) {
-            return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);
+            return writer.write(new TestFriendlyInfostoreRequest(timezoneId), data);
         }
 
-        return writer.writeSpecific(new TestFriendlyInfostoreRequest("UTC"), data, fields, null);
+        return writer.writeSpecific(new TestFriendlyInfostoreRequest(timezoneId), data, fields, null);
     }
 
     public JSONArray writeFolderAndIDList(List<String> ids, List<String> folders) throws JSONException {

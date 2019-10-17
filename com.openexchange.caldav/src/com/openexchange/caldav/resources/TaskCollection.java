@@ -62,6 +62,7 @@ import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.dav.reports.SyncStatus;
+import com.openexchange.dav.resources.SyncToken;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.CalendarObject;
@@ -170,12 +171,9 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
     }
 
     @Override
-    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+    protected SyncStatus<WebdavResource> getSyncStatus(SyncToken syncToken) throws OXException {
         SyncStatus<WebdavResource> multistatus = new SyncStatus<WebdavResource>();
-        //      Date nextSyncToken = new Date(since.getTime());
-        if (null == since) {
-            since = new Date(0L);
-        }
+        Date since = new Date(syncToken.getTimestamp());
         boolean initialSync = 0 == since.getTime();
         Date nextSyncToken = Tools.getLatestModified(since, this.folder);
         /*
@@ -209,7 +207,7 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
         /*
          * Return response with new next sync-token in response
          */
-        multistatus.setToken(Long.toString(nextSyncToken.getTime()));
+        multistatus.setToken(new SyncToken(nextSyncToken.getTime()).toString());
         return multistatus;
     }
 

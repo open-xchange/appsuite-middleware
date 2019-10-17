@@ -938,7 +938,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
 
             FileMetadataParser parser = FileMetadataParser.getInstance();
-            file = parser.parse(jFile);
+            file = parser.parse(jFile, getTimezone());
             fields = parser.getFields(jFile);
             if (streamedUploadFile != null) {
                 if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
@@ -1030,7 +1030,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
 
-        file = ParameterBasedFileMetadataParser.getInstance().parse(data);
+        file = ParameterBasedFileMetadataParser.getInstance().parse(data, getTimezone());
         fields = ParameterBasedFileMetadataParser.getInstance().getFields(data);
         if (file != null) {
 

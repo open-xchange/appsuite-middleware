@@ -798,6 +798,8 @@ public final class SieveTextFilter {
         }
     }
 
+    private static final String TEXT_TAG = "text:";
+
     /**
      * This method is used to remove the comments only at those places at which
      * they are used as comments not in multi line texts for example
@@ -832,7 +834,7 @@ public final class SieveTextFilter {
                 nextChar = false;
                 i++;
             } else if (!commentRemoved && !comment && c == 't') {
-                if ("text:".equals(sb.substring(i, i + 5))) {
+                if (((i + TEXT_TAG.length()) <= sb.length()) && TEXT_TAG.equals(sb.substring(i, i + TEXT_TAG.length()))) {
                     dontParse = true;
                 }
                 nextChar = false;

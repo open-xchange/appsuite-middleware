@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.LoginServlet;
 import com.openexchange.session.Session;
 
 /**
@@ -109,23 +108,7 @@ public class GuardApis {
 
         List<Cookie> extractedCookies = new LinkedList<Cookie>();
         for (javax.servlet.http.Cookie cookie : cookies) {
-            String name = cookie.getName();
-            if (name.startsWith(LoginServlet.SECRET_PREFIX)) {
-                String value = cookie.getValue();
-                if (null != value && value.equals(session.getSecret())) {
-                    extractedCookies.add(new Cookie(name, cookie.getValue()));
-                }
-            } else if (name.startsWith(LoginServlet.PUBLIC_SESSION_PREFIX)) {
-                String value = cookie.getValue();
-                if (null != value && value.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
-                    extractedCookies.add(new Cookie(name, cookie.getValue()));
-                }
-            } else if ("JSESSIONID".equals(name)) {
-                String value = cookie.getValue();
-                if (null != value) {
-                    extractedCookies.add(new Cookie(name, value));
-                }
-            }
+            extractedCookies.add(new Cookie(cookie.getName(), cookie.getValue()));
         }
         return extractedCookies;
     }
