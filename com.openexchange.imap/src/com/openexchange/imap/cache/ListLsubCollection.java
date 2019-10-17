@@ -1279,7 +1279,7 @@ final class ListLsubCollection implements Serializable {
                 /*
                  * Check subscription status
                  */
-                listLsubEntry.setSubscribed(doSubscriptionCheck(protocol, mbox));
+                listLsubEntry.setSubscribed(doSubscriptionCheck(protocol, fullName));
             }
             return listLsubEntry;
         }
@@ -1296,16 +1296,15 @@ final class ListLsubCollection implements Serializable {
      * Performs a check if denoted folder is subscribed.
      *
      * @param protocol The IMAP protocol
-     * @param mbox The encoded full name
+     * @param fullName The encoded full name
      * @return <code>true</code> if subscribed; otherwise <code>false</code>
      * @throws ProtocolException If a protocol error occurs
      */
-    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String mbox) throws ProtocolException {
+    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String fullName) throws ProtocolException {
         /*
          * Perform command: LIST "" <full-name>
          */
-        final Argument args = new Argument();
-        args.writeString(mbox);
+        final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, "LSUB \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -1316,7 +1315,7 @@ final class ListLsubCollection implements Serializable {
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals("LSUB")) {
-                    ret |= mbox.equals(parseEncodedFullName(ir));
+                    ret |= fullName.equals(parseEncodedFullName(ir));
                     r[i] = null;
                 }
             }

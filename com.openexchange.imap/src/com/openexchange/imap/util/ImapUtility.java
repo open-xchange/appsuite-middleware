@@ -239,13 +239,10 @@ public final class ImapUtility {
      * @see com.sun.mail.imap.protocol.IMAPProtocol#writeMailboxName(Argument, String)
      */
     public static Argument encodeFolderName(String fullFolderName, IMAPProtocol protocol) {
-        Argument args = new Argument();
         if (null != protocol && protocol.supportsUtf8()) {
-            args.writeString(fullFolderName, StandardCharsets.UTF_8);
-        } else {
-            args.writeString(BASE64MailboxEncoder.encode(fullFolderName));
+            return new Argument().writeString(fullFolderName, StandardCharsets.UTF_8);
         }
-        return args;
+        return new Argument().writeString(BASE64MailboxEncoder.encode(fullFolderName));
     }
 
 }
