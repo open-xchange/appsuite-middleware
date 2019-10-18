@@ -47,42 +47,37 @@
  *
  */
 
-package com.openexchange.oidc.impl;
+package com.openexchange.rmi.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.google.common.collect.ImmutableList;
-import com.hazelcast.core.Hazelcast;
-import com.openexchange.exception.OXException;
-import com.openexchange.oidc.tools.OIDCTools;
-import com.openexchange.session.Session;
-import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.rmi.server.RMIServerSocketFactory;
 
 /**
- * Adds the {@link OIDCTools}.IDTOKEN to potential {@link Session} attributes.
- * This way those attribute will be synchronized throughout {@link Hazelcast} stored Sessions
+ * {@link BoundServerFactory} - The RMI server socket factory accepting connections only for any address resolvable from a given host name.
  *
- * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class OIDCSessionParameterNamesProvider implements SessionStorageParameterNamesProvider {
+public class BoundServerFactory implements RMIServerSocketFactory {
 
-    private final List<String> parameterNames;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BoundServerFactory.class);
+
+    private final String hostname;
 
     /**
-     * Initializes a new {@link OIDCSessionParameterNamesProvider}.
+     * Initializes a new {@link BoundServerFactory}.
+     *
+     * @param hostname The host name
      */
-    public OIDCSessionParameterNamesProvider() {
+    public BoundServerFactory(String hostname) {
         super();
-        List<String> parameterNames = new ArrayList<String>(4);
-        parameterNames.add(OIDCTools.IDTOKEN);
-        parameterNames.add(OIDCTools.BACKEND_PATH);
-        this.parameterNames = ImmutableList.copyOf(parameterNames);
+        this.hostname = hostname;
     }
 
     @Override
-    public List<String> getParameterNames(int userId, int contextId) throws OXException {
-        return parameterNames;
+    public ServerSocket createServerSocket(int port) throws IOException {
+        LOG.info("RMI server socket will only accept connect requests to the addresses of {}!", hostname);
+        return new ServerSocket(port, 0, InetAddress.getByName(hostname));
     }
-
 }

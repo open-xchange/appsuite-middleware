@@ -952,8 +952,12 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         }
     }
 
-    private static InternetAddress getEmailAddress(String addrStr) {
-        if (com.openexchange.java.Strings.isEmpty(addrStr) || "false".equalsIgnoreCase(addrStr)) {
+    private static InternetAddress getEmailAddress(String addrString) {
+        if (com.openexchange.java.Strings.isEmpty(addrString)) {
+            return null;
+        }
+        String addrStr = addrString.trim();
+        if ("false".equalsIgnoreCase(addrStr) || addrStr.indexOf('@') < 0) {
             return null;
         }
         try {

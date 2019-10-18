@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard.impl.mapping;
 
+import static com.openexchange.java.Autoboxing.i;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -56,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.DateOrTimeProperty;
+import ezvcard.util.PartialDate;
 
 /**
  * {@link AbstractDateMapping}
@@ -72,7 +75,7 @@ public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends 
      * @param propertyName The affected vCard property name
      * @param contactFields The affected contact fields
      */
-    protected AbstractDateMapping(int field, Class<T> propertyClass, String propertyName, ContactField...contactFields) {
+    protected AbstractDateMapping(int field, Class<T> propertyClass, String propertyName, ContactField... contactFields) {
         super(field, propertyClass, propertyName, contactFields);
     }
 
@@ -103,14 +106,20 @@ public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends 
     protected void importProperty(T property, Contact contact, List<OXException> warnings) {
         Date value = property.getDate();
         if (null == value) {
-            contact.set(field, null);
-        } else {
-            /*
-             * adjust date after deserialization through ez-vcard (that uses local timezone)
-             */
-            Date adjustedDate = new Date(addTimeZoneOffset(value.getTime(), TimeZone.getDefault()));
-            contact.set(field, adjustedDate);
+            PartialDate partialDate = property.getPartialDate();
+            if (partialDate == null) {
+                contact.set(field, null);
+                return;
+            }
+
+            value = toDate(partialDate, 1604, 0, 0, 0, 0, 0);
         }
+
+        /*
+         * adjust date after deserialization through ez-vcard (that uses local timezone)
+         */
+        Date adjustedDate = new Date(addTimeZoneOffset(value.getTime(), TimeZone.getDefault()));
+        contact.set(field, adjustedDate);
     }
 
     protected static long addTimeZoneOffset(long date, TimeZone timeZone) {
@@ -121,4 +130,25 @@ public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends 
         return null == timeZone ? date : date - timeZone.getOffset(date);
     }
 
+    /**
+     * Creates a Date based on a given PartialDate. Enriches the Date with given optional values, if they are missing in the PartialDate.
+     *
+     * @return
+     */
+    protected Date toDate(PartialDate pd, int optYear, int optMonth, int optDay, int optHour, int optMinute, int optSecond) {
+        Calendar c = Calendar.getInstance();
+
+        // @formatter:off
+        c.set(pd.getYear() == null ? optYear : i(pd.getYear()),
+              pd.getMonth() == null ? optMonth : i(pd.getMonth())-1,
+              pd.getDate() == null ? optDay : i(pd.getDate()),
+              pd.getHour() == null ? optHour : i(pd.getHour()),
+              pd.getMinute() == null ? optMinute : i(pd.getMinute()),
+              pd.getSecond() == null ? optSecond : i(pd.getSecond()));
+        // @formatter:on
+
+        c.set(Calendar.MILLISECOND, 0);
+
+        return c.getTime();
+    }
 }

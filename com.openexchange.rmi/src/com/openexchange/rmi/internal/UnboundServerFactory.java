@@ -50,38 +50,42 @@
 package com.openexchange.rmi.internal;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
 
 /**
- * {@link LocalServerFactory}
+ * {@link UnboundServerFactory} - The RMI server socket factory accepting connections on any/all local addresses.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class LocalServerFactory implements RMIServerSocketFactory {
+public class UnboundServerFactory implements RMIServerSocketFactory {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalServerFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnboundServerFactory.class);
 
-    private final String hostname;
+    private static final UnboundServerFactory INSTANCE = new UnboundServerFactory();
 
     /**
-     * Initializes a new {@link LocalServerFactory}.
+     * Gets the instance
      *
-     * @param hostname The host name
+     * @return The instance
      */
-    public LocalServerFactory(String hostname) {
+    public static UnboundServerFactory getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link UnboundServerFactory}.
+     */
+    private UnboundServerFactory() {
         super();
-        this.hostname = hostname;
     }
 
     @Override
     public ServerSocket createServerSocket(int port) throws IOException {
-        if (hostname.equalsIgnoreCase("0")) {
-            LOG.info("Admindaemon will listen on all network devices!");
-            return new ServerSocket(port, 0, null);
-        }
-        LOG.info("Admindaemon will listen on {}!", hostname);
-        return new ServerSocket(port, 0, InetAddress.getByName(hostname));
+        LOG.info("RMI server socket will accept connections on any/all local addresses!");
+        return new ServerSocket(port, 0, null);
     }
+
 }

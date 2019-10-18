@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -166,12 +167,22 @@ public class WebUIShareHandler extends AbstractShareHandler {
             String displayName = FullNameBuilder.buildFullName(sharingUser, translator);
             TargetProxy proxy = shareRequest.getTargetProxy();
             String type = targetPath.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
-            String message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle());
+            String message;
+
+            switch (targetPath.getModule()) {
+                // Mail
+                case FolderObject.MAIL:
+                    message = translator.translate(ShareServletStrings.SHARE_PASSWORD);
+                    break;
+                default:
+                    message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle());
+            }
 
             LoginLocation location = new LoginLocation()
                 .share(guestInfo.getBaseToken())
                 .loginType(guestInfo.getAuthentication())
                 .message(MessageType.INFO, message);
+
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
                 location.loginName(guestInfo.getGuestID(), guestInfo.getContextID());
             }

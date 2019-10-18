@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-11-05 13:03+0100\n"
+"PO-Revision-Date: 2019-10-04 14:50+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -257,6 +257,10 @@ msgid ""
 msgstr ""
 "Die angegebene iCalendar-Quelle enthält keinen gültigen Inhalt und kann "
 "nicht verarbeitet werden."
+
+#: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
+msgid "The given iCal file contains too many entities."
+msgstr "Die angegebene iCal-Datei enthält zu viele Entitäten."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -4075,6 +4079,26 @@ msgstr "Ihre Sitzung ist abgelaufen. Bitte versuchen Sie es erneut."
 msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr ""
 "Das Kerberos-Ticket für die Sitzung fehlt. Bitte versuchen Sie es erneut."
+
+#. *
+#. * No recipient(s) has been defined for new message
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:71
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
+msgid "There are no recipient(s) for the new message."
+msgstr "Für die neue Nachricht sind keine Empfänger eingetragen."
+
+#. *
+#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:76
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
+msgid ""
+"The following recipient is not allowed: %1$s. Please remove associated "
+"address and try again."
+msgstr ""
+"Folgender Empfänger ist nicht zulässig: %1$s. Bitte entfernen Sie die "
+"zugehörige Adresse und versuchen Sie es erneut."
 
 #. A Guard error occurred: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
@@ -10924,8 +10948,13 @@ msgstr ""
 "%1$s hat %2$s \"%3$s\" für Sie freigegeben. Bitte melden Sie sich zum "
 "Anzeigen des Objekts an."
 
-#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#. Login when opening a share protected with a password
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+msgid "Please enter your password to log into this account."
+msgstr "Bitte geben Sie Ihr Passwort ein, um sich bei diesem Konto anzumelden."
+
+#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -10933,24 +10962,24 @@ msgstr ""
 "Eine Nachricht mit weiteren Anweisungen zum Einrichten eines neuen Passworts "
 "wurde an %1$s gesendet."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
 msgid "Please set a new password to regain access."
 msgstr "Bitte legen Sie ein neues Passwort fest, um wieder Zugang zu erhalten."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:79
 msgid "The share you are looking for does not exist."
 msgstr "Die von Ihnen gesuchte Freigabe ist nicht vorhanden."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
 msgid "This share cannot be accessed with your Web Browser."
 msgstr ""
 "Auf diese Freigabe kann nicht mit Ihrem Web-Browser zugegriffen werden."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
 msgid "We were unable to process your request."
 msgstr "Wir konnten Ihre Anfrage nicht verarbeiten."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -10958,7 +10987,7 @@ msgstr ""
 "Der gesuchte Ordner bzw. das gesuchte Objekt ist nicht mehr verfügbar. Bitte "
 "klicken Sie auf \"Fortfahren\", um Ihre anderen Freigaben anzuzeigen."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -10967,7 +10996,7 @@ msgstr ""
 "Zurücksetzen des Passworts wird abgebrochen."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10976,7 +11005,7 @@ msgstr ""
 "kontaktieren Sie den Eigentümer, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -10985,7 +11014,7 @@ msgstr ""
 "kontaktieren Sie %1$s, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10994,7 +11023,7 @@ msgstr ""
 "kontaktieren Sie den Eigentümer, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -11003,7 +11032,7 @@ msgstr ""
 "kontaktieren Sie %1$s, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11012,7 +11041,7 @@ msgstr ""
 "kontaktieren Sie den Eigentümer, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11021,7 +11050,7 @@ msgstr ""
 "kontaktieren Sie %1$s, falls Sie wieder Zugriff haben möchten."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11032,7 +11061,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11043,7 +11072,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11054,7 +11083,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -11065,7 +11094,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11076,7 +11105,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11087,7 +11116,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien klicken Sie auf \"Fortfahren\"."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11098,7 +11127,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11108,7 +11137,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11119,7 +11148,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -11130,7 +11159,7 @@ msgstr ""
 "Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11141,7 +11170,7 @@ msgstr ""
 "Anzeigen Ihrer anderen freigegebenen Dateien melden Sie sich bitte an."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11858,24 +11887,6 @@ msgid ""
 msgstr ""
 "Die Nachricht ist zu lang (%1$s Zeichen). Die maximale Länge beträgt %2$s "
 "Zeichen."
-
-#. *
-#. * No recipient(s) has been defined for new message
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
-msgid "There are no recipient(s) for the new message."
-msgstr "Für die neue Nachricht sind keine Empfänger eingetragen."
-
-#. *
-#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
-msgid ""
-"The following recipient is not allowed: %1$s. Please remove associated "
-"address and try again."
-msgstr ""
-"Folgender Empfänger ist nicht zulässig: %1$s. Bitte entfernen Sie die "
-"zugehörige Adresse und versuchen Sie es erneut."
 
 #. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:71

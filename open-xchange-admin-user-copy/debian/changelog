@@ -1,3 +1,9 @@
+open-xchange-admin-user-copy (7.10.1-22) stable; urgency=medium
+
+  * Build for patch 2019-10-14 (5438)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 08 Oct 2019 11:52:40 +0200
+
 open-xchange-admin-user-copy (7.10.1-21) stable; urgency=medium
 
   * Build for patch 2019-09-30 (5419)

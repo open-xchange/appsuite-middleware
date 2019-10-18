@@ -291,7 +291,7 @@ public final class PushManagerRegistry implements PushListenerService {
             try {
                 if (blockedContexts.contains(contextId) || schemaBeingLockedOrNeedsUpdate(contextId)) {
                     blockedContexts.add(contextId);
-                    LOG.info("Database schema is locked or needs update. Denied start-up of permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), extendedService);
+                    LOG.info("Database schema is locked or needs update. Denied start-up of permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService);
 
                     DatabaseService dbService = services.getOptionalService(DatabaseService.class);
                     if (null != dbService) {
@@ -307,7 +307,7 @@ public final class PushManagerRegistry implements PushListenerService {
                     PermanentListenerJob job = jobQueue.scheduleJob(pushUser, extendedService);
                     if (null != job) {
                         startedOnes.add(job);
-                        //LOG.debug("Scheduled to start permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), extendedService);
+                        LOG.debug("Scheduled to start permanent push listener for user {} in context {} by push manager \"{}\"", I(userId), I(contextId), extendedService, new Throwable("Start permanent push listener trace"));
                     }
                 }
             } catch (OXException e) {
