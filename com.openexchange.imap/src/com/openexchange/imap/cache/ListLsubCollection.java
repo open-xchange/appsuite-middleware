@@ -75,6 +75,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -86,7 +87,6 @@ import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
-import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Namespaces;
@@ -1256,9 +1256,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Perform command: LIST "" <full-name>
          */
-        final String mbox = BASE64MailboxEncoder.encode(fullName);
-        final Argument args = new Argument();
-        args.writeString(mbox);
+        final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, "LIST \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -1281,7 +1279,7 @@ final class ListLsubCollection implements Serializable {
                 /*
                  * Check subscription status
                  */
-                listLsubEntry.setSubscribed(doSubscriptionCheck(protocol, mbox));
+                listLsubEntry.setSubscribed(doSubscriptionCheck(protocol, fullName));
             }
             return listLsubEntry;
         }
@@ -1298,16 +1296,15 @@ final class ListLsubCollection implements Serializable {
      * Performs a check if denoted folder is subscribed.
      *
      * @param protocol The IMAP protocol
-     * @param mbox The encoded full name
+     * @param fullName The encoded full name
      * @return <code>true</code> if subscribed; otherwise <code>false</code>
      * @throws ProtocolException If a protocol error occurs
      */
-    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String mbox) throws ProtocolException {
+    private boolean doSubscriptionCheck(final IMAPProtocol protocol, final String fullName) throws ProtocolException {
         /*
          * Perform command: LIST "" <full-name>
          */
-        final Argument args = new Argument();
-        args.writeString(mbox);
+        final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, "LSUB \"\"", args);
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -1318,7 +1315,7 @@ final class ListLsubCollection implements Serializable {
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals("LSUB")) {
-                    ret |= mbox.equals(parseEncodedFullName(ir));
+                    ret |= fullName.equals(parseEncodedFullName(ir));
                     r[i] = null;
                 }
             }
@@ -1627,9 +1624,7 @@ final class ListLsubCollection implements Serializable {
          * Perform command: LIST "" "INBOX"
          */
         final String command = lsub ? "LSUB" : "LIST";
-        String mbox = BASE64MailboxEncoder.encode(fullName);
-        Argument args = new Argument();
-        args.writeString(mbox);
+        Argument args = ImapUtility.encodeFolderName(fullName, protocol);
         final Response[] r = performCommand(protocol, new StringBuilder(command).append(" \"\"").toString(), args);
         args = null;
         mbox = null;

@@ -601,8 +601,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
                 /*
                  * Item arguments
                  */
@@ -677,8 +676,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Arguments...
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
                 /*
                  * Execute
                  */
@@ -743,8 +741,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Arguments...
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
                 /*
                  * Execute
                  */
@@ -860,8 +857,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                final Argument args = ImapUtility.encodeFolderName(imapFolder.getFullName(), protocol);
                 /*
                  * Item arguments
                  */
@@ -927,8 +923,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
                 /*
                  * Item arguments
                  */
@@ -994,8 +989,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
                 /*
                  * Item arguments
                  */
@@ -1059,8 +1053,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                final Argument args = ImapUtility.encodeFolderName(imapFolder.getFullName(), protocol);
                 /*
                  * Item arguments
                  */
@@ -1126,8 +1119,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(fullName));
+                final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
                 /*
                  * Item arguments
                  */
@@ -1175,8 +1167,7 @@ public final class IMAPCommandsCollection {
                 Integer total = null;
                 {
                     // Encode the mbox as per RFC2060
-                    final Argument args = new Argument();
-                    args.writeString(BASE64MailboxEncoder.encode(fullName));
+                    final Argument args = ImapUtility.encodeFolderName(fullName, protocol);
 
                     // Perform command
                     Response[] r = performCommand(protocol, "EXAMINE", args);
@@ -1405,8 +1396,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final Argument args = new Argument();
-                args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+                final Argument args = ImapUtility.encodeFolderName(imapFolder.getFullName(), p);
                 /*
                  * Perform command
                  */
@@ -1528,8 +1518,7 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(final IMAPProtocol p) {
-                    final Argument args = new Argument();
-                    args.writeString(BASE64MailboxEncoder.encode(folder));
+                    final Argument args = ImapUtility.encodeFolderName(folder, p);
                     performCommand(p, (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args);
                     return null;
                 }
@@ -2566,8 +2555,7 @@ public final class IMAPCommandsCollection {
                     /*
                      * Encode the mbox as per RFC2060
                      */
-                    final Argument args = new Argument();
-                    args.writeString(BASE64MailboxEncoder.encode(f.getFullName()));
+                    final Argument args = ImapUtility.encodeFolderName(f.getFullName(), p);
                     /*
                      * Perform command
                      */
@@ -2617,8 +2605,7 @@ public final class IMAPCommandsCollection {
                         /*
                          * Encode the mbox as per RFC2060
                          */
-                        final Argument args = new Argument();
-                        args.writeString(BASE64MailboxEncoder.encode(fullName));
+                        final Argument args = ImapUtility.encodeFolderName(fullName, p);
                         /*
                          * Perform command
                          */
@@ -2638,8 +2625,7 @@ public final class IMAPCommandsCollection {
                     /*
                      * Now re-access previous folder to keep it selected
                      */
-                    final Argument args = new Argument();
-                    args.writeString(BASE64MailboxEncoder.encode(f.getFullName()));
+                    final Argument args = ImapUtility.encodeFolderName(f.getFullName(), p);
                     /*
                      * Perform command
                      */

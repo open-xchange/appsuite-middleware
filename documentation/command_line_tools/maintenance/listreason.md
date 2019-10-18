@@ -1,5 +1,5 @@
 ---
-title: listreason(1)
+title: listreason
 icon: far fa-circle
 tags: Administration, Command Line tools, Maintenance
 ---
