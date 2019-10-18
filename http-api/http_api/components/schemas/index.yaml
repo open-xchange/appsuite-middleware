@@ -778,3 +778,6 @@ CancelJobResponse:
 # Module: OpenId
 InitResponse:
   $ref: ./openid/InitResponse.yaml
+# Module: System
+WhoAmIResponse:
+  $ref: ./system/WhoAmIResponse.yaml

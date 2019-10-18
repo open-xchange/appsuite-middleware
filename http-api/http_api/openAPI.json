@@ -158,6 +158,9 @@
   }, {
     "name" : "SAML",
     "description" : "Endpoints of the built-in SAML 2.0 service provider. See https://documentation.open-xchange.com/latest/middleware/login/02_saml.html."
+  }, {
+    "name" : "System",
+    "description" : "The module for API related to the middelware system"
   } ],
   "paths" : {
     "/oauth/grants?action=all" : {
@@ -2097,6 +2100,28 @@
           },
           "description" : "A JSON object containing the resource data fields to change. Only modified fields are present and the field id is omitted.",
           "required" : true
+        }
+      }
+    },
+    "/system?action=whoami" : {
+      "get" : {
+        "operationId" : "whoami",
+        "tags" : [ "system" ],
+        "summary" : "Returns information about the session",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object signaling success. In case of errors the responsible fields in the response are\nfilled (see [Error handling](#error-handling)).\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WhoAmIResponse"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -4869,6 +4894,26 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system?action=ping" : {
+      "get" : {
+        "operationId" : "ping",
+        "tags" : [ "ping", "system" ],
+        "summary" : "Simple API call to check whether the server is still running or not",
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the value \"TRUE\". This indicates  that the server is still running and ready to handle more  requests\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string",
+                  "enum" : [ true ]
                 }
               }
             }
@@ -7768,6 +7813,26 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/MailReplyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system?action=time" : {
+      "get" : {
+        "operationId" : "time",
+        "tags" : [ "time", "system" ],
+        "summary" : "Simple API call to obtain the systems time in milliseconds",
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the time value as long. The time is  measured in milliseconds and is the difference between the  current time and midnight, January 1, 1970 UTC\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "integer",
+                  "example" : 1349333576093
                 }
               }
             }
@@ -36963,6 +37028,39 @@
             "type" : "integer",
             "format" : "int64",
             "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "WhoAmIResponse" : {
+        "type" : "object",
+        "properties" : {
+          "random" : {
+            "type" : "string",
+            "description" : "The random token"
+          },
+          "session" : {
+            "type" : "string",
+            "description" : "The session identifier"
+          },
+          "user" : {
+            "type" : "string",
+            "description" : "The user"
+          },
+          "user_id" : {
+            "type" : "string",
+            "description" : "The user identifer"
+          },
+          "context_id" : {
+            "type" : "string",
+            "description" : "The context identifer"
+          },
+          "requires_multifactor" : {
+            "type" : "boolean",
+            "description" : "An value indicating whether multifactor has been enabled or not"
+          },
+          "locale" : {
+            "type" : "string",
+            "description" : "The locale of the user"
           }
         }
       }
