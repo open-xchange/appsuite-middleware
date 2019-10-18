@@ -65,6 +65,11 @@ or on 6.22 or newer
 After editing this file accordingly to your proxy needs, try to start
 the report client again.
 
+## Which systems need to report
+The LDB account you have in your repository configuration and the assigned key needs reporting only from one node, once a month. 
+
+Make sure that you have configured the key correctly on the node which is reporting, see 3.0.
+
 # Using the Report tool
 
 Now as the package has been correctly installed and you provided your
