@@ -269,6 +269,9 @@ tags:
     description: >-
       Endpoints of the built-in SAML 2.0 service provider. See
       https://documentation.open-xchange.com/latest/middleware/login/02_saml.html.
+  - name: System
+    description: >-
+      The module for API related to the middelware system
 
 paths: 
    source: ./paths/ 
