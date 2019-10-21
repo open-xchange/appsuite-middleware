@@ -52,8 +52,13 @@ package com.openexchange.chronos.scheduling.changes.impl;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.chronos.scheduling.changes.impl.desc.AttachmentDescriptionTest;
+import com.openexchange.chronos.scheduling.changes.impl.desc.AttendeeDescriptionTest;
+import com.openexchange.chronos.scheduling.changes.impl.desc.DescriptionDescriptionTest;
 import com.openexchange.chronos.scheduling.changes.impl.desc.LocationDescriptionTest;
+import com.openexchange.chronos.scheduling.changes.impl.desc.OrganizerDescriptionTest;
 import com.openexchange.chronos.scheduling.changes.impl.desc.RRuleDescription;
+import com.openexchange.chronos.scheduling.changes.impl.desc.ReschedulingDescriptionTest;
 import com.openexchange.chronos.scheduling.changes.impl.desc.SplitDescription;
 import com.openexchange.chronos.scheduling.changes.impl.desc.SummaryDescriptionTest;
 import com.openexchange.chronos.scheduling.changes.impl.desc.TransparencyDescriptionTest;
@@ -66,7 +71,12 @@ import com.openexchange.chronos.scheduling.changes.impl.desc.TransparencyDescrip
  */
 @RunWith(Suite.class)
 @SuiteClasses({
+    AttachmentDescriptionTest.class,
+    AttendeeDescriptionTest.class,
+    DescriptionDescriptionTest.class,
     LocationDescriptionTest.class,
+    OrganizerDescriptionTest.class,
+    ReschedulingDescriptionTest.class,
     RRuleDescription.class,
     SplitDescription.class,
     SummaryDescriptionTest.class,
