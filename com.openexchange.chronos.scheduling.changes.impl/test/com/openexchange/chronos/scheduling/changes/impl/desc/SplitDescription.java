@@ -82,10 +82,10 @@ public class SplitDescription extends AbstractDescriptionTest {
      * Initializes a new {@link SplitDescription}.
      */
     public SplitDescription() {
-        super(EventField.RELATED_TO, "The appointment series was updated, beginning at");
+        super(EventField.RELATED_TO, "The appointment series was updated, beginning at", () -> {
+            return new SplitDescriber();
+        });
     }
-
-    private SplitDescriber describer;
 
     @Override
     @Before
@@ -106,7 +106,7 @@ public class SplitDescription extends AbstractDescriptionTest {
         Description description = describer.describe(eventUpdate);
         testDescription(description);
         String date = DateFormat.getDateInstance(DateFormat.LONG, Locale.ENGLISH).format(new Date(time.getTimestamp()));
-        checkMessage(description, date);
+        checkMessageStart(description, date);
     }
 
     @Test

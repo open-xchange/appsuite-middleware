@@ -53,19 +53,18 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TimeZone;
+import java.util.function.Supplier;
 import org.junit.Before;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 
 /**
  * {@link AbstractDescriptionTest}
@@ -73,25 +72,15 @@ import com.openexchange.chronos.service.EventUpdate;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
  */
-public abstract class AbstractDescriptionTest {
-
-    private static final String FORMAT = "text";
+public abstract class AbstractDescriptionTest extends AbstractDescriptionTestMocking {
 
     final EventField field;
 
-    @Mock
-    protected EventUpdate eventUpdate;
-
-    @Mock
-    protected Set<EventField> fields;
-
-    @Mock
-    protected Event original;
-
-    @Mock
-    protected Event updated;
-
     protected String descriptionMessage;
+
+    protected ChangeDescriber describer;
+
+    private Supplier<ChangeDescriber> supplier;
 
     /**
      * Initializes a new {@link AbstractDescriptionTest}.
@@ -99,46 +88,60 @@ public abstract class AbstractDescriptionTest {
      * @param field The field to test
      * @param descriptionMessage The introduction message of the description
      */
-    public AbstractDescriptionTest(EventField field, String descriptionMessage) {
+    public AbstractDescriptionTest(EventField field, String descriptionMessage, Supplier<ChangeDescriber> supplier) {
         super();
         this.field = field;
         this.descriptionMessage = descriptionMessage;
+        this.supplier = supplier;
     }
 
-    protected EventField getTestedField() {
-        return field;
-    }
 
-    @SuppressWarnings("unused")
+
+    @Override
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        super.setUp();
+        this.describer = supplier.get();
+        PowerMockito.when(B(fields.contains(field))).thenReturn(Boolean.TRUE);
 
-        PowerMockito.when(eventUpdate.getOriginal()).thenReturn(original);
-        PowerMockito.when(eventUpdate.getUpdate()).thenReturn(updated);
+    }
 
-        PowerMockito.when(eventUpdate.getUpdatedFields()).thenReturn(fields);
-        PowerMockito.when(B(fields.contains(getTestedField()))).thenReturn(Boolean.TRUE);
+    @Test
+    public void testDescriber_NoValues_DescriptionUnavailable() {
+        PowerMockito.when(B(fields.contains(field))).thenReturn(Boolean.FALSE);
+
+        Description description = describer.describe(eventUpdate);
+        assertThat(description, nullValue());
     }
 
     protected void testDescription(Description description) {
         assertThat("Should not be null", description, notNullValue());
         assertThat("Not matching size", I(description.getChangedFields().size()), is((I(1))));
-        assertThat("Wrong field", description.getChangedFields().get(0), is(getTestedField()));
+        assertThat("Wrong field", description.getChangedFields().get(0), is(field));
     }
 
-    protected void checkMessage(Description description, String containee) {
-        checkMessage(description);
-        assertTrue(getMessage(description).contains(containee));
+    protected void checkMessageStart(Description description, String containee) {
+        checkMessageStart(description);
+        assertTrue(getMessage(description, 0).contains(containee));
     }
 
-    protected void checkMessage(Description description) {
+    protected void checkMessageStart(Description description) {
         assertThat("Not matching size", I(description.getSentences().size()), is((I(1))));
-        assertTrue(getMessage(description).startsWith(descriptionMessage));
+        assertTrue(getMessage(description, 0).startsWith(descriptionMessage));
     }
 
-    protected String getMessage(Description description) {
-        return description.getSentences().get(0).getMessage(FORMAT, Locale.ENGLISH, TimeZone.getDefault(), null);
+    protected void checkMessageEnd(Description description, String containee) {
+        checkMessageEnd(description);
+        assertTrue(getMessage(description, 0).contains(containee));
+    }
+
+    protected void checkMessageEnd(Description description) {
+        assertThat("Not matching size", I(description.getSentences().size()), is((I(1))));
+        assertTrue(getMessage(description, 0).endsWith(descriptionMessage));
+    }
+
+    protected String getMessage(Description description, int sentenceIndex) {
+        return description.getSentences().get(sentenceIndex).getMessage(FORMAT, Locale.ENGLISH, TimeZone.getDefault(), null);
     }
 
 }

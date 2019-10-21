@@ -49,9 +49,6 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
-import static com.openexchange.java.Autoboxing.B;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,10 +74,10 @@ public class RRuleDescription extends AbstractDescriptionTest {
      * Initializes a new {@link RRuleDescription}.
      */
     public RRuleDescription() {
-        super(EventField.RECURRENCE_RULE, "The appointment's recurrence rule has changed to");
+        super(EventField.RECURRENCE_RULE, "The appointment's recurrence rule has changed to", () -> {
+            return new RRuleDescriber();
+        });
     }
-
-    private RRuleDescriber describer;
 
     @Override
     @Before
@@ -96,7 +93,7 @@ public class RRuleDescription extends AbstractDescriptionTest {
 
         Description description = describer.describe(eventUpdate);
         testDescription(description);
-        checkMessage(description, "Every 1 day, No end");
+        checkMessageStart(description, "Every 1 day, No end");
     }
 
 //    @Test
@@ -114,15 +111,7 @@ public class RRuleDescription extends AbstractDescriptionTest {
 
         Description description = describer.describe(eventUpdate);
         testDescription(description);
-        checkMessage(description, "Every 1 day, Occurs 10 times");
-    }
-
-    @Test
-    public void testSplit_NoValues_DescriptionUnavailable() {
-        PowerMockito.when(B(fields.contains(getTestedField()))).thenReturn(Boolean.FALSE);
-
-        Description description = describer.describe(eventUpdate);
-        assertThat(description, nullValue());
+        checkMessageStart(description, "Every 1 day, Occurs 10 times");
     }
 
     // -------------------- HELPERS --------------------
