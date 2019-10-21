@@ -125,11 +125,7 @@ public class SproxydFileStorage implements FileStorage {
              * proceed
              */
             UUID documentId = UUID.randomUUID();
-            long length = upload(documentId, file, 0);
-            if (length <= 0) {
-                // Received an empty input stream
-                throw SproxydExceptionCode.UNEXPECTED_ERROR.create("Sproxyd storage cannot save an empty file");
-            }
+            upload(documentId, file, 0);
             return UUIDs.getUnformattedString(documentId);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
@@ -347,50 +343,17 @@ public class SproxydFileStorage implements FileStorage {
         try {
             chunkedUpload = new DefaultChunkedUpload(data);
             long off = offset;
-            if (!chunkedUpload.hasNext()) {
-                success = true;
-                return off;
-            }
-
-            // Handle first chunk especially
-            {
+            while (chunkedUpload.hasNext()) {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
-                    // ... and upload first chunk
-                    long chunkSize = chunk.getSize();
-                    UUID scalityId = client.put(chunk.getData(), chunkSize);
+                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
                     scalityIds.add(scalityId);
-                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunkSize));
-
-                    if (chunkSize <= 0) {
-                        // Received an empty input stream
-                        success = true;
-                        return off;
-                    }
-
+                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
                     off += chunk.getSize();
                 } finally {
                     Streams.close(chunk);
                 }
             }
-
-            // Handle remaining chunks
-            while (chunkedUpload.hasNext()) {
-                UploadChunk chunk = chunkedUpload.next();
-                try {
-                    long chunkSize = chunk.getSize();
-                    if (chunkSize > 0) {
-                        UUID scalityId = client.put(chunk.getData(), chunk.getSize());
-                        scalityIds.add(scalityId);
-                        chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
-                        off += chunk.getSize();
-                    }
-                } finally {
-                    Streams.close(chunk);
-                }
-            }
-
-            // All fine, no error occurred
             success = true;
             return off;
         } finally {
