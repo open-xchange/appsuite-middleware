@@ -2,7 +2,7 @@
   get:
     operationId: whoami
     tags:
-      - system
+      - System
     summary: Returns information about the session
     parameters:
       - $ref: '#/components/parameters/gblQueryParamSession'

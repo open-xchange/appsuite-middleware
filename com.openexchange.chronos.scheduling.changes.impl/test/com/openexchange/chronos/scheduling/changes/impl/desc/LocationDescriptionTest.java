@@ -54,18 +54,13 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.service.EventUpdate;
 
 /**
  * {@link LocationDescriptionTest}
@@ -74,30 +69,15 @@ import com.openexchange.chronos.service.EventUpdate;
  * @since v7.10.3
  */
 @RunWith(PowerMockRunner.class)
-public class LocationDescriptionTest {
-
-    private static final String FORMAT = "text";
+public class LocationDescriptionTest extends AbstractDescriptionTestMocking {
 
     private LocationDescriber describer;
 
-    @Mock
-    private EventUpdate eventUpdate;
-
-    @Mock
-    private Set<EventField> fields;
-
-    @Mock
-    private Event original;
-
-    @Mock
-    private Event updated;
-
+    @Override
     @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    public void setUp() throws Exception {
+        super.setUp();
         describer = new LocationDescriber();
-        PowerMockito.when(eventUpdate.getOriginal()).thenReturn(original);
-        PowerMockito.when(eventUpdate.getUpdate()).thenReturn(updated);
     }
 
     @Test

@@ -49,71 +49,45 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
+import java.util.Set;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.scheduling.changes.Description;
+import com.openexchange.chronos.service.EventUpdate;
 
 /**
- * {@link TransparencyDescriptionTest}
+ * {@link AbstractDescriptionTestMocking}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
  * @since v7.10.3
  */
-@RunWith(PowerMockRunner.class)
-public class TransparencyDescriptionTest extends AbstractDescriptionTest {
+public abstract class AbstractDescriptionTestMocking {
 
-    /**
-     * Initializes a new {@link TransparencyDescriptionTest}.
-     */
-    public TransparencyDescriptionTest() {
-        super(EventField.TRANSP, "The appointment will now be shown as", () -> {
-            return new TransparencyDescriber();
-        });
-    }
+    protected static final String FORMAT = "text";
 
-    @Override
+    @Mock
+    protected EventUpdate eventUpdate;
+
+    @Mock
+    protected Event original;
+
+    @Mock
+    protected Event updated;
+
+    @Mock
+    protected Set<EventField> fields;
+
+    @SuppressWarnings("unused")
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-        describer = new TransparencyDescriber();
-    }
+        MockitoAnnotations.initMocks(this);
 
-    @Test
-    public void testTransp_SetOPAQUE_DescriptionAvailable() {
-        setTransp(null, TimeTransparency.OPAQUE);
+        PowerMockito.when(eventUpdate.getOriginal()).thenReturn(original);
+        PowerMockito.when(eventUpdate.getUpdate()).thenReturn(updated);
 
-        Description description = describer.describe(eventUpdate);
-        testDescription(description);
-        checkMessageStart(description, "Reserved");
-    }
-
-    @Test
-    public void testTransp_SetTransperant_DescriptionAvailable() {
-        setTransp(null, TimeTransparency.TRANSPARENT);
-
-        Description description = describer.describe(eventUpdate);
-        testDescription(description);
-        checkMessageStart(description, "Free");
-    }
-
-    @Test
-    public void testTransp_ChangeToTransperant_DescriptionAvailable() {
-        setTransp(TimeTransparency.OPAQUE, TimeTransparency.TRANSPARENT);
-
-        Description description = describer.describe(eventUpdate);
-        testDescription(description);
-        checkMessageStart(description, "Free");
-    }
-
-    // -------------------- HELPERS --------------------
-    private void setTransp(Transp originalTransp, Transp updatedTransp) {
-        PowerMockito.when(original.getTransp()).thenReturn(originalTransp);
-        PowerMockito.when(updated.getTransp()).thenReturn(updatedTransp);
+        PowerMockito.when(eventUpdate.getUpdatedFields()).thenReturn(fields);
     }
 }

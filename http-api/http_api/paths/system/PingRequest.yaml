@@ -2,8 +2,7 @@
   get:
     operationId: ping
     tags:
-      - ping
-      - system
+      - System
     summary: Simple API call to check whether the server is still 
              running or not
     responses:

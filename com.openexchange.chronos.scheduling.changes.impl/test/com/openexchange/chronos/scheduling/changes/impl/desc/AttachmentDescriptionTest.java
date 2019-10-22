@@ -49,12 +49,6 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
-import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.I;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -77,10 +71,8 @@ import com.openexchange.chronos.scheduling.changes.Description;
 public class AttachmentDescriptionTest extends AbstractDescriptionTest {
 
     private static List<Attachment> attachments;
-    private static String message = new String();
     private static String addMessage = "The appointment has a new attachment";
     private static String removeMessage = "was removed from the appointment.";
-    private AttachmentDescriber describer;
 
     /**
      * Initializes a new {@link AttachmentDescriptionTest}.
@@ -89,14 +81,15 @@ public class AttachmentDescriptionTest extends AbstractDescriptionTest {
      * @param descriptionMessage The introduction message of the description
      */
     public AttachmentDescriptionTest() {
-        super(EventField.ATTACHMENTS, message);
+        super(EventField.ATTACHMENTS, "", () -> {
+            return new AttachmentDescriber();
+        });
     }
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        describer = new AttachmentDescriber();
         attachments = new ArrayList<Attachment>();
         Attachment attachment = new Attachment();
         attachment.setFilename("NewAttachment");
@@ -110,7 +103,7 @@ public class AttachmentDescriptionTest extends AbstractDescriptionTest {
         descriptionMessage = addMessage;
         Description description = describer.describe(eventUpdate);
         testDescription(description);
-        checkMessage(description, attachments.get(0).getFilename());
+        checkMessageStart(description, attachments.get(0).getFilename());
     }
 
     @Test
@@ -120,19 +113,7 @@ public class AttachmentDescriptionTest extends AbstractDescriptionTest {
         descriptionMessage = removeMessage;
         Description description = describer.describe(eventUpdate);
         testDescription(description);
-
-        String message = getMessage(description);
-        assertThat("Not matching size", I(description.getSentences().size()), is((I(1))));
-        assertTrue(message.endsWith(descriptionMessage));
-        assertTrue(message.contains(attachments.get(0).getFilename()));
-    }
-
-    @Test
-    public void testAttachment_NoValues_DescriptionUnavailable() {
-        PowerMockito.when(B(fields.contains(getTestedField()))).thenReturn(Boolean.FALSE);
-
-        Description description = describer.describe(eventUpdate);
-        assertThat(description, nullValue());
+        checkMessageEnd(description, attachments.get(0).getFilename());
     }
 
     // -------------------- HELPERS --------------------

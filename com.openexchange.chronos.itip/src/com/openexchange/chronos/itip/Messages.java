@@ -274,25 +274,25 @@ public class Messages implements LocalizableStrings {
 
     public static final String INTENTION_INVITE_GROUP = "Invite the group %1$s to the appointment.";
 
-    public static final String HAS_INVITED_GROUP = "The group %1$s has been invited to the appointment";
+    public static final String HAS_INVITED_GROUP = "The group %1$s has been invited to the appointment.";
 
     public static final String ASK_REMOVE_GROUP = "Remove the group %1$s from the appointment.";
 
     public static final String INTENTION_REMOVE_GROUP = "Remove the group %1$s from the appointment.";
 
-    public static final String HAS_REMOVED_GROUP = "The group %1$s has been removed from the appointment";
+    public static final String HAS_REMOVED_GROUP = "The group %1$s has been removed from the appointment.";
 
-    public static final String ASK_ADD_RESOURCE = "Reserve the resource %1$s for the appointment";
+    public static final String ASK_ADD_RESOURCE = "Reserve the resource %1$s for the appointment.";
 
     public static final String INTENTION_ADD_RESOURCE = "Reserve the resource %1$s for the appointment.";
 
-    public static final String HAS_ADDED_RESOURCE = "The resource %1$s has been reserved for the appointment";
+    public static final String HAS_ADDED_RESOURCE = "The resource %1$s has been reserved for the appointment.";
 
-    public static final String ASK_REMOVE_RESOURCE = "Remove the resource %1$s from the appointment";
+    public static final String ASK_REMOVE_RESOURCE = "Remove the resource %1$s from the appointment.";
 
     public static final String INTENTION_REMOVE_RESOURCE = "Remove the resource %1$s from the appointment.";
 
-    public static final String HAS_REMOVED_RESOURCE = "The resource %1$s is no longer reserved for the appointment";
+    public static final String HAS_REMOVED_RESOURCE = "The resource %1$s is no longer reserved for the appointment.";
 
     public static final String HAS_RESCHEDULED = "The appointment was rescheduled. Original date: %1$s. New date: %2$s";
 

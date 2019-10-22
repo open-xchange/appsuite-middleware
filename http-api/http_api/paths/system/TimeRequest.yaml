@@ -2,8 +2,7 @@
   get:
     operationId: time
     tags:
-      - time
-      - system
+      - System
     summary: Simple API call to obtain the systems time in milliseconds
     responses:
       '200':
