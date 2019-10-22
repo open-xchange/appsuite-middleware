@@ -74,6 +74,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug34499Test.class,
     Bug36687Test.class,
     JPCSVImportTest.class,
+    Bug67638Test.class,
     
     // Overall bug tests.
     Bug6825Test.class,
