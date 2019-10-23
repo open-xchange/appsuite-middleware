@@ -259,7 +259,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
     }
 
     @Override
-    public MailPath transportCompositionSpace(UUID compositionSpaceId, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, Session ses) throws OXException {
+    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, Session ses) throws OXException {
         CompositionSpace compositionSpace = getCompositionSpace(compositionSpaceId, ses);
 
         Message m = compositionSpace.getMessage();
@@ -301,9 +301,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
         if (TEXT_HTML == m.getContentType()) {
             // An HTML message...
-            if (attachments != null && !attachments.isEmpty()) {
+            if ((attachments != null && !attachments.isEmpty())) {
                 // ... with attachments
-                Map<UUID, Attachment> fileAttachments = new LinkedHashMap<>(attachments.size());
+                Map<UUID, Attachment> fileAttachments = new LinkedHashMap<>();
                 for (Attachment attachment : attachments) {
                     fileAttachments.put(attachment.getId(), attachment);
                 }
@@ -425,10 +425,26 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         // Collect parts
         List<MailPart> parts;
-        if (attachments != null && !attachments.isEmpty()) {
-            parts = new ArrayList<MailPart>(attachments.size());
-            for (Attachment attachment : attachments) {
-                parts.add(new AttachmentMailPart(attachment));
+        if ((attachments != null && !attachments.isEmpty()) || optionalUploadedAttachments.isPresent()) {
+            parts = new ArrayList<MailPart>();
+            if (attachments != null) {
+                for (Attachment attachment : attachments) {
+                    parts.add(new AttachmentMailPart(attachment));
+                }
+            }
+            if (optionalUploadedAttachments.isPresent()) {
+                StreamedUploadFileIterator uploadedAttachments = optionalUploadedAttachments.get();
+                if (uploadedAttachments.hasNext()) {
+                    try {
+                        do {
+                            StreamedUploadFile uploadFile = uploadedAttachments.next();
+                            AttachmentDescription attachmentDescription = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, com.openexchange.mail.compose.Attachment.ContentDisposition.ATTACHMENT.getId(), compositionSpaceId);
+                            parts.add(new StreamedAttachmentMailPart(attachmentDescription, uploadFile.getStream()));
+                        } while (uploadedAttachments.hasNext());
+                    } catch (IOException e) {
+                        throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    }
+                }
             }
         } else {
             parts = Collections.emptyList();

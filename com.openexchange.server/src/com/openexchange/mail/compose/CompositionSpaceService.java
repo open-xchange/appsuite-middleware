@@ -51,6 +51,7 @@ package com.openexchange.mail.compose;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -73,6 +74,7 @@ public interface CompositionSpaceService {
      * Transports the mail resulting from specified composition space.
      *
      * @param compositionSpaceId The identifier of the composition space describing the mail to transport
+     * @param optionalUploadedAttachments The optional uploaded attachments that are streamed-through w/o being saved to attachment storage
      * @param mailSettings The user's mail settings
      * @param requestData The request data
      * @param warnings The optional collection to add possible warnings to
@@ -81,7 +83,7 @@ public interface CompositionSpaceService {
      * @return The path to the sent mail or <code>null</code>
      * @throws OXException If transport fails
      */
-    MailPath transportCompositionSpace(UUID compositionSpaceId, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport, Session session) throws OXException;
+    MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport, Session session) throws OXException;
 
     /**
      * Saves given composition space to an appropriate draft mail.
