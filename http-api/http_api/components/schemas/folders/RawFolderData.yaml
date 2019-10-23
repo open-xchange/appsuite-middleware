@@ -140,7 +140,7 @@ com.openexchange.share.extendedPermissions:
   type: array
   items:
     $ref: "#/components/schemas/FolderExtendedPermission"
-comOpenexchangeCalendarExtendedProperties:
+com.openexchange.calendar.extendedProperties:
   type: object
   description: Contains the extended properties for calendar folders
   properties:
@@ -175,7 +175,7 @@ comOpenexchangeCalendarExtendedProperties:
         value:
           type: integer
           format: int64
-comOpenexchangeCalendarConfig:
+com.openexchange.calendar.config:
   type: object
   description: Holds arbitrary, provider-specific configuration data for calendar accounts.
   properties:

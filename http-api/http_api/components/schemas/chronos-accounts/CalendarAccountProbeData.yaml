@@ -1,6 +1,6 @@
 type: object
 properties:
-  comOpenexchangeCalendarExtendedProperties:
+  com.openexchange.calendar.extendedProperties:
     type: object
     description: Contains the extended properties for calendar folders
     properties:
@@ -32,7 +32,7 @@ properties:
         properties:
           value:
             type: string
-  comOpenexchangeCalendarConfig:
+  com.openexchange.calendar.config:
     type: object
     description: >-
       Holds arbitrary, provider-specific configuration data for calendar
