@@ -13,5 +13,4 @@
         content:
           application/json:
             schema:
-              type: integer
-              example: 1349333576093
+              $ref: '#/components/schemas/TimeResponse'

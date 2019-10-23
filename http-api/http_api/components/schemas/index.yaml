@@ -781,3 +781,7 @@ InitResponse:
 # Module: System
 WhoAmIResponse:
   $ref: ./system/WhoAmIResponse.yaml
+TimeResponse:
+  $ref: ./system/TimeResponse.yaml
+PingResponse:
+  $ref: ./system/PingResponse.yaml
