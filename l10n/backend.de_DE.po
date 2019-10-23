@@ -653,7 +653,7 @@ msgstr "%1$s setzt den Status für diesen Termin auf %2$s:"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:160
 msgid "%1$s sets the status to %2$s for an appointment of the series %3$s:"
-msgstr "%1$s setzt den Status für einen Termin der Serie %3 auf %2$s:"
+msgstr "%1$s setzt den Status für einen Termin der Serie %3$s auf %2$s:"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:162
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
@@ -664,7 +664,7 @@ msgid ""
 "On behalf of %4$s, %1$s sets the status for an appointment of the series "
 "%3$s to %2$s:"
 msgstr ""
-"Im Auftrag von %4$s setzt %1$s den Status für einen Termin der Serie %3s auf "
+"Im Auftrag von %4$s setzt %1$s den Status für einen Termin der Serie %3$s auf "
 "%2$s:"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
