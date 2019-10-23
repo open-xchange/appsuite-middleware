@@ -127,7 +127,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
         // Create event
         event = createEvent();
 
-        addExternalAttendee(event, false);
+        addExternalAttendee(eventManager2.getEvent(null, event.getId()), false);
 
         // Re-check as organizer
         EventData data = eventManager.getEvent(event.getFolder(), event.getId());
@@ -185,7 +185,7 @@ public class AttendeePrivilegesTest extends AbstractOrganizerTest {
 
         // Create event
         event = createEvent();
-
+        event = eventManager2.getEvent(null, event.getId());
         String summary = "AttendeePrivilegesTest: Modify summary";
         EventData eventUpdate = prepareEventUpdate(event);
         eventUpdate.setSummary(summary);
