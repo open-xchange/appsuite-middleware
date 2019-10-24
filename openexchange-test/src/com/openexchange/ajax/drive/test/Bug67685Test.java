@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,35 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.drive;
+package com.openexchange.ajax.drive.test;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.drive.apiclient.test.TrashTests;
-import com.openexchange.ajax.drive.test.Bug67685Test;
-import com.openexchange.ajax.drive.test.DeleteLinkTest;
-import com.openexchange.ajax.drive.test.GetLinkTest;
-import com.openexchange.ajax.drive.test.QuotaForSyncTest;
-import com.openexchange.ajax.drive.test.UpdateLinkTest;
-import com.openexchange.ajax.drive.updater.UpdaterXMLTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import java.io.IOException;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.exception.OXException;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.modules.DriveApi;
 
 /**
- * {@link DriveAJAXSuite}
+ * {@link Bug67685Test}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.8.0
+ * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    GetLinkTest.class,
-    UpdateLinkTest.class,
-    DeleteLinkTest.class,
-    UpdaterXMLTest.class,
-    QuotaForSyncTest.class,
-    Bug67685Test.class,
-    TrashTests.class
-})
-public class DriveAJAXSuite  {
+public class Bug67685Test extends AbstractAPIClientSession {
 
+    DriveApi api;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        api = new DriveApi(apiClient);
+    }
+
+    @Test
+    public void testDriveSubscribeActionGet_ModeInvalid_ErrorResponseWithoutException() throws OXException, IOException, JSONException, ApiException {
+        String sessionId = apiClient.getSession();
+        Integer folderId = I(getClient().getValues().getPrivateTaskFolder());
+
+        CommonResponse response = api.subscribePushEventsGetReq(sessionId, folderId.toString(), "gcm", "foobar", "invalid");
+        assertEquals(2, response.getErrorParams().size());
+        assertEquals("Invalid parameter \"mode\": invalid", response.getErrorStack().get(0));
+    }
+
+    @Test
+    public void testDriveSubscribeActionGet_ModeValid_ErrorResponse() throws OXException, IOException, JSONException, ApiException {
+        String sessionId = apiClient.getSession();
+        Integer folderId = I(getClient().getValues().getPrivateTaskFolder());
+
+        CommonResponse response = api.subscribePushEventsGetReq(sessionId, folderId.toString(), "gcm", "foobar", "default");
+        assertNull(response.getErrorId());
+        assertEquals(0, response.getErrorParams().size());
+    }
 }
