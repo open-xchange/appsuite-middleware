@@ -100,11 +100,13 @@ public class ConfigurationFileParser {
     public List<String> getConfigList () throws IOException {
         File folder = configService.getDirectory(SECURITY_FOLDER);
         ArrayList<String> list = new ArrayList<String> ();
-        if (folder.exists() && folder.isDirectory()) {
+        if (null != folder && folder.exists() && folder.isDirectory()) {
             File[] files = folder.listFiles();
-            for (File file : files) {
-                if (file.getName().endsWith(SECURITY_FILE_SUFFIX)) {
-                    parseFile(file, list);
+            if (null != files) {
+                for (File file : files) {
+                    if (file.getName().endsWith(SECURITY_FILE_SUFFIX)) {
+                        parseFile(file, list);
+                    }
                 }
             }
         }
