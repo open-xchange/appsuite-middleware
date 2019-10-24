@@ -53,11 +53,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.json.JSONObject;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedProperties;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesColor;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesDescription;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesScheduleTransp;
+import com.openexchange.testing.httpclient.models.FolderCalendarConfig;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedProperties;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedPropertiesColor;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedPropertiesDescription;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedPropertiesScheduleTransp;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 
@@ -71,20 +71,20 @@ public final class CalendarFolderFactory {
     /**
      * The extended properties mappers
      */
-    private static final Map<CalendarFolderExtendedProperty, BiConsumer<FolderDataComOpenexchangeCalendarExtendedProperties, String>> extPropertyMappers = new HashMap<>();
+    private static final Map<CalendarFolderExtendedProperty, BiConsumer<FolderCalendarExtendedProperties, String>> extPropertyMappers = new HashMap<>();
     static {
         extPropertyMappers.put(CalendarFolderExtendedProperty.COLOR, (extendedProperties, value) -> {
-            FolderDataComOpenexchangeCalendarExtendedPropertiesColor color = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
+            FolderCalendarExtendedPropertiesColor color = new FolderCalendarExtendedPropertiesColor();
             color.setValue(value);
             extendedProperties.setColor(color);
         });
         extPropertyMappers.put(CalendarFolderExtendedProperty.DESCRIPTION, (extendedProperties, value) -> {
-            FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
+            FolderCalendarExtendedPropertiesDescription description = new FolderCalendarExtendedPropertiesDescription();
             description.setValue(value);
             extendedProperties.setDescription(description);
         });
         extPropertyMappers.put(CalendarFolderExtendedProperty.SCHEDULE_TRANSP, (extendedProperties, value) -> {
-            FolderDataComOpenexchangeCalendarExtendedPropertiesScheduleTransp scheduleTransp = new FolderDataComOpenexchangeCalendarExtendedPropertiesScheduleTransp();
+            FolderCalendarExtendedPropertiesScheduleTransp scheduleTransp = new FolderCalendarExtendedPropertiesScheduleTransp();
             scheduleTransp.setValue(value);
             extendedProperties.setScheduleTransp(scheduleTransp);
         });
@@ -93,7 +93,7 @@ public final class CalendarFolderFactory {
     /**
      * The calendar configuration mappers
      */
-    private static final Map<CalendarFolderConfig, BiConsumer<FolderDataComOpenexchangeCalendarConfig, Object>> configMappers = new HashMap<>();
+    private static final Map<CalendarFolderConfig, BiConsumer<FolderCalendarConfig, Object>> configMappers = new HashMap<>();
     static {
         configMappers.put(CalendarFolderConfig.COLOR, (config, value) -> {
             config.setColor((String) value);
@@ -153,10 +153,10 @@ public final class CalendarFolderFactory {
      * Creates a calendar configuration object from the specified {@link JSONObject} configuration
      * 
      * @param config The configuration
-     * @return The {@link FolderDataComOpenexchangeCalendarConfig}
+     * @return The {@link FolderCalendarConfig}
      */
-    private static final FolderDataComOpenexchangeCalendarConfig createCalendarConfig(JSONObject config) {
-        FolderDataComOpenexchangeCalendarConfig calendarConfig = new FolderDataComOpenexchangeCalendarConfig();
+    private static final FolderCalendarConfig createCalendarConfig(JSONObject config) {
+        FolderCalendarConfig calendarConfig = new FolderCalendarConfig();
         for (CalendarFolderConfig folderConfig : CalendarFolderConfig.values()) {
             Object value = config.opt(folderConfig.getFieldName());
             if (value == null) {
@@ -171,10 +171,10 @@ public final class CalendarFolderFactory {
      * Creates a calendar extended properties object from the extended properties in the {@link JSONObject}
      * 
      * @param extProps The extended properties
-     * @return The {@link FolderDataComOpenexchangeCalendarExtendedProperties} object
+     * @return The {@link FolderCalendarExtendedProperties} object
      */
-    private static final FolderDataComOpenexchangeCalendarExtendedProperties createCalendarExtendedProperties(JSONObject extProps) {
-        FolderDataComOpenexchangeCalendarExtendedProperties extendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
+    private static final FolderCalendarExtendedProperties createCalendarExtendedProperties(JSONObject extProps) {
+        FolderCalendarExtendedProperties extendedProperties = new FolderCalendarExtendedProperties();
         for (CalendarFolderExtendedProperty property : CalendarFolderExtendedProperty.values()) {
             JSONObject c = extProps.optJSONObject(property.getFieldName());
             if (null == c || c.isEmpty()) {

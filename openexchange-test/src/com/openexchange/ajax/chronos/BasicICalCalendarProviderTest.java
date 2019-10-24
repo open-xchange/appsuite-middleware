@@ -83,19 +83,19 @@ import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CalendarAccountProbeConfig;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeData;
-import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarConfig;
-import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties;
+import com.openexchange.testing.httpclient.models.CalendarAccountProbeExtendedProperties;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
 import com.openexchange.testing.httpclient.models.ChronosFolderBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventsResponse;
+import com.openexchange.testing.httpclient.models.FolderCalendarConfig;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedProperties;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedPropertiesColor;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedPropertiesDescription;
 import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedProperties;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesColor;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesDescription;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MultipleEventDataError;
@@ -132,10 +132,10 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
-        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeExtendedProperties());
 
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
@@ -147,7 +147,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     public void testCreate_containsSurrogateChars_returnException() throws ApiException {
         String externalUri = "http://example.com/files/test.\ud83d\udca9";
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
 
@@ -166,10 +166,10 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
-        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeExtendedProperties());
 
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
@@ -181,7 +181,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     public void testCreate_noScheme_returnException() throws ApiException {
         String externalUri = "example.com/files/test.ics";
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
 
@@ -202,10 +202,10 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
-        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeExtendedProperties());
 
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
@@ -221,10 +221,10 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
-        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeExtendedProperties());
 
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
@@ -240,13 +240,13 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
         String title = "The awesome custom name!";
         data.setTitle(title);
-        CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties comOpenexchangeCalendarExtendedProperties = new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties();
-        FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
+        CalendarAccountProbeExtendedProperties comOpenexchangeCalendarExtendedProperties = new CalendarAccountProbeExtendedProperties();
+        FolderCalendarExtendedPropertiesDescription description = new FolderCalendarExtendedPropertiesDescription();
         description.setValue("My custom description");
         comOpenexchangeCalendarExtendedProperties.setDescription(description);
         data.setComOpenexchangeCalendarExtendedProperties(comOpenexchangeCalendarExtendedProperties);
@@ -267,7 +267,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
 
@@ -285,7 +285,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
 
@@ -303,7 +303,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
 
@@ -321,7 +321,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
 
@@ -349,7 +349,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
 
@@ -367,7 +367,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
-        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        CalendarAccountProbeConfig config = new CalendarAccountProbeConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
 
@@ -393,7 +393,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
 
@@ -417,7 +417,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         NewFolderBody body = new NewFolderBody();
@@ -439,7 +439,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         folder.setTitle(null);
@@ -463,12 +463,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         String title = RandomStringUtils.randomNumeric(30);
         folder.setTitle(title);
-        FolderDataComOpenexchangeCalendarExtendedProperties comOpenexchangeCalendarExtendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
-        FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
+        FolderCalendarExtendedProperties comOpenexchangeCalendarExtendedProperties = new FolderCalendarExtendedProperties();
+        FolderCalendarExtendedPropertiesDescription description = new FolderCalendarExtendedPropertiesDescription();
         description.setValue("The nice description");
         comOpenexchangeCalendarExtendedProperties.setDescription(description);
         folder.setComOpenexchangeCalendarExtendedProperties(comOpenexchangeCalendarExtendedProperties);
@@ -494,8 +494,8 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         String changedTitle = "changed";
         folderData.setTitle(changedTitle);
-        FolderDataComOpenexchangeCalendarExtendedProperties extendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
-        FolderDataComOpenexchangeCalendarExtendedPropertiesColor color = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
+        FolderCalendarExtendedProperties extendedProperties = new FolderCalendarExtendedProperties();
+        FolderCalendarExtendedPropertiesColor color = new FolderCalendarExtendedPropertiesColor();
         color.setValue("blue");
         extendedProperties.setColor(color);
         folderData.setComOpenexchangeCalendarExtendedProperties(extendedProperties);
@@ -521,11 +521,11 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         FolderData folderData = folderManager.getFolder(newFolderId);
 
         folderData.setTitle("changed");
-        FolderDataComOpenexchangeCalendarExtendedProperties extendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
-        FolderDataComOpenexchangeCalendarExtendedPropertiesColor color = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
+        FolderCalendarExtendedProperties extendedProperties = new FolderCalendarExtendedProperties();
+        FolderCalendarExtendedPropertiesColor color = new FolderCalendarExtendedPropertiesColor();
         color.setValue("blue");
         extendedProperties.setColor(color);
-        FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
+        FolderCalendarExtendedPropertiesDescription description = new FolderCalendarExtendedPropertiesDescription();
         String updatedDescription = "Keine Lust auf description";
         description.setValue(updatedDescription);
         extendedProperties.setDescription(description);
@@ -554,7 +554,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         FolderData folderData = folderManager.getFolder(newFolderId);
         folderData.getComOpenexchangeCalendarConfig().setRefreshInterval(I(100000));
-        FolderDataComOpenexchangeCalendarExtendedPropertiesColor folderDataComOpenexchangeCalendarExtendedPropertiesColor = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
+        FolderCalendarExtendedPropertiesColor folderDataComOpenexchangeCalendarExtendedPropertiesColor = new FolderCalendarExtendedPropertiesColor();
         folderDataComOpenexchangeCalendarExtendedPropertiesColor.setValue("blue");
         folderData.getComOpenexchangeCalendarExtendedProperties().setColor(folderDataComOpenexchangeCalendarExtendedPropertiesColor);
 
@@ -632,7 +632,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         folder.setTitle(null);
@@ -662,7 +662,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         folder.setTitle(null);
@@ -691,7 +691,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         folder.setTitle(null);
@@ -709,7 +709,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         folder.setTitle(null);
@@ -733,7 +733,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.FEED_WITH_SERIES_AND_CHANGE_EXCEPTION, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         folder.setTitle(null);
@@ -769,7 +769,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.FEED_WITH_SERIES_AND_CHANGE_EXCEPTION, HttpStatus.SC_OK);
 
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
         folder.setTitle(null);
@@ -1164,7 +1164,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     private String createDefaultAccount(String externalUri) throws ApiException {
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);
 
@@ -1174,7 +1174,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         return createAccount(body);
     }
 
-    private NewFolderBodyFolder createFolder(String externalUri, FolderDataComOpenexchangeCalendarConfig config) {
+    private NewFolderBodyFolder createFolder(String externalUri, FolderCalendarConfig config) {
         config.setEnabled(Boolean.TRUE);
         config.setUri(externalUri);
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
@@ -1183,7 +1183,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         folder.setSubscribed(Boolean.TRUE);
         folder.setTitle("testFolder_" + System.nanoTime());
         folder.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
-        folder.setComOpenexchangeCalendarExtendedProperties(new FolderDataComOpenexchangeCalendarExtendedProperties());
+        folder.setComOpenexchangeCalendarExtendedProperties(new FolderCalendarExtendedProperties());
         return folder;
     }
 
