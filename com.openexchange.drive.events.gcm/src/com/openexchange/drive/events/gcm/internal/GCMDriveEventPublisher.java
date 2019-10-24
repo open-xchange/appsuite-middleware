@@ -140,7 +140,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             /*
              * process result
              */
-            LOG.debug("{}", result);
+            LOG.debug("{}", result != null ? result : "");
             processResult(subscriptionStore, event.getContextID(), subscription.getToken(), result);
         }
     }
