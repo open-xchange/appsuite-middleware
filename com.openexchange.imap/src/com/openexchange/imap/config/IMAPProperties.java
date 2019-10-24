@@ -1095,6 +1095,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 }
             }
 
+            if (failureExecutions == 0 || successExecutions == 0) {
+                // Division by zero
+                return Optional.empty();
+            }
+
             return Optional.of(new PrimaryFailsafeCircuitBreakerCommandExecutor(new Ratio(failures, failureExecutions), new Ratio(success, successExecutions), delayMillis));
         } // End of primary
 
