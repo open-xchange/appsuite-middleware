@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,72 +47,53 @@
  *
  */
 
-package com.openexchange.security.manager.configurationReader;
+package com.openexchange.ajax.drive.test;
 
-import java.io.File;
+import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.config.ConfigurationService;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.exception.OXException;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.modules.DriveApi;
 
 /**
- * {@link ConfigurationFileParser} Loads all of the configurations in the security-manager.list that
- * will require directory access
+ * {@link Bug67685Test}
  *
- * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
+ * @author <a href="mailto:anna.ottersbach@open-xchange.com">Anna Ottersbach</a>
  * @since v7.10.3
  */
-public class ConfigurationFileParser {
+public class Bug67685Test extends AbstractAPIClientSession {
 
-    private static final String SECURITY_FILE_SUFFIX = ".list";
-    private static final String SECURITY_FOLDER = "security";
-    private final ConfigurationService configService;
+    DriveApi api;
 
-    public ConfigurationFileParser(ConfigurationService configService) {
-        this.configService = configService;
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        api = new DriveApi(apiClient);
     }
 
-    /**
-     * Read the data from a file, add each valid line to list
-     *
-     * @param file  File to read
-     * @param list  List to store valid lines
-     */
-    private void parseFile (File file, ArrayList<String> list) {
-        String data = configService.getText(file.getName());
-        if (data != null) {
-            String[] lines = data.split("\n");
-            for (String line: lines) {
-                line = line.trim();
-                if (line.indexOf("#") != 0 && !line.isEmpty()) {
-                    list.add(line);
-                }
-            }
-        }
+    @Test
+    public void testDriveSubscribeActionGet_ModeInvalid_ErrorResponseWithoutException() throws OXException, IOException, JSONException, ApiException {
+        String sessionId = apiClient.getSession();
+        Integer folderId = I(getClient().getValues().getPrivateTaskFolder());
+
+        CommonResponse response = api.subscribePushEventsGetReq(sessionId, folderId.toString(), "gcm", "foobar", "invalid");
+        assertEquals(2, response.getErrorParams().size());
+        assertEquals("Invalid parameter \"mode\": invalid", response.getErrorStack().get(0));
     }
 
-    /**
-     * Read through the security directory and return List of configuration options
-     *
-     * @return List of configurations found in the files
-     * @throws IOException
-     */
-    public List<String> getConfigList () throws IOException {
-        File folder = configService.getDirectory(SECURITY_FOLDER);
-        ArrayList<String> list = new ArrayList<String> ();
-        if (null != folder && folder.exists() && folder.isDirectory()) {
-            File[] files = folder.listFiles();
-            if (null != files) {
-                for (File file : files) {
-                    if (file.getName().endsWith(SECURITY_FILE_SUFFIX)) {
-                        parseFile(file, list);
-                    }
-                }
-            }
-        }
-        return list;
+    @Test
+    public void testDriveSubscribeActionGet_ModeValid_ErrorResponse() throws OXException, IOException, JSONException, ApiException {
+        String sessionId = apiClient.getSession();
+        Integer folderId = I(getClient().getValues().getPrivateTaskFolder());
+
+        CommonResponse response = api.subscribePushEventsGetReq(sessionId, folderId.toString(), "gcm", "foobar", "default");
+        assertNull(response.getErrorId());
+        assertEquals(0, response.getErrorParams().size());
     }
-
-
-
 }

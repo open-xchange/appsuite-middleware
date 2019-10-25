@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.json.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUpload;
+import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.compose.Attachment.ContentDisposition;
@@ -92,6 +94,7 @@ public class SendCompositionSpaceAction extends AbstractMailComposeAction {
         UUID uuid = parseCompositionSpaceId(sId);
 
         // Check for optional body data
+        Optional<StreamedUploadFileIterator> optionalUploadedAttachments = Optional.empty();
         {
             // Determine upload quotas
             UploadLimitations uploadLimitations = getUploadLimitations(session);
@@ -104,11 +107,6 @@ public class SendCompositionSpaceAction extends AbstractMailComposeAction {
                 String disposition = upload.getFormField("contentDisposition");
                 if (null == disposition) {
                     disposition = ContentDisposition.ATTACHMENT.getId();
-                }
-
-                if (hasFileUploads) {
-                    // File upload available...
-                    compositionSpaceService.addAttachmentToCompositionSpace(uuid, upload.getUploadFiles(), disposition, session);
                 }
 
                 // Check for JSON data
@@ -125,11 +123,20 @@ public class SendCompositionSpaceAction extends AbstractMailComposeAction {
                     parseJSONMessage(jMessage, md);
                     compositionSpaceService.updateCompositionSpace(uuid, md, session);
                 }
+
+                if (hasFileUploads) {
+                    // File upload available...
+                    if (null != jMessage && jMessage.optBoolean("streamThrough", false)) {
+                        optionalUploadedAttachments = Optional.of(upload.getUploadFiles());
+                    } else {
+                        compositionSpaceService.addAttachmentToCompositionSpace(uuid, upload.getUploadFiles(), disposition, session);
+                    }
+                }
             }
         }
 
         List<OXException> warnings = new ArrayList<OXException>(4);
-        MailPath mailPath = compositionSpaceService.transportCompositionSpace(uuid, session.getUserSettingMail(), requestData, warnings, true, session);
+        MailPath mailPath = compositionSpaceService.transportCompositionSpace(uuid, optionalUploadedAttachments, session.getUserSettingMail(), requestData, warnings, true, session);
 
         AJAXRequestResult result;
         if (null == mailPath) {

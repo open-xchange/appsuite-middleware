@@ -47,72 +47,70 @@
  *
  */
 
-package com.openexchange.security.manager.configurationReader;
+package com.openexchange.mail.compose.impl;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.config.ConfigurationService;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.activation.DataSource;
+import com.openexchange.mail.compose.AttachmentDescription;
+
 
 /**
- * {@link ConfigurationFileParser} Loads all of the configurations in the security-manager.list that
- * will require directory access
+ * {@link AttachmentDescriptionDataSource} - The data source (for the JavaBeans Activation Framework) backed by an attachment.
  *
- * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
- * @since v7.10.3
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-public class ConfigurationFileParser {
+public class AttachmentDescriptionDataSource implements DataSource {
 
-    private static final String SECURITY_FILE_SUFFIX = ".list";
-    private static final String SECURITY_FOLDER = "security";
-    private final ConfigurationService configService;
+    private final AttachmentDescription attachmentDescription;
+    private final InputStream input;
+    private final String contentType;
 
-    public ConfigurationFileParser(ConfigurationService configService) {
-        this.configService = configService;
+    /**
+     * Initializes a new {@link AttachmentDescriptionDataSource}.
+     *
+     * @param attachmentDescription The attachment description
+     * @param input The attachment data
+     */
+    public AttachmentDescriptionDataSource(AttachmentDescription attachmentDescription, InputStream input) {
+        this(attachmentDescription, input, attachmentDescription.getMimeType());
     }
 
     /**
-     * Read the data from a file, add each valid line to list
+     * Initializes a new {@link AttachmentDescriptionDataSource} with an explicit MIME type.
      *
-     * @param file  File to read
-     * @param list  List to store valid lines
+     * @param attachment The attachment description
+     * @param input The attachment data
+     * @param contentType The MIME type
      */
-    private void parseFile (File file, ArrayList<String> list) {
-        String data = configService.getText(file.getName());
-        if (data != null) {
-            String[] lines = data.split("\n");
-            for (String line: lines) {
-                line = line.trim();
-                if (line.indexOf("#") != 0 && !line.isEmpty()) {
-                    list.add(line);
-                }
-            }
-        }
+    public AttachmentDescriptionDataSource(AttachmentDescription attachmentDescription, InputStream input, String contentType) {
+        super();
+        this.attachmentDescription = attachmentDescription;
+        this.input = input;
+        this.contentType = contentType;
     }
 
-    /**
-     * Read through the security directory and return List of configuration options
-     *
-     * @return List of configurations found in the files
-     * @throws IOException
-     */
-    public List<String> getConfigList () throws IOException {
-        File folder = configService.getDirectory(SECURITY_FOLDER);
-        ArrayList<String> list = new ArrayList<String> ();
-        if (null != folder && folder.exists() && folder.isDirectory()) {
-            File[] files = folder.listFiles();
-            if (null != files) {
-                for (File file : files) {
-                    if (file.getName().endsWith(SECURITY_FILE_SUFFIX)) {
-                        parseFile(file, list);
-                    }
-                }
-            }
-        }
-        return list;
+    @Override
+    public String getContentType() {
+        return contentType;
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return input;
     }
 
 
+    @Override
+    public String getName() {
+        return attachmentDescription.getName();
+    }
+
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        throw new IOException(this.getClass().getName() + ".getOutputStream() isn't implemented");
+    }
 
 }

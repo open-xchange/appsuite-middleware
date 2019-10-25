@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-10-16 15:37+0200\n"
+"PO-Revision-Date: 2019-10-24 14:29+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -689,7 +689,6 @@ msgid "%1$s would like you to change the appointment:"
 msgstr "%1$s möchte, dass Sie den Termin ändern:"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
-#, fuzzy
 msgid "%1$s has asked %2$s to change the appointment:"
 msgstr "%1$s hat %2$s gebeten, den Termin zu ändern:"
 
@@ -980,16 +979,15 @@ msgid "The appointment series was updated, beginning at %1$s."
 msgstr "Der Serientermin wurde ab %1$s aktualisiert."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:309
-#, fuzzy
 msgid "The appointment's recurrence rule has changed to: %1$s."
 msgstr "Die Wiederholungsregel des Termins wurde geändert in: %1$s."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:311
-#, fuzzy
 msgid ""
 "Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
-"Verschieben Sie den Termin. Ursprüngliches Datum: %1$s. Neues Datum: %2$s"
+"Verschieben Sie den Termin. Ursprünglich: Datum/Zeit: %1$s. Neu: Datum/Zeit: "
+"%2$s"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:313
 msgid "Resources"
@@ -3970,7 +3968,6 @@ msgstr "Die Zeichenkette konnte nicht in eine gültige URL aufgelöst werden."
 
 #. The prefix for the diagnostics file
 #: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/DataExportStrings.java:70
-#, fuzzy
 msgid "Diagnostics"
 msgstr "Diagnose"
 

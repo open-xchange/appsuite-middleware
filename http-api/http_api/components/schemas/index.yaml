@@ -34,6 +34,10 @@ FolderPermission:
   $ref: ./folders/FolderPermission.yaml
 FolderExtendedPermission:
   $ref: ./folders/FolderExtendedPermission.yaml
+FolderCalendarExtendedProperties:
+  $ref: ./folders/FolderCalendarExtendedProperties.yaml
+FolderCalendarConfig:
+  $ref: ./folders/FolderCalendarConfig.yaml
 FolderData:
   $ref: ./folders/FolderData.yaml
 FolderResponse:
@@ -781,3 +785,12 @@ InitResponse:
 # Module: System
 WhoAmIResponse:
   $ref: ./system/WhoAmIResponse.yaml
+TimeResponse:
+  $ref: ./system/TimeResponse.yaml
+PingResponse:
+  $ref: ./system/PingResponse.yaml
+# Module: chronos accounts
+CalendarAccountProbeExtendedProperties:
+  $ref: ./chronos-accounts/CalendarAccountProbeExtendedProperties.yaml
+CalendarAccountProbeConfig:
+  $ref: ./chronos-accounts/CalendarAccountProbeConfig.yaml

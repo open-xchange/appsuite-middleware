@@ -295,6 +295,29 @@ public class AdminParser extends CLIParser {
         this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
         return retval;
     }
+    
+    /**
+     * Adds an option at the given position
+     * 
+     * @param pos The position to insert the option
+     * @param longForm The long form
+     * @param longFormParameterDescription The long form description
+     * @param description The description
+     * @param needed Whether the option is needed or not
+     * @param hasarg Whether the option has arguments or not
+     * @return The {@link CLIOption}
+     */
+    private final CLIOption addOption(int pos, final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
+        if (hasarg) {
+            final CLIOption retval = this.addStringOption(longForm);
+            this.optinfolist.add(pos, new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description));
+            return retval;
+        }
+
+        final CLIOption retval = this.addBooleanOption(longForm);
+        this.optinfolist.add(pos, new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
+        return retval;
+    }
 
     /**
      * @param longForm
@@ -526,7 +549,7 @@ public class AdminParser extends CLIParser {
     }
 
     public final void setExtendedOptions() {
-        this.extendedoption = addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
+        this.extendedoption = addOption(1, OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
     }
 
     public final void printEnvUsage() {

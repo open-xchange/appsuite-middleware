@@ -71,9 +71,9 @@ import com.openexchange.ajax.proxy.MockRequestMethod;
 import com.openexchange.ajax.proxy.StartMockServerRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.FolderCalendarConfig;
+import com.openexchange.testing.httpclient.models.FolderCalendarExtendedProperties;
 import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedProperties;
 
 /**
  * {@link AbstractExternalProviderChronosTest}
@@ -208,8 +208,8 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
         assertNotNull("The calendar configuration is 'null'", actualFolderData.getComOpenexchangeCalendarConfig());
 
         ObjectMapper objectMapper = new ObjectMapper();
-        FolderDataComOpenexchangeCalendarConfig expectedConfig = objectMapper.readValue(config.toString(), FolderDataComOpenexchangeCalendarConfig.class);
-        FolderDataComOpenexchangeCalendarExtendedProperties expectedProperties = objectMapper.readValue(extProperties.toString(), FolderDataComOpenexchangeCalendarExtendedProperties.class);
+        FolderCalendarConfig expectedConfig = objectMapper.readValue(config.toString(), FolderCalendarConfig.class);
+        FolderCalendarExtendedProperties expectedProperties = objectMapper.readValue(extProperties.toString(), FolderCalendarExtendedProperties.class);
         assertEquals(expectedConfig, actualFolderData.getComOpenexchangeCalendarConfig());
         assertEquals(expectedProperties, actualFolderData.getComOpenexchangeCalendarExtendedProperties());
         return actualFolderData;

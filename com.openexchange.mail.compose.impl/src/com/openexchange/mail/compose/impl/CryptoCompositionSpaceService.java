@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -119,9 +120,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public MailPath transportCompositionSpace(UUID compositionSpaceId, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport, Session session) throws OXException {
+    public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData requestData, List<OXException> warnings, boolean deleteAfterTransport, Session session) throws OXException {
         try {
-            return delegate.transportCompositionSpace(compositionSpaceId, mailSettings, requestData, warnings, deleteAfterTransport, session);
+            return delegate.transportCompositionSpace(compositionSpaceId, optionalUploadedAttachments, mailSettings, requestData, warnings, deleteAfterTransport, session);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);

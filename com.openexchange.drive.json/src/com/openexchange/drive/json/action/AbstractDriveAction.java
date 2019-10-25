@@ -282,7 +282,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             try {
                 return Enums.parse(SubscriptionMode.class, mode);
             } catch (IllegalArgumentException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "mode");
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "mode", mode);
             }
         }
         return null;

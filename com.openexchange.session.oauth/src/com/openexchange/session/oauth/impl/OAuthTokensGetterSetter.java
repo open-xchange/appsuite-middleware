@@ -185,7 +185,7 @@ public class OAuthTokensGetterSetter {
             locked = true;
             op.perform();
         } finally {
-            accessControl.release(locked);
+            releaseAndClose(accessControl, locked);
         }
     }
 
@@ -195,7 +195,7 @@ public class OAuthTokensGetterSetter {
             try {
                 op.perform();
             } finally {
-                accessControl.release();
+                releaseAndClose(accessControl);
             }
         } else {
             throw new TimeoutException("Lock timeout exceeded");
@@ -210,7 +210,7 @@ public class OAuthTokensGetterSetter {
             locked = true;
             op.perform();
         } finally {
-            accessControl.release(locked);
+            releaseAndClose(accessControl, locked);
         }
     }
 
@@ -220,7 +220,7 @@ public class OAuthTokensGetterSetter {
             try {
                 return op.perform();
             } finally {
-                accessControl.release();
+                releaseAndClose(accessControl);
             }
         }
         throw new TimeoutException("Lock timeout exceeded");
@@ -234,7 +234,7 @@ public class OAuthTokensGetterSetter {
             locked = true;
             return op.perform();
         } finally {
-            accessControl.release(locked);
+            releaseAndClose(accessControl, locked);
         }
     }
 
@@ -244,7 +244,7 @@ public class OAuthTokensGetterSetter {
             try {
                 return op.perform();
             } finally {
-                accessControl.release();
+                releaseAndClose(accessControl);
             }
         }
 
@@ -257,11 +257,33 @@ public class OAuthTokensGetterSetter {
             try {
                 return op.perform();
             } finally {
-                accessControl.release();
+                releaseAndClose(accessControl);
             }
         }
 
         throw new TimeoutException("Lock timeout exceeded");
+    }
+
+    private void releaseAndClose(AccessControl accessControl) {
+        if (null != accessControl) {
+            try {
+                accessControl.release();
+                accessControl.close();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    private void releaseAndClose(AccessControl accessControl, boolean aquired) {
+        if (null != accessControl) {
+            try {
+                accessControl.release(aquired);
+                accessControl.close();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
     }
 
 }

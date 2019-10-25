@@ -4912,8 +4912,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "string",
-                  "enum" : [ true ]
+                  "$ref" : "#/components/schemas/PingResponse"
                 }
               }
             }
@@ -7831,8 +7830,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "integer",
-                  "example" : 1349333576093
+                  "$ref" : "#/components/schemas/TimeResponse"
                 }
               }
             }
@@ -17554,6 +17552,100 @@
           }
         }
       },
+      "FolderCalendarExtendedProperties" : {
+        "type" : "object",
+        "description" : "Contains the extended properties for calendar folders",
+        "properties" : {
+          "description" : {
+            "type" : "object",
+            "description" : "The description of the folder",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          },
+          "usedForSync" : {
+            "type" : "object",
+            "description" : "Indicates whether the folder should be considered for synchronization with external clients or not.",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          },
+          "color" : {
+            "type" : "object",
+            "description" : "Indicates the color the folder should be displayed with",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          },
+          "scheduleTransp" : {
+            "type" : "object",
+            "description" : "Indicates whether the calendar object resources in a calendar collection will affect the owner's busy time information or not",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          },
+          "lastUpdate" : {
+            "type" : "object",
+            "description" : "indicates the timestamp of the last update of the contents for cached calendars",
+            "properties" : {
+              "value" : {
+                "type" : "integer",
+                "format" : "int64"
+              }
+            }
+          }
+        }
+      },
+      "FolderCalendarConfig" : {
+        "type" : "object",
+        "description" : "Holds arbitrary, provider-specific configuration data for calendar accounts.",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean",
+            "description" : "Defines if the account is enabled."
+          },
+          "color" : {
+            "type" : "string",
+            "description" : "Defines the account color."
+          },
+          "usedForSync" : {
+            "type" : "boolean",
+            "description" : "Defines if the account should be synced via CalDAV."
+          },
+          "uri" : {
+            "type" : "string",
+            "description" : "(ical provider only) The URI of the ICal feed that should be subscribed."
+          },
+          "refreshInterval" : {
+            "type" : "integer",
+            "description" : "(ical provider only) Defines the refresh interval used for the subscribed ICal feed."
+          },
+          "login" : {
+            "type" : "string",
+            "description" : "(ical provider only) Defines an optional login for the subscribed ICal feed."
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "(ical provider only) An optional password for the subscribed ICal feed."
+          },
+          "itemId" : {
+            "type" : "string",
+            "description" : "(schedjoules provider only) Unique identifier for schedjoules feed."
+          },
+          "locale" : {
+            "type" : "string",
+            "description" : "(schedjoules provider only) The locale of the subscribed schedjoules feed."
+          }
+        }
+      },
       "FolderData" : {
         "type" : "object",
         "properties" : {
@@ -17700,99 +17792,11 @@
               "$ref" : "#/components/schemas/FolderExtendedPermission"
             }
           },
-          "comOpenexchangeCalendarExtendedProperties" : {
-            "type" : "object",
-            "description" : "Contains the extended properties for calendar folders",
-            "properties" : {
-              "description" : {
-                "type" : "object",
-                "description" : "The description of the folder",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "usedForSync" : {
-                "type" : "object",
-                "description" : "Indicates whether the folder should be considered for synchronization with external clients or not.",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "color" : {
-                "type" : "object",
-                "description" : "Indicates the color the folder should be displayed with",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "scheduleTransp" : {
-                "type" : "object",
-                "description" : "Indicates whether the calendar object resources in a calendar collection will affect the owner's busy time information or not",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "lastUpdate" : {
-                "type" : "object",
-                "description" : "indicates the timestamp of the last update of the contents for cached calendars",
-                "properties" : {
-                  "value" : {
-                    "type" : "integer",
-                    "format" : "int64"
-                  }
-                }
-              }
-            }
+          "com.openexchange.calendar.extendedProperties" : {
+            "$ref" : "#/components/schemas/FolderCalendarExtendedProperties"
           },
-          "comOpenexchangeCalendarConfig" : {
-            "type" : "object",
-            "description" : "Holds arbitrary, provider-specific configuration data for calendar accounts.",
-            "properties" : {
-              "enabled" : {
-                "type" : "boolean",
-                "description" : "Defines if the account is enabled."
-              },
-              "color" : {
-                "type" : "string",
-                "description" : "Defines the account color."
-              },
-              "usedForSync" : {
-                "type" : "boolean",
-                "description" : "Defines if the account should be synced via CalDAV."
-              },
-              "uri" : {
-                "type" : "string",
-                "description" : "(ical provider only) The URI of the ICal feed that should be subscribed."
-              },
-              "refreshInterval" : {
-                "type" : "integer",
-                "description" : "(ical provider only) Defines the refresh interval used for the subscribed ICal feed."
-              },
-              "login" : {
-                "type" : "string",
-                "description" : "(ical provider only) Defines an optional login for the subscribed ICal feed."
-              },
-              "password" : {
-                "type" : "string",
-                "description" : "(ical provider only) An optional password for the subscribed ICal feed."
-              },
-              "itemId" : {
-                "type" : "string",
-                "description" : "(schedjoules provider only) Unique identifier for schedjoules feed."
-              },
-              "locale" : {
-                "type" : "string",
-                "description" : "(schedjoules provider only) The locale of the subscribed schedjoules feed."
-              }
-            }
+          "com.openexchange.calendar.config" : {
+            "$ref" : "#/components/schemas/FolderCalendarConfig"
           },
           "com.openexchange.calendar.provider" : {
             "type" : "string",
@@ -18026,99 +18030,11 @@
                   "$ref" : "#/components/schemas/FolderExtendedPermission"
                 }
               },
-              "comOpenexchangeCalendarExtendedProperties" : {
-                "type" : "object",
-                "description" : "Contains the extended properties for calendar folders",
-                "properties" : {
-                  "description" : {
-                    "type" : "object",
-                    "description" : "The description of the folder",
-                    "properties" : {
-                      "value" : {
-                        "type" : "string"
-                      }
-                    }
-                  },
-                  "usedForSync" : {
-                    "type" : "object",
-                    "description" : "Indicates whether the folder should be considered for synchronization with external clients or not.",
-                    "properties" : {
-                      "value" : {
-                        "type" : "string"
-                      }
-                    }
-                  },
-                  "color" : {
-                    "type" : "object",
-                    "description" : "Indicates the color the folder should be displayed with",
-                    "properties" : {
-                      "value" : {
-                        "type" : "string"
-                      }
-                    }
-                  },
-                  "scheduleTransp" : {
-                    "type" : "object",
-                    "description" : "Indicates whether the calendar object resources in a calendar collection will affect the owner's busy time information or not",
-                    "properties" : {
-                      "value" : {
-                        "type" : "string"
-                      }
-                    }
-                  },
-                  "lastUpdate" : {
-                    "type" : "object",
-                    "description" : "indicates the timestamp of the last update of the contents for cached calendars",
-                    "properties" : {
-                      "value" : {
-                        "type" : "integer",
-                        "format" : "int64"
-                      }
-                    }
-                  }
-                }
+              "com.openexchange.calendar.extendedProperties" : {
+                "$ref" : "#/components/schemas/FolderCalendarExtendedProperties"
               },
-              "comOpenexchangeCalendarConfig" : {
-                "type" : "object",
-                "description" : "Holds arbitrary, provider-specific configuration data for calendar accounts.",
-                "properties" : {
-                  "enabled" : {
-                    "type" : "boolean",
-                    "description" : "Defines if the account is enabled."
-                  },
-                  "color" : {
-                    "type" : "string",
-                    "description" : "Defines the account color."
-                  },
-                  "usedForSync" : {
-                    "type" : "boolean",
-                    "description" : "Defines if the account should be synced via CalDAV."
-                  },
-                  "uri" : {
-                    "type" : "string",
-                    "description" : "(ical provider only) The URI of the ICal feed that should be subscribed."
-                  },
-                  "refreshInterval" : {
-                    "type" : "integer",
-                    "description" : "(ical provider only) Defines the refresh interval used for the subscribed ICal feed."
-                  },
-                  "login" : {
-                    "type" : "string",
-                    "description" : "(ical provider only) Defines an optional login for the subscribed ICal feed."
-                  },
-                  "password" : {
-                    "type" : "string",
-                    "description" : "(ical provider only) An optional password for the subscribed ICal feed."
-                  },
-                  "itemId" : {
-                    "type" : "string",
-                    "description" : "(schedjoules provider only) Unique identifier for schedjoules feed."
-                  },
-                  "locale" : {
-                    "type" : "string",
-                    "description" : "(schedjoules provider only) The locale of the subscribed schedjoules feed."
-                  }
-                }
+              "com.openexchange.calendar.config" : {
+                "$ref" : "#/components/schemas/FolderCalendarConfig"
               },
               "com.openexchange.calendar.provider" : {
                 "type" : "string",
@@ -23089,69 +23005,11 @@
       "CalendarAccountProbeData" : {
         "type" : "object",
         "properties" : {
-          "comOpenexchangeCalendarExtendedProperties" : {
-            "type" : "object",
-            "description" : "Contains the extended properties for calendar folders",
-            "properties" : {
-              "description" : {
-                "type" : "object",
-                "description" : "The description of the folder",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "usedForSync" : {
-                "type" : "object",
-                "description" : "Indicates whether the folder should be considered for synchronization with external clients or not.",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "color" : {
-                "type" : "object",
-                "description" : "Indicates the color the folder should be displayed with",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              "scheduleTransp" : {
-                "type" : "object",
-                "description" : "Indicates whether the calendar object resources in a calendar collection will affect the owner's busy time information or not",
-                "properties" : {
-                  "value" : {
-                    "type" : "string"
-                  }
-                }
-              }
-            }
+          "com.openexchange.calendar.extendedProperties" : {
+            "$ref" : "#/components/schemas/CalendarAccountProbeExtendedProperties"
           },
-          "comOpenexchangeCalendarConfig" : {
-            "type" : "object",
-            "description" : "Holds arbitrary, provider-specific configuration data for calendar accounts.",
-            "properties" : {
-              "uri" : {
-                "type" : "string",
-                "description" : "(ical provider only) The URI of the ICal feed that should be subscribed."
-              },
-              "refreshInterval" : {
-                "type" : "integer",
-                "description" : "(ical provider only) Defines the refresh interval used for the subscribed ICal feed."
-              },
-              "login" : {
-                "type" : "string",
-                "description" : "(ical provider only) Defines an optional login for the subscribed ICal feed."
-              },
-              "password" : {
-                "type" : "string",
-                "description" : "(ical provider only) An optional password for the subscribed ICal feed."
-              }
-            }
+          "com.openexchange.calendar.config" : {
+            "$ref" : "#/components/schemas/CalendarAccountProbeConfig"
           },
           "com.openexchange.calendar.provider" : {
             "type" : "string",
@@ -37034,33 +36892,250 @@
       "WhoAmIResponse" : {
         "type" : "object",
         "properties" : {
-          "random" : {
-            "type" : "string",
-            "description" : "The random token"
+          "data" : {
+            "type" : "object",
+            "properties" : {
+              "random" : {
+                "type" : "string",
+                "description" : "The random token"
+              },
+              "session" : {
+                "type" : "string",
+                "description" : "The session identifier"
+              },
+              "user" : {
+                "type" : "string",
+                "description" : "The user"
+              },
+              "user_id" : {
+                "type" : "string",
+                "description" : "The user identifier"
+              },
+              "context_id" : {
+                "type" : "string",
+                "description" : "The context identifier"
+              },
+              "requires_multifactor" : {
+                "type" : "boolean",
+                "description" : "An value indicating whether multifactor has been enabled or not"
+              },
+              "locale" : {
+                "type" : "string",
+                "description" : "The locale of the user"
+              }
+            }
           },
-          "session" : {
+          "error" : {
             "type" : "string",
-            "description" : "The session identifier"
+            "description" : "The translated error message. Present in case of errors."
           },
-          "user" : {
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
             "type" : "string",
-            "description" : "The user"
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
           },
-          "user_id" : {
+          "error_desc" : {
             "type" : "string",
-            "description" : "The user identifer"
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
           },
-          "context_id" : {
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
             "type" : "string",
-            "description" : "The context identifer"
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
           },
-          "requires_multifactor" : {
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "TimeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The system time of the node as long"
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "PingResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
             "type" : "boolean",
-            "description" : "An value indicating whether multifactor has been enabled or not"
+            "description" : true
           },
-          "locale" : {
+          "error" : {
             "type" : "string",
-            "description" : "The locale of the user"
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "CalendarAccountProbeExtendedProperties" : {
+        "type" : "object",
+        "description" : "Contains the extended properties for calendar folders",
+        "properties" : {
+          "description" : {
+            "type" : "object",
+            "description" : "The description of the folder",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          },
+          "usedForSync" : {
+            "type" : "object",
+            "description" : "Indicates whether the folder should be considered for synchronization with external clients or not.",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          },
+          "color" : {
+            "type" : "object",
+            "description" : "Indicates the color the folder should be displayed with",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          },
+          "scheduleTransp" : {
+            "type" : "object",
+            "description" : "Indicates whether the calendar object resources in a calendar collection will affect the owner's busy time information or not",
+            "properties" : {
+              "value" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      },
+      "CalendarAccountProbeConfig" : {
+        "type" : "object",
+        "description" : "Holds arbitrary, provider-specific configuration data for calendar accounts.",
+        "properties" : {
+          "uri" : {
+            "type" : "string",
+            "description" : "(ical provider only) The URI of the ICal feed that should be subscribed."
+          },
+          "refreshInterval" : {
+            "type" : "integer",
+            "description" : "(ical provider only) Defines the refresh interval used for the subscribed ICal feed."
+          },
+          "login" : {
+            "type" : "string",
+            "description" : "(ical provider only) Defines an optional login for the subscribed ICal feed."
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "(ical provider only) An optional password for the subscribed ICal feed."
           }
         }
       }
