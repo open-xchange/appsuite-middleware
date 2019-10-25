@@ -82,7 +82,7 @@ public class ConfigurationReader {
      * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
      * @since v7.10.3
      */
-    private class SecurityAddition {
+    private static class SecurityAddition {
         private final String path;
         private final boolean file;
         private final Allow allow;
