@@ -274,32 +274,34 @@ public final class HtmlWhitelistFilter {
         final OutputDocument outputDocument = new OutputDocument(source);
         final List<Tag> tags = source.getAllTags();
         int pos = 0;
-        for (final Tag tag : tags) {
-            if (processTag(tag, outputDocument, dropExternalImages)) {
-                tag.setUserData(VALID_MARKER);
-                // Handle content of an allowed tag
-                if (HTMLElementName.STYLE == tag.getName()) {
-                    reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
-                } else {
-                    reencodeTextSegment(source, outputDocument, pos, tag.getBegin(), formatWhiteSpace);
-                }
-            } else {
-                if (!stripInvalidElements) {
-                    continue; // element will be encoded along with surrounding text
-                }
-                // Handle content of a forbidden tag
-                outputDocument.remove(tag);
-                if (HTMLElementName.STYLE == tag.getName()) {
-                    reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
-                } else {
-                    if (!body || isRemoveWholeTag(tag)) {
-                        removeTextSegment(source, outputDocument, pos, tag.getBegin());
-                    } else { // Within body: retain content
+        if (null != tags) {
+            for (final Tag tag : tags) {
+                if (processTag(tag, outputDocument, dropExternalImages)) {
+                    tag.setUserData(VALID_MARKER);
+                    // Handle content of an allowed tag
+                    if (HTMLElementName.STYLE == tag.getName()) {
+                        reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
+                    } else {
                         reencodeTextSegment(source, outputDocument, pos, tag.getBegin(), formatWhiteSpace);
                     }
+                } else {
+                    if (!stripInvalidElements) {
+                        continue; // element will be encoded along with surrounding text
+                    }
+                    // Handle content of a forbidden tag
+                    outputDocument.remove(tag);
+                    if (HTMLElementName.STYLE == tag.getName()) {
+                        reencodeCSSTextSegment(source, outputDocument, pos, tag.getBegin(), dropExternalImages);
+                    } else {
+                        if (!body || isRemoveWholeTag(tag)) {
+                            removeTextSegment(source, outputDocument, pos, tag.getBegin());
+                        } else { // Within body: retain content
+                            reencodeTextSegment(source, outputDocument, pos, tag.getBegin(), formatWhiteSpace);
+                        }
+                    }
                 }
+                pos = tag.getEnd();
             }
-            pos = tag.getEnd();
         }
         reencodeTextSegment(source, outputDocument, pos, source.getEnd(), formatWhiteSpace);
         return outputDocument.toString();
