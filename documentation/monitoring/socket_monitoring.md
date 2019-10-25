@@ -105,31 +105,24 @@ Additionally, the tracing and traffic socket listeners allows to enable a dedica
 
 # Socket Logging
 
-Since 7.10.3, the OX middleware is offering to administrators the ability to log all incoming and outgoing socket traffic for debugging purposes. The socket logging is based on bundle names, meaning that it can be activated for a specific bundle, e.g. for `com.openexchange.oauth`. To enable socket logging, simply set the property ``com.openexchange.monitoring.sockets.traffic.logging.enabled`` to ``true``.
-
-To enable socket logging for one or more bundles, that are registered for socket logging (more on registering below), the desired bundle name needs to be added to the logback.xml with the TRACE level set. For example:
-
-```xml
-<logger name="com.openexchange.oauth" level="TRACE" />
-<logger name="com.openexchange.mailfilter" level="TRACE" />
-```
+Since 7.10.3, the OX middleware is offering to administrators the ability to log all incoming and outgoing socket traffic for debugging purposes. The socket logging is based on bundle names, meaning that it can be activated for a specific bundle, e.g. for `com.openexchange.oauth`. To enable socket logging, simply set the property ``com.openexchange.monitoring.sockets.traffic.logging.enabled`` to ``true``. To divert the traffic logging to a separate file use the property  `com.openexchange.monitoring.sockets.traffic.file.logging.fileLocation`.
 
 To register or unregister a bundle for/from socket logging during operation, use the `socketLogging` command line tool. For example:
 
 ```bash
-$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -r -n com.openexchange.rss
+$ /opt/open-xchange/sbin/socketLogging -A oxadminmaster -P secret -r -n com.openexchange.rss
 ```
 
 Registers the specified bundle to the socket logging registry.
 
 ```bash
-$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -u -n com.openexchange.rss
+$ /opt/open-xchange/sbin/socketLogging -A oxadminmaster -P secret -u -n com.openexchange.rss
 ```
 
 Unregisters the specified bundle to the socket logging registry.
 
 ```bash
-$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -l
+$ /opt/open-xchange/sbin/socketLogging -A oxadminmaster -P secret -l
 ```
 
 Lists all registered bundles for which socket logging is enabled.
