@@ -636,7 +636,22 @@
           }
         },
         "requestBody" : {
-          "$ref" : "#/components/requestBodies/postAttachments"
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "postAttachmentsBody",
+                "properties" : {
+                  "file" : {
+                    "description" : "The file to add",
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
         }
       }
     },
@@ -8710,7 +8725,22 @@
           }
         },
         "requestBody" : {
-          "$ref" : "#/components/requestBodies/postAttachments"
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "postAttachmentsBody",
+                "properties" : {
+                  "file" : {
+                    "description" : "The file to add",
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
         }
       },
       "get" : {
@@ -31982,18 +32012,6 @@
             "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
           }
         }
-      },
-      "PostAttachmentsData" : {
-        "type" : "object",
-        "title" : "postAttachmentsBody",
-        "properties" : {
-          "file" : {
-            "description" : "The file to add",
-            "type" : "string",
-            "format" : "binary"
-          }
-        },
-        "required" : [ "file" ]
       },
       "DataExportTask" : {
         "type" : "object",

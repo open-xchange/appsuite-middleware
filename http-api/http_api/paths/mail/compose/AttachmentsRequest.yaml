@@ -24,4 +24,15 @@
       '401':
         description: Not authorized
     requestBody:
-      $ref: '#/components/requestBodies/postAttachments'
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            title: postAttachmentsBody
+            properties:
+              file:
+                description: The file to add
+                type: string
+                format: binary
+            required:
+              - file

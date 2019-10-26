@@ -26,17 +26,6 @@ properties:
       file: sockets.properties
       packageName: open-xchange-core
       tags: ["Socket_Monitoring"]
-    - key: com.openexchange.monitoring.sockets.traffic.enabled
-      description: |
-        This property enables/disables socket traffic listener.
-      defaultValue: false
-      version: 7.10.3
-      reloadable: true
-      configcascadeAware: false
-      related: 
-      file: sockets.properties
-      packageName: open-xchange-core
-      tags: ["Socket_Monitoring"]
     - key: com.openexchange.monitoring.sockets.tracing.numberOfSamplesPerSocket
       description: |
         Specifies how many samples are allowed to be tracked per socket in a LIFO (stack) manner.

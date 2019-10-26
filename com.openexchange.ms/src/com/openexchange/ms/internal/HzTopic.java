@@ -144,6 +144,9 @@ public final class HzTopic<E> extends AbstractHzTopic<E> {
         @Override
         public void onMessage(final com.hazelcast.core.Message<Map<String, Object>> message) {
             final Map<String, Object> messageData = message.getMessageObject();
+            if (null == messageData) {
+                return;
+            }
             if (messageData.containsKey(HzDataUtility.MULTIPLE_MARKER)) {
                 final String name = message.getSource().toString();
                 for (final Entry<String, Object> entry : messageData.entrySet()) {

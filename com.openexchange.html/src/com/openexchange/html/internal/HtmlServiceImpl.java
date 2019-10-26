@@ -1775,11 +1775,13 @@ public final class HtmlServiceImpl implements HtmlService {
                     // throw new OXException(); //TODO: set exceptioncode
                 } else {
                     final byte[] responseBody = get.getResponseBody();
-                    try {
-                        final String charSet = get.getResponseCharSet();
-                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
-                    } catch (UnsupportedCharsetException e) {
-                        css.append(new String(responseBody, Charsets.ISO_8859_1));
+                    if (null != responseBody && responseBody.length > 0) {
+                        try {
+                            final String charSet = get.getResponseCharSet();
+                            css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                        } catch (UnsupportedCharsetException e) {
+                            css.append(new String(responseBody, Charsets.ISO_8859_1));
+                        }
                     }
                 }
             } catch (HttpException e) {

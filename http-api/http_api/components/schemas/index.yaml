@@ -529,8 +529,6 @@ MailComposeSendResponse:
   $ref: ./mailcompose/SendResponse.yaml
 MailComposeSaveResponse:
   $ref: ./mailcompose/SaveResponse.yaml
-PostAttachmentsData:
-  $ref: ./mailcompose/PostAttachmentsData.yaml
 # Module: dataexport
 DataExportTask:
   $ref: ./dataexport/DataExportTask.yaml

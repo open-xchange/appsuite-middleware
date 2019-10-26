@@ -79,12 +79,14 @@ public class PortableHzMessageListener<P extends Portable> implements com.hazelc
     @Override
     public void onMessage(com.hazelcast.core.Message<PortableMessage<P>> message) {
         PortableMessage<P> messageData = message.getMessageObject();
-        List<P> messagePayload = messageData.getMessagePayload();
-        if (null != messagePayload && 0 < messagePayload.size()) {
-            String name = message.getSource().toString();
-            String senderID = messageData.getSenderID();
-            for (P payload : messagePayload) {
-                listener.onMessage(new Message<P>(name, senderID, payload, !this.senderID.equals(senderID)));
+        if (null != messageData) {
+            List<P> messagePayload = messageData.getMessagePayload();
+            if (null != messagePayload && 0 < messagePayload.size()) {
+                String name = message.getSource().toString();
+                String senderID = messageData.getSenderID();
+                for (P payload : messagePayload) {
+                    listener.onMessage(new Message<P>(name, senderID, payload, !this.senderID.equals(senderID)));
+                }
             }
         }
     }

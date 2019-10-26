@@ -3784,20 +3784,20 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final class FailedAuthInfo {
         final int count;
-        final long start;
+        final long date;
         final String url;
 
-        FailedAuthInfo(int count, long start, String url) {
+        FailedAuthInfo(int count, long date, String url) {
             super();
             this.count = count;
             this.url = url;
-            this.start = 0 == start ? System.currentTimeMillis() : start;
+            this.date = 0 == date ? System.currentTimeMillis() : date;
         }
 
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder(32);
-            builder.append("[count=").append(count).append(", start=").append(start).append(", ");
+            builder.append("[count=").append(count).append(", date=").append(date).append(", ");
             if (url != null) {
                 builder.append("url=").append(url);
             }
@@ -3823,20 +3823,44 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
 
-        String def = "30m";
+        long def = 1800000L; // 30 minutes
         ConfigView view = viewFactory.getView(userId, contextId);
         ComposedConfigProperty<String> property = view.property("com.openexchange.mailaccount.failedAuth.span", String.class);
 
         if (false == property.isDefined()) {
-            return ConfigTools.parseTimespan(def);
+            return def;
         }
 
         String span = property.get();
         if (Strings.isEmpty(span)) {
-            return ConfigTools.parseTimespan(def);
+            return def;
         }
 
-        return ConfigTools.parseTimespan(span.trim());
+        long parsedTimespan = ConfigTools.parseTimespan(span.trim());
+        return parsedTimespan < 0 ? def : parsedTimespan;
+    }
+
+    private static long getFailedAuthAggregationTimeSpan(int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        long def = 3000L; // 3 seconds
+        ConfigView view = viewFactory.getView(userId, contextId);
+        ComposedConfigProperty<String> property = view.property("com.openexchange.mailaccount.failedAuth.aggregationSpan", String.class);
+
+        if (false == property.isDefined()) {
+            return def;
+        }
+
+        String span = property.get();
+        if (Strings.isEmpty(span)) {
+            return def;
+        }
+
+        long parsedTimespan = ConfigTools.parseTimespan(span.trim());
+        return parsedTimespan < 0 ? def : parsedTimespan;
     }
 
     private boolean disableAccount(boolean mailAccess, int accountId, int userId, int contextId, Connection con) throws OXException {
@@ -3930,7 +3954,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = null;
             stmt = null;
 
-            boolean lastCountExpired = (System.currentTimeMillis() - failedAuthInfo.start) > getFailedAuthTimeSpan(userId, contextId);
+            boolean lastCountExpired = (System.currentTimeMillis() - failedAuthInfo.date) > getFailedAuthTimeSpan(userId, contextId);
             if (lastCountExpired) {
                 // Reset
                 boolean resetted = incrementOrResetAccount(mailAccess, true, failedAuthInfo.count, accountId, userId, contextId, con);
@@ -3939,6 +3963,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     return false;
                 }
             } else {
+                // Aggregatable?
+                boolean aggregatable = (System.currentTimeMillis() - failedAuthInfo.date) <= getFailedAuthAggregationTimeSpan(userId, contextId);
+                if (aggregatable) {
+                    // A subsequent login attempt within a short period of time. Let it collapse into previous increment.
+                    if (null == optReason) {
+                        LOG.debug("Aggregated failed auth attempt into failed auth count of {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId));
+                    } else {
+                        LOG.debug("Aggregated failed auth attempt into failed auth count of {} for {} account {} ({}) of user {} in context {}", I(failedAuthInfo.count), mailAccess ? "mail" : "transport", I(accountId), failedAuthInfo.url, I(userId), I(contextId), optReason);
+                    }
+                    return false;
+                }
+
                 if (failedAuthInfo.count + 1 > getFailedAuthThreshold(userId, contextId)) {
                     // Exceeded...
                     boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
