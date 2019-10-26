@@ -49,24 +49,49 @@
 
 package com.openexchange.ajax.mailcompose;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static com.openexchange.java.Autoboxing.I;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import java.util.Collections;
+import org.junit.Test;
+import com.openexchange.testing.httpclient.models.Attachment;
+import com.openexchange.testing.httpclient.models.ComposeBody;
+import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
+import com.openexchange.testing.httpclient.models.MailComposeResponse;
 
 /**
- * {@link MailComposeTestSuite}
+ * {@link Bug67701Test}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.10.2
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    CompositionSpaceTest.class,
-    AttachmentsTest.class,
-    Bug67701Test.class
-    // @formatter:on
-})
-public class MailComposeTestSuite {
+public class Bug67701Test extends AbstractMailComposeTest {
+    
+    
+    /**
+     * Initializes a new {@link Bug67701Test}.
+     */
+    public Bug67701Test() {
+        super("bug67701.eml");
+    }
+    
+    
+    @Test
+    public void testAttachmentForwarded() throws Exception {
+        ComposeBody body = new ComposeBody();
+        body.setFolderId(mailWithAttachment.getFolderId());
+        body.setId(mailWithAttachment.getId());
+        MailComposeResponse reply = api.postMailCompose(getSessionId(), "FORWARD", null, Collections.singletonList(body));
+        check(reply);
+        MailComposeMessageModel data = reply.getData();
+        compositionSpaceIds.add(data.getId());
+
+        MailComposeResponse response = api.getMailComposeById(getSessionId(), data.getId());
+        check(response);
+        assertThat(I(response.getData().getAttachments().size()), is(I(1)));
+        Attachment attach = response.getData().getAttachments().get(0);
+        assertThat(attach.getMimeType(), is("application/pdf"));
+    }
+    
 
 }

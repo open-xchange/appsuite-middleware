@@ -107,7 +107,25 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
     protected String folderId;
     protected MailDestinationData mailWithAttachment;
 
+    private final String fileName;
+    
     private static final String FOLDER = "default0%2FINBOX";
+    /**
+     * Initializes a new {@link AbstractMailComposeTest}.
+     */
+    public AbstractMailComposeTest() {
+        this(null);
+    }
+
+    /**
+     * Initializes a new {@link AbstractMailComposeTest}.
+     * 
+     * @param fileName The file name of the mail to upload
+     */
+    public AbstractMailComposeTest(String fileName) {
+        super();
+        this.fileName = fileName;
+    }
 
     @Override
     public void setUp() throws Exception {
@@ -117,7 +135,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         mailApi = new MailApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
         testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
-        mailWithAttachmentFile = new File(testMailDir, "bug29865.eml");
+        mailWithAttachmentFile = new File(testMailDir, null == fileName ? "bug29865.eml" : fileName);
 
         NewFolderBody body = new NewFolderBody();
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
