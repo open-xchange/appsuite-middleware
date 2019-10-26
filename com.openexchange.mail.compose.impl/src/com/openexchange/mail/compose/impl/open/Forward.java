@@ -229,9 +229,11 @@ public class Forward extends AbstractOpener {
                     state.message.setContentType(textForForward.isHtml() ? TEXT_HTML : TEXT_PLAIN);
                 }
             }
-
+            // Check if we got an empty message with just an attachment
+            boolean application = forwardedMail.getContentType().startsWith("application/");
+            
             // Check if original mail may contain attachments
-            if (multipart) {
+            if (multipart || application) {
                 // Add mail's non-inline parts
                 {
                     NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
