@@ -132,9 +132,9 @@ public class CryptoCompositionSpaceService extends AbstractCryptoAware implement
     }
 
     @Override
-    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, boolean deleteAfterSave, Session session) throws OXException {
+    public MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave, Session session) throws OXException {
         try {
-            return delegate.saveCompositionSpaceToDraftMail(compositionSpaceId, deleteAfterSave, session);
+            return delegate.saveCompositionSpaceToDraftMail(compositionSpaceId, optionalUploadedAttachments, deleteAfterSave, session);
         } catch (OXException e) {
             if (CompositionSpaceErrorCode.MISSING_KEY.equals(e)) {
                 autoDeleteSafe(compositionSpaceId, session, e);
