@@ -89,12 +89,13 @@ public interface CompositionSpaceService {
      * Saves given composition space to an appropriate draft mail.
      *
      * @param compositionSpaceId The identifier of the composition space to save as draft mail
+     * @param optionalUploadedAttachments The optional uploaded attachments that are streamed-through w/o being saved to attachment storage
      * @param deleteAfterSave Whether the composition space is supposed to be deleted after saving as draft mail
      * @param session The session providing user information
      * @return The path to the draft mail
      * @throws OXException If conversion fails
      */
-    MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, boolean deleteAfterSave, Session session) throws OXException;
+    MailPath saveCompositionSpaceToDraftMail(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, boolean deleteAfterSave, Session session) throws OXException;
 
     /**
      * Opens a new composition space for composing a message according to given parameters.
