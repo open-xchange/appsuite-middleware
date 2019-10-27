@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.mail.MessagingException;
+import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
@@ -75,6 +76,7 @@ import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
@@ -229,11 +231,9 @@ public class Forward extends AbstractOpener {
                     state.message.setContentType(textForForward.isHtml() ? TEXT_HTML : TEXT_PLAIN);
                 }
             }
-            // Check if we got an empty message with just an attachment
-            boolean application = forwardedMail.getContentType().startsWith("application/");
-            
+
             // Check if original mail may contain attachments
-            if (multipart || application) {
+            if (multipart || considerAsFileAttachment(forwardedMail)) {
                 // Add mail's non-inline parts
                 {
                     NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
@@ -286,6 +286,21 @@ public class Forward extends AbstractOpener {
                 }
             }
         }
+    }
+
+    private static final String APPLICATION = "application/";
+
+    private boolean considerAsFileAttachment(MailPart mailPart) {
+        return isNonInline(mailPart) || mailPart.getContentDisposition().containsFilenameParameter() || mailPart.getHeader(MessageHeaders.HDR_CONTENT_ID) != null || mailPart.getContentType().startsWith(APPLICATION);
+    }
+
+    private boolean isNonInline(MailPart mailPart) {
+        return !isInline(mailPart);
+    }
+
+    private boolean isInline(MailPart mailPart) {
+        String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
+        return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (mailPart.getFileName() == null));
     }
 
 }
