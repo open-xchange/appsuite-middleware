@@ -4,5 +4,4 @@
 # Default is for read only.  Add RW to allow write
 # File instructs Security manager to only allow the one object, not directory or recursive
 
-# Drive client
 com.openexchange.geolocation.maxmind.databasePath
