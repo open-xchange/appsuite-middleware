@@ -198,6 +198,9 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
             schedulingHelper.trackCreation(splitResult.getKey());
         }
         Event updatedSeriesMaster = splitResult.getValue().getSeriesMaster();
+        if (null == updatedSeriesMaster) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to track update. Reason: Nothing was changed.");
+        }
         updatedSeriesMaster = updateEvent(updatedSeriesMaster, organizer);
         List<Event> updatedChangeExceptions = updateExceptions(updatedSeriesMaster, organizer);
         CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedSeriesMaster, updatedChangeExceptions);
