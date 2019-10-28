@@ -51,6 +51,7 @@ package com.openexchange.chronos;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.annotation.Nullable;
 
 /**
  * {@link CalendarObjectResource}
@@ -72,6 +73,7 @@ public interface CalendarObjectResource {
      * 
      * @return The organizer, or <code>null</code> if not set
      */
+    @Nullable
     Organizer getOrganizer();
     
     /**
@@ -86,6 +88,7 @@ public interface CalendarObjectResource {
      * 
      * @return The series master event, or <code>null</code> if not available
      */
+    @Nullable
     Event getSeriesMaster();
 
     /**
