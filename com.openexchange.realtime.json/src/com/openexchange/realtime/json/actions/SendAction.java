@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.json.actions;
 
+import static com.openexchange.tools.servlet.http.Tools.JSESSIONID_COOKIE;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -185,15 +186,15 @@ public class SendAction extends RTAction  {
 	        HttpSession httpSession = servletRequest.getSession();
 	        sessionid = httpSession.getId();
 		}
-        final String jsessionid = sessionid; 
-        
+        final String jsessionid = sessionid;
+
         //handle incoming messages
         List<Long> acknowledgements = new ArrayList<Long>(objects.size());
         protocolHandler.handleIncomingMessages(id, session, stateEntry, objects, acknowledgements, new StanzaProcessor() {
-			
+
 			@Override
 			public void process(Stanza stanza) {
-				 stanza.setChannelAttribute("JSESSIONID", jsessionid);
+				 stanza.setChannelAttribute(JSESSIONID_COOKIE, jsessionid);
 			}
 		});
 

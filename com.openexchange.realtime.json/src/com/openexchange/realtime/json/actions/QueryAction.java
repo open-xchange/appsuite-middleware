@@ -48,6 +48,7 @@
 
 package com.openexchange.realtime.json.actions;
 
+import static com.openexchange.tools.servlet.http.Tools.JSESSIONID_COOKIE;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -170,8 +171,9 @@ public class QueryAction extends RTAction {
             data = (JSONObject) request.getData();
         }
 
-        if (null == data)
+        if (null == data) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
 
         final StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, data);
 
@@ -180,7 +182,7 @@ public class QueryAction extends RTAction {
         if (servletRequest != null) {
 	        HttpSession httpSession = servletRequest.getSession();
 			String jsessionid = httpSession.getId();
-			stanza.setChannelAttribute("JSESSIONID", jsessionid);
+			stanza.setChannelAttribute(JSESSIONID_COOKIE, jsessionid);
 			stanza.setChannelAttribute("SESSION", session.getSessionID());
 		}
 

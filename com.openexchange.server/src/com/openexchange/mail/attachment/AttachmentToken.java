@@ -50,6 +50,7 @@
 package com.openexchange.mail.attachment;
 
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import static com.openexchange.tools.servlet.http.Tools.JSESSIONID_COOKIE;
 import static java.util.UUID.randomUUID;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.session.Session;
@@ -150,7 +151,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      */
     public AttachmentToken setAccessInfo(int accountId, Session session) {
         this.accountId = accountId;
-        this.jsessionId = (String) session.getParameter("JSESSIONID");
+        this.jsessionId = (String) session.getParameter(JSESSIONID_COOKIE);
         this.contextId = session.getContextId();
         this.userId = session.getUserId();
         this.sessionId = session.getSessionID();
