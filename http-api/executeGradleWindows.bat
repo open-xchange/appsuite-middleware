@@ -1,1 +1,1 @@
-CALL gradlew.bat clean resolve http_api_client:build rest_api_client:build copyClients
+CALL gradlew.bat clean deleteClientSrc resolve http_api_client:build rest_api_client:build copyClients
