@@ -59,6 +59,9 @@ GLOBIGNORE='*'
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
+%dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/security/geolocation_maxmind_binary.list
+%config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
 * Thu Oct 17 2019 Thorben Betten <thorben.betten@open-xchange.com>
