@@ -83,6 +83,10 @@ public class ICalImportExportManager {
     public static final String SERIES_IMPORT_ICS_SUMMARY = "TestSeries";
     public static final String SERIES_IMPORT_ICS_UID = "fbbd81e8-4a81-4092-bc9b-7e3a5cbb5861";
 
+    public static final String FLOATING_ICS = "MWB-2.ics";
+    public static final String FLOATING_ICS_SUMMARY = "Flight to Berlin-Tegel";
+    public static final String FLOATING_ICS_UID = "12345abcdef_CGNTXL";
+
     private final ExportApi exportApi;
     private final ImportApi importApi;
 

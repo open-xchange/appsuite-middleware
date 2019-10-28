@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,46 +49,65 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractImportExportTest;
+import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.InfoItemExport;
 
 /**
- * {@link ChronosBugsTestSuite}
+ * {@link MWB2Test}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug13447Test.class,
-    Bug13501Test.class,
-    Bug13505Test.class,
-    Bug13625Test.class,
-    Bug13788Test.class,
-    Bug13942Test.class,
-    Bug14357Test.class,
-    Bug14679Test.class,
-    Bug15074Test.class,
-    Bug15585Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class,
-    Bug66144Test.class,
-    MWB2Test.class
-    // @formatter:on
+public class MWB2Test extends AbstractImportExportTest {
 
-})
-public class ChronosBugsTestSuite {
+    @Test
+    public void testFloatingEvent() throws Exception {
+        /*
+        BEGIN:VCALENDAR
+        VERSION:2.0
+        METHOD:PUBLISH
+        PRODID:Data::ICal 0.23
+        BEGIN:VEVENT
+        CATEGORIES:Travel\, Flight
+        CLASS:PUBLIC
+        DESCRIPTION:From: Cologne-Bonn
+        DTEND:20191103T182500
+        DTSTAMP:20191021T140425Z
+        DTSTART:20191103T171500
+        LOCATION:From Cologne-Bonn
+        PRIORITY:5
+        SEQUENCE:0
+        SUMMARY:Flight to Berlin-Tegel
+        TRANSP:OPAQUE
+        UID:12345abcdef_CGNTXL
+        END:VEVENT
+        END:VCALENDAR
+         */
+        
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.FLOATING_ICS));
+        assertEquals(1, eventData.size());
 
+        EventData event = eventData.get(0);
+        assertNull("No timezone expected.", event.getStartDate().getTzid());
+        assertNull("No timezone expectedt.", event.getEndDate().getTzid());
+
+        List<InfoItemExport> itemList = new ArrayList<>();
+        addInfoItemExport(itemList, eventData.get(0).getFolder(), eventData.get(0).getId());
+
+        String iCalExport = importExportManager.exportICalBatchFile(defaultUserApi.getSession(), itemList);
+        assertNotNull(iCalExport);
+        assertEventData(eventData, iCalExport);
+
+        assertTrue("Missing correct dtstart", iCalExport.contains("DTSTART:20191103T171500\r\n"));
+        assertTrue("Missing correct dtend", iCalExport.contains("DTEND:20191103T182500\r\n"));
+    }
 }

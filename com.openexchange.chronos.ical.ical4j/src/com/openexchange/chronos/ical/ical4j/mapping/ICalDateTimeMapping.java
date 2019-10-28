@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -107,9 +108,20 @@ public abstract class ICalDateTimeMapping<T extends Component, U> extends Abstra
                 property.setDate(new net.fortuna.ical4j.model.Date(value.getTimestamp()));
                 property.setTimeZone(null);
             } else {
-                DateTime dateTime;
+                DateTime dateTime = null;
                 String timezoneID = null != value.getTimeZone() ? value.getTimeZone().getID() : null;
-                if (Strings.isNotEmpty(timezoneID) && false == "UTC".equals(timezoneID)) {
+                if (value.isFloating() || Strings.isEmpty(timezoneID)) {
+                    try {
+                        dateTime = new DateTime(value.toString());
+                    } catch (ParseException e) {
+                        addConversionWarning(warnings, propertyName, e.getMessage());
+                        dateTime = new DateTime(true);
+                        dateTime.setTime(value.getTimestamp());
+                    }
+                } else if (timezoneID.equals("UTC")) {
+                    dateTime = new DateTime(true);
+                    dateTime.setTime(value.getTimestamp());
+                } else {
                     TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
                     net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timezoneID);
                     if (null != timeZone) {
@@ -121,9 +133,6 @@ public abstract class ICalDateTimeMapping<T extends Component, U> extends Abstra
                         dateTime = new DateTime(true);
                         dateTime.setTime(value.getTimestamp());
                     }
-                } else {
-                    dateTime = new DateTime(true);
-                    dateTime.setTime(value.getTimestamp());
                 }
                 property.setDate(dateTime);
             }
