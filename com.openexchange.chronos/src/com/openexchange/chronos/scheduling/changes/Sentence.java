@@ -68,6 +68,7 @@ public interface Sentence {
      * @param locale The local to translate the sentence in
      * @param timeZone The time zone to use the sentence
      * @param regionalSettings The preferred regional settings, or <code>null</code> if not configured
+     * @return The message in a specific format, localized
      */
     String getMessage(String format, Locale locale, TimeZone timeZone, RegionalSettings regionalSettings);
 
