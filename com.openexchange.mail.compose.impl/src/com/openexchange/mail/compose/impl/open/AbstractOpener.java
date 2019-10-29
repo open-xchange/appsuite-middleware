@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractOpener}
+ * {@link AbstractOpener} - Abstract utility for opening a composition space for a certain purpose (reply, forward, edit, ...)
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
@@ -125,16 +125,16 @@ public abstract class AbstractOpener {
      *
      * @param session The session
      * @return The associated context
-     * @throws OXException If context xannot be returned
+     * @throws OXException If context cannot be returned
      */
     protected Context getContext(Session session) throws OXException {
         return session instanceof ServerSession ? ((ServerSession) session).getContext() : services.getService(ContextService.class).getContext(session.getContextId());
     }
 
     /**
-     * Converts given (internet) address to an {@link Address} instance
+     * Converts given Internet email address to an {@link Address} instance.
      *
-     * @param addr The address to convert
+     * @param addr The Internet email address to convert
      * @return The resulting {@code Address} instance
      */
     protected static Address toAddress(QuotedInternetAddress addr) {
@@ -142,9 +142,9 @@ public abstract class AbstractOpener {
     }
 
     /**
-     * Converts given (internet) address to an {@link Address} instance
+     * Converts given Internet email address to an {@link Address} instance.
      *
-     * @param addr The address to convert
+     * @param addr The Internet email address to convert
      * @return The resulting {@code Address} instance
      */
     protected static Address toAddress(InternetAddress addr) {
@@ -152,9 +152,9 @@ public abstract class AbstractOpener {
     }
 
     /**
-     * Converts given (internet) addresses to an {@link Address} instances
+     * Converts given Internet email addresses to {@link Address} instances.
      *
-     * @param addrs The addresses to convert
+     * @param addrs The Internet email addresses to convert
      * @return The resulting {@code Address} instances
      */
     protected static List<Address> toAddresses(InternetAddress[] addrs) {
