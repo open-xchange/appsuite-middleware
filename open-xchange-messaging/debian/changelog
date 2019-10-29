@@ -1,3 +1,9 @@
+open-xchange-messaging (7.10.2-15) stable; urgency=medium
+
+  * Build for patch 2019-10-28 (5461)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 22 Oct 2019 11:25:29 +0200
+
 open-xchange-messaging (7.10.2-14) stable; urgency=medium
 
   * Build for patch 2019-10-14 (5439)
