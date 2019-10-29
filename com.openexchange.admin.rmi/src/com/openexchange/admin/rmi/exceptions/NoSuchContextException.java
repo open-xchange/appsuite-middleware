@@ -57,16 +57,26 @@ package com.openexchange.admin.rmi.exceptions;
  */
 public class NoSuchContextException extends Exception {
 
-    /**
+    private static final String MSG_WITH_PARAM = "Context %d does not exist";
+    private static final String MSG = "Context does not exist";
+	/**
      * For serialization
      */
     private static final long serialVersionUID = 1991615694615324164L;
 
     /**
-     *
+     * 
      */
     public NoSuchContextException() {
-        super("Context does not exist");
+        super(MSG);
+    }
+    
+    
+    /**
+     * @param ctxId
+     */
+    public NoSuchContextException(int ctxId) {
+        super(String.format(MSG_WITH_PARAM, ctxId));
     }
 
     /**

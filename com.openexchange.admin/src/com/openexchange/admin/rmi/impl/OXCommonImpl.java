@@ -82,6 +82,19 @@ public abstract class OXCommonImpl {
         tool = OXToolStorageInterface.getInstance();
     }
 
+    /**
+     * Checks whether the given context exists or not
+     * 
+     * @param ctx The context to check
+     * @throws NoSuchContextException In case the context doesn't exist
+     * @throws StorageException In case of errors with the storage
+     */
+    protected void checkExistence(Context ctx) throws NoSuchContextException, StorageException {
+    	if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException(ctx.getId());
+        }
+    }
+    
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");

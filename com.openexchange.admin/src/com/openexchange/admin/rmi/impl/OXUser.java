@@ -394,7 +394,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final int user_id = user.getId().intValue();
             if (!tool.existsContext(ctx)) {
-                throw new NoSuchContextException();
+                throw new NoSuchContextException(ctx.getId());
             } else if (!tool.existsUser(ctx, user_id)) {
                 throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             } else if (!tool.existsStore(dstFilestore.getId().intValue())) {

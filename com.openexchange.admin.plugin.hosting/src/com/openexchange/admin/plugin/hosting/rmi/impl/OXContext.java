@@ -147,9 +147,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
                 return oxcox.listQuotas(ctx);
@@ -203,9 +201,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             LOGGER.debug("{} - {} - {}", ctx, modules, Long.valueOf(quota));
 
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 // Trigger plugin extensions
                 {
@@ -234,7 +230,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw convertException(e);
         }
     }
-
+    
     @Override
     public Set<String> getCapabilities(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if (null == ctx) {
@@ -250,9 +246,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException(e);
             }
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
                 return oxcox.getCapabilities(ctx);
@@ -300,9 +294,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             LOGGER.debug("{} - {} | {}", ctx, capasToAdd.toString(), capasToRemove.toString());
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 // Trigger plugin extensions
                 {
@@ -353,14 +345,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Set<String> loginMappings = null; // used for invalidating old login mappings in the cache
             try {
                 if (ctx.getName() == null) {
-                    if (!tool.existsContext(ctx)) {
-                        throw new NoSuchContextException();
-                    }
+                	checkExistence(ctx);
                 } else if (Strings.isEmpty(ctx.getName())) {
                     ctx.setName(null);
-                    if (!tool.existsContext(ctx)) {
-                        throw new NoSuchContextException();
-                    }
+                    checkExistence(ctx);
                 } else {
                     if (false == tool.checkContextName(ctx)) {
                         // Holds the same name
@@ -514,9 +502,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             LOGGER.debug(ctx.toString());
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 try {
                     if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
@@ -625,9 +611,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             LOGGER.debug("{} - {}", ctx, reason);
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
                 /*
                  * if (!tool.existsReason(reason_id)) {
                  * throw new NoSuchReasonException();
@@ -761,9 +745,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             LOGGER.debug(ctx.toString());
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 // Trigger plugin extensions
                 {
@@ -901,9 +883,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
                 LOGGER.debug(ctx.toString());
                 try {
-                    if (!tool.existsContext(ctx)) {
-                        throw new NoSuchContextException();
-                    }
+                	checkExistence(ctx);
                 } catch (NoSuchContextException e) {
                     LOGGER.error("", e);
                     throw e;
@@ -1152,9 +1132,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                  * throw new OXContextException(OXUtilException.NO_SUCH_REASON);
                  * }
                  */
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
                 if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
                     throw tool.generateDatabaseUpdateException(ctx.getId().intValue());
                 }
@@ -1228,9 +1206,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 } catch (NoSuchObjectException e) {
                     throw new NoSuchContextException(e);
                 }
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                } else if (!tool.existsStore(dst_filestore.getId().intValue())) {
+                checkExistence(ctx);
+                if (!tool.existsStore(dst_filestore.getId().intValue())) {
                     throw new NoSuchFilestoreException();
                 } else if (!tool.isContextEnabled(ctx)) {
                     throw new OXContextException("Unable to disable Context " + ctx.getIdAsString());
@@ -1414,9 +1391,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             LOGGER.debug("{} - {}", ctx, access);
 
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 // Trigger plugin extensions
                 {
@@ -1483,9 +1458,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             try {
 
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 UserModuleAccess accessAdmin = cache.getNamedAccessCombination(access_combination_name.trim(), true);
                 UserModuleAccess accessUser = cache.getNamedAccessCombination(access_combination_name.trim(), false);
@@ -1552,9 +1525,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             LOGGER.debug(ctx.toString());
 
-            if (!tool.existsContext(ctx)) {
-                throw new NoSuchContextException();
-            }
+            checkExistence(ctx);
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             // Trigger plugin extensions
@@ -1607,9 +1578,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             // Resolve admin user and get the module access from db and query cache for access combination name
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 // Trigger plugin extensions
                 {
@@ -1662,9 +1631,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             LOGGER.debug(ctx.toString());
 
             try {
-                if (!tool.existsContext(ctx)) {
-                    throw new NoSuchContextException();
-                }
+            	checkExistence(ctx);
 
                 // Trigger plugin extensions
                 {
@@ -1760,9 +1727,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
-            if (!tool.existsContext(ctx)) {
-                throw new NoSuchContextException();
-            }
+            checkExistence(ctx);
 
             return tool.getAdminForContext(ctx);
         } catch (RuntimeException e) {
