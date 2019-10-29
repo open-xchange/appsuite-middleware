@@ -393,6 +393,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             } catch (PluginException e) {
                 LOGGER.error("", e);
                 throw StorageException.wrapForRMI(e);
+            } catch (InvalidDataException e) {
+            	LOGGER.error("", e);
+            	throw e;
             }
             try {
                 final ContextStorage cs = ContextStorage.getInstance();
