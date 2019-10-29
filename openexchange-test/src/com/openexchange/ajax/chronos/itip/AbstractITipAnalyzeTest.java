@@ -193,14 +193,14 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
     public enum CustomConsumers {
         /** Validates that the response does contain all actions */
         ALL((Analysis t) -> {
-            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT) || t.getActions().contains(ActionsEnum.ACCEPT_AND_IGNORE_CONFLICTS));
             assertTrue("Missing action!", t.getActions().contains(ActionsEnum.TENTATIVE));
             assertTrue("Missing action!", t.getActions().contains(ActionsEnum.DECLINE));
             assertTrue("Missing action!", t.getActions().contains(ActionsEnum.UPDATE));
         }),
         /** Validates that the response does contain actions to set the users status */
         ACTIONS((Analysis t) -> {
-            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT));
+            assertTrue("Missing action!", t.getActions().contains(ActionsEnum.ACCEPT) || t.getActions().contains(ActionsEnum.ACCEPT_AND_IGNORE_CONFLICTS));
             assertTrue("Missing action!", t.getActions().contains(ActionsEnum.TENTATIVE));
             assertTrue("Missing action!", t.getActions().contains(ActionsEnum.DECLINE));
 
@@ -208,7 +208,7 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         }),
         /** Validates that the response does contain the UPDATE action */
         UPDATE((Analysis t) -> {
-            assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.ACCEPT));
+            assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.ACCEPT) || t.getActions().contains(ActionsEnum.ACCEPT_AND_IGNORE_CONFLICTS));
             assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.TENTATIVE));
             assertFalse("Unwanted action!", t.getActions().contains(ActionsEnum.DECLINE));
 
