@@ -286,6 +286,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * then apply the update for the splitted series master event after rolling back the related-to field, taking over a new recurrence rule as needed
              */
             Event updatedSeriesMaster = splitResult.getValue().getSeriesMaster();
+            if (null == updatedSeriesMaster) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to track update. Reason: Nothing was changed.");
+            }
             Event originalEvent = adjustUpdatedSeriesAfterSplit(originalSeriesMaster, updatedSeriesMaster);
             Event eventUpdate = adjustClientUpdateAfterSplit(originalSeriesMaster, updatedSeriesMaster, updatedEventData);
             return updateEvent(originalEvent, eventUpdate, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);

@@ -47,29 +47,67 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes;
+package com.openexchange.ajax.chronos.bugs;
 
-import java.util.Locale;
-import java.util.TimeZone;
-import com.openexchange.regional.RegionalSettings;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractImportExportTest;
+import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.InfoItemExport;
 
 /**
- * {@link Sentence}
+ * {@link MWB2Test}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.3
  */
-public interface Sentence {
+public class MWB2Test extends AbstractImportExportTest {
 
-    /**
-     * Get the message in a specific format
-     *
-     * @param format The format. For <code>null</code>, format <code>text</code> is assumed
-     * @param locale The local to translate the sentence in
-     * @param timeZone The time zone to use the sentence
-     * @param regionalSettings The preferred regional settings, or <code>null</code> if not configured
-     * @return The message in a specific format, localized
-     */
-    String getMessage(String format, Locale locale, TimeZone timeZone, RegionalSettings regionalSettings);
+    @Test
+    public void testFloatingEvent() throws Exception {
+        /*
+        BEGIN:VCALENDAR
+        VERSION:2.0
+        METHOD:PUBLISH
+        PRODID:Data::ICal 0.23
+        BEGIN:VEVENT
+        CATEGORIES:Travel\, Flight
+        CLASS:PUBLIC
+        DESCRIPTION:From: Cologne-Bonn
+        DTEND:20191103T182500
+        DTSTAMP:20191021T140425Z
+        DTSTART:20191103T171500
+        LOCATION:From Cologne-Bonn
+        PRIORITY:5
+        SEQUENCE:0
+        SUMMARY:Flight to Berlin-Tegel
+        TRANSP:OPAQUE
+        UID:12345abcdef_CGNTXL
+        END:VEVENT
+        END:VCALENDAR
+         */
+        
+        List<EventData> eventData = parseEventData(getImportResponse(ICalImportExportManager.FLOATING_ICS));
+        assertEquals(1, eventData.size());
 
+        EventData event = eventData.get(0);
+        assertNull("No timezone expected.", event.getStartDate().getTzid());
+        assertNull("No timezone expectedt.", event.getEndDate().getTzid());
+
+        List<InfoItemExport> itemList = new ArrayList<>();
+        addInfoItemExport(itemList, eventData.get(0).getFolder(), eventData.get(0).getId());
+
+        String iCalExport = importExportManager.exportICalBatchFile(defaultUserApi.getSession(), itemList);
+        assertNotNull(iCalExport);
+        assertEventData(eventData, iCalExport);
+
+        assertTrue("Missing correct dtstart", iCalExport.contains("DTSTART:20191103T171500\r\n"));
+        assertTrue("Missing correct dtend", iCalExport.contains("DTEND:20191103T182500\r\n"));
+    }
 }

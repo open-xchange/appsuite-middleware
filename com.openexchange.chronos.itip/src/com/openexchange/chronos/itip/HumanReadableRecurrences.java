@@ -151,7 +151,7 @@ public class HumanReadableRecurrences {
             return format(locale, HRRStrings.MONTHLY_2, parseCount(locale), parseDays(locale), Autoboxing.I(rrule.getInterval()));
         }
         List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
-        if (byMonthDay.size() > 1) {
+        if (null == byMonthDay || byMonthDay.size() > 1) {
             return no();
         }
         return format(locale, HRRStrings.MONTHLY_1, byMonthDay.get(0), Autoboxing.I(rrule.getInterval()));

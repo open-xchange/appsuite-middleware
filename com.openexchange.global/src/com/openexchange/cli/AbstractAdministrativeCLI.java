@@ -51,6 +51,7 @@ package com.openexchange.cli;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.java.Strings;
 
 /**
@@ -77,6 +78,7 @@ public abstract class AbstractAdministrativeCLI<R, C, A> extends AbstractCLI<R, 
      * @return <code>null</code> if it's configuration based and shall be affected by the <code>MASTER_AUTHENTICATION_DISABLED</code> property,
      *         <code>true</code> for mandatory administrative permission which shall override the previous mentioned property; otherwise <code>false</code>
      */
+    @Nullable
     protected Boolean requiresAdministrativePermission() {
         return null;
     }

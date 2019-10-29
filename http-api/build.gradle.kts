@@ -40,6 +40,11 @@ tasks.register("copySources", Copy::class){
     into("../openexchange-test/lib/source")
 }
 
+tasks.register("deleteClientSrc", Delete::class){
+    delete("client-gen/out/http_api_client/src")
+    delete("client-gen/out/rest_api_client/src")
+}
+
 
 allprojects {
     group = "com.openexchange.appsuite.mw"

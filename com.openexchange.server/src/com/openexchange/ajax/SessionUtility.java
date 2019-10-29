@@ -897,7 +897,7 @@ public final class SessionUtility {
      */
     public static void rememberSession(final HttpServletRequest req, final ServerSession session) {
         req.setAttribute(SESSION_KEY, session);
-        session.setParameter("JSESSIONID", req.getSession().getId());
+        session.setParameter(Tools.JSESSIONID_COOKIE, req.getSession().getId());
     }
 
     /**
@@ -908,7 +908,7 @@ public final class SessionUtility {
      */
     public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
         req.setAttribute(PUBLIC_SESSION_KEY, session);
-        session.setParameter("JSESSIONID", req.getSession().getId());
+        session.setParameter(Tools.JSESSIONID_COOKIE, req.getSession().getId());
     }
 
     /**

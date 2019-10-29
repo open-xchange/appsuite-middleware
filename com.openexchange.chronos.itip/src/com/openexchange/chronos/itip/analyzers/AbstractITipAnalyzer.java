@@ -220,13 +220,13 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     }
 
     private void deleteIntro(final ITipChange change, final TypeWrapper wrapper, final Locale locale) {
-        final String displayName = displayNameFor(change.getDeletedEvent().getOrganizer());
+        final String displayName = displayNameForOrganizer(change.getDeletedEvent());
         change.setIntroduction(new Sentence(Messages.DELETE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
 
     }
 
     private void updateIntro(final ITipChange change, final TypeWrapper wrapper, final Locale locale, ITipMessage message) throws OXException {
-        String displayName = displayNameFor(change.getCurrentEvent().getOrganizer());
+        String displayName = displayNameForOrganizer(change.getCurrentEvent());
         if (onlyStateChanged(change.getDiff())) {
             // External Participant
 
@@ -287,12 +287,13 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     }
 
     private void createIntro(final ITipChange change, final TypeWrapper wrapper, final Locale locale) {
-        final String displayName = displayNameFor(change.getNewEvent().getOrganizer());
+        final String displayName = displayNameForOrganizer(change.getNewEvent());
         change.setIntroduction(new Sentence(Messages.CREATE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
     }
 
-    protected String displayNameFor(Organizer organizer) {
-        if (organizer == null) {
+    protected String displayNameForOrganizer(Event event) {
+        Organizer organizer;
+        if (null == event || (organizer = event.getOrganizer()) == null) {
             return "unknown";
         }
 

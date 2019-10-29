@@ -56,7 +56,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.text.ParseException;
-import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
@@ -72,6 +71,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class CreateCore extends ContextAbstraction {
 
@@ -81,13 +81,12 @@ public abstract class CreateCore extends ContextAbstraction {
         setContextNameOption(parser, NeededQuadState.notneeded);
         setMandatoryOptions(parser);
 
-        setLanguageOption(parser);
-        setTimezoneOption(parser);
-
         setContextQuotaOption(parser, true);
 
         setFurtherOptions(parser);
+        setExtendedOptions(parser);
         setPrimaryAccountOption(parser);
+        setOptionalOptions(parser);
 
         parser.allowDynamicOptions();
     }
@@ -115,17 +114,18 @@ public abstract class CreateCore extends ContextAbstraction {
                 // fill user obj with mandatory values from console
                 parseAndSetMandatoryOptionsinUser(parser, usr);
                 parseAndSetPrimaryAccountName(parser, usr);
-                // fill user obj with mandatory values from console
-                final String tz = (String) parser.getOptionValue(this.timezoneOption);
-                if (null != tz) {
-                    usr.setTimezone(tz);
-                }
+                
+                // fill user obj with optional values from console
+                parseAndSetOptionalOptionsinUser(parser, usr);
 
-                final String languageoptionvalue = (String) parser.getOptionValue(this.languageOption);
-                if (languageoptionvalue != null) {
-                    usr.setLanguage(languageoptionvalue);
-                }
+                applyExtendedOptionsToUser(parser, usr);
 
+                applyDynamicOptionsToUser(parser, usr);
+                
+                applyDriveFolderModeOption(parser, usr);
+                
+                // Fill ctx obj with additional values from console
+                
                 parseAndSetContextQuota(parser, ctx);
 
                 parseAndSetExtensions(parser, ctx, auth);

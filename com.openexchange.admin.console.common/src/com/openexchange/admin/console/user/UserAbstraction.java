@@ -615,6 +615,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String SIMPLE_INT = "int";
     protected static final String OPT_IMAPONLY_LONG = "imaponly";
     protected static final String OPT_DBONLY_LONG = "dbonly";
+    
+    protected static final String OPT_DRIVE_FOLDER_MODE_LONG = "drive-user-folder-mode";
 
     public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
 
@@ -640,6 +642,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption imapQuotaOption = null;
     protected CLIOption inetMailAccessOption = null;
     protected CLIOption spamFilterOption = null;
+    protected CLIOption driveFolderModeOption;
 
     protected CLIOption accessRightsCombinationName = null;
 
@@ -2536,6 +2539,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setDepartmentOption(parser);
         setCompanyOption(parser);
         setAliasesOption(parser);
+        setUserFolderModeOptions(parser);
+    }
+    
+    protected void setUserFolderModeOptions(AdminParser parser) {
+        this.driveFolderModeOption = setLongOpt(parser, OPT_DRIVE_FOLDER_MODE_LONG, "stringvalue", "The mode how the default drive folders should be created. 'default', 'normal', 'none'. If not selected, 'default' is applied.", true, false, true);
     }
 
     protected void setExtendedOptions(final AdminParser parser) {
@@ -3786,6 +3794,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
                 usr.setUserAttribute(namespace, name, value);
             }
+        }
+    }
+    
+    protected void applyDriveFolderModeOption(final AdminParser parser, final User usr) {
+        String value = (String) parser.getOptionValue(driveFolderModeOption);
+        if (null != value) {
+            usr.setDriveFolderMode(value);
         }
     }
 

@@ -156,7 +156,7 @@ public class AttendeeDescriber implements ChangeDescriber {
         return new ArrayList<>(attendees).stream().filter(a -> cuType.matches(a.getCuType())).sorted(new AttendeeComperator(cuType)).collect(Collectors.toList());
     }
 
-    private class AttendeeComperator implements Comparator<Attendee> {
+    private static class AttendeeComperator implements Comparator<Attendee> {
 
         private final CalendarUserType cuType;
 

@@ -1,6 +1,6 @@
 ---
 title: Sharing and Guest Mode
-icon: fa-share-alt
+icon: fa-share-alt-square
 tags: Sharing, Configuration, Administration
 ---
 

@@ -93,8 +93,10 @@ public class ChangeDescriber {
         for (ChangeDescriptionGenerator generator : generators) {
             if (diff.containsAnyChangeOf(generator.getFields())) {
                 List<Sentence> descriptions = generator.getDescriptions(ctx, original, update, diff, locale, timezone, recipientUserId);
-                for (Sentence changeDescription : descriptions) {
-                    changeDescriptions.add(changeDescription.getMessage(wrapper, locale));
+                if (null != descriptions) {
+                    for (Sentence changeDescription : descriptions) {
+                        changeDescriptions.add(changeDescription.getMessage(wrapper, locale));
+                    }
                 }
             }
         }
