@@ -237,17 +237,24 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
             case NUMBER:
                 return true;
             case FIRST_DAY_OF_WEEK:
-                if ("sunday".equals(value) || "monday".equals(value)) {
-                    return true;
+                if (WeekDay.class.isInstance(value)) {
+                    WeekDay day = (WeekDay) value;
+                    switch (day) {
+                        case monday:
+                        case sunday:
+                        case saturday:
+                            return true;
+                        default:
+                            return false;
+                    }
                 }
                 return false;
             case FIRST_DAY_OF_YEAR:
-                try {
-                    int v = Integer.parseInt((String)value);
+                if (Integer.class.isInstance(value)) {
+                    int v = ((Integer)value).intValue();
                     return 0 <= v && 7 > v;
-                } catch (NumberFormatException e) {
-                    return false;
                 }
+                return false;
             default:
                 // Will not happen...
                 return false;
