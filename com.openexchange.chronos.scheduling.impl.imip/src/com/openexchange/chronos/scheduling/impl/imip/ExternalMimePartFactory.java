@@ -233,6 +233,9 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
                 case REPLY:
                     event = adjustAttendees(event);
                     break;
+                case CANCEL:
+                    adjustSequence(event);
+                    break;
                 default:
                     // Do nothing special
                     break;
@@ -251,6 +254,18 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
         }
 
         return icalPart;
+    }
+
+    /**
+     * Adjusts (increments) the sequence for the CANCEL method
+     *
+     * @param event The event to adjust
+     * @return The adjusted event
+     * @see <a href="https://tools.ietf.org/html/rfc5546#section-2.1.4">RFC 5546</a>
+     */
+    private Event adjustSequence(Event event) {
+        event.setSequence(event.getSequence() + 1);
+        return event;
     }
 
     /**
