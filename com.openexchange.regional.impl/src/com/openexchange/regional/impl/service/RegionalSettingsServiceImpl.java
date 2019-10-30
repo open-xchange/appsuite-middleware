@@ -303,17 +303,5 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
         }
         return null;
     }
-//
-//    private void validate(RegionalSettings settings) throws OXException {
-//        RegionalSettingField.values()
-//        Map<String, String> localeData = new HashMap<>();
-//        localeData.put("date", settings.getDateFormat());
-//        localeData.put(key, value)
-//        try {
-//            DateFormat df = new SimpleDateFormat(settings.getDateFormat());
-//        } catch (IllegalArgumentException e) {
-//            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE
-//        }
-//    }
 
 }
