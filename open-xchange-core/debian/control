@@ -2,7 +2,7 @@ Source: open-xchange-core
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: cdbs (>= 0.4.53), debhelper (>= 9), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-hazelcast-community (>= @OXVERSION@) | open-xchange-hazelcast, pandoc (>= 2.0.0)
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 9), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless | adoptopenjdk-8-hotspot, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-hazelcast-community (>= @OXVERSION@) | open-xchange-hazelcast, pandoc (>= 2.0.0)
 Standards-Version: 3.9.6
 Homepage: http://www.open-xchange.com
 

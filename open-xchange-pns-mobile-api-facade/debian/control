@@ -2,7 +2,7 @@ Source: open-xchange-pns-mobile-api-facade
 Section: web
 Priority: optional
 Maintainer: Thorben Betten <thorben.betten@open-xchange.com>
-Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-pns-impl (>= @OXVERSION@)
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), openjdk-8-jdk-headless | adoptopenjdk-8-hotspot, open-xchange-pns-impl (>= @OXVERSION@)
 Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 

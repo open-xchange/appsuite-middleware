@@ -134,9 +134,9 @@ public class Bug65533Test extends AbstractITipTest {
         iMip = iMip.replaceAll(Pattern.quote("{{DTSTART}}"), dtStart);
         iMip = iMip.replaceAll(Pattern.quote("{{DTEND}}"), dtEnd);
         iMip = iMip.replaceAll(Pattern.quote("{{FROM_MAIL}}"), organizerMail);
-        iMip = iMip.replaceAll(Pattern.quote("{{FROM_CN}}"), organizerCn);
+        iMip = iMip.replaceAll(Pattern.quote("{{FROM_CN}}"), quoteCN(organizerCn));
         iMip = iMip.replaceAll(Pattern.quote("{{TO_MAIL}}"), recipientMail);
-        iMip = iMip.replaceAll(Pattern.quote("{{TO_CN}}"), recipientCn);
+        iMip = iMip.replaceAll(Pattern.quote("{{TO_CN}}"), quoteCN(recipientCn));
         iMip = iMip.replaceAll(Pattern.quote("{{UID}}"), uid);
         iMip = iMip.replaceAll(Pattern.quote("{{SUMMARY}}"), summary);
         sendIMip(apiClientC2, iMip);
@@ -244,6 +244,10 @@ public class Bug65533Test extends AbstractITipTest {
         MailDestinationResponse response = apiClient.invokeAPI(localVarPath, "PUT", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
         assertNull(response.getError(), response.getError());
         return response.getData();
+    }
+
+    private String quoteCN(String cn) {
+        return "\"" + cn + "\"";
     }
 
 }

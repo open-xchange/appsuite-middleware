@@ -2,7 +2,7 @@ Source: open-xchange-mobile-config
 Section: web
 Priority: optional
 Maintainer: Alexander Quast <alexander.quast@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless | adoptopenjdk-8-hotspot
 Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 

@@ -187,7 +187,7 @@ public class ITipAssertion {
      */
     public static void assertSingleDescription(AnalysisChange change, String descriptionToMatch) {
         assertTrue(change.getDiffDescription().size() == 1);
-        assertTrue("Description does not contain expected update", change.getDiffDescription().get(0).contains(descriptionToMatch));
+        assertTrue("Description does not contain expected update: (" + change.getDiffDescription().get(0) + ")", change.getDiffDescription().get(0).contains(descriptionToMatch));
     }
 
 }

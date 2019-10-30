@@ -211,6 +211,12 @@ public class SproxydBufferedInputStream extends InputStream {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        Streams.close(current);
+        super.close();
+    }
+
     private IOException toIOException(OXException e) {
         Throwable cause = e.getCause();
         if (cause instanceof IOException) {

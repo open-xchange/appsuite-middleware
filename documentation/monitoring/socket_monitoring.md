@@ -122,7 +122,7 @@ $ /opt/open-xchange/sbin/socketLogging -A oxadminmaster -P secret -u -n com.open
 Unregisters the specified bundle to the socket logging registry.
 
 ```bash
-$ /opt/open-xchange/sbin/socketLogging -A oxadminmaster -P secret -l
+$ /opt/openexchange/sbin/socketLogging -A oxadminmaster -P secret -lr
 ```
 
 Lists all registered bundles for which socket logging is enabled.

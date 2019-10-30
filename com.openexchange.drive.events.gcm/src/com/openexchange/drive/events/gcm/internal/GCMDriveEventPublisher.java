@@ -149,6 +149,9 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
      * http://developer.android.com/google/gcm/http.html#success
      */
     private void processResult(DriveSubscriptionStore subscriptionStore, int contextID, String registrationID, Result result) {
+        if (null == result) {
+            return;
+        }
         if (null != result.getMessageId()) {
             /*
              * If message_id is set, check for registration_id:
