@@ -570,8 +570,6 @@ public class MimeMessageFiller {
 
                 if (null != replyTo) {
                     mimeMessage.setReplyTo(replyTo);
-                } else if (mail.containsFrom()) {
-                    mimeMessage.setReplyTo(mail.getFrom());
                 }
             } else {
                 String replyTo = compositionParameters.getReplyToAddress();
@@ -591,8 +589,6 @@ public class MimeMessageFiller {
                             LOG.error("", e1);
                         }
                     }
-                } else if (mail.containsFrom()) {
-                    mimeMessage.setReplyTo(mail.getFrom());
                 }
             }
         }
