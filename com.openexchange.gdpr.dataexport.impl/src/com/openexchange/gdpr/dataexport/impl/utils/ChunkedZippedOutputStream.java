@@ -273,6 +273,7 @@ public class ChunkedZippedOutputStream {
     }
 
     private void closeStream() throws IOException, OXException {
+        zipOutputStream.flush();
         zipOutputStream.finish();
         zipOutputStream.close();
 
