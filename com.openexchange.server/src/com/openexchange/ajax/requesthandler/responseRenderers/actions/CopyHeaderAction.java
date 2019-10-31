@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,36 +49,37 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.http.Tools;
+import java.util.Map.Entry;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 
 /**
- * {@link RemovePragmaHeaderAction} removes the pragma header
+ * {@link CopyHeaderAction} - Copies headers into the response
  *
  * Influence the following IDataWrapper attributes:
  * <ul>
  * <li>response
  * </ul>
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * 
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.3
  */
-public class RemovePragmaHeaderAction implements IFileResponseRendererAction {
+public class CopyHeaderAction implements IFileResponseRendererAction {
 
     @Override
-    public void call(IDataWrapper data) throws OXException {
-        /*
-         * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser.
-         * So removing Pragma header.
-         */
-        boolean keepCachingHeaders = false;
-        if (data.getRequestData().isSet("keepCachingHeaders")) {
-            keepCachingHeaders = data.getRequestData().getParameter("keepCachingHeaders", Boolean.class).booleanValue();
-        }
-        if (!keepCachingHeaders) {
-            Tools.removeCachingHeader(data.getResponse());
-        }
+    public void call(IDataWrapper data) throws Exception {
+        HttpServletResponse response = data.getResponse();
+        AJAXRequestResult result = data.getResult();
 
+        /*
+         * The result is send to the client, so copy headers
+         * set to the response into the result.
+         */
+        for (Entry<String, String> entry : result.getHeaders().entrySet()) {
+            if (null == response.getHeader(entry.getKey())) {
+                response.addHeader(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
 }

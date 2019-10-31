@@ -521,8 +521,7 @@ public class AJAXRequestData {
     }
 
     /**
-     * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
-     * do not allow this header.
+     * Remove <tt>Pragma</tt> and other caching response header values if client requested it
      *
      * @return <code>true</code> if applied; otherwise <code>false</code>
      */

@@ -84,6 +84,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
@@ -112,6 +113,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
+
+    /**
+     * The <code>removeCachingHeaders</code> request parameter
+     */
+    public static final String PARAM_REMOVE_CACHING_HEADERS = "removeCachingHeaders";
 
     public static final String COM_OPENEXCHANGE_CHECK_URL_PARAMS = "com.openexchange.check.url.params";
 
@@ -355,17 +361,64 @@ public final class Tools {
         resp.setHeader(NAME_CACHE_CONTROL, CACHE_VALUE);
         resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
+    
+    /**
+     * The magic spell to disable caching... Sets <code>"Expires"</code>, <code>"Cache-Control"</code>, and <code>"Pragma"</code> headers to
+     * disable caching:
+     * <ul>
+     * <li><code>"Expires: "Sat, 6 May 1995 12:00:00 GMT"</code><br>Set to expire far in the past<br>&nbsp;</li>
+     * <li><code>"Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0"</code><br>Set standard HTTP/1.1 no-cache headers as well as IE extended HTTP/1.1 no-cache headers<br>&nbsp;</li>
+     * <li><code>"Pragma: no-cache"</code><br>Set standard HTTP/1.0 no-cache header<br>&nbsp;</li>
+     * </ul>
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Do <b>not</b> use these headers if response is directly written into servlet's output stream to initiate a download.
+     * </div>
+     *
+     * @param resp the servlet response.
+     * @see #removeCachingHeader(HttpServletResponse)
+     */
+    public static void disableCaching(final AJAXRequestResult resp) {
+        resp.setHeader(NAME_EXPIRES, EXPIRES_DATE);
+        resp.setHeader(NAME_CACHE_CONTROL, CACHE_VALUE);
+        resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
+    }
 
     /**
-     * Removes <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream, because then some
-     * Browsers do not allow this header.
-     *
+     * Removes <tt>Pragma</tt> and other caching response header values if we are going to write directly into servlet's output stream,
+     * because then some browsers do not allow this header.
+     * 
      * @param resp the servlet response.
      */
     public static void removeCachingHeader(final HttpServletResponse resp) {
         resp.setHeader(PRAGMA_KEY, null);
         resp.setHeader(NAME_CACHE_CONTROL, null);
         resp.setHeader(NAME_EXPIRES, null);
+    }
+
+    /**
+     * Gets a value indicating whether caching headers should be removed or not
+     *
+     * @param req The request
+     * @return <code>true</code> if caching headers should be removed, <code>false</code> otherwise
+     */
+    public static boolean isRemoveCachingHeader(final HttpServletRequest req) {
+        return null != req && null != req.getHeader(PARAM_REMOVE_CACHING_HEADERS) && Boolean.valueOf(req.getHeader(PARAM_REMOVE_CACHING_HEADERS)).booleanValue();
+    }
+    
+    /**
+     * Updates the caching headers
+     *
+     * @param req The servlet request
+     * @param resp The servelt response
+     * @See {@link #isRemoveCachingHeader(HttpServletRequest)}, {@link #removeCachingHeader(HttpServletResponse)}, {@link #disableCaching(AJAXRequestResult)}
+     */
+    public static void updateCachingHeaders(final HttpServletRequest req, final HttpServletResponse resp) {
+        if(isRemoveCachingHeader(req)) {
+            removeCachingHeader(resp);
+        } else {
+            disableCaching(resp);
+        }
     }
 
     /**
