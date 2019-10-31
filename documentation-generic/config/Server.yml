@@ -269,6 +269,38 @@ properties:
     file: server.properties
     packageName: open-xchange-core
     tags: ["Server", "Security"] 
+  - key: com.openexchange.cookie.domain
+    description: The domain name that should be set for the "Domain" part of cookies. 
+    defaultValue: 
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: com.openexchange.cookie.domain.enabled 
+    file:
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.cookie.domain.enabled
+    description: Whether to use the cookie domain name or not.
+    defaultValue: false
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: com.openexchange.cookie.domain 
+    file:
+    packageName: open-xchange-core
+    tags: ["Server"] 
+  - key: com.openexchange.cookie.domain.prefixWithDot
+    description: |
+       Whether domain parameter should start with a dot (<code>'.'</code>) character or not. Efficently
+       allows subdomains to use the cookie, too, or not.
+    defaultValue: false
+    version: 
+    reloadable: true
+    configcascadeAware: false
+    related: com.openexchange.cookie.domain 
+    file:
+    packageName: open-xchange-core
+    tags: ["Server"] 
   - key: com.openexchange.forceHTTPS
     description: |
        If an HTTPS connection is detected the cookie is automatically marked as secure. This tells the browser only to send the cookie over

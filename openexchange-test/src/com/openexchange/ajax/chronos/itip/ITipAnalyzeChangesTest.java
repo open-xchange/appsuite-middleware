@@ -274,7 +274,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ACTIONS);
         AnalysisChange change = assertSingleChange(analyzeResponse);
-        assertSingleDescription(change, "The timezone of the appointments start date was changed.");
+        assertSingleDescription(change, "The timezone of the appointment's start date was changed.");
     }
 
     @Test

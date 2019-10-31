@@ -162,6 +162,7 @@ public class DataExportSinkImpl implements DataExportSink {
                             out.putArchiveEntry(entry);
                             IOUtils.copy(zipIn, out, BUFFER_SIZE);
                             out.closeArchiveEntry();
+                            out.flush();
                         }
                     } finally {
                         Streams.close(zipIn, in);
@@ -240,6 +241,7 @@ public class DataExportSinkImpl implements DataExportSink {
                 }
             }
             zipOutput.closeArchiveEntry();
+            zipOutput.flush();
         } catch (IOException e) {
             throw DataExportExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {

@@ -183,6 +183,7 @@ public class ChunkedZippedOutputStream {
 
         // Complete the entry
         zipOutputStream.closeArchiveEntry();
+        zipOutputStream.flush();
     }
 
     /**
@@ -255,6 +256,7 @@ public class ChunkedZippedOutputStream {
                 zipOutputStream.putArchiveEntry(entry);
                 IOUtils.copy(useTmp && tmp != null ? tmp.getStream() : zipIn, zipOutputStream, BUFFER_SIZE);
                 zipOutputStream.closeArchiveEntry();
+                zipOutputStream.flush();
             }
         } finally {
             Streams.close(tmp);
@@ -271,6 +273,7 @@ public class ChunkedZippedOutputStream {
     }
 
     private void closeStream() throws IOException, OXException {
+        zipOutputStream.flush();
         zipOutputStream.finish();
         zipOutputStream.close();
 

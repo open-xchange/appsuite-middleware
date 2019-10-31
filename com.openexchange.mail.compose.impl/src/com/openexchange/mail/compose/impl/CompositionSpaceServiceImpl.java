@@ -374,6 +374,9 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             }
         }
 
+        // Sent date
+        sourceMessage.setSentDate(new Date());
+
         // Read receipt
         if (m.isRequestReadReceipt()) {
             sourceMessage.setDispositionNotification(toMimeAddress(m.getFrom()));
