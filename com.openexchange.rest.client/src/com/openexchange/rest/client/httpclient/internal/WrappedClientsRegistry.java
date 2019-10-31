@@ -99,18 +99,19 @@ public class WrappedClientsRegistry {
      *
      * @param httpClient The wrapping instance
      * @param config The configuration with which the <code>CloseableHttpClient</code> instance has been initialized
+     * @param monitoringId The monitoring ID to use
      * @return The resulting <code>CloseableHttpClient</code> instance, which is either wrapped or not
      */
-    public CloseableHttpClient createWrapped(ClientConfig config) {
+    public CloseableHttpClient createWrapped(ClientConfig config, MonitoringId monitoringId) {
         SSLSocketFactoryProvider factoryProvider;
         SSLConfigurationService sslConfig;
         synchronized (wrappers) {
             factoryProvider = this.factoryProvider;
             sslConfig = this.sslConfig;
             if (null == factoryProvider) {
-                CloseableHttpClient fallbackHttpClient = HttpClients.getFallbackHttpClient(config);
+                CloseableHttpClient fallbackHttpClient = HttpClients.getFallbackHttpClient(config, monitoringId);
                 WrappingCloseableHttpClient wrapper = new WrappingCloseableHttpClient(fallbackHttpClient);
-                wrappers.add(new ClientAndConfig(wrapper, config));
+                wrappers.add(new ClientAndConfig(wrapper, config, monitoringId));
                 return wrapper;
             }
         }
@@ -136,7 +137,7 @@ public class WrappedClientsRegistry {
                     ClientAndConfig clientEntry = iter.next();
                     CloseableHttpClient newHttpClient = null;
                     try {
-                        newHttpClient = HttpClients.getHttpClient(clientEntry.config, factoryProvider, sslConfig);
+                        newHttpClient = HttpClients.getHttpClient(clientEntry.config, factoryProvider, sslConfig, clientEntry.monitoringId);
                         clientEntry.wrapper.replaceHttpClient(newHttpClient);
                         newHttpClient = null; // Avoid preliminary shut-down
                         iter.remove();
@@ -158,11 +159,13 @@ public class WrappedClientsRegistry {
 
         final WrappingCloseableHttpClient wrapper;
         final ClientConfig config;
+        final MonitoringId monitoringId;
 
-        ClientAndConfig(WrappingCloseableHttpClient client, ClientConfig config) {
+        ClientAndConfig(WrappingCloseableHttpClient client, ClientConfig config, MonitoringId monitoringId) {
             super();
             this.wrapper = client;
             this.config = config;
+            this.monitoringId = monitoringId;
         }
     }
 

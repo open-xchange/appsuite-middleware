@@ -80,6 +80,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
         }
     };
 
+    private static final String CLIENT_NAME = "schedjoules";
     private static final String USER_AGENT = "Open-Xchange SchedJoules Client";
     private static final int API_VERSION = 1;
 
@@ -95,7 +96,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * Initialises a new {@link SchedJoulesRESTClient}.
      */
     public SchedJoulesRESTClient(String scheme, String host, String apiKey, int timeout) {
-        super(USER_AGENT, timeout, new SchedJoulesRESTResponseParser());
+        super(CLIENT_NAME, USER_AGENT, timeout, new SchedJoulesRESTResponseParser());
 
         this.scheme = scheme;
         this.host = host;

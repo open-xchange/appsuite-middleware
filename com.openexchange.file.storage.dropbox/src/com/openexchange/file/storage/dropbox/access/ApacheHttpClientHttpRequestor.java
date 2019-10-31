@@ -95,7 +95,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
      * @return The Apache HttpClient instance
      */
     public static CloseableHttpClient defaultApacheHttpClient() {
-        HttpClients.ClientConfig config = HttpClients.ClientConfig.newInstance();
+        HttpClients.ClientConfig config = HttpClients.ClientConfig.newInstance("dropbox");
         config.setConnectionTimeout((int) DEFAULT_CONNECT_TIMEOUT_MILLIS);
         config.setSocketReadTimeout((int) DEFAULT_READ_TIMEOUT_MILLIS);
         config.setUserAgent("Open-Xchange Dropbox HttpClient v" + DropboxServices.getService(VersionService.class).getVersionString());

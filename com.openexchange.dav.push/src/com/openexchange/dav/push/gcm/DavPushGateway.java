@@ -452,7 +452,7 @@ public class DavPushGateway implements PushNotificationTransport {
         } else {
             versionString = optService.getVersionString();
         }
-        return HttpClients.getHttpClient(ClientConfig.newInstance()
+        return HttpClients.getHttpClient(ClientConfig.newInstance("davpush")
             .setUserAgent("OX DAV-Push Gateway Client v" + versionString)
             .setMaxTotalConnections(100)
             .setMaxConnectionsPerRoute(100)

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,60 +47,81 @@
  *
  */
 
-package com.openexchange.rest.client.osgi;
+package com.openexchange.rest.client.httpclient.internal;
 
-import com.openexchange.metrics.MetricService;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
-import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
-import com.openexchange.timer.TimerService;
-
+import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.MetricDescriptor.MetricBuilder;
+import com.openexchange.metrics.MetricType;
 
 /**
- * {@link RestClientActivator}
+ * {@link MonitoringId}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class RestClientActivator extends HousekeepingActivator {
+public class MonitoringId {
 
-    /**
-     * Initializes a new {@link RestClientActivator}.
-     */
-    public RestClientActivator() {
+    private final String clientName;
+
+    private final int instanceId;
+
+
+    public MonitoringId(String clientName, int instanceId) {
         super();
+        this.clientName = clientName;
+        this.instanceId = instanceId;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public int getInstanceId() {
+        return instanceId;
+    }
+
+    public void applyDimensionsTo(MetricBuilder builder) {
+        builder.addDimension("client", clientName);
+        builder.addDimension("instance", Integer.toString(instanceId));
+    }
+
+    public MetricBuilder newMetricBuilder(String group, String name, MetricType type) {
+        MetricBuilder builder = MetricDescriptor.newBuilder(group, name, type);
+        applyDimensionsTo(builder);
+        return builder;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, MetricService.class };
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((clientName == null) ? 0 : clientName.hashCode());
+        result = prime * result + instanceId;
+        return result;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RestClientServices.setServices(this);
-        WrappedClientsRegistry.getInstance().setSSLServices(getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
-        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
-
-        // Avoid annoying WARN logging
-        //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MonitoringId other = (MonitoringId) obj;
+        if (clientName == null) {
+            if (other.clientName != null)
+                return false;
+        } else if (!clientName.equals(other.clientName))
+            return false;
+        if (instanceId != other.instanceId)
+            return false;
+        return true;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        try {
-            // Clean-up
-            super.stopBundle();
-            // Clear service registry
-            WrappedClientsRegistry.getInstance().setSSLServices(null, null);
-            RestClientServices.setServices(null);
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
-            throw e;
-        }
+    public String toString() {
+        return clientName + ':' + Integer.toString(instanceId);
     }
 
 }

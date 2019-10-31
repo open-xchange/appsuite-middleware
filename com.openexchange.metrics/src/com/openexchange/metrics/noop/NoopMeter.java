@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,60 +47,62 @@
  *
  */
 
-package com.openexchange.rest.client.osgi;
+package com.openexchange.metrics.noop;
 
-import com.openexchange.metrics.MetricService;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
-import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
-import com.openexchange.timer.TimerService;
+import com.openexchange.metrics.types.Meter;
 
 
 /**
- * {@link RestClientActivator}
+ * {@link NoopMeter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
  */
-public class RestClientActivator extends HousekeepingActivator {
+public class NoopMeter implements Meter {
 
-    /**
-     * Initializes a new {@link RestClientActivator}.
-     */
-    public RestClientActivator() {
+    private static final NoopMeter INSTANCE = new NoopMeter();
+
+    private NoopMeter() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, MetricService.class };
+    public static NoopMeter getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RestClientServices.setServices(this);
-        WrappedClientsRegistry.getInstance().setSSLServices(getService(SSLSocketFactoryProvider.class), getService(SSLConfigurationService.class));
-        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
+    public void mark() {
 
-        // Avoid annoying WARN logging
-        //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        try {
-            // Clean-up
-            super.stopBundle();
-            // Clear service registry
-            WrappedClientsRegistry.getInstance().setSSLServices(null, null);
-            RestClientServices.setServices(null);
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
-            throw e;
-        }
+    public void mark(long n) {
+
+    }
+
+    @Override
+    public long getCount() {
+        return 0;
+    }
+
+    @Override
+    public double getOneMinuteRate() {
+        return 0;
+    }
+
+    @Override
+    public double getFiveMinuteRate() {
+        return 0;
+    }
+
+    @Override
+    public double getFifteenMinuteRate() {
+        return 0;
+    }
+
+    @Override
+    public double getMeanRate() {
+        return 0;
     }
 
 }

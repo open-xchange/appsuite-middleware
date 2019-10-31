@@ -143,7 +143,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
 
         CloseableHttpClient httpclient;
         {
-            HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance();
+            HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance("autoconfig-ispdb");
             clientConfig.setUserAgent("Open-Xchange ISPDB Client");
             if (null != proxy) {
                 clientConfig.setProxy(proxy.proxyUrl, proxy.proxyLogin, proxy.proxyPassword);
