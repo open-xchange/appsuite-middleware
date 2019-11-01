@@ -219,10 +219,9 @@ public final class AJAXFile extends PermissionServlet {
              */
             InputStream contentInputStream = null;
             /*
-             * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do not
-             * allow header "Pragma"
+             * Handle caching headers
              */
-            Tools.removeCachingHeader(resp);
+            Tools.updateCachingHeaders(req, resp);
             final OutputStream out = resp.getOutputStream();
             try {
                 contentInputStream = new FileInputStream(file.getFile());

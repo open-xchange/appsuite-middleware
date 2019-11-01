@@ -49,16 +49,10 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.ETAG;
-import static com.google.common.net.HttpHeaders.PRAGMA;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,17 +118,6 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
     private static final String HEIGHT = "height";
 
     private static final int DEFAULT_THUMB_HEIGHT = 160;
-
-    private static final DateFormat HEADER_DATEFORMAT;
-
-    static {
-        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
-        HEADER_DATEFORMAT.setTimeZone(getTimeZone("GMT"));
-    }
-
-    private static final String CACHE_VALUE = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
-
-    private static final String PRAGMA_VALUE = "no-cache";
 
     private final boolean isBlockingWorkerAllowed;
 
@@ -321,11 +304,10 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
      * @param result The current {@link AJAXRequestResult}
      */
     private void preventCaching(AJAXRequestData requestData, AJAXRequestResult result) {
-        requestData.putParameter("keepCachingHeaders", "true");
+        requestData.putParameter("removeCachingHeaders", "false");
         result.removeHeader(ETAG);
         result.setExpires(LENIENT_EXPIRY);
-        result.setHeader(CACHE_CONTROL, CACHE_VALUE);
-        result.setHeader(PRAGMA, PRAGMA_VALUE);
+        com.openexchange.tools.servlet.http.Tools.disableCaching(result);
     }
 
 }

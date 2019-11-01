@@ -180,8 +180,9 @@ public class Attachment extends PermissionServlet {
             }
 
             document(
-                session, res,
-                req.getHeader("user-agent"),
+                session,
+                req, 
+                res,
                 isIE(req),
                 folderId,
                 attachedId,
@@ -368,7 +369,7 @@ public class Attachment extends PermissionServlet {
 
     }
 
-    private void document(Session session, final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
+    private void document(Session session, final HttpServletRequest req, final HttpServletResponse res, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
         Readable documentData = null;
         OutputStream os = null;
         boolean rollback = false;
@@ -393,7 +394,7 @@ public class Attachment extends PermissionServlet {
                     documentData,
                     attachment.getFilename(),
                     attachment.getFileMIMEType(),
-                    userAgent,
+                    req.getHeader("user-agent"),
                     ServerSessionAdapter.valueOf(session));
 
                 res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -401,10 +402,10 @@ public class Attachment extends PermissionServlet {
                 documentData = checkedDownload.getInputStream();
             }
 
-            // Browsers doesn't like the Pragma header the way we usually set
-            // this. Especially if files are sent to the browser. So removing
-            // pragma header
-            Tools.removeCachingHeader(res);
+            /*
+             * Handle caching headers
+             */
+            Tools.updateCachingHeaders(req, res);
 
             os = res.getOutputStream();
 

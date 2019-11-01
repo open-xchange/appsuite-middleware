@@ -1702,10 +1702,9 @@ public class Mail extends PermissionServlet {
                 resp.setContentType(contentType.toString());
                 resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null, req.getHeader("user-agent")));
                 /*
-                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
-                 * not allow header "Pragma"
+                 * Handle caching headers
                  */
-                Tools.removeCachingHeader(resp);
+                Tools.updateCachingHeaders(req, resp);
                 final OutputStream out = resp.getOutputStream();
                 outSelected = true;
                 /*
@@ -1779,10 +1778,9 @@ public class Mail extends PermissionServlet {
                 resp.setContentType(contentType.toString());
                 resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null, req.getHeader("user-agent")));
                 /*
-                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
-                 * not allow header "Pragma"
+                 * Handle caching headers
                  */
-                Tools.removeCachingHeader(resp);
+                Tools.updateCachingHeaders(req, resp);
                 final OutputStream out = resp.getOutputStream();
                 outSelected = true;
                 /*
@@ -2008,10 +2006,9 @@ public class Mail extends PermissionServlet {
                     attachmentInputStream = checkedDownload.getInputStream();
                 }
                 /*
-                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
-                 * not allow header "Pragma"
+                 * Handle caching headers
                  */
-                Tools.removeCachingHeader(resp);
+                Tools.updateCachingHeaders(req, resp);
                 final OutputStream out = resp.getOutputStream();
                 outSelected = true;
                 /*
