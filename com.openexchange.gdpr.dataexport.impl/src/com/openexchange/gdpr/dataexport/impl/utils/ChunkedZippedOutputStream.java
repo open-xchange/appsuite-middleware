@@ -86,7 +86,7 @@ public class ChunkedZippedOutputStream {
 
     private final DataExportStorageService storageService;
     private final DataExportTask task;
-    private final ServiceLookup services;
+    private final ServiceLookup services; // Currently not used
     private final FileStorage fileStorage;
     private final long maxFileSize;
 
@@ -282,7 +282,7 @@ public class ChunkedZippedOutputStream {
     }
 
     private void constructNewStream() throws IOException {
-        zipOutputStream = new ZippedFileStorageOutputStream(fileStorage, Deflater.DEFAULT_COMPRESSION, services);
+        zipOutputStream = ZippedFileStorageOutputStream.createDefaultZippedFileStorageOutputStream(fileStorage, Deflater.DEFAULT_COMPRESSION);
         currentSize = 0;
     }
 
