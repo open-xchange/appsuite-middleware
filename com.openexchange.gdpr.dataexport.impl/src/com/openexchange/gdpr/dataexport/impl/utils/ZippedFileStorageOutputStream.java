@@ -1,51 +1,3 @@
-/*
- *
- *    OPEN-XCHANGE legal information
- *
- *    All intellectual property rights in the Software are protected by
- *    international copyright laws.
- *
- *
- *    In some countries OX, OX Open-Xchange, open xchange and OXtender
- *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
- *    Instead, you are allowed to use these Logos according to the terms and
- *    conditions of the Creative Commons License, Version 2.5, Attribution,
- *    Non-commercial, ShareAlike, and the interpretation of the term
- *    Non-commercial applicable to the aforementioned license is published
- *    on the web site http://www.open-xchange.com/EN/legal/index.html.
- *
- *    Please make sure that third-party modules and libraries are used
- *    according to their respective licenses.
- *
- *    Any modifications to this package must retain all copyright notices
- *    of the original copyright holder(s) for the original code used.
- *
- *    After any such modifications, the original and derivative code shall remain
- *    under the copyright of the copyright holder(s) and/or original author(s)per
- *    the Attribution and Assignment Agreement that can be located at
- *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
- *    given Attribution for the derivative code and a license granting use.
- *
- *     Copyright (C) 2016-2020 OX Software GmbH
- *     Mail: info@open-xchange.com
- *
- *
- *     This program is free software; you can redistribute it and/or modify it
- *     under the terms of the GNU General Public License, Version 2 as published
- *     by the Free Software Foundation.
- *
- *     This program is distributed in the hope that it will be useful, but
- *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- *     for more details.
- *
- *     You should have received a copy of the GNU General Public License along
- *     with this program; if not, write to the Free Software Foundation, Inc., 59
- *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
 
 package com.openexchange.gdpr.dataexport.impl.utils;
 
@@ -58,62 +10,84 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy;
-import org.slf4j.Logger;
 import com.openexchange.filestore.FileStorage;
-import com.openexchange.gdpr.dataexport.impl.DataExportUtility;
-import com.openexchange.java.BlockingAtomicReference;
-import com.openexchange.java.ExceptionAwarePipedInputStream;
-import com.openexchange.java.ExceptionForwardingPipedOutputStream;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 
 /**
- * {@link ZippedFileStorageOutputStream} - An output stream that writes a ZIP archive to a file storage location.
+ * {@link ZippedFileStorageOutputStream} - The abstract super class for zipped output streams into file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class ZippedFileStorageOutputStream extends OutputStream {
+public abstract class ZippedFileStorageOutputStream extends OutputStream {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ZippedFileStorageOutputStream.class);
+    /**
+     * Creates a new zipped output stream writing to given file storage.
+     *
+     * @param piped Whether to use a piped mechanism to transport bytes into file storage
+     * @param fileStorage The file storage to write to
+     * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
+     * @param services The service look-up
+     * @return The zipped output stream
+     * @throws IOException If initialization fails
+     */
+    public static ZippedFileStorageOutputStream createDefaultZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel) throws IOException {
+        return createZippedFileStorageOutputStream(false, fileStorage, compressionLevel, null);
     }
 
-    private final ServiceLookup services;
-    private final FileStorage fileStorage;
-    private final BlockingAtomicReference<String> fileStorageLocationReference;
-    private final ExceptionForwardingPipedOutputStream out;
-    private final ZipArchiveOutputStream zipOut;
+    /**
+     * Creates a new zipped output stream writing to given file storage.
+     *
+     * @param piped Whether to use a piped mechanism to transport bytes into file storage
+     * @param fileStorage The file storage to write to
+     * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
+     * @param services The service look-up
+     * @return The zipped output stream
+     * @throws IOException If initialization fails
+     */
+    public static ZippedFileStorageOutputStream createZippedFileStorageOutputStream(boolean piped, FileStorage fileStorage, int compressionLevel, ServiceLookup services) throws IOException {
+        return piped ? new PipedZippedFileStorageOutputStream(fileStorage, compressionLevel, services) : new AppendingZippedFileStorageOutputStream(fileStorage, compressionLevel);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    protected final FileStorage fileStorage;
 
     /**
      * Initializes a new {@link ZippedFileStorageOutputStream}.
      *
      * @param fileStorage The file storage to write to
-     * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
-     * @param services The service look-up
-     * @throws IOException If initialization fails
      */
-    public ZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel, ServiceLookup services) throws IOException {
+    protected ZippedFileStorageOutputStream(FileStorage fileStorage) {
         super();
         this.fileStorage = fileStorage;
-        this.services = services;
-        fileStorageLocationReference = new BlockingAtomicReference<String>();
-        out = initOutputStream();
-        zipOut = initZipArchiveOutputStream(out, compressionLevel);
     }
+
+    // --------------------------------------------- Init streams---------------------------------------------------------------------------
+
+    /**
+     * Initializes a zipped output stream using given output stream and compression level.
+     *
+     * @param out The output stream to zip
+     * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
+     * @return
+     */
+    protected ZipArchiveOutputStream initZipArchiveOutputStream(OutputStream out, int compressionLevel) {
+        ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
+        zipOutput.setEncoding("UTF-8");
+        zipOutput.setUseLanguageEncodingFlag(true);
+        zipOutput.setLevel(compressionLevel);
+        return zipOutput;
+    }
+
+    // --------------------------------------------- Public methods-------------------------------------------------------------------------
 
     /**
      * Gets the optional file storage location.
      *
      * @return The optional file storage location
      */
-    public Optional<String> getOptionalFileStorageLocation() {
-        return Optional.ofNullable(fileStorageLocationReference.peek());
-    }
+    public abstract Optional<String> getOptionalFileStorageLocation();
 
     /**
      * Gets the file storage location (uninterruptibly).
@@ -124,38 +98,14 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *
      * @return The file storage location
      */
-    public String awaitFileStorageLocation() {
-        return fileStorageLocationReference.getUninterruptibly();
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-        try {
-            zipOut.write(b);
-        } catch (IOException e) {
-            out.forwardException(e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-        try {
-            zipOut.write(b);
-        } catch (IOException e) {
-            out.forwardException(e);
-            throw e;
-        }
-    }
+    public abstract String awaitFileStorageLocation();
 
     /**
      * Returns the current number of bytes written to this stream.
      *
      * @return the number of written bytes
      */
-    public long getBytesWritten() {
-        return zipOut.getBytesWritten();
-    }
+    public abstract long getBytesWritten();
 
     /**
      * This method indicates whether this archive is writing to a
@@ -167,9 +117,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *
      * @return true if seekable
      */
-    public boolean isSeekable() {
-        return zipOut.isSeekable();
-    }
+    public abstract boolean isSeekable();
 
     /**
      * The encoding to use for filenames and the file comment.
@@ -181,18 +129,14 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      * @param encoding the encoding to use for file names, use null
      *            for the platform's default encoding
      */
-    public void setEncoding(String encoding) {
-        zipOut.setEncoding(encoding);
-    }
+    public abstract void setEncoding(String encoding);
 
     /**
      * The encoding to use for filenames and the file comment.
      *
      * @return <code>null</code> if using the platform's default character encoding.
      */
-    public String getEncoding() {
-        return zipOut.getEncoding();
-    }
+    public abstract String getEncoding();
 
     /**
      * Whether to set the language encoding flag if the file name
@@ -203,9 +147,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      * @param b whether to set the language encoding flag if the file
      *            name encoding is UTF-8
      */
-    public void setUseLanguageEncodingFlag(boolean b) {
-        zipOut.setUseLanguageEncodingFlag(b);
-    }
+    public abstract void setUseLanguageEncodingFlag(boolean b);
 
     /**
      * Whether to create Unicode Extra Fields.
@@ -214,9 +156,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *
      * @param b whether to create Unicode Extra Fields.
      */
-    public void setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy b) {
-        zipOut.setCreateUnicodeExtraFields(b);
-    }
+    public abstract void setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy b);
 
     /**
      * Whether to fall back to UTF and the language encoding flag if
@@ -228,9 +168,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *            flag if the file name cannot be encoded using the specified
      *            encoding.
      */
-    public void setFallbackToUTF8(boolean b) {
-        zipOut.setFallbackToUTF8(b);
-    }
+    public abstract void setFallbackToUTF8(boolean b);
 
     /**
      * Finishes the addition of entries to this stream, without closing it.
@@ -238,14 +176,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *
      * @throws IOException if the user forgets to close the entry.
      */
-    public void finish() throws IOException {
-        try {
-            zipOut.finish();
-        } catch (IOException e) {
-            out.forwardException(e);
-            throw e;
-        }
-    }
+    public abstract void finish() throws IOException;
 
     /**
      * Closes the archive entry, writing any trailer information that may
@@ -253,14 +184,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *
      * @throws IOException if an I/O error occurs
      */
-    public void closeArchiveEntry() throws IOException {
-        try {
-            zipOut.closeArchiveEntry();
-        } catch (IOException e) {
-            out.forwardException(e);
-            throw e;
-        }
-    }
+    public abstract void closeArchiveEntry() throws IOException;
 
     /**
      * Adds an archive entry with a raw input stream.
@@ -275,14 +199,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      * @param rawStream The raw input stream of a different entry. May be compressed/encrypted.
      * @throws IOException If copying fails
      */
-    public void addRawArchiveEntry(ZipArchiveEntry entry, InputStream rawStream) throws IOException {
-        try {
-            zipOut.addRawArchiveEntry(entry, rawStream);
-        } catch (IOException e) {
-            out.forwardException(e);
-            throw e;
-        }
-    }
+    public abstract void addRawArchiveEntry(ZipArchiveEntry entry, InputStream rawStream) throws IOException;
 
     /**
      * Writes the headers for an archive entry to the output stream.
@@ -292,29 +209,14 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      * @param entry describes the entry
      * @throws IOException if an I/O error occurs
      */
-    public void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException {
-        try {
-            zipOut.putArchiveEntry(archiveEntry);
-        } catch (java.util.zip.ZipException e) {
-            String message = e.getMessage();
-            if (message == null || !message.startsWith("duplicate entry")) {
-                out.forwardException(e);
-            }
-            throw e;
-        } catch (IOException e) {
-            out.forwardException(e);
-            throw e;
-        }
-    }
+    public abstract void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException;
 
     /**
      * Set the file comment.
      *
      * @param comment the comment
      */
-    public void setComment(String comment) {
-        zipOut.setComment(comment);
-    }
+    public abstract void setComment(String comment);
 
     /**
      * Sets the compression level for subsequent entries.
@@ -325,9 +227,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      * @throws IllegalArgumentException if an invalid compression
      *             level is specified.
      */
-    public void setLevel(int level) {
-        zipOut.setLevel(level);
-    }
+    public abstract void setLevel(int level);
 
     /**
      * Sets the default compression method for subsequent entries.
@@ -336,9 +236,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *
      * @param method an <code>int</code> from java.util.zip.ZipEntry
      */
-    public void setMethod(int method) {
-        zipOut.setMethod(method);
-    }
+    public abstract void setMethod(int method);
 
     /**
      * Whether this stream is able to write the given entry.
@@ -346,24 +244,7 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      * <p>May return false if it is set up to use encryption or a
      * compression method that hasn't been implemented yet.</p>
      */
-    public boolean canWriteEntryData(ArchiveEntry ae) {
-        return zipOut.canWriteEntryData(ae);
-    }
-
-    @Override
-    public void write(byte[] b, int offset, int length) throws IOException {
-        zipOut.write(b, offset, length);
-    }
-
-    @Override
-    public void close() throws IOException {
-        zipOut.close();
-    }
-
-    @Override
-    public void flush() throws IOException {
-        zipOut.flush();
-    }
+    public abstract boolean canWriteEntryData(ArchiveEntry ae);
 
     /**
      * Creates a new zip entry taking some information from the given
@@ -376,93 +257,6 @@ public class ZippedFileStorageOutputStream extends OutputStream {
      *
      * <p>Must not be used if the stream has already been closed.</p>
      */
-    public ArchiveEntry createArchiveEntry(File inputFile, String entryName) throws IOException {
-        try {
-            return zipOut.createArchiveEntry(inputFile, entryName);
-        } catch (IOException e) {
-            out.forwardException(e);
-            throw e;
-        }
-    }
-
-    // --------------------------------------------- Init streams---------------------------------------------------------------------------
-
-    private ZipArchiveOutputStream initZipArchiveOutputStream(OutputStream out, int compressionLevel) {
-        ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
-        zipOutput.setLevel(compressionLevel);
-        return zipOutput;
-    }
-
-    private ExceptionForwardingPipedOutputStream initOutputStream() throws IOException {
-        // Initialize pipes
-        ExceptionAwarePipedInputStream in = new ExceptionAwarePipedInputStream(DataExportUtility.BUFFER_SIZE);
-        ExceptionForwardingPipedOutputStream out = new ExceptionForwardingPipedOutputStream(in);
-
-        // Create writer task
-        FileStorage fileStorage= this.fileStorage;
-        BlockingAtomicReference<String> fileStorageLocationReference = this.fileStorageLocationReference;
-        AbstractTask<Void> fileStorageWriter = new DataExportFileStorageWriterTask(in, out, fileStorage, fileStorageLocationReference);
-
-        // Submit/execute writer task
-        ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
-        if (threadPool == null) {
-            throw new IOException(ServiceExceptionCode.absentService(ThreadPoolService.class));
-        }
-        threadPool.submit(fileStorageWriter);
-
-        // Return piped output stream, which is consumed by DataExportFileStorageWriterTask instance
-        return out;
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * {@link DataExportFileStorageWriterTask} - Writes the bytes received from given piped input stream into specified file storage.
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     * @since v7.10.3
-     */
-    private static final class DataExportFileStorageWriterTask extends AbstractTask<Void> {
-
-        private final ExceptionAwarePipedInputStream in;
-        private final ExceptionForwardingPipedOutputStream out;
-        private final BlockingAtomicReference<String> fileStorageLocationReference;
-        private final FileStorage fileStorage;
-
-        /**
-         * Initializes a new {@link DataExportFileStorageWriterTask}.
-         *
-         * @param in The piped input stream to read from
-         * @param out The piped output stream feeding the bytes to piped input stream
-         * @param fileStorage The file storage to write to
-         * @param fileStorageLocationReference The reference for the resulting file storage location when writing to storage is completed
-         */
-        DataExportFileStorageWriterTask(ExceptionAwarePipedInputStream in, ExceptionForwardingPipedOutputStream out, FileStorage fileStorage, BlockingAtomicReference<String> fileStorageLocationReference) {
-            super();
-            this.in = in;
-            this.out = out;
-            this.fileStorageLocationReference = fileStorageLocationReference;
-            this.fileStorage = fileStorage;
-        }
-
-        @Override
-        public void setThreadName(ThreadRenamer threadRenamer) {
-            threadRenamer.renamePrefix(DataExportFileStorageWriterTask.class.getSimpleName());
-        }
-
-        @Override
-        public Void call() {
-            try {
-                String fileStorageLocation = fileStorage.saveNewFile(in);
-                fileStorageLocationReference.set(fileStorageLocation);
-            } catch (Exception e) {
-                LoggerHolder.LOG.warn("Failed writing into file storage sink", e);
-                out.setException(e);
-            }
-            return null;
-        }
-    }
+    public abstract ArchiveEntry createArchiveEntry(File inputFile, String entryName) throws IOException;
 
 }

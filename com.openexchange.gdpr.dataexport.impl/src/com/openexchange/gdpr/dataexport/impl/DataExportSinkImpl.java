@@ -64,8 +64,8 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
-import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
 import com.openexchange.gdpr.dataexport.DataExportDiagnosticsReport;
+import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
 import com.openexchange.gdpr.dataexport.DataExportSavepoint;
 import com.openexchange.gdpr.dataexport.DataExportSink;
 import com.openexchange.gdpr.dataexport.DataExportStorageService;
@@ -150,7 +150,7 @@ public class DataExportSinkImpl implements DataExportSink {
         ZippedFileStorageOutputStream out = zipOutReference.get();
         if (out == null) {
             try {
-                out = new ZippedFileStorageOutputStream(fileStorage, Deflater.NO_COMPRESSION, services);
+                out = ZippedFileStorageOutputStream.createDefaultZippedFileStorageOutputStream(fileStorage, Deflater.NO_COMPRESSION);
                 if (optFileStorageLocation != null) {
                     // Continue writing to ZIP archive
                     InputStream in = null;
