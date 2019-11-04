@@ -238,8 +238,8 @@ This section describes the structures of tests.
 | [reject](#reject-command) | Rejects the mail with a given text. |
 | [stop](#stop-command) | Stops any further progressing of a mail. |
 | [vacation](#vacation-command) | Creates a vacation mail. |
-| [setflags](#setflags-command) | Set flags of a mail. |
-| [addflags](#addflags-command) | Adds flags to a mail. |
+| [setflag](#setflag-command) | Set flags of a mail. |
+| [addflag](#addflag-command) | Adds flags to a mail. |
 | [notify](#notify-command) | Adds a notification. |
 | [pgp](#pgp-command) | Encrypts a mail via pgp. |
 
@@ -301,14 +301,14 @@ This section describes the structures of action commands.
 |subject | String || The new subject for the returned message (can be left empty, when only adding RE:).|
 |text | String || The vacation text itself.|
 
-### addflags-command
+### addflag-command
 
 |Name |Type|Value|Description|
 |:----|:---|:----|:----------|
 |id | String | addflags | A string defining the object itself.|
 |flags | Array || An array containing the flags which should be added to that mail. A flag can be either a system flag or a user flag. System flags begin with a backslash (\\) and can be one of the ones describes in [Flags](#flags).<br><br> System flags are case-insensitive.<br><br> User flags begin with a dollar sign ($) and can contain any ASCII characters between 0x21 (!) and 0x7E (~), inclusive, except for the characters 0x22, 0x25, 0x28, 0x29, 0x2A, 0x5C, 0x5D and 0x7B, which correspond to <br><br> "%()*\]{ <br><br> Mail color flags as used by OX are implemented by user flags of the form $cl_n, where n is a number between 1 and 10, inclusive. <br><br> See [RFC 3501](http://tools.ietf.org/html/rfc3501) for further details on IMAP flags and their meanings.|
 
-### setflags-command
+### setflag-command
 
 |Name |Type|Value|Description|
 |:----|:---|:----|:----------|
