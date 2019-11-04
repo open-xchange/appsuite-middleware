@@ -51,9 +51,7 @@ package com.openexchange.rss.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.Before;
 import org.junit.Test;
-
 
 /**
  * {@link RssPropertiesTest}
@@ -63,34 +61,89 @@ import org.junit.Test;
  */
 public class RssPropertiesTest {
 
-    @Before
-    public void setUp() throws Exception {}
-
     @Test
-    public void testIsDenied_everythingAllowed_returnTrue() {
-        boolean denied = RssProperties.isDenied("https", "open-xchange.com", 80);
-        
+    public void testIsDenied_everythingAllowed_returnFalse() {
+        String url = "http://open-xchange.com:80";
+        boolean denied = RssProperties.isDenied(url);
+
         assertFalse(denied);
     }
 
     @Test
-    public void testIsDenied_schemeDenied_returnFalse() {
-        boolean denied = RssProperties.isDenied("rss", "open-xchange.com", 80);
+    public void testIsDenied_everythingAllowed2_returnFalse() {
+        String url = "https://open-xchange.com:80";
+        boolean denied = RssProperties.isDenied(url);
+
+        assertFalse(denied);
+    }
+
+    @Test
+    public void testIsDenied_everythingAllowed3_returnFalse() {
+        String url = "https://open-xchange.com";
+        boolean denied = RssProperties.isDenied(url);
+
+        assertFalse(denied);
+    }
+
+    @Test
+    public void testIsDenied_everythingAllowed4_returnFalse() {
+        String url = "https://open-xchange.com:443";
+        boolean denied = RssProperties.isDenied(url);
+
+        assertFalse(denied);
+    }
+
+    @Test
+    public void testIsDenied_everythingAllowed5_returnFalse() {
+        String url = "https://open-xchange.com:443/myDeeplink/test.xml";
+        boolean denied = RssProperties.isDenied(url);
+
+        assertFalse(denied);
+    }
+
+    @Test
+    public void testIsDenied_schemeDenied_returnTrue() {
+        String url = "rss://open-xchange.com:80";
+        boolean denied = RssProperties.isDenied(url);
 
         assertTrue(denied);
     }
 
     @Test
-    public void testIsDenied_hostDenied_returnFalse() {
-        boolean denied = RssProperties.isDenied("https", "localhost", 80);
-        
+    public void testIsDenied_hostDenied_returnTrue() {
+        String url = "https://localhost:80";
+        boolean denied = RssProperties.isDenied(url);
+
         assertTrue(denied);
     }
 
     @Test
-    public void testIsDenied_portDenied_returnFalse() {
-        boolean denied = RssProperties.isDenied("https", "open-xchange.com", 993);
-        
+    public void testIsDenied_hostIpDenied_returnTrue() {
+        String url = "https://127.127.127.127:80";
+        boolean denied = RssProperties.isDenied(url);
+
+        assertTrue(denied);
+    }
+
+    @Test
+    public void testIsDenied_hostIpDenied2_returnTrue() {
+        String url = "https://127.0.0.1";
+        boolean denied = RssProperties.isDenied(url);
+
+        assertTrue(denied);
+    }
+
+    public void testIsDenied_hostIpDenied3_returnTrue() {
+        String url = "https://127.0.0.11/myDeeplink/test.xml";
+        boolean denied = RssProperties.isDenied(url);
+
+        assertTrue(denied);
+    }
+
+    public void testIsDenied_portDenied_returnTrue() {
+        String url = "https://open-xchange.com:993";
+        boolean denied = RssProperties.isDenied(url);
+
         assertTrue(denied);
     }
 }
