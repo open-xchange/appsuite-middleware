@@ -245,6 +245,7 @@ public class TimeoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Re
                     int responseCode = httpConnection.getResponseCode();
                     URL redirectUrl = checkPossibleRedirect(responseCode, httpConnection, originalAddressIsRemote);
                     if (null != redirectUrl) {
+                        httpConnection.disconnect();
                         feedUrl = redirectUrl;
                         continue NextUrl;
                     }
