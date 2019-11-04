@@ -50,7 +50,9 @@ properties:
         <pre>
         com.openexchange.messaging.rss.feed.blacklist=127.0.0.1-127.255.255.255, localhost, internal.domain.org
         </pre>
-        An empty value means no black-listing is active.
+        An empty value means no black-listing is active. 
+        
+        Note: For security reasons any local address will not be accepted regardless of the configuration!
       defaultValue: 127.0.0.1-127.255.255.255,localhost
       version:
       reloadable: false
