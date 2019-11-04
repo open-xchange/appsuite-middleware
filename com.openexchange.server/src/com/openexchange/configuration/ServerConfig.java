@@ -296,6 +296,7 @@ public final class ServerConfig implements Reloadable {
         }
         File tmpDir = getTmpDir();
         ImageIO.setCacheDirectory(tmpDir);
+        System.setProperty("java.io.tmpdir", tmpDir.getPath());
         System.setProperty("jna.tmpdir", tmpDir.getPath());
     }
 
