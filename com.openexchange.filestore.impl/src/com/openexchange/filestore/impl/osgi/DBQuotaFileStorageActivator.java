@@ -120,9 +120,12 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
             trackService(ConfigViewFactory.class);
             trackService(UploadDirService.class);
 
+            DatabaseAccessServiceImpl databaseAccessService = new DatabaseAccessServiceImpl(context);
+            rememberTracker(databaseAccessService);
+
             openTrackers();
 
-            registerService(DatabaseAccessService.class, new DatabaseAccessServiceImpl(context));
+            registerService(DatabaseAccessService.class, databaseAccessService);
         }
 
         // Update tasks
