@@ -93,7 +93,7 @@ public class ICalProviderUtils {
         try {
             InetAddress inetAddress = InetAddress.getByName(uri.getHost());
             if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
-                org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).debug("Given feed URL \"0}\" with destination IP {} appears not to be valid.", uri.toString(), inetAddress.getHostAddress());
+                org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).debug("Given feed URL \"{}\" with destination IP {} appears not to be valid.", uri.toString(), inetAddress.getHostAddress());
                 return false;
             }
         } catch (UnknownHostException e) {
