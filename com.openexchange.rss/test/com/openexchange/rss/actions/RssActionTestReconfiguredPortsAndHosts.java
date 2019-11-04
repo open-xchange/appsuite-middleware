@@ -65,7 +65,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.util.RssProperties;
-import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
+import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.test.mock.MockUtils;
 import com.sun.syndication.feed.synd.SyndFeed;
 
@@ -83,7 +83,7 @@ public class RssActionTestReconfiguredPortsAndHosts {
 
     private ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
 
-    private TimoutHttpURLFeedFetcher fetcher = Mockito.mock(TimoutHttpURLFeedFetcher.class);
+    private TimeoutHttpURLFeedFetcher fetcher = Mockito.mock(TimeoutHttpURLFeedFetcher.class);
 
     List<URL> urls = new ArrayList<>();
 

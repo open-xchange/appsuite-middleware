@@ -56,6 +56,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -86,15 +88,15 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 
 /**
- * {@link TimoutHttpURLFeedFetcher} - timeout-capable {@link HttpURLFeedFetcher}.
+ * {@link TimeoutHttpURLFeedFetcher} - timeout-capable {@link HttpURLFeedFetcher}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.4.1
  */
-public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Reloadable {
+public class TimeoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Reloadable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimoutHttpURLFeedFetcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimeoutHttpURLFeedFetcher.class);
 
     private static final String MAX_FEED_SIZE_PROPERTY_NAME = "com.openexchange.messaging.rss.feed.size";
 
@@ -112,12 +114,12 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
     private FeedFetcherCache feedInfoCache;
 
     /**
-     * Initializes a new {@link TimoutHttpURLFeedFetcher}.
+     * Initializes a new {@link TimeoutHttpURLFeedFetcher}.
      *
      * @param connectTimout The timeout value, in milliseconds, to be used when opening a communications link to the resource
      * @param readTimout The read timeout to a specified timeout, in milliseconds
      */
-    public TimoutHttpURLFeedFetcher(int connectTimout, int readTimout) {
+    public TimeoutHttpURLFeedFetcher(int connectTimout, int readTimout) {
         super();
         this.connectTimout = connectTimout;
         this.readTimout = readTimout;
@@ -125,13 +127,13 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
     }
 
     /**
-     * Initializes a new {@link TimoutHttpURLFeedFetcher}.
+     * Initializes a new {@link TimeoutHttpURLFeedFetcher}.
      *
      * @param connectTimout The timeout value, in milliseconds, to be used when opening a communications link to the resource
      * @param readTimout The read timeout to a specified timeout, in milliseconds
      * @param feedInfoCache The feed cache
      */
-    public TimoutHttpURLFeedFetcher(int connectTimout, int readTimout, FeedFetcherCache feedInfoCache) {
+    public TimeoutHttpURLFeedFetcher(int connectTimout, int readTimout, FeedFetcherCache feedInfoCache) {
         this.connectTimout = connectTimout;
         this.readTimout = readTimout;
         setFeedInfoCache(feedInfoCache);
@@ -158,26 +160,26 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
         // Examine redirect location
         try {
-            URL feedUrl = new URL(redirectUrl);
-            if (RssProperties.isDenied(feedUrl.getProtocol(), feedUrl.getHost(), feedUrl.getPort())) {
+            if (RssProperties.isDenied(redirectUrl)) {
                 // Deny redirecting to a local address
-                throw new FetcherException(feedUrl.toExternalForm() + " is not an allowed redirect URL");
+                throw new FetcherException(redirectUrl + " is not an allowed redirect URL");
             }
+            URI feedUrl = new URI(redirectUrl);
             if (originalAddressIsRemote) {
                 try {
                     InetAddress inetAddress = InetAddress.getByName(feedUrl.getHost());
                     if (InetAddresses.isInternalAddress(inetAddress)) {
                         // Deny redirecting to a local address
-                        throw new FetcherException(feedUrl.toExternalForm() + " is not an allowed redirect URL");
+                        throw new FetcherException(feedUrl.toString() + " is not an allowed redirect URL");
                     }
                 } catch (UnknownHostException e) {
                     // IP address of that host could not be determined
                     LOG.warn("Unknown host: {}. Skipping retrieving feed from redirect URL {}", feedUrl.getHost(), feedUrl, e);
-                    throw new IllegalArgumentException(feedUrl.toExternalForm() + " contains an unknown host", e);
+                    throw new IllegalArgumentException(feedUrl.toString() + " contains an unknown host", e);
                 }
             }
-            return feedUrl;
-        } catch (MalformedURLException e) {
+            return feedUrl.toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
             LOG.warn("Redirect URL is invalid: {}", redirectUrl, e);
             throw new IllegalArgumentException("Redirect URL is invalid: " + redirectUrl, e);
         }
@@ -217,11 +219,9 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
             }
 
             HttpURLConnection httpConnection = (HttpURLConnection) connection;
-            if ("https".equals(feedUrl.getProtocol()) || 443 == feedUrl.getPort()) {
-                HttpsURLConnection httpsConnection = (HttpsURLConnection) httpConnection;
+            if ("https".equalsIgnoreCase(feedUrl.getProtocol()) || 443 == feedUrl.getPort()) {
                 SSLSocketFactory sslSocketFactory = Services.getService(SSLSocketFactoryProvider.class).getDefault();
-                HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
-                httpConnection = httpsConnection;
+                ((HttpsURLConnection) httpConnection).setSSLSocketFactory(sslSocketFactory);
             }
 
             if (connectTimout > 0) {

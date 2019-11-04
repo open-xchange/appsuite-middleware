@@ -70,7 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.util.RssProperties;
-import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
+import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.test.mock.MockUtils;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
@@ -93,7 +93,7 @@ public class RssActionTest {
     private ConfigurationService configurationService;
 
     @Mock
-    private TimoutHttpURLFeedFetcher fetcher;
+    private TimeoutHttpURLFeedFetcher fetcher;
 
     List<URL> urls = new ArrayList<>();
 
