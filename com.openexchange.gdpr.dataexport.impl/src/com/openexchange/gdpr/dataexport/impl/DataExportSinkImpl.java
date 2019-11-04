@@ -64,6 +64,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.gdpr.dataexport.DataExportDiagnosticsReport;
 import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
 import com.openexchange.gdpr.dataexport.DataExportSavepoint;
@@ -143,38 +144,52 @@ public class DataExportSinkImpl implements DataExportSink {
     }
 
     private ZippedFileStorageOutputStream getZipOutputStream() throws OXException { // Only called when holding lock
-        return getZipOutputStream(optExistentFileStorageLocation.get());
+        return getZipOutputStream(Optional.ofNullable(optExistentFileStorageLocation.get()));
     }
 
-    private ZippedFileStorageOutputStream getZipOutputStream(String optFileStorageLocation) throws OXException { // Only called when holding lock
+    private ZippedFileStorageOutputStream getZipOutputStream(Optional<String> optionalFileStorageLocation) throws OXException { // Only called when holding lock
         ZippedFileStorageOutputStream out = zipOutReference.get();
         if (out == null) {
             try {
                 out = ZippedFileStorageOutputStream.createDefaultZippedFileStorageOutputStream(fileStorage, Deflater.NO_COMPRESSION);
-                if (optFileStorageLocation != null) {
-                    // Continue writing to ZIP archive
-                    InputStream in = null;
-                    ZipArchiveInputStream zipIn = null;
-                    try {
-                        in = fileStorage.getFile(optFileStorageLocation);
-                        zipIn = new ZipArchiveInputStream(in, "UTF-8");
-                        for (ZipArchiveEntry entry; (entry = zipIn.getNextZipEntry()) != null;) {
-                            out.putArchiveEntry(entry);
-                            IOUtils.copy(zipIn, out, BUFFER_SIZE);
-                            out.closeArchiveEntry();
-                            out.flush();
+                // Continue writing to ZIP archive?
+                if (optionalFileStorageLocation.isPresent()) {
+                    // Transfer existent archive to newly created zipped output stream
+                    Optional<InputStream> optionalStream = getOptionalFileFromStorage(optionalFileStorageLocation.get());
+                    if (optionalStream.isPresent()) {
+                        InputStream in = null;
+                        ZipArchiveInputStream zipIn = null;
+                        try {
+                            in = optionalStream.get();
+                            zipIn = new ZipArchiveInputStream(in, "UTF-8");
+                            for (ZipArchiveEntry entry; (entry = zipIn.getNextZipEntry()) != null;) {
+                                out.putArchiveEntry(entry);
+                                IOUtils.copy(zipIn, out, BUFFER_SIZE);
+                                out.closeArchiveEntry();
+                                out.flush();
+                            }
+                        } finally {
+                            Streams.close(zipIn, in);
                         }
-                    } finally {
-                        Streams.close(zipIn, in);
                     }
                 }
-
                 zipOutReference.set(out);
             } catch (IOException e) {
                 throw DataExportExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }
         return out;
+    }
+
+    private Optional<InputStream> getOptionalFileFromStorage(String fileStorageLocation) throws OXException {
+        try {
+            return Optional.of(fileStorage.getFile(fileStorageLocation));
+        } catch (OXException e) {
+            if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                return Optional.empty();
+            }
+            throw e;
+        }
     }
 
     /**
