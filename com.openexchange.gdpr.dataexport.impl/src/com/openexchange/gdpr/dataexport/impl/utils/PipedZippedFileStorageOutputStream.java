@@ -82,6 +82,7 @@ public class PipedZippedFileStorageOutputStream extends ZippedFileStorageOutputS
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PipedZippedFileStorageOutputStream.class);
     }
 
+    private final FileStorage fileStorage;
     private final ServiceLookup services;
     private final BlockingAtomicReference<String> fileStorageLocationReference;
     private final ExceptionForwardingPipedOutputStream out;
@@ -96,7 +97,8 @@ public class PipedZippedFileStorageOutputStream extends ZippedFileStorageOutputS
      * @throws IOException If initialization fails
      */
     PipedZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel, ServiceLookup services) throws IOException {
-        super(fileStorage);
+        super();
+        this.fileStorage = fileStorage;
         this.services = services;
         fileStorageLocationReference = new BlockingAtomicReference<String>();
         out = initOutputStream();
@@ -408,7 +410,7 @@ public class PipedZippedFileStorageOutputStream extends ZippedFileStorageOutputS
         ExceptionForwardingPipedOutputStream out = new ExceptionForwardingPipedOutputStream(in);
 
         // Create writer task
-        FileStorage fileStorage= this.fileStorage;
+        FileStorage fileStorage = this.fileStorage;
         BlockingAtomicReference<String> fileStorageLocationReference = this.fileStorageLocationReference;
         AbstractTask<Void> fileStorageWriter = new DataExportFileStorageWriterTask(in, out, fileStorage, fileStorageLocationReference);
 
