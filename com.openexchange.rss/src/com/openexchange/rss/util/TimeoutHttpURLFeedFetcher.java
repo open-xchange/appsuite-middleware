@@ -56,6 +56,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -158,26 +160,26 @@ public class TimeoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Re
 
         // Examine redirect location
         try {
-            URL feedUrl = new URL(redirectUrl);
-            if (RssProperties.isDenied(feedUrl.getProtocol(), feedUrl.getHost(), feedUrl.getPort())) {
+            if (RssProperties.isDenied(redirectUrl)) {
                 // Deny redirecting to a local address
-                throw new FetcherException(feedUrl.toExternalForm() + " is not an allowed redirect URL");
+                throw new FetcherException(redirectUrl + " is not an allowed redirect URL");
             }
+            URI feedUrl = new URI(redirectUrl);
             if (originalAddressIsRemote) {
                 try {
                     InetAddress inetAddress = InetAddress.getByName(feedUrl.getHost());
                     if (InetAddresses.isInternalAddress(inetAddress)) {
                         // Deny redirecting to a local address
-                        throw new FetcherException(feedUrl.toExternalForm() + " is not an allowed redirect URL");
+                        throw new FetcherException(feedUrl.toString() + " is not an allowed redirect URL");
                     }
                 } catch (UnknownHostException e) {
                     // IP address of that host could not be determined
                     LOG.warn("Unknown host: {}. Skipping retrieving feed from redirect URL {}", feedUrl.getHost(), feedUrl, e);
-                    throw new IllegalArgumentException(feedUrl.toExternalForm() + " contains an unknown host", e);
+                    throw new IllegalArgumentException(feedUrl.toString() + " contains an unknown host", e);
                 }
             }
-            return feedUrl;
-        } catch (MalformedURLException e) {
+            return feedUrl.toURL();
+        } catch (URISyntaxException | MalformedURLException e) {
             LOG.warn("Redirect URL is invalid: {}", redirectUrl, e);
             throw new IllegalArgumentException("Redirect URL is invalid: " + redirectUrl, e);
         }
