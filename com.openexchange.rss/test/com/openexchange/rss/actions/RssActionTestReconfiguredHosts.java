@@ -50,17 +50,22 @@
 package com.openexchange.rss.actions;
 
 import static org.junit.Assert.assertEquals;
+
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.osgi.Services;
@@ -76,7 +81,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
  * @since v7.8.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class })
+@PrepareForTest({ Services.class, RssProperties.class, InetAddress.class })
 public class RssActionTestReconfiguredHosts {
 
     private RssAction action;
@@ -94,6 +99,9 @@ public class RssActionTestReconfiguredHosts {
         PowerMockito.mockStatic(Services.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+        PowerMockito.mockStatic(InetAddress.class);
+        InetAddress inetAddress = Mockito.mock(InetAddress.class);
+        Mockito.when(InetAddress.getByName(Matchers.anyString())).thenReturn(inetAddress);
 
         action = new RssAction();
 

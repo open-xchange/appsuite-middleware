@@ -50,17 +50,22 @@
 package com.openexchange.rss.actions;
 
 import static org.junit.Assert.assertEquals;
+
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.osgi.Services;
@@ -72,61 +77,69 @@ import com.sun.syndication.feed.synd.SyndFeed;
 /**
  * {@link RssActionTestReconfiguredPortsAndHosts}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin
+ *         Schneider</a>
  * @since v7.8.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class })
+@PrepareForTest({ Services.class, RssProperties.class, InetAddress.class })
 public class RssActionTestReconfiguredPortsAndHosts {
 
-    private RssAction action;
+	private RssAction action;
 
-    private ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
+	private ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
 
-    private TimeoutHttpURLFeedFetcher fetcher = Mockito.mock(TimeoutHttpURLFeedFetcher.class);
+	private TimeoutHttpURLFeedFetcher fetcher = Mockito.mock(TimeoutHttpURLFeedFetcher.class);
 
-    List<URL> urls = new ArrayList<URL>();
+	List<URL> urls = new ArrayList<URL>();
 
-    List<OXException> warnings = new ArrayList<OXException>();
+	List<OXException> warnings = new ArrayList<OXException>();
 
-    @Before
-    public void setUp() throws Exception {
-        PowerMockito.mockStatic(Services.class);
-        Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
-        Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+	@Before
+	public void setUp() throws Exception {
+		PowerMockito.mockStatic(Services.class);
+		Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
+		Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+		PowerMockito.mockStatic(InetAddress.class);
+		InetAddress inetAddress = Mockito.mock(InetAddress.class);
+		Mockito.when(InetAddress.getByName(Matchers.anyString())).thenReturn(inetAddress);
 
-        action = new RssAction();
+		action = new RssAction();
 
-        MockUtils.injectValueIntoPrivateField(action, "fetcher", fetcher);
-    }
+		MockUtils.injectValueIntoPrivateField(action, "fetcher", fetcher);
+	}
 
-    // tests bug 45402: SSRF at RSS feeds
-    @Test
-    public void testGetAcceptedFeeds_emptyHostListAndEmptyPortConfigured_AllowAll() throws OXException, MalformedURLException {
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn("");
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn("");
-        Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
+	// tests bug 45402: SSRF at RSS feeds
+	@Test
+	public void testGetAcceptedFeeds_emptyHostListAndEmptyPortConfigured_AllowAll()
+			throws OXException, MalformedURLException {
+		Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist",
+				RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn("");
+		Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports",
+				RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn("");
+		Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT))
+				.thenReturn(RssProperties.SCHEMES_DEFAULT);
 
-        urls.add(new URL("http://tollerLaden.de:80/this/is/nice"));
-        urls.add(new URL("http://tollerLaden.de:88/this/is/not/nice"));
-        urls.add(new URL("http://tollerLaden2.de/this/is/nice/too"));
-        urls.add(new URL("http://tollerLaden.de/this/is/nice/too/asFile.xml"));
-        urls.add(new URL("https://tollerLaden.de:80/this/is/secured/nice"));
-        urls.add(new URL("https://tollerLaden.de:88/this/is/secured/not/nice"));
-        urls.add(new URL("https://tollerLaden.de/this/is/secured/nice/too"));
-        urls.add(new URL("https://tollerLaden2.de/this/is/secured/nice/too/asFile.xml"));
-        urls.add(new URL("http://127.0.0.1:80/this/is/never/nice"));
-        urls.add(new URL("http://127.0.0.1:88/this/is/never/not/nice"));
-        urls.add(new URL("http://127.0.0.1/this/is/never/nice/too"));
-        urls.add(new URL("http://127.0.0.1/this/is/never/nice/too/asFile.xml"));
-        urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice"));
-        urls.add(new URL("https://127.0.0.1:88/this/is/secured/never/d/nice"));
-        urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too"));
-        urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too/asFile.xml"));
+		urls.add(new URL("http://tollerLaden.de:80/this/is/nice"));
+		urls.add(new URL("http://tollerLaden.de:88/this/is/not/nice"));
+		urls.add(new URL("http://tollerLaden2.de/this/is/nice/too"));
+		urls.add(new URL("http://tollerLaden.de/this/is/nice/too/asFile.xml"));
+		urls.add(new URL("https://tollerLaden.de:80/this/is/secured/nice"));
+		urls.add(new URL("https://tollerLaden.de:88/this/is/secured/not/nice"));
+		urls.add(new URL("https://tollerLaden.de/this/is/secured/nice/too"));
+		urls.add(new URL("https://tollerLaden2.de/this/is/secured/nice/too/asFile.xml"));
+		urls.add(new URL("http://127.0.0.1:80/this/is/never/nice"));
+		urls.add(new URL("http://127.0.0.1:88/this/is/never/not/nice"));
+		urls.add(new URL("http://127.0.0.1/this/is/never/nice/too"));
+		urls.add(new URL("http://127.0.0.1/this/is/never/nice/too/asFile.xml"));
+		urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice"));
+		urls.add(new URL("https://127.0.0.1:88/this/is/secured/never/d/nice"));
+		urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too"));
+		urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too/asFile.xml"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
+		List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
-        assertEquals(16, acceptedFeedsFromUrls.size());
-        assertEquals(0, warnings.size());
-    }
+		assertEquals(16, acceptedFeedsFromUrls.size());
+		assertEquals(0, warnings.size());
+	}
 }

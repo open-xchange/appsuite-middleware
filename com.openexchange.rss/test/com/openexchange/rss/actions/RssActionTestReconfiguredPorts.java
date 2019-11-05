@@ -51,13 +51,16 @@ package com.openexchange.rss.actions;
 
 import static org.junit.Assert.assertEquals;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -78,7 +81,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
  * @since v7.8.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ Services.class })
+@PrepareForTest({ Services.class, RssProperties.class, InetAddress.class })
 public class RssActionTestReconfiguredPorts {
 
     private ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
@@ -88,11 +91,14 @@ public class RssActionTestReconfiguredPorts {
     List<OXException> warnings = new ArrayList<OXException>();
 
     // tests bug 45402: SSRF at RSS feeds
-    @Test
-    public void testGetAcceptedFeeds_emptyPortListConfigured_allowAllPorts() throws OXException, MalformedURLException {
+     @Test
+     public void testGetAcceptedFeeds_emptyPortListConfigured_allowAllPorts() throws OXException, MalformedURLException, UnknownHostException {
         PowerMockito.mockStatic(Services.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+        PowerMockito.mockStatic(InetAddress.class);
+        InetAddress inetAddress = Mockito.mock(InetAddress.class);
+        Mockito.when(InetAddress.getByName(Matchers.anyString())).thenReturn(inetAddress);
 
         RssAction newAction = new RssAction();
         MockUtils.injectValueIntoPrivateField(newAction, "fetcher", Mockito.mock(TimeoutHttpURLFeedFetcher.class));
