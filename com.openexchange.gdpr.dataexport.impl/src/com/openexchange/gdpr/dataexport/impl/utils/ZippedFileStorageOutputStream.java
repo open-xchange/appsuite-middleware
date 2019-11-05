@@ -32,7 +32,7 @@ public abstract class ZippedFileStorageOutputStream extends OutputStream {
      * @throws IOException If initialization fails
      */
     public static ZippedFileStorageOutputStream createDefaultZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel) throws IOException {
-        return createZippedFileStorageOutputStream(false, fileStorage, compressionLevel, null);
+        return createZippedFileStorageOutputStream(false, fileStorage, compressionLevel, AppendingFileStorageOutputStream.DEFAULT_IN_MEMORY_THRESHOLD, null);
     }
 
     /**
@@ -41,34 +41,31 @@ public abstract class ZippedFileStorageOutputStream extends OutputStream {
      * @param piped Whether to use a piped mechanism to transport bytes into file storage
      * @param fileStorage The file storage to write to
      * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
+     * @param bufferSize The size for the in-memory buffer; if that buffer size is exceeded data will be flushed into file storage
+     *                   (default is {@link AppendingFileStorageOutputStream#DEFAULT_IN_MEMORY_THRESHOLD})
      * @param services The service look-up
      * @return The zipped output stream
      * @throws IOException If initialization fails
      */
-    public static ZippedFileStorageOutputStream createZippedFileStorageOutputStream(boolean piped, FileStorage fileStorage, int compressionLevel, ServiceLookup services) throws IOException {
-        return piped ? new PipedZippedFileStorageOutputStream(fileStorage, compressionLevel, services) : new AppendingZippedFileStorageOutputStream(fileStorage, compressionLevel);
+    public static ZippedFileStorageOutputStream createZippedFileStorageOutputStream(boolean piped, FileStorage fileStorage, int compressionLevel, int bufferSize, ServiceLookup services) throws IOException {
+        return piped ? new PipedZippedFileStorageOutputStream(fileStorage, compressionLevel, services) : new AppendingZippedFileStorageOutputStream(fileStorage, compressionLevel, bufferSize);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    protected final FileStorage fileStorage;
-
     /**
      * Initializes a new {@link ZippedFileStorageOutputStream}.
-     *
-     * @param fileStorage The file storage to write to
      */
-    protected ZippedFileStorageOutputStream(FileStorage fileStorage) {
+    protected ZippedFileStorageOutputStream() {
         super();
-        this.fileStorage = fileStorage;
     }
 
     // --------------------------------------------- Init streams---------------------------------------------------------------------------
 
     /**
-     * Initializes a zipped output stream using given output stream and compression level.
+     * Initializes an {@link ZipArchiveOutputStream Apache zipped output stream} using given output stream and compression level.
      *
-     * @param out The output stream to zip
+     * @param out The output stream to zip to
      * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
      * @return
      */

@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.imageio.ImageIO;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
@@ -245,19 +246,9 @@ public final class ServerConfig implements Reloadable {
         configReference = new AtomicReference<>(newDefaultConfig());
     }
 
-    /** The name of the properties file. */
-    private static final String FILENAME = "server.properties";
-
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        Properties newProps = configService.getFile(FILENAME);
-        if (null == newProps) {
-            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
-            configReference.set(newDefaultConfig());
-        } else {
-            configReference.set(new ConfigBuilder(newProps).init().build());
-            LOG.info("Successfully read configuration file {}.", FILENAME);
-        }
+        initialize(configService);
 
         try {
             AttachmentConfig attachmentConfig = AttachmentConfig.getInstance();
@@ -286,6 +277,14 @@ public final class ServerConfig implements Reloadable {
         LoginWriter.invalidateRandomTokenEnabled();
     }
 
+    /** The name of the properties file. */
+    private static final String FILENAME = "server.properties";
+
+    /**
+     * Initializes this server config instance.
+     *
+     * @param confService The configuration service to use
+     */
     public void initialize(ConfigurationService confService) {
         Properties newProps = confService.getFile(FILENAME);
         if (null == newProps) {
@@ -295,8 +294,15 @@ public final class ServerConfig implements Reloadable {
             configReference.set(new ConfigBuilder(newProps).init().build());
             LOG.info("Successfully read configuration file {}.", FILENAME);
         }
+        File tmpDir = getTmpDir();
+        ImageIO.setCacheDirectory(tmpDir);
+        System.setProperty("java.io.tmpdir", tmpDir.getPath());
+        System.setProperty("jna.tmpdir", tmpDir.getPath());
     }
 
+    /**
+     * Shuts-down this server config instance.
+     */
     public void shutdown() {
         configReference.set(newDefaultConfig());
     }

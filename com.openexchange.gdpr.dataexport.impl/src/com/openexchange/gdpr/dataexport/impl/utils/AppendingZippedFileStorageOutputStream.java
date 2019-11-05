@@ -59,9 +59,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy;
 import com.openexchange.filestore.FileStorage;
 
-
 /**
- * {@link AppendingZippedFileStorageOutputStream}
+ * {@link AppendingZippedFileStorageOutputStream} - The zipped output stream that appends data to a file storage location successively.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
@@ -76,10 +75,12 @@ public class AppendingZippedFileStorageOutputStream extends ZippedFileStorageOut
      *
      * @param fileStorage The file storage to write to
      * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
+     * @param bufferSize The size for the in-memory buffer; if that buffer size is exceeded data will be flushed into file storage
+     *                   (default is {@link AppendingFileStorageOutputStream#DEFAULT_IN_MEMORY_THRESHOLD})
      */
-    AppendingZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel) {
-        super(fileStorage);
-        out = new AppendingFileStorageOutputStream(fileStorage);
+    AppendingZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel, int bufferSize) {
+        super();
+        out = new AppendingFileStorageOutputStream(bufferSize, fileStorage);
         zipOut = initZipArchiveOutputStream(out, compressionLevel);
     }
 
