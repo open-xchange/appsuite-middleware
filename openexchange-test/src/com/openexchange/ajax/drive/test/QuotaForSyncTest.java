@@ -63,12 +63,12 @@ import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.DriveAction;
-import com.openexchange.testing.httpclient.models.DriveActionsResponse;
 import com.openexchange.testing.httpclient.models.DriveExtendedActionsResponse;
 import com.openexchange.testing.httpclient.models.DriveQuota;
 import com.openexchange.testing.httpclient.models.DriveQuotaResponse;
 import com.openexchange.testing.httpclient.models.DriveSubfoldersResponse;
 import com.openexchange.testing.httpclient.models.DriveSyncFilesBody;
+import com.openexchange.testing.httpclient.models.DriveSyncFolderResponse;
 import com.openexchange.testing.httpclient.models.DriveSyncFoldersBody;
 import com.openexchange.testing.httpclient.modules.ConfigApi;
 import com.openexchange.testing.httpclient.modules.DriveApi;
@@ -101,7 +101,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaNotSent() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, I(2), "2", null, null, null);
+        DriveSyncFolderResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, I(2), "2", null, null, null);
 
         assertNull(syncFolders.getError());
         for (DriveAction action : syncFolders.getData().getActions()) {
@@ -113,7 +113,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaFalse() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, I(2), "2", null, Boolean.FALSE, null);
+        DriveSyncFolderResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, I(2), "2", null, Boolean.FALSE, null);
 
         assertNull(syncFolders.getError());
         for (DriveAction action : syncFolders.getData().getActions()) {
@@ -126,7 +126,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaRequested() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, I(2), "2", null, Boolean.TRUE, null);
+        DriveSyncFolderResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, I(2), "2", null, Boolean.TRUE, null);
         assertNull(syncFolders.getError());
         //        assertNotNull(syncFolders.getData().getQuota());
     }
@@ -135,7 +135,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFolders_quotaRequestedButWrongVersion_noQuotaReturned() throws ApiException {
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, null, null, null, Boolean.TRUE, null);
+        DriveSyncFolderResponse syncFolders = driveApi.syncFolders(apiClient.getSession(), infostoreFolder, body, null, null, null, Boolean.TRUE, null);
         assertNull(syncFolders.getError());
         //        assertNull(syncFolders.getData().getQuota());
     }
