@@ -49,20 +49,20 @@
 
 package com.openexchange.ajax.drive.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static com.openexchange.java.Autoboxing.I;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.testing.httpclient.models.DriveActionsResponse;
 import com.openexchange.testing.httpclient.models.DriveExtendedActionsResponse;
 import com.openexchange.testing.httpclient.models.DriveSettingsResponse;
 import com.openexchange.testing.httpclient.models.DriveSyncFilesBody;
+import com.openexchange.testing.httpclient.models.DriveSyncFolderResponse;
 import com.openexchange.testing.httpclient.models.DriveSyncFoldersBody;
 import com.openexchange.testing.httpclient.modules.DriveApi;
 
@@ -97,7 +97,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
         String folderName = "PathToRootTest_syncFoldersRequest_" + UUID.randomUUID().toString();
         String folderId = createFolderForTest(folderName);
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse response = driveApi.syncFolders(apiClient.getSession(), folderId, body, I(8), null, null, null, null);
+        DriveSyncFolderResponse response = driveApi.syncFolders(apiClient.getSession(), folderId, body, I(8), null, null, null, null);
         assertNotNull(response);
         checkResponse(response, folderName);
     }
@@ -107,7 +107,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
         String folderName = "PathToRootTest_syncFolderRequest_" + UUID.randomUUID().toString();
         String folderId = createFolderForTest(folderName);
         DriveSyncFoldersBody body = new DriveSyncFoldersBody();
-        DriveActionsResponse response = driveApi.syncFolders(apiClient.getSession(), folderId, body, I(8), null, null, null, null);
+        DriveSyncFolderResponse response = driveApi.syncFolders(apiClient.getSession(), folderId, body, I(8), null, null, null, null);
         assertNotNull(response);
         checkResponse(response, folderName);
     }
@@ -156,7 +156,7 @@ public class PathToRootTest extends AbstractAPIClientSession {
         return path;
     }
 
-    private void checkResponse(DriveActionsResponse response, String expectedFolderName) {
+    private void checkResponse(DriveSyncFolderResponse response, String expectedFolderName) {
         assertNotNull(response.getData());
         String pathToRoot = response.getData().getPathToRoot();
         assertTrue(Strings.isNotEmpty(pathToRoot));

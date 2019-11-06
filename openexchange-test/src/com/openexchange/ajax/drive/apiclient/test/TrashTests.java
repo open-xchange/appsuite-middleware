@@ -63,7 +63,7 @@ import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.DriveActionsResponse;
+import com.openexchange.testing.httpclient.models.DriveUploadResponse;
 import com.openexchange.testing.httpclient.models.FoldersResponse;
 import com.openexchange.testing.httpclient.models.TrashContent;
 import com.openexchange.testing.httpclient.models.TrashFolderResponse;
@@ -101,7 +101,7 @@ public class TrashTests extends AbstractAPIClientSession {
         driveApi = new DriveApi(client);
         driveApi.emptyTrash(folderApi.getSession(), rootId);
         byte[] body = new byte[4];
-        DriveActionsResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, I(1), null, null, "text/plain", L(0), new Long(4), null, null, null, null, null);
+        DriveUploadResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, I(1), null, null, "text/plain", L(0), new Long(4), null, null, null, null, null);
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
         folderManager.createFolder(trashId, "trashedFolder", "infostore");

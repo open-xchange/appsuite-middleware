@@ -16,10 +16,12 @@ DriveSyncFoldersBody:
   $ref: ./DriveSyncFoldersBody.yaml
 DriveSyncErrorData:
   $ref: ./DriveSyncErrorData.yaml
+DriveSyncFolderResponse:
+  $ref: ./DriveSyncFolderResponse.yaml
 DriveAction:
   $ref: ./DriveAction.yaml
-DriveActionsResponse:
-  $ref: ./DriveActionsResponse.yaml
+DriveUploadResponse:
+  $ref: ./DriveUploadResponse.yaml
 DriveSyncFilesBody:
   $ref: ./DriveSyncFilesBody.yaml
 #DirectoryMetadata and FileMetadata use data structures from OX HTTP API, so import the necessary models
@@ -68,6 +70,8 @@ DriveJumpData:
   $ref: ./DriveJumpData.yaml
 DriveJumpResponse:
   $ref: ./DriveJumpResponse.yaml
+DriveListenResponse:
+  $ref: ./DriveListenResponse.yaml
 DriveSubfoldersResponse:
   $ref: ./DriveSubfoldersResponse.yaml
 DriveShareTargetData:

@@ -65,7 +65,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DriveActionsResponse'
+              $ref: '#/components/schemas/DriveSyncFolderResponse'
     x-ox-examples:
       - Example1: null
         description: Basic example

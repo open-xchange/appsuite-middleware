@@ -4,21 +4,20 @@ properties:
   data:
     type: object
     description: >-
-      An array containing the actions the client should execute for
-      synchronization.
-
       If `diagnostics` parameter is set, this is a JSON object with the fields
-      `actions` (array of actions to execute) and `diagnostics` (contains
-      diagnostics trace).
-
-      If `quota` parameter is set, this is a JSON object with the fields
-      `actions` (array of actions to execute) and `quota` (contains quota
-      information).
+      `actions` (array of actions to execute), `diagnostics` (contains
+      diagnostics trace), `pathToRoot`(Path to internal 'real' root folder from given rootFolderId) 
+      and `quota`(quota limits and usage).
     properties:
       actions:
         type: array
         items:
           $ref: '#/components/schemas/DriveAction'
+      diagnostics:
+        type: string
+        description: The diagnostics trace.
       pathToRoot:
         type: string
         description: Path to internal 'real' root folder from given rootFolderId
+      quota:
+        $ref: '#/components/schemas/DriveQuotaData'

@@ -1,0 +1,10 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    type: array
+    description: >-
+      An array containing the actions the client should execute for
+      synchronization.
+    items:
+      $ref: '#/components/schemas/DriveAction'

@@ -54,7 +54,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DriveActionsResponse'
+              $ref: '#/components/schemas/DriveListenResponse'
     x-ox-examples:
       - Example1: null
         description: Basic example
@@ -118,7 +118,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DriveActionsResponse'
+              $ref: '#/components/schemas/DriveListenResponse'
     x-ox-examples:
       - Example1: null
         description: Basic example

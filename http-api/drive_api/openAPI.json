@@ -274,7 +274,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/DriveActionsResponse"
+                  "$ref" : "#/components/schemas/DriveUploadResponse"
                 }
               }
             }
@@ -415,7 +415,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/DriveActionsResponse"
+                  "$ref" : "#/components/schemas/DriveSyncFolderResponse"
                 }
               }
             }
@@ -1038,7 +1038,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/DriveActionsResponse"
+                  "$ref" : "#/components/schemas/DriveSyncFolderResponse"
                 }
               }
             }
@@ -1285,7 +1285,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/DriveActionsResponse"
+                  "$ref" : "#/components/schemas/DriveListenResponse"
                 }
               }
             }
@@ -1328,7 +1328,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/DriveActionsResponse"
+                  "$ref" : "#/components/schemas/DriveListenResponse"
                 }
               }
             }
@@ -2075,6 +2075,77 @@
           }
         }
       },
+      "DriveSyncFolderResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "object",
+            "description" : "If `diagnostics` parameter is set, this is a JSON object with the fields `actions` (array of actions to execute), `diagnostics` (contains diagnostics trace), `pathToRoot`(Path to internal 'real' root folder from given rootFolderId)  and `quota`(quota limits and usage).",
+            "properties" : {
+              "actions" : {
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/components/schemas/DriveAction"
+                }
+              },
+              "diagnostics" : {
+                "type" : "string",
+                "description" : "The diagnostics trace."
+              },
+              "pathToRoot" : {
+                "type" : "string",
+                "description" : "Path to internal 'real' root folder from given rootFolderId"
+              },
+              "quota" : {
+                "$ref" : "#/components/schemas/DriveQuotaData"
+              }
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see \"com.openexchange.ajax.response.includeStackTraceOnError\" in \"server.properties\") this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data."
+          }
+        }
+      },
       "DriveAction" : {
         "type" : "object",
         "properties" : {
@@ -2185,23 +2256,14 @@
           }
         }
       },
-      "DriveActionsResponse" : {
+      "DriveUploadResponse" : {
         "type" : "object",
         "properties" : {
           "data" : {
-            "type" : "object",
-            "description" : "An array containing the actions the client should execute for synchronization.\nIf `diagnostics` parameter is set, this is a JSON object with the fields `actions` (array of actions to execute) and `diagnostics` (contains diagnostics trace).\nIf `quota` parameter is set, this is a JSON object with the fields `actions` (array of actions to execute) and `quota` (contains quota information).",
-            "properties" : {
-              "actions" : {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/components/schemas/DriveAction"
-                }
-              },
-              "pathToRoot" : {
-                "type" : "string",
-                "description" : "Path to internal 'real' root folder from given rootFolderId"
-              }
+            "type" : "array",
+            "description" : "An array containing the actions the client should execute for synchronization.\nFor the case that diagnostics parameter is true another schema definition is needed. This case is currently not realizable with OpenAPI.",
+            "items" : {
+              "$ref" : "#/components/schemas/DriveAction"
             }
           },
           "error" : {
@@ -3727,6 +3789,61 @@
         "properties" : {
           "data" : {
             "$ref" : "#/components/schemas/DriveJumpData"
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style).",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see \"com.openexchange.ajax.response.includeStackTraceOnError\" in \"server.properties\") this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data."
+          }
+        }
+      },
+      "DriveListenResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "array",
+            "description" : "An array containing the actions the client should execute for synchronization.",
+            "items" : {
+              "$ref" : "#/components/schemas/DriveAction"
+            }
           },
           "error" : {
             "type" : "string",
