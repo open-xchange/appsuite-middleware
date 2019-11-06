@@ -67,7 +67,7 @@ public class RegionalSettingsUtil {
 
     /**
      * Gets a date format for the specified locale, considering customized regional settings if configured.
-     * 
+     *
      * @param regionalSettings The regional settings to consider, or <code>null</code> if not configured
      * @param style The formatting style. @see {@link DateFormat#getDateInstance(int, Locale)}
      * @param locale The locale to use
@@ -84,10 +84,10 @@ public class RegionalSettingsUtil {
         }
         return DateFormat.getDateInstance(style, locale);
     }
-    
+
     /**
      * Gets a time format for the specified locale, considering customized regional settings if configured.
-     * 
+     *
      * @param regionalSettings The regional settings to consider, or <code>null</code> if not configured
      * @param style The formatting style. @see {@link DateFormat#getTimeInstance(int, Locale)}
      * @param locale The locale to use
@@ -99,7 +99,7 @@ public class RegionalSettingsUtil {
             try {
                 return new SimpleDateFormat(pattern);
             } catch (Exception e) {
-                LOG.error("Error applying time format {}, falling back to defaults for locale {}.", pattern, locale, e);
+                LOG.error("Error applying time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
             }
         }
         return DateFormat.getTimeInstance(style, locale);
@@ -107,7 +107,7 @@ public class RegionalSettingsUtil {
 
     /**
      * Gets a date/time format for the specified locale, considering customized regional settings if configured.
-     * 
+     *
      * @param regionalSettings The regional settings to consider, or <code>null</code> if not configured
      * @param dateStyle The formatting style. @see {@link DateFormat#getDateInstance(int, Locale)}
      * @param timeStyle The formatting style. @see {@link DateFormat#getTimeInstance(int, Locale)}
