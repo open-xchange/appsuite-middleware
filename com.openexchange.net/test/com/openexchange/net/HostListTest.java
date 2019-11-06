@@ -369,4 +369,30 @@ public class HostListTest {
         }
     }
 
+    @Test
+    public void testForBug67980() {
+        try {
+            HostList hl = HostList.valueOf("127.0.0.1-127.255.255.255,localhost");
+
+            String shl = hl.toString();
+            assertNotNull("Host-list's string representation is null", shl);
+
+            /*-
+             * xip.io and nip.io is a magic domain name that provides wildcard DNS
+             * for any IP address. Say your LAN IP address is 10.0.0.1.
+             * Using xip.io,
+             *
+             *          10.0.0.1.xip.io   resolves to   10.0.0.1
+             *      www.10.0.0.1.xip.io   resolves to   10.0.0.1
+             *   mysite.10.0.0.1.xip.io   resolves to   10.0.0.1
+             *  foo.bar.10.0.0.1.xip.io   resolves to   10.0.0.1
+             */
+
+            assertTrue(hl.contains("127.0.0.1.nip.io")); // All IPv4
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 }
