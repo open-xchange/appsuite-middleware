@@ -174,8 +174,11 @@ public class DataExportSinkImpl implements DataExportSink {
                     }
                 }
                 zipOutReference.set(out);
+                out = null; // Avoid premature closing
             } catch (IOException e) {
                 throw DataExportExceptionCode.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(out);
             }
         }
         return out;
