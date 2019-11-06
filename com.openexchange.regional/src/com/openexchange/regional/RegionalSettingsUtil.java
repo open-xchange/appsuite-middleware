@@ -81,7 +81,12 @@ public class RegionalSettingsUtil {
             try {
                 return new SimpleDateFormat(pattern);
             } catch (Exception e) {
-                LoggerHolder.LOG.error("Error applying date format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
+                if (LoggerHolder.LOG.isDebugEnabled()) {
+                    // Log exception, too
+                    LoggerHolder.LOG.info("Could not apply date format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
+                } else {
+                    LoggerHolder.LOG.info("Could not apply date format \"{}\", falling back to defaults for locale {}.", pattern, locale);
+                }
             }
         }
         return DateFormat.getDateInstance(style, locale);
@@ -101,7 +106,12 @@ public class RegionalSettingsUtil {
             try {
                 return new SimpleDateFormat(pattern);
             } catch (Exception e) {
-                LoggerHolder.LOG.error("Error applying time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
+                if (LoggerHolder.LOG.isDebugEnabled()) {
+                    // Log exception, too
+                    LoggerHolder.LOG.info("Could not apply time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
+                } else {
+                    LoggerHolder.LOG.info("Could not apply time format \"{}\", falling back to defaults for locale {}.", pattern, locale);
+                }
             }
         }
         return DateFormat.getTimeInstance(style, locale);
@@ -130,7 +140,12 @@ public class RegionalSettingsUtil {
             try {
                 return new SimpleDateFormat(datePattern + ' ' + timePattern);
             } catch (Exception e) {
-                LoggerHolder.LOG.error("Error applying date/time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
+                if (LoggerHolder.LOG.isDebugEnabled()) {
+                    // Log exception, too
+                    LoggerHolder.LOG.info("Could not apply date/time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
+                } else {
+                    LoggerHolder.LOG.info("Could not apply date/time format \"{}\", falling back to defaults for locale {}.", pattern, locale);
+                }
             }
         }
         return SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
