@@ -93,6 +93,9 @@ public class InitService extends OIDCServlet {
             return;
         }
         try {
+            // Create a new HttpSession if missing
+            request.getSession(true);
+
             String redirectURI = this.getRedirectURI(flow, request, response);
             OIDCTools.buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
         } catch (OXException e) {
@@ -118,6 +121,9 @@ public class InitService extends OIDCServlet {
         }
 
         try {
+            // Create a new HttpSession if missing
+            request.getSession(true);
+
             String redirectURI = provider.getLoginRedirectRequest(request, response);
             OIDCTools.buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
         } catch (OXException e) {
