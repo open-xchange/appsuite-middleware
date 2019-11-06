@@ -451,7 +451,7 @@ public final class IMAPCommandsCollection {
                     if (created) {
                         // Delete probe folder
                         sb.setLength(0);
-                        performCommand(p, sb.append("DELETE ").append(mboxName).toString());
+                        performCommand(p, sb.append("DELETE ").append(mboxName).toString(), true);
                     }
                 }
             }
@@ -1433,7 +1433,7 @@ public final class IMAPCommandsCollection {
                 public Object doCommand(final IMAPProtocol p) {
                     final Argument args = new Argument();
                     args.writeString(BASE64MailboxEncoder.encode(folder));
-                    performCommand(p, (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args);
+                    performCommand(p, (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE"), args, true);
                     return null;
                 }
             });
@@ -1781,7 +1781,7 @@ public final class IMAPCommandsCollection {
                 Next: for (int i = 0; i < args.length; i++) {
 
                     final String command = String.format(format, args[i], "-", ALL_COLOR_LABELS);
-                    r = performCommand(p, command);
+                    r = performCommand(p, command, true);
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         notifyResponseHandlers(r, p);
@@ -1963,7 +1963,7 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    final Response[] r = performCommand(protocol, COMMAND_CLOSE);
+                    final Response[] r = performCommand(protocol, COMMAND_CLOSE, true);
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -1992,7 +1992,7 @@ public final class IMAPCommandsCollection {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    final Response[] r = performCommand(protocol, COMMAND_NOOP);
+                    final Response[] r = performCommand(protocol, COMMAND_NOOP, true);
                     /*
                      * Grab last response that should indicate an OK
                      */
@@ -2379,7 +2379,7 @@ public final class IMAPCommandsCollection {
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 String command = "EXPUNGE";
-                final Response[] r = performCommand(p, command);
+                final Response[] r = performCommand(p, command, true);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     return Boolean.TRUE;
@@ -3636,7 +3636,7 @@ public final class IMAPCommandsCollection {
                 Response response = null;
                 Next: for (int i = 0; i < args.length; i++) {
                     final String command = String.format(TEMPL_UID_EXPUNGE, args[i]);
-                    r = performCommand(p, command);
+                    r = performCommand(p, command, true);
                     response = r[r.length - 1];
                     if (response.isOK()) {
                         continue Next;
@@ -3685,7 +3685,7 @@ public final class IMAPCommandsCollection {
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final String command = new StringBuilder("SELECT ").append(prepareStringArgument(imapFolder.getFullName())).toString();
-                final Response[] r = performCommand(p, command);
+                final Response[] r = performCommand(p, command, false);
                 final Response response = r[r.length - 1];
                 Boolean retval = Boolean.FALSE;
                 if (response.isOK()) {
@@ -4060,8 +4060,20 @@ public final class IMAPCommandsCollection {
      * @param command The command
      * @return The responses
      */
-    public static Response[] performCommand(final IMAPProtocol p, final String command) {
-        return performCommand(p, command, null);
+    public static Response[] performCommand(IMAPProtocol p, String command) {
+        return performCommand(p, command, false);
+    }
+
+    /**
+     * Performs specified command without arguments
+     *
+     * @param p The IMAP protocol
+     * @param command The command
+     * @param discardResponses Whether to discard regular untagged responses
+     * @return The responses
+     */
+    public static Response[] performCommand(IMAPProtocol p, String command, boolean discardResponses) {
+        return performCommand(p, command, null, discardResponses);
     }
 
     /**
@@ -4072,7 +4084,42 @@ public final class IMAPCommandsCollection {
      * @param args The argument
      * @return The responses
      */
-    public static Response[] performCommand(final IMAPProtocol p, final String command, final Argument args) {
+    public static Response[] performCommand(IMAPProtocol p, String command, Argument args) {
+        return performCommand(p, command, args, false);
+    }
+
+    /**
+     * Performs specified command using given arguments
+     *
+     * @param p The IMAP protocol
+     * @param command The command
+     * @param args The argument
+     * @param discardResponses Whether to discard regular untagged responses
+     * @return The responses
+     */
+    public static Response[] performCommand(IMAPProtocol p, String command, Argument args, boolean discardResponses) {
+        if (!discardResponses) {
+            return performCommand0(p, command, args);
+        }
+
+        // Suppress IMAP responses
+        LogProperties.put(LogProperties.Name.IMAP_DISCARD_RESPONSES, "true");
+        try {
+            return performCommand0(p, command, args);
+        } finally {
+            LogProperties.remove(LogProperties.Name.IMAP_DISCARD_RESPONSES);
+        }
+    }
+
+    /**
+     * Performs specified command using given arguments
+     *
+     * @param p The IMAP protocol
+     * @param command The command
+     * @param args The argument
+     * @return The responses
+     */
+    private static Response[] performCommand0(IMAPProtocol p, String command, Argument args) {
         final long start = System.currentTimeMillis();
         final Response[] responses = p.command(command, args);
         final long time = System.currentTimeMillis() - start;
