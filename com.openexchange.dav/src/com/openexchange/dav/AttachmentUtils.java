@@ -57,6 +57,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.resources.FolderCollection;
@@ -87,6 +89,9 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @since v7.8.1
  */
 public class AttachmentUtils {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentUtils.class);
+
 
     private static final AttachmentMetadataFactory FACTORY = new AttachmentMetadataFactory();
 
@@ -177,17 +182,39 @@ public class AttachmentUtils {
      * @throws IllegalArgumentException If path isn't valid
      */
     public static AttachmentMetadata decodeURI(URI uri, ConfigViewFactory configViewFactory) throws IllegalArgumentException {
-        String path = uri.getPath();
-        if (Strings.isEmpty(path)) {
-            throw new IllegalArgumentException(String.valueOf(uri));
+        String name;
+        {
+            /*
+             * Get URI and remove servlet prefix
+             */
+            String path = null == uri ? null : uri.getPath();
+            if (Strings.isEmpty(path)) {
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
+            path = removePathPrefixFromPath(configViewFactory, path);
+            name = removePrefixFromPath("/attachments", path);
+            if (path.equals(name)) {
+                /*
+                 * URI does not contain "attachments" sub-path
+                 */
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
         }
-        path = removePathPrefixFromPath(configViewFactory, path);
-        path = removePrefixFromPath("/attachments", path);
-        int index = path.indexOf('/');
+        /*
+         * Remove leading '/'
+         */
+        int index = name.indexOf('/');
         if (-1 != index) {
-            path = path.substring(0, index);
+            name = name.substring(index + 1);
         }
-        return AttachmentUtils.decodeName(path);
+
+        if (Strings.isEmpty(name)) {
+            // Log URI instead of empty name  
+            IllegalArgumentException e = new IllegalArgumentException(String.valueOf(uri));
+            LOGGER.trace("URI \"{}\" could not be decoded", String.valueOf(uri), e);
+            throw e;
+        }
+        return AttachmentUtils.decodeName(name);
     }
 
     public static String encodeName(AttachmentMetadata metadata) {
