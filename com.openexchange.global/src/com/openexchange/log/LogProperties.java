@@ -370,7 +370,13 @@ public final class LogProperties {
         /**
          * com.openexchange.rt2.filename
          */
-        RT2_FILENAME("com.openexchange.rt2.filename")        
+        RT2_FILENAME("com.openexchange.rt2.filename"),
+        /**
+         * mail.imap.discardresponses
+         * <p>
+         * A special log property that controls whether regular untagged IMAP responses are supposed to be discarded
+         */
+        IMAP_DISCARD_RESPONSES("mail.imap.discardresponses"),
         ;
 
         private final String name;
