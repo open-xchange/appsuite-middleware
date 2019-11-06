@@ -4143,10 +4143,9 @@ public final class IMAPCommandsCollection {
      * @return The responses
      */
     private static Response[] performCommand0(IMAPProtocol p, String command, Argument args) {
-        final long start = System.currentTimeMillis();
-        final Response[] responses = p.command(command, args);
-        final long time = System.currentTimeMillis() - start;
-        mailInterfaceMonitor.addUseTime(time);
+        long start = System.currentTimeMillis();
+        Response[] responses = p.command(command, args);
+        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         return responses;
     }
 
@@ -4155,7 +4154,7 @@ public final class IMAPCommandsCollection {
         final BODYSTRUCTURE bodystructure;
         final String sectionId;
 
-        BodyAndId(final BODYSTRUCTURE bodystructure, final String sectionId) {
+        BodyAndId(BODYSTRUCTURE bodystructure, String sectionId) {
             super();
             this.bodystructure = bodystructure;
             this.sectionId = sectionId;
