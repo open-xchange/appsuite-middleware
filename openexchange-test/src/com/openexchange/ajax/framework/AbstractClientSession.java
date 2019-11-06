@@ -223,7 +223,7 @@ public class AbstractClientSession {
                 newClient = new AJAXClient(user, client);
             }
         } catch (Exception e) {
-            LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());
+            LOG.error("Could not generate new client for user {} in context {}.", user.getUser(), user.getContext(), e);
             throw new OXException();
         }
         return newClient;
