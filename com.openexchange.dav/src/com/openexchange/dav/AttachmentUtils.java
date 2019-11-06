@@ -57,8 +57,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.resources.FolderCollection;
@@ -90,9 +88,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class AttachmentUtils {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentUtils.class);
-
-
     private static final AttachmentMetadataFactory FACTORY = new AttachmentMetadataFactory();
 
     /**
@@ -209,10 +204,7 @@ public class AttachmentUtils {
         }
 
         if (Strings.isEmpty(name)) {
-            // Log URI instead of empty name  
-            IllegalArgumentException e = new IllegalArgumentException(String.valueOf(uri));
-            LOGGER.trace("URI \"{}\" could not be decoded", String.valueOf(uri), e);
-            throw e;
+            throw new IllegalArgumentException(String.valueOf(uri));
         }
         return AttachmentUtils.decodeName(name);
     }
