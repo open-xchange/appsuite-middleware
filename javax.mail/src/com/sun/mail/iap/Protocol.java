@@ -445,7 +445,7 @@ public class Protocol {
      */
     public synchronized Response[] executeCommand(String command, Argument args) {
 	commandStart(command);
-	List<Response> v = new LinkedList<Response>();
+	List<Response> v = null;
 	boolean done = false;
 	String tag = null;
 	Response r = null;
@@ -456,11 +456,14 @@ public class Protocol {
 	long start = measure ? System.currentTimeMillis() : 0L;
 	try {
 	    tag = writeCommand(command, args);
+	    v = new java.util.ArrayList<Response>(32);
 	} catch (LiteralException lex) {
+	    v = new java.util.ArrayList<Response>(1);
 	    v.add(lex.getResponse());
 	    done = true;
 	} catch (Exception ex) {
 	    // Convert this into a BYE response
+	    v = new java.util.ArrayList<Response>(1);
 	    v.add(Response.byeResponse(ex));
 	    done = true;
 	}
@@ -489,18 +492,19 @@ public class Protocol {
 	    }
 
 	    // If this is a matching command completion response, we are done
-	    if (r.isTagged() && r.getTag().equals(tag)) {
+	    boolean tagged = r.isTagged();
+        if (tagged && r.getTag().equals(tag)) {
 	        v.add(r);
 	        done = true;
 	        taggedResp = r;
 	    } else {
-	        if (discardResponses && !r.isSynthetic() && (r instanceof IMAPResponse)) {
+	        if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
 	            IMAPResponse imapResponse = (IMAPResponse) r;
 	            if (lowerCaseCommand == null) {
                     lowerCaseCommand = asciiLowerCase(command);
                 }
                 String key = asciiLowerCase(imapResponse.getKey());
-                if (key == null || !lowerCaseCommand.contains(key)) {
+                if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
                     v.add(r);
                 }
             } else {
