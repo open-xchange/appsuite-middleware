@@ -150,8 +150,9 @@ public class DataExportSinkImpl implements DataExportSink {
     private ZippedFileStorageOutputStream getZipOutputStream(Optional<String> optionalFileStorageLocation) throws OXException { // Only called when holding lock
         ZippedFileStorageOutputStream out = zipOutReference.get();
         if (out == null) {
+            ZippedFileStorageOutputStream newOut = null;
             try {
-                out = ZippedFileStorageOutputStream.createDefaultZippedFileStorageOutputStream(fileStorage, Deflater.NO_COMPRESSION);
+                newOut = ZippedFileStorageOutputStream.createDefaultZippedFileStorageOutputStream(fileStorage, Deflater.NO_COMPRESSION);
                 // Continue writing to ZIP archive?
                 if (optionalFileStorageLocation.isPresent()) {
                     // Transfer existent archive to newly created zipped output stream
@@ -163,22 +164,23 @@ public class DataExportSinkImpl implements DataExportSink {
                             in = optionalStream.get();
                             zipIn = new ZipArchiveInputStream(in, "UTF-8");
                             for (ZipArchiveEntry entry; (entry = zipIn.getNextZipEntry()) != null;) {
-                                out.putArchiveEntry(entry);
-                                IOUtils.copy(zipIn, out, BUFFER_SIZE);
-                                out.closeArchiveEntry();
-                                out.flush();
+                                newOut.putArchiveEntry(entry);
+                                IOUtils.copy(zipIn, newOut, BUFFER_SIZE);
+                                newOut.closeArchiveEntry();
+                                newOut.flush();
                             }
                         } finally {
                             Streams.close(zipIn, in);
                         }
                     }
                 }
-                zipOutReference.set(out);
-                out = null; // Avoid premature closing
+                zipOutReference.set(newOut);
+                out = newOut;
+                newOut = null; // Avoid premature closing
             } catch (IOException e) {
                 throw DataExportExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
-                Streams.close(out);
+                Streams.close(newOut);
             }
         }
         return out;
