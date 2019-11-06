@@ -53,7 +53,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link RegionalSettingsUtil}
@@ -63,7 +62,10 @@ import org.slf4j.LoggerFactory;
  */
 public class RegionalSettingsUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RegionalSettingsUtil.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RegionalSettingsUtil.class);
+    }
 
     /**
      * Gets a date format for the specified locale, considering customized regional settings if configured.
@@ -79,7 +81,7 @@ public class RegionalSettingsUtil {
             try {
                 return new SimpleDateFormat(pattern);
             } catch (Exception e) {
-                LOG.error("Error applying date format {}, falling back to defaults for locale {}.", pattern, locale, e);
+                LoggerHolder.LOG.error("Error applying date format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
             }
         }
         return DateFormat.getDateInstance(style, locale);
@@ -99,7 +101,7 @@ public class RegionalSettingsUtil {
             try {
                 return new SimpleDateFormat(pattern);
             } catch (Exception e) {
-                LOG.error("Error applying time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
+                LoggerHolder.LOG.error("Error applying time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
             }
         }
         return DateFormat.getTimeInstance(style, locale);
@@ -128,7 +130,7 @@ public class RegionalSettingsUtil {
             try {
                 return new SimpleDateFormat(datePattern + ' ' + timePattern);
             } catch (Exception e) {
-                LOG.error("Error applying date/time format {}, falling back to defaults for locale {}.", pattern, locale, e);
+                LoggerHolder.LOG.error("Error applying date/time format \"{}\", falling back to defaults for locale {}.", pattern, locale, e);
             }
         }
         return SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
