@@ -29,10 +29,9 @@ public abstract class ZippedFileStorageOutputStream extends OutputStream {
      * @param fileStorage The file storage to write to
      * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
      * @return The zipped output stream
-     * @throws IOException If initialization fails
      */
-    public static ZippedFileStorageOutputStream createDefaultZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel) throws IOException {
-        return createZippedFileStorageOutputStream(false, fileStorage, compressionLevel, AppendingFileStorageOutputStream.DEFAULT_IN_MEMORY_THRESHOLD, null);
+    public static ZippedFileStorageOutputStream createDefaultZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel) {
+        return new AppendingZippedFileStorageOutputStream(fileStorage, compressionLevel, AppendingFileStorageOutputStream.DEFAULT_IN_MEMORY_THRESHOLD);
     }
 
     /**
