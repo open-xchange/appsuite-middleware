@@ -52,7 +52,6 @@ package com.openexchange.ajax.share.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link GuestAutologinTest}
@@ -123,51 +121,4 @@ public class GuestAutologinTest extends ShareTest {
             sharedSession.setId(oldSessionID);
         }
     }
-
-    @Test
-    public void testGuestAutologinWithoutStore() throws Exception {
-        /*
-         * create folder shared to guest user
-         */
-        int module = randomModule();
-        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST, module);
-        ShareRecipient recipient = guestPermission.getRecipient();
-        FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module), guestPermission);
-        /*
-         * check permissions
-         */
-        OCLPermission matchingPermission = null;
-        for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != getClient().getValues().getUserId()) {
-                matchingPermission = permission;
-                break;
-            }
-        }
-        assertNotNull("No matching permission in created folder found", matchingPermission);
-        checkPermissions(guestPermission, matchingPermission);
-        /*
-         * discover & check guest
-         */
-        ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, module, folder.getObjectID(), matchingPermission.getEntity());
-        checkGuestPermission(guestPermission, guest);
-        String shareURL = discoverShareURL(guest);
-        /*
-         * login & store guest session for auto-login, then try to auto-login
-         */
-        String client = AJAXClient.class.getName();
-        AJAXClient client3 = new AJAXClient(testContext.acquireUser());
-        AJAXSession sharedSession = client3.getSession();
-        String oldSessionID = sharedSession.getId();
-        try {
-            client3.getSession().setId(null);
-            GuestClient guestClient = new GuestClient(sharedSession, shareURL, getUsername(recipient), getPassword(recipient), client, true, false);
-            AutologinRequest autologin = new AutologinRequest(new AutologinParameters(randomUID(), client, AJAXClient.VERSION), false);
-            AutologinResponse response = guestClient.execute(autologin);
-            assertTrue("Autologin worked without store request", response.hasError());
-            assertEquals(OXJSONExceptionCodes.INVALID_COOKIE.getNumber(), response.getException().getCode());
-        } finally {
-            sharedSession.setId(oldSessionID);
-        }
-    }
-
 }
