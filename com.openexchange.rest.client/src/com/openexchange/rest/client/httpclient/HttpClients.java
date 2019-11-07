@@ -54,15 +54,11 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpClientConnection;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -89,9 +85,7 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
-import org.apache.http.conn.ConnectionRequest;
 import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -106,26 +100,24 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.CookieSpecRegistries;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.DefaultCookieSpec;
 import org.apache.http.message.BasicHeaderElementIterator;
-import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.java.InetAddresses;
 import com.openexchange.java.Streams;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.rest.client.httpclient.internal.ClientConnectionManager;
+import com.openexchange.rest.client.httpclient.internal.IdleConnectionCloser;
+import com.openexchange.rest.client.httpclient.internal.MeteredHttpRequestExecutor;
+import com.openexchange.rest.client.httpclient.internal.MonitoringId;
+import com.openexchange.rest.client.httpclient.internal.MonitoringRegistry;
 import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
 import com.openexchange.rest.client.httpclient.ssl.EasySSLSocketFactory;
 import com.openexchange.rest.client.osgi.RestClientServices;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link HttpClients} - Utility class for HTTP client.
@@ -171,7 +163,14 @@ public final class HttpClients {
      * @return A newly created {@link CloseableHttpClient} instance
      */
     public static CloseableHttpClient getHttpClient(String userAgent) {
-        return getHttpClient(new ClientConfig().setUserAgent(userAgent));
+        String name = "unknown";
+        try {
+            Class<?> callingClass = org.slf4j.helpers.Util.getCallingClass();
+            name = callingClass.getSimpleName();
+        } catch (Exception e) {
+            LOG.warn("Error while trying to determine HTTP client name for unnamed client config. Falling back to 'unknown'.", e);
+        }
+        return getHttpClient(new ClientConfig(name).setUserAgent(userAgent));
     }
 
     /**
@@ -189,7 +188,8 @@ public final class HttpClients {
             }
         }
 
-        return WrappedClientsRegistry.getInstance().createWrapped(config);
+        MonitoringId monitoringId = MonitoringRegistry.getInstance().registerInstance(config.name);
+        return WrappedClientsRegistry.getInstance().createWrapped(config, monitoringId);
     }
 
     /**
@@ -201,11 +201,29 @@ public final class HttpClients {
      * @return A newly created {@link CloseableHttpClient} instance
      */
     public static CloseableHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
+        MonitoringId monitoringId = MonitoringRegistry.getInstance().registerInstance(config.name);
         // Initialize ClientConnectionManager
-        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider, sslConfig);
+        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider, sslConfig, monitoringId);
 
         // Initialize CloseableHttpClient using the ClientConnectionManager and client configuration
-        return initializeHttpClientUsing(config, ccm);
+        return initializeHttpClientUsing(config, ccm, monitoringId);
+    }
+
+    /**
+     * Creates a {@link CloseableHttpClient} instance.
+     *
+     * @param config The configuration settings for the client
+     * @param factoryProvider The provider for the appropriate <code>SSLSocketFactory</code> instance to use
+     * @param sslConfig The SSL configuration service to use
+     * @param monitoringId The monitoring ID to use
+     * @return A newly created {@link CloseableHttpClient} instance
+     */
+    public static CloseableHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig, MonitoringId monitoringId) {
+        // Initialize ClientConnectionManager
+        ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider, sslConfig, monitoringId);
+
+        // Initialize CloseableHttpClient using the ClientConnectionManager and client configuration
+        return initializeHttpClientUsing(config, ccm, monitoringId);
     }
 
     /**
@@ -218,33 +236,53 @@ public final class HttpClients {
      * @return A newly created {@link CloseableHttpClient} instance
      */
     public static CloseableHttpClient getFallbackHttpClient(ClientConfig config) {
+        MonitoringId monitoringId = MonitoringRegistry.getInstance().registerInstance(config.name);
         // Initialize ClientConnectionManager
-        ClientConnectionManager ccm = initializeFallbackClientConnectionManagerUsing(config);
+        ClientConnectionManager ccm = initializeFallbackClientConnectionManagerUsing(config, monitoringId);
 
         // Initialize CloseableHttpClient using the ClientConnectionManager and client configuration
-        return initializeHttpClientUsing(config, ccm);
+        return initializeHttpClientUsing(config, ccm, monitoringId);
     }
 
-    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
+    /**
+     * Creates a fall-back {@link CloseableHttpClient} instance.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Exclusively invoked internally! Do not use!</div>
+     * <p>
+     *
+     * @param config The configuration settings for the client
+     * @param monitoringId The monitoring ID to use
+     * @return A newly created {@link CloseableHttpClient} instance
+     */
+    public static CloseableHttpClient getFallbackHttpClient(ClientConfig config, MonitoringId monitoringId) {
+        // Initialize ClientConnectionManager
+        ClientConnectionManager ccm = initializeFallbackClientConnectionManagerUsing(config, monitoringId);
+
+        // Initialize CloseableHttpClient using the ClientConnectionManager and client configuration
+        return initializeHttpClientUsing(config, ccm, monitoringId);
+    }
+
+
+    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig, MonitoringId monitoringId) {
         // Host name verification is done implicitly (if enabled through configuration) through com.openexchange.tools.ssl.DelegatingSSLSocket
         //javax.net.ssl.HostnameVerifier hostnameVerifier = sslConfig.isVerifyHostname() ? new DefaultHostnameVerifier() : NoopHostnameVerifier.INSTANCE;
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
             .register("http", PlainConnectionSocketFactory.getSocketFactory())
             .register("https", new SSLConnectionSocketFactory(factoryProvider.getDefault(), sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), NoopHostnameVerifier.INSTANCE))
             .build();
-        return initializeClientConnectionManagerUsing(config, socketFactoryRegistry);
+        return initializeClientConnectionManagerUsing(config, socketFactoryRegistry, monitoringId);
     }
 
-    private static ClientConnectionManager initializeFallbackClientConnectionManagerUsing(ClientConfig config) {
+    private static ClientConnectionManager initializeFallbackClientConnectionManagerUsing(ClientConfig config, MonitoringId monitoringId) {
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
             .register("http", PlainConnectionSocketFactory.getSocketFactory())
             .register("https", EasySSLSocketFactory.getInstance())
             .build();
-        return initializeClientConnectionManagerUsing(config, socketFactoryRegistry);
+        return initializeClientConnectionManagerUsing(config, socketFactoryRegistry, monitoringId);
     }
 
-    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
-        ClientConnectionManager ccm = new ClientConnectionManager(socketFactoryRegistry, config.keepAliveMonitorInterval);
+    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, Registry<ConnectionSocketFactory> socketFactoryRegistry, MonitoringId monitoringId) {
+        ClientConnectionManager ccm = new ClientConnectionManager(monitoringId, socketFactoryRegistry, config.keepAliveDuration);
         ccm.setDefaultMaxPerRoute(config.maxConnectionsPerRoute);
         ccm.setMaxTotal(config.maxTotalConnections);
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
@@ -253,7 +291,7 @@ public final class HttpClients {
         return ccm;
     }
 
-    private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, HttpClientConnectionManager ccm) {
+    private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, HttpClientConnectionManager ccm, MonitoringId monitoringId) {
         HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClients.custom()
             .setConnectionManager(ccm)
             .setDefaultRequestConfig(RequestConfig.custom()
@@ -262,8 +300,8 @@ public final class HttpClients {
                 .setConnectionRequestTimeout(config.connectionRequestTimeout)
                 .setProxy(config.proxy)
                 .setCookieSpec("lenient")
-            .build()
-        );
+                .build())
+            .setRequestExecutor(new MeteredHttpRequestExecutor(monitoringId));
 
         if (config.keepAliveStrategy == null) {
             clientBuilder.setKeepAliveStrategy(new KeepAliveStrategy(config.keepAliveDuration));
@@ -347,6 +385,7 @@ public final class HttpClients {
             });
         }
         clientBuilder.useSystemProperties();
+
         return clientBuilder.build();
     }
 
@@ -355,12 +394,14 @@ public final class HttpClients {
      * However those probably don't fit your use case, so you should adjust them accordingly.
      * Settings can be applied in a builder-like way, e.g.:
      * <pre>
-     * ClientConfig config = ClientConfig.newInstance()
+     * ClientConfig config = ClientConfig.newInstance("myclient")
      *     .setConnectionTimeout(10000)
      *     .setSocketReadTimeout(10000);
      * </pre>
      */
     public static final class ClientConfig {
+
+        final String name;
 
         int socketReadTimeout = DEFAULT_TIMEOUT_MILLIS;
         int connectionTimeout = DEFAULT_TIMEOUT_MILLIS;
@@ -382,16 +423,43 @@ public final class HttpClients {
         ConnectionReuseStrategy connectionReuseStrategy;
         boolean contentCompressionDisabled = false;
 
-        ClientConfig() {
+        ClientConfig(String name) {
             super();
+            this.name = name;
             denyLocalRedirect = false;
         }
 
         /**
-         * Creates a new {@link ClientConfig} instance.
+         * Creates a new {@link ClientConfig} instance with name "unknown-<random-number>". Prefer {@link #newInstance(String)} to enable dedicated
+         * monitoring metrics for the client instance.
+         *
+         * @deprecated Use {@link #newInstance(String)}
          */
+        @Deprecated
         public static ClientConfig newInstance() {
-            return new ClientConfig();
+            String name = "unknown";
+            try {
+                Class<?> callingClass = org.slf4j.helpers.Util.getCallingClass();
+                name = callingClass.getSimpleName();
+            } catch (Exception e) {
+                LOG.warn("Error while trying to determine HTTP client name for unnamed client config. Falling back to 'unknown'.", e);
+            }
+            LOG.warn("Unnamed HTTP client initialized. Using name '{}'. Consider using a proper name for monitoring purposes!", name);
+            return new ClientConfig(name);
+        }
+
+        /**
+         * Creates a new named {@link ClientConfig} instance.
+         *
+         * @param name The client name used for monitoring and logging. Must be a short lower-case identifier {@code [a-z0-9_.-]}, e.g. "myclient".
+         *             Make sure to use unique names for different client instances, otherwise connection pool metrics are not distinguishable and
+         *             will reflect any of those instances.
+         */
+        public static ClientConfig newInstance(String name) {
+            if (name == null) {
+                throw new IllegalArgumentException("name must not be null!");
+            }
+            return new ClientConfig(name);
         }
 
         /**
@@ -604,7 +672,8 @@ public final class HttpClients {
         public String toString() {
             StringBuilder builder = new StringBuilder(256);
             builder.append("[");
-            builder.append("socketReadTimeout=").append(socketReadTimeout);
+            builder.append("name=").append(name);
+            builder.append(", socketReadTimeout=").append(socketReadTimeout);
             builder.append(", connectionTimeout=").append(connectionTimeout);
             builder.append(", connectionRequestTimeout=").append(connectionRequestTimeout);
             builder.append(", maxTotalConnections=").append(maxTotalConnections);
@@ -694,133 +763,6 @@ public final class HttpClients {
     }
 
     /*------------------------------------------------------ CLASSES ------------------------------------------------------*/
-
-    private static class ClientConnectionManager extends PoolingHttpClientConnectionManager {
-
-        private volatile IdleConnectionCloser idleConnectionCloser;
-        private final int keepAliveMonitorInterval;
-        private final AtomicBoolean shuttingDown;
-
-        ClientConnectionManager(Registry<ConnectionSocketFactory> socketFactoryRegistry, int keepAliveMonitorInterval) {
-            super(socketFactoryRegistry);
-            this.keepAliveMonitorInterval = keepAliveMonitorInterval;
-            shuttingDown = new AtomicBoolean(false);
-        }
-
-        /**
-         * Sets the associated {@link IdleConnectionCloser} instance
-         *
-         * @param idleConnectionCloser The instance to set
-         */
-        void setIdleConnectionCloser(IdleConnectionCloser idleConnectionCloser) {
-            this.idleConnectionCloser = idleConnectionCloser;
-        }
-
-        @Override
-        public ConnectionRequest requestConnection(HttpRoute route, Object state) {
-            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
-            if (null != idleConnectionClose) {
-                idleConnectionClose.ensureRunning(keepAliveMonitorInterval);
-            }
-            if (shuttingDown.get()) {
-                /*
-                 * In case the connection pool is shutting down return a ConnectionReuest which always throws a ExecutionException for the get method.
-                 * This is required to prevent an IllegalStateException.
-                 */
-                return new ConnectionRequest() {
-
-                    @Override
-                    public boolean cancel() {
-                        return true;
-                    }
-
-                    @Override
-                    public HttpClientConnection get(final long timeout, final TimeUnit tunit) throws ExecutionException {
-                        throw new ExecutionException("Connection pool is shutting down", null);
-                    }
-
-                };
-            }
-            return super.requestConnection(route, state);
-        }
-
-        @Override
-        public void shutdown() {
-            IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
-            if (null != idleConnectionClose) {
-                idleConnectionClose.stop();
-                this.idleConnectionCloser = null;
-            }
-            shuttingDown.set(true);
-            super.shutdown();
-        }
-    }
-
-    private static class IdleConnectionCloser implements Runnable {
-
-        private final static Logger LOGGER = LoggerFactory.getLogger(IdleConnectionCloser.class);
-
-        private final ClientConnectionManager manager;
-        private final int idleTimeoutSeconds;
-        private volatile ScheduledTimerTask timerTask;
-
-        IdleConnectionCloser(ClientConnectionManager manager, int idleTimeoutSeconds) {
-            super();
-            this.manager = manager;
-            this.idleTimeoutSeconds = idleTimeoutSeconds;
-        }
-
-        void ensureRunning(int checkIntervalSeconds) {
-            ScheduledTimerTask tmp = timerTask;
-            if (null == tmp) {
-                synchronized (IdleConnectionCloser.class) {
-                    tmp = timerTask;
-                    if (null == tmp) {
-                        TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                        if (null == service) {
-                            LOGGER.error("{} is missing. Can't execute run()", TimerService.class.getSimpleName());
-                        } else {
-                            tmp = service.scheduleWithFixedDelay(this, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
-                            timerTask = tmp;
-                        }
-                    }
-                }
-            }
-        }
-
-        void stop() {
-            ScheduledTimerTask tmp = timerTask;
-            if (null != tmp) {
-                synchronized (IdleConnectionCloser.class) {
-                    tmp = timerTask;
-                    if (null != tmp) {
-                        tmp.cancel();
-                        TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                        if (null == service) {
-                            LOGGER.error("{} is missing. Can't remove canceled tasks", TimerService.class.getSimpleName());
-                        } else {
-                            service.purge();
-                            timerTask = null;
-                        }
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void run() {
-            try {
-                manager.closeExpiredConnections();
-                manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
-                PoolStats totalStats = manager.getTotalStats();
-                if (totalStats.getLeased() == 0 && totalStats.getPending() == 0  && totalStats.getAvailable() == 0) {
-                    stop();
-                }
-            } catch (Exception e) {
-                stop();
-            }
-        }
-    }
 
     private static final class KeepAliveStrategy implements ConnectionKeepAliveStrategy {
 
