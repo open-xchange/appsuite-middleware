@@ -59,6 +59,9 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -79,6 +82,8 @@ public class EndpointPool {
 
     private static final Logger LOG = LoggerFactory.getLogger(EndpointPool.class);
 
+    private static final String GROUP_ID = "sproxyd";
+
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private final List<String> available;
     private final List<String> blacklist;
@@ -95,8 +100,9 @@ public class EndpointPool {
      * @param httpClient
      * @param heartbeatInterval
      * @param timerService
+     * @param metrics
      */
-    public EndpointPool(String filestoreId, List<String> endpointUrls, HttpClient httpClient, int heartbeatInterval, TimerService timerService) {
+    public EndpointPool(String filestoreId, List<String> endpointUrls, HttpClient httpClient, int heartbeatInterval, TimerService timerService, MetricService metrics) {
         super();
         this.filestoreId = filestoreId;
         int size = endpointUrls.size();
@@ -105,11 +111,38 @@ public class EndpointPool {
         blacklist = new ArrayList<>(size);
         counter = new AtomicInteger(size);
         if (endpointUrls.isEmpty()) {
-            throw new IllegalArgumentException("Paramater 'endpointUrls' must not be empty");
+            throw new IllegalArgumentException("Parameter 'endpointUrls' must not be empty");
         }
 
         LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this, httpClient), heartbeatInterval, heartbeatInterval);
+        initMetrics(metrics);
+    }
+
+    private void initMetrics(MetricService metrics) {
+        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.TotalSize", MetricType.GAUGE)
+            .withDescription("Number of configured sproxyd endpoints")
+            .withMetricSupplier(() -> getNumberOfEndpoints())
+            .addDimension("filestore", filestoreId)
+            .build());
+
+        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.Available", MetricType.GAUGE)
+            .withDescription("Number of available sproxyd endpoints")
+            .withMetricSupplier(() -> getStats().getAvailableEndpoints())
+            .addDimension("filestore", filestoreId)
+            .build());
+
+        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.Unavailable", MetricType.GAUGE)
+            .withDescription("Number of unavailable (blacklisted) sproxyd endpoints")
+            .withMetricSupplier(() -> getStats().getBlacklistedEndpoints())
+            .addDimension("filestore", filestoreId)
+            .build());
+
+        metrics.getGauge(MetricDescriptor.newBuilder(GROUP_ID, "EndpointPool.Blacklist", MetricType.GAUGE)
+            .withDescription("List of unavailable (blacklisted) sproxyd endpoints")
+            .withMetricSupplier(() -> getStats().getBlacklist())
+            .addDimension("filestore", filestoreId)
+            .build());
     }
 
     /**
@@ -196,6 +229,15 @@ public class EndpointPool {
         lock.readLock().lock();
         try {
             return new ArrayList<>(blacklist);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    EndpointPoolStats getStats() {
+        lock.readLock().lock();
+        try {
+            return new EndpointPoolStats(getNumberOfEndpoints(), getBlacklist());
         } finally {
             lock.readLock().unlock();
         }

@@ -52,7 +52,6 @@ package com.openexchange.filestore.sproxyd;
 import static com.openexchange.filestore.utils.PropertyNameBuilder.optIntProperty;
 import static com.openexchange.filestore.utils.PropertyNameBuilder.requireProperty;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.osgi.Tools.requireService;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
@@ -82,6 +81,7 @@ import com.openexchange.filestore.sproxyd.impl.SproxydConfig;
 import com.openexchange.filestore.utils.DefaultDatabaseAccess;
 import com.openexchange.filestore.utils.PropertyNameBuilder;
 import com.openexchange.java.Strings;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceLookup;
@@ -322,12 +322,13 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
         }
 
-        HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
+        MetricService metrics = services.getServiceSafe(MetricService.class);
+        HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance("sproxyd-" + filestoreID)
             .setMaxTotalConnections(maxConnections)
             .setMaxConnectionsPerRoute(maxConnectionsPerHost)
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
-        EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
+        EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, services.getServiceSafe(TimerService.class), metrics);
         return new SproxydConfig(httpClient, endpointPool);
     }
 

@@ -67,6 +67,7 @@ import com.openexchange.filestore.sproxyd.rmi.impl.SproxydRemoteImpl;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -88,7 +89,7 @@ public class SproxydActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, MetricService.class };
     }
 
     @Override
