@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -136,6 +137,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
+            callBeforeDbLookupPluginMethods(new Context[] {ret}, auth);
             if (isAnyPluginLoaded()) {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
@@ -194,4 +196,29 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
         return null != pluginInterfaces && false == pluginInterfaces.getContextPlugins().getServiceList().isEmpty();
     }
+
+    /**
+     * Execute <i>beforeContextDbLookup</i> method of plugins registered for {@link ContextDbLookupPluginInterface}
+     *
+     * @param ctxs The context's
+     * @param credentials The admin credentials
+     * @throws StorageException When plugin exceptions occurred
+     */
+    protected void callBeforeDbLookupPluginMethods(final Context[] ctxs, final Credentials credentials) throws StorageException {
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        if (null != pluginInterfaces) {
+            for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+                final String bundlename = dbLookupPlugin.getClass().getName();
+                try {
+                    LOGGER.debug("Calling beforeDBLookup for plugin: {}", bundlename);
+                    dbLookupPlugin.beforeContextDbLookup(credentials, ctxs);
+                } catch (PluginException e) {
+                    LOGGER.error("Error while calling beforeDBLookup of plugin {}", bundlename, e);
+                    throw StorageException.wrapForRMI(e);
+                }
+            }
+        }
+    }
+
+
 }

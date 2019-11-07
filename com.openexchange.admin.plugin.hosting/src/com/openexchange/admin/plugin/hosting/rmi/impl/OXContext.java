@@ -72,6 +72,7 @@ import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
 import com.openexchange.admin.plugin.hosting.services.PluginInterfaces;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.plugin.hosting.tools.DatabaseDataMover;
+import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
@@ -140,6 +141,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
 
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -180,6 +183,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
@@ -240,6 +245,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -287,6 +293,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -336,6 +345,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
             validateloginmapping(ctx);
+
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -498,6 +510,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             BasicAuthenticator basicAuthenticator = BasicAuthenticator.createPluginAwareAuthenticator();
             basicAuthenticator.doAuthentication(auth);
 
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -604,6 +618,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             LOGGER.error("Invalid data sent by client!", e1);
             throw e1;
         }
+
+        callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
         try {
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
@@ -741,6 +757,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -849,6 +867,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth, ctx);
 
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.getData(new Context[] { ctx })[0];
         } catch (StorageException e) {
@@ -872,6 +892,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            callBeforeDbLookupPluginMethods(ctxs, credentials);
 
             final List<Context> retval = new ArrayList<>();
             boolean filled = true;
@@ -915,7 +937,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 LOGGER.error("", e);
                 throw new StorageException(e.getMessage());
             }
-            return retval.toArray(new Context[retval.size()]);
+
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null == pluginInterfaces) {
+                return retval.toArray(new Context[retval.size()]);
+            } else {
+                Context []ret = retval.toArray(new Context[retval.size()]);
+                for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+                    final String bundlename = dbLookupPlugin.getClass().getName();
+                    try {
+                        LOGGER.debug("Calling afterContextDBLookup for plugin: {}", bundlename);
+                        dbLookupPlugin.afterContextDbLookup(auth, ret);
+                    } catch (PluginException e) {
+                        LOGGER.error("Error while calling afterContextDBLookup of plugin {}", bundlename, e);
+                        throw StorageException.wrapForRMI(e);
+                    }
+                }
+                return ret;
+            }
         } catch (RuntimeException e) {
             LOGGER.error("", e);
             throw convertException(e);
@@ -974,9 +1013,37 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             throw StorageException.wrapForRMI(e);
                         }
                     }
+                    for (ContextDbLookupPluginInterface dblu : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+                        String pluginName = dblu.getClass().getName();
+                        LOGGER.debug("Calling searchTermDBLookup for plugin: {}", pluginName);
+                        try {
+                            String new_search_pattern = dblu.searchPatternDbLookup(auth, search_pattern);
+                            if ( null != new_search_pattern) {
+                                search_pattern = new_search_pattern;
+                            }
+                        } catch (PluginException e) {
+                            LOGGER.error("Error while calling method searchTermDBLookup of plugin {}", pluginName, e);
+                            throw StorageException.wrapForRMI(e);
+                        }
+                    }
                 }
 
-                return oxcox.listContext(search_pattern, contextFilter, loaderFilter, offset, length);
+                if (null == pluginInterfaces) {
+                    return oxcox.listContext(search_pattern, contextFilter, loaderFilter, offset, length);
+                } else {
+                    Context []ctxs = oxcox.listContext(search_pattern, contextFilter, loaderFilter, offset, length);
+                    for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+                        final String bundlename = dbLookupPlugin.getClass().getName();
+                        try {
+                            LOGGER.debug("Calling afterContextDBLookup for plugin: {}", bundlename);
+                            dbLookupPlugin.afterContextDbLookup(auth, ctxs);
+                        } catch (PluginException e) {
+                            LOGGER.error("Error while calling afterContextDBLookup of plugin {}", bundlename, e);
+                            throw StorageException.wrapForRMI(e);
+                        }
+                    }
+                    return ctxs;
+                }
             } catch (StorageException e) {
                 LOGGER.error("", e);
                 throw new StorageException(e.getMessage());
@@ -1035,7 +1102,23 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 } else {
                     retval.addAll(Arrays.asList(ret));
                 }
-                return retval.toArray(new Context[retval.size()]);
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null == pluginInterfaces) {
+                    return retval.toArray(new Context[retval.size()]);
+                } else {
+                    Context []ctxs = retval.toArray(new Context[retval.size()]);
+                    for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+                        final String bundlename = dbLookupPlugin.getClass().getName();
+                        try {
+                            LOGGER.debug("Calling afterContextDBLookup for plugin: {}", bundlename);
+                            dbLookupPlugin.afterContextDbLookup(auth, ctxs);
+                        } catch (PluginException e) {
+                            LOGGER.error("Error while calling afterContextDBLookup of plugin {}", bundlename, e);
+                            throw StorageException.wrapForRMI(e);
+                        }
+                    }
+                    return ctxs;
+                }
             } catch (StorageException e) {
                 LOGGER.error("", e);
                 throw new StorageException(e.getMessage());
@@ -1083,7 +1166,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 } else {
                     retval.addAll(Arrays.asList(ret));
                 }
-                return retval.toArray(new Context[retval.size()]);
+
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null == pluginInterfaces) {
+                    return retval.toArray(new Context[retval.size()]);
+                } else {
+                    Context []ctxs = retval.toArray(new Context[retval.size()]);
+                    for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+                        final String bundlename = dbLookupPlugin.getClass().getName();
+                        try {
+                            LOGGER.debug("Calling afterContextDBLookup for plugin: {}", bundlename);
+                            dbLookupPlugin.afterContextDbLookup(auth, ctxs);
+                        } catch (PluginException e) {
+                            LOGGER.error("Error while calling afterContextDBLookup of plugin {}", bundlename, e);
+                            throw StorageException.wrapForRMI(e);
+                        }
+                    }
+                    return ctxs;
+                }
             } catch (StorageException e) {
                 LOGGER.error("", e);
                 throw new StorageException(e.getMessage());
@@ -1114,6 +1214,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         try {
             BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
+
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
@@ -1385,6 +1487,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -1450,6 +1554,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         try {
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
@@ -1520,6 +1626,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
             } catch (NoSuchObjectException e) {
@@ -1570,6 +1678,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
@@ -1624,6 +1734,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
+
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
             try {
                 setIdOrGetIDFromNameAndIdObject(null, ctx);
@@ -1715,6 +1827,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
+            callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
+
             // Trigger plugin extensions
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -1747,6 +1861,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (ctx == null) {
             throw new InvalidDataException("Given context is invalid");
         }
+
+        callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
         try {
             // Trigger plugin extensions
@@ -1785,6 +1901,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (ctx == null) {
             throw new InvalidDataException("Given context is invalid");
         }
+
+        callBeforeDbLookupPluginMethods(new Context[] {ctx}, credentials);
 
         try {
             // Trigger plugin extensions
