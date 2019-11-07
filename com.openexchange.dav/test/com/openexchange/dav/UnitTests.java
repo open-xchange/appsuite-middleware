@@ -63,8 +63,19 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     com.openexchange.dav.DAVToolsTest.class,
+    com.openexchange.dav.AttachmentUtilDecodeTest.class,
 })
 public class UnitTests {
+    
+    /**
+     * Copied from {@link DAVTools}
+     */
+    public final static String PREFIX_PATH_NAME = "com.openexchange.dav.prefixPath";
+
+    /**
+     * Copied from {@link DAVTools}
+     */
+    public final static String PROXY_PREFIX_PATH_NAME = "com.openexchange.dav.proxyPrefixPath";
 
     public UnitTests() {
         super();

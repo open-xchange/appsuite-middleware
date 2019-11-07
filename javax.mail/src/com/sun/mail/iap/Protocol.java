@@ -62,12 +62,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
+import org.slf4j.MDC;
 import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.ProtocolListener;
 import com.sun.mail.imap.ProtocolListenerCollection;
 import com.sun.mail.imap.ResponseEvent;
+import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.SocketFetcher;
@@ -443,7 +445,7 @@ public class Protocol {
      */
     public synchronized Response[] executeCommand(String command, Argument args) {
 	commandStart(command);
-	List<Response> v = new LinkedList<Response>();
+	List<Response> v = null;
 	boolean done = false;
 	String tag = null;
 	Response r = null;
@@ -454,14 +456,20 @@ public class Protocol {
 	long start = measure ? System.currentTimeMillis() : 0L;
 	try {
 	    tag = writeCommand(command, args);
+	    v = new java.util.ArrayList<Response>(32);
 	} catch (LiteralException lex) {
+	    v = new java.util.ArrayList<Response>(1);
 	    v.add(lex.getResponse());
 	    done = true;
 	} catch (Exception ex) {
 	    // Convert this into a BYE response
+	    v = new java.util.ArrayList<Response>(1);
 	    v.add(Response.byeResponse(ex));
 	    done = true;
 	}
+
+	boolean discardResponses = "true".equals(MDC.get("mail.imap.discardresponses"));
+	String lowerCaseCommand = null;
 
 	Response byeResp = null;
 	Response taggedResp = null;
@@ -483,12 +491,25 @@ public class Protocol {
 		continue;
 	    }
 
-	    v.add(r);
-
 	    // If this is a matching command completion response, we are done
-	    if (r.isTagged() && r.getTag().equals(tag)) {
-		done = true;
-		taggedResp = r;
+	    boolean tagged = r.isTagged();
+        if (tagged && r.getTag().equals(tag)) {
+	        v.add(r);
+	        done = true;
+	        taggedResp = r;
+	    } else {
+	        if (discardResponses && !tagged && !r.isSynthetic() && (r instanceof IMAPResponse)) {
+	            IMAPResponse imapResponse = (IMAPResponse) r;
+	            if (lowerCaseCommand == null) {
+                    lowerCaseCommand = asciiLowerCase(command);
+                }
+                String key = asciiLowerCase(imapResponse.getKey());
+                if ((key == null) || (lowerCaseCommand.indexOf(key) < 0)) {
+                    v.add(r);
+                }
+            } else {
+                v.add(r);
+            }
 	    }
 	}
 
@@ -877,4 +898,43 @@ public class Protocol {
             throw new ProtocolException("can't set read timeout", ex);
         }
     }
+    
+    private static char[] lowercases = { '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077', '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137', '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
+
+    /**
+     * Fast lower-case conversion.
+     *
+     * @param s The string
+     * @return The lower-case string
+     */
+    private static String asciiLowerCase(String s) {
+        if (null == s) {
+            return null;
+        }
+
+        char[] c = null;
+        int i = s.length();
+
+        // look for first conversion
+        while (i-- > 0) {
+            char c1 = s.charAt(i);
+            if (c1 <= 127) {
+                char c2 = lowercases[c1];
+                if (c1 != c2) {
+                    c = s.toCharArray();
+                    c[i] = c2;
+                    break;
+                }
+            }
+        }
+
+        while (i-- > 0) {
+            if (c[i] <= 127) {
+                c[i] = lowercases[c[i]];
+            }
+        }
+
+        return c == null ? s : new String(c);
+    }
+    
 }

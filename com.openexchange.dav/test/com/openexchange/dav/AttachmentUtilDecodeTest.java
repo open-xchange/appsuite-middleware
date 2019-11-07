@@ -49,11 +49,13 @@
 
 package com.openexchange.dav;
 
+import static com.openexchange.dav.AttachmentUtils.decodeURI;
+import static com.openexchange.java.Autoboxing.I;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,81 +64,37 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
-import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 
 /**
- * {@link DAVToolsTest}
+ * {@link AttachmentUtilDecodeTest}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
  */
 @RunWith(Parameterized.class)
-public class DAVToolsTest {
-
+public class AttachmentUtilDecodeTest {
 
     @Parameters
     public static List<Object[]> testData() {
-        //@formatter:off
-        return Arrays.asList(new Object[][] {
-                {"/servlet/dav/", "/servlet/dav/", ImmutableMap.<String, String> builder()
-                    .put("caldav", "/caldav")
-                    .put("/caldav", "/caldav")
-                    .put("/caldav/", "/caldav/")
-                    .put("/photos/contactXY/image1.jpg", "/photos/contactXY/image1.jpg")
-                    .build()
-                },
-                {"servlet/dav", "servlet/dav/", ImmutableMap.<String, String> builder()
-                    .put("caldav", "/caldav")
-                    .put("/caldav", "/caldav")
-                    .put("/caldav/", "/caldav/")
-                    .put("/photos/contactXY/image1.jpg", "/photos/contactXY/image1.jpg")
-                    .build()
-                },
-                {"/servlet/dav/hidden/", "/servlet/dav/", ImmutableMap.<String, String> builder()
-                    .put("caldav/", "/hidden/caldav/")
-                    .put("/caldav", "/hidden/caldav")
-                    .put("/caldav/", "/hidden/caldav/")
-                    .put("/caldav/principals/foo/bar", "/hidden/caldav/principals/foo/bar")
-                    .put("/caldav/principals/foo/bar/", "/hidden/caldav/principals/foo/bar/")
-                    .put("/photos/contactXY/image1.jpg", "/hidden/photos/contactXY/image1.jpg")
-                    .build()
-                },
-                {"/dav/", "/", ImmutableMap.<String, String> builder()
-                    .put("caldav", "/dav/caldav")
-                    .put("/caldav", "/dav/caldav")
-                    .put("/caldav/", "/dav/caldav/")
-                    .put("/photos/contactXY/image1.jpg", "/dav/photos/contactXY/image1.jpg")
-                    .build()
-                },
-                {"/dav/", "", ImmutableMap.<String, String> builder()
-                    .put("caldav", "/dav/caldav")
-                    .put("/caldav", "/dav/caldav")
-                    .put("/caldav/", "/dav/caldav/")
-                    .put("/photos/contactXY/image1.jpg", "/dav/photos/contactXY/image1.jpg")
-                    .build()
-                },
-        });
-        //@formatter:on
+        return Arrays.asList(new Object[][] { { "/servlet/dav/", "/servlet/dav/" }, { "/servlet/dav/hidden/", "/servlet/dav/" }, { "/dav/", "/" } });
     }
 
     private final String prefixPath;
     private final String proxyprefixPath;
-    private final Map<String, String> rawToExpected;
 
     /**
      * Initializes a new {@link DAVToolsTest}.
      * 
      * @param prefixPath The prefix path
      * @param proxyPrefixPath The proxy prefix path
-     * @param rawToExpected The paths to the expected paths after parsing
      */
-    public DAVToolsTest(String prefixPath, String proxyPrefixPath, Map<String, String> rawToExpected) {
+    public AttachmentUtilDecodeTest(String prefixPath, String proxyPrefixPath) {
         super();
         this.prefixPath = prefixPath;
         this.proxyprefixPath = proxyPrefixPath;
-        this.rawToExpected = rawToExpected;
     }
 
     @Mock
@@ -158,12 +116,64 @@ public class DAVToolsTest {
         PowerMockito.when(view.get(UnitTests.PROXY_PREFIX_PATH_NAME, String.class)).thenReturn(proxyprefixPath);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecode_noUri_fail() throws Exception {
+        decodeURI(null, factory);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecode_emptyUri_fail() throws Exception {
+        URI uri = new URI("");
+        decodeURI(uri, factory);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecode_noAttachmentUri_fail() throws Exception {
+        URI uri = new URI(prefixPath + "caldav/foo");
+        decodeURI(uri, factory);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecode_noMetadata_fail() throws Exception {
+        URI uri = new URI(prefixPath + "attachments/");
+        decodeURI(uri, factory);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecode_wrongMetadata_fail() throws Exception {
+        URI uri = new URI(prefixPath + "attachments/foo");
+        decodeURI(uri, factory);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecode_wrongMetadataType_fail() throws Exception {
+        /*
+         * Metadata format 1-1-1-a
+         */
+        URI uri = new URI(prefixPath + "attachments/MV8xXzFfYQ");
+        decodeURI(uri, factory);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testDecode_wrongMetadataSyntax_fail() throws Exception {
+        /*
+         * Metadata format 1-1-1-a
+         */
+        URI uri = new URI(prefixPath + "attachments/MV8xXzFfYQ/foo");
+        decodeURI(uri, factory);
+    }
+
     @Test
-    public void testCorrectPath() {
-        for (Entry<String, String> entry : rawToExpected.entrySet()) {
-            String path = DAVTools.getExternalPath(factory, entry.getKey());
-            Assert.assertEquals("Not the corect path", entry.getValue(), path);
-        }
+    public void testDecode_validUri_MetadataParsed() throws Exception {
+        /*
+         * Metadata format 1-1-1-1
+         */
+        URI uri = new URI(prefixPath + "attachments/MS0xLTEtMQ");
+        AttachmentMetadata metadata = decodeURI(uri, factory);
+        assertThat(I(metadata.getId()), is(I(1)));
+        assertThat(I(metadata.getAttachedId()), is(I(1)));
+        assertThat(I(metadata.getFolderId()), is(I(1)));
+        assertThat(I(metadata.getModuleId()), is(I(1)));
     }
 
 }

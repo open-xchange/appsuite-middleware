@@ -87,7 +87,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @since v7.8.1
  */
 public class AttachmentUtils {
-
+    
     private static final AttachmentMetadataFactory FACTORY = new AttachmentMetadataFactory();
 
     /**
@@ -177,17 +177,36 @@ public class AttachmentUtils {
      * @throws IllegalArgumentException If path isn't valid
      */
     public static AttachmentMetadata decodeURI(URI uri, ConfigViewFactory configViewFactory) throws IllegalArgumentException {
-        String path = uri.getPath();
-        if (Strings.isEmpty(path)) {
+        String name;
+        {
+            /*
+             * Get URI and remove servlet prefix
+             */
+            String path = null == uri ? null : uri.getPath();
+            if (Strings.isEmpty(path)) {
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
+            path = removePathPrefixFromPath(configViewFactory, path);
+            name = removePrefixFromPath("/attachments", path);
+            if (path.equals(name)) {
+                /*
+                 * URI does not contain "attachments" sub-path
+                 */
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
+        }
+        /*
+         * Remove leading '/'
+         */
+        int index = name.indexOf('/');
+        if (-1 != index) {
+            name = name.substring(index + 1);
+        }
+
+        if (Strings.isEmpty(name)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        path = removePathPrefixFromPath(configViewFactory, path);
-        path = removePrefixFromPath("/attachments", path);
-        int index = path.indexOf('/');
-        if (-1 != index) {
-            path = path.substring(0, index);
-        }
-        return AttachmentUtils.decodeName(path);
+        return AttachmentUtils.decodeName(name);
     }
 
     public static String encodeName(AttachmentMetadata metadata) {
