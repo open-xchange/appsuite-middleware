@@ -2,9 +2,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
-"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-05-03 18:53+0200\n"
+"PO-Revision-Date: 2019-10-27 20:43+0900\n"
 "Last-Translator: Adi David <adi@workshop-chapina.com>\n"
 "Language-Team: Romanian <ro@workshop-chapina.com>\n"
 "Language: ro_RO\n"
@@ -13,40 +12,40 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.4\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
 msgctxt "verb"
 msgid "accepted"
 msgstr "acceptat"
 
 #. The adjective "accepted", like "The users status is 'accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:85
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:87
 msgctxt "adjective"
 msgid "accepted"
 msgstr "acceptat"
 
 #. The verb "declined", like "User A has declined an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:101
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:116
 msgctxt "verb"
 msgid "declined"
 msgstr "refuzat"
 
 #. The adjective "declined", like "The users status is 'declined'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:104
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:119
 msgctxt "adjective"
 msgid "declined"
 msgstr "refuzat"
 
 #. The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:120
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:135
 msgctxt "verb"
 msgid "tentatively accepted"
 msgstr "acceptat provizoriu"
 
 #. The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:123
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:138
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "acceptat provizoriu"
@@ -117,76 +116,6 @@ msgstr "Citiți toate întâlnirile."
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
 msgid "Create, modify and delete appointments."
 msgstr "Creează, modifică și șterge întâlniri."
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
-msgid "Calendar"
-msgstr "Calendar"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
-msgid "Week"
-msgstr "Săptămână"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
-msgid "All-day events"
-msgstr "Evenimente pe durata întregii zile"
-
-#. *
-#. * The default file name for an ical event export, when using batch data
-#.
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
-#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
-msgid "Events"
-msgstr "Evenimente"
-
-#. * The displayed name for the {@link EventField#LOCATION} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
-msgid "Location"
-msgstr "Loc"
-
-#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
-msgid "Participants"
-msgstr "Participanți"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
-msgid "Comments"
-msgstr "Comentarii"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
-#: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
-msgid "The entire day"
-msgstr "Toată ziua"
-
-#. Status
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
-msgid "Accepted"
-msgstr "Acceptat"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
-msgid "Declined"
-msgstr "Respins"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
-msgid "Tentatively accepted"
-msgstr "Acceptat provizoriu"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
-msgid "Undecided"
-msgstr "Indecis"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
-msgid "Resources"
-msgstr "Resurse"
 
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
@@ -475,7 +404,15 @@ msgstr ""
 "Această întâlnire are fișiere atașate. Utilizați următoarea legătură pentru "
 "a vizualiza întâlnirea și a obține fișierele atașate:  %1$s."
 
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:68
+msgid "The appointment has a new attachment: %1$s."
+msgstr "Întâlnirea are o atașare nouă: %1$s."
+
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:69
+msgid "The attachment %1$s was removed from the appointment."
+msgstr "Atașarea %1$s a fost eliminată din întâlnire."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:71
 msgid ""
 "The organizer would like to create an exception for a  recurring appointment "
 "that could not be found. Either ignore this update, or ask the organizer to "
@@ -485,7 +422,7 @@ msgstr ""
 "nu poate fi găsită. Puteți ignora această actualizare sau puteți cere "
 "organizatorului să vă trimită din nou întreaga serie."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:70
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:72
 msgid ""
 "The organizer would like to change the occurrence of a recurrence on a day "
 "that already contains such a change. The server can only store one change "
@@ -495,12 +432,12 @@ msgstr ""
 "astfel de modificare. Serverul poate stoca doar o singură modificare pe zi "
 "pentru o serie."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:71
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:73
 msgid ""
 "The organizer would like to cancel an appointment that could not be found."
 msgstr "Organizatorul dorește să anuleze o întâlnire ce nu a putut fi găsită."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:72
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:74
 msgid ""
 "An attendee wanted to change his/her participant state in an appointment "
 "that could not be found. Probably the appointment was already canceled."
@@ -508,7 +445,7 @@ msgstr ""
 "Un participant dorește să modifice starea participării sale la o întâlnire "
 "ce nu poate fi găsită. Probabil această întâlnire a fost deja anulată."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:73
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:75
 msgid ""
 "An attendee wanted to change his/her participant state in an appointment "
 "that was already deleted."
@@ -516,7 +453,7 @@ msgstr ""
 "Un participant dorește să-și modifice starea de participant într-o întâlnire "
 "care a fost deja ștearsă."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:74
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:76
 msgid ""
 "This is an update to an appointment that has been changed in the meantime. "
 "Best ignore it."
@@ -524,7 +461,7 @@ msgstr ""
 "Aceasta este o actualizare a unei întâlniri ce a fost modificată între timp. "
 "Se recomandă să o ignorați."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:75
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:77
 msgid ""
 "An attendee wants to change an appointment that could not be found. Probably "
 "the appointment was deleted. Best ignore it."
@@ -533,12 +470,12 @@ msgstr ""
 "Probabil această întâlnire a fost ștearsă. Se recomandă să ignorați această "
 "actualizare."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:76
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
 msgid "The organizer declined your counter proposal for the appointment."
 msgstr ""
 "Organizatorul a respins contrapropunerea dumneavoastră pentru întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:77
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:79
 msgid ""
 "The organizer declined your counter proposal for an appointment that could "
 "not be found. It was probably deleted in the meantime."
@@ -546,7 +483,7 @@ msgstr ""
 "Organizatorul a respins contrapropunerea dumneavoastră pentru o întâlnire ce "
 "nu a putut fi găsită. Probabil că a fost ștearsă între timp."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:80
 msgid ""
 "An attendee wants to be brought up to date about an appointment that could "
 "not be found. It was probably deleted at some point. Best ignore this "
@@ -555,7 +492,7 @@ msgstr ""
 "Un participant dorește să fie informat la zi despre o întâlnire ce pare să "
 "nu existe. Probabil că a fost ștearsă. Se recomandă să ignorați acest mesaj."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:79
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:81
 msgid ""
 "This message contains appointment updates that were already accepted by "
 "another user. Best ignore this message."
@@ -563,13 +500,13 @@ msgstr ""
 "Acest mesaj conține actualizări de întâlniri ce au fost deja acceptate de "
 "către alt utilizator. Nu trebuie să reacționați la acest mesaj."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:80
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:82
 msgid "This message comes from an internal user. Best ignore it."
 msgstr ""
 "Acest mesaj provine de la un utilizator intern. Nu trebuie să reacționați la "
 "acest mesaj."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:81
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:83
 msgid ""
 "This invitation was sent to someone else, not you. This appointment would "
 "have to be created in a user's private folder to which you do not have write "
@@ -579,36 +516,36 @@ msgstr ""
 "trebuit creată într-un dosar personal al utilizatorului la care "
 "dumneavoastră nu aveți drept de scriere."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:83
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:85
 msgid "The appointment's attachments have been changed"
 msgstr "Fișierele atașate ale întâlnirii au fost modificate"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:85
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:87
 msgid "One or more other fields have been updated"
 msgstr "Unul sau mai multe câmpuri au fost actualizate"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:87
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:89
 msgid "Reserved"
 msgstr "Rezervat"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:89
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:91
 msgid "Temporary"
 msgstr "Temporar"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:91
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:93
 msgid "Absent"
 msgstr "Absent"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:93
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:95
 msgid "Free"
 msgstr "Liber"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:95
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:97
 msgid "%1$s has declined your proposed changes for the appointment %2$s."
 msgstr ""
 "%1$s a respins modificările propuse de dumneavoastră asupra întâlnirii %2$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:97
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:99
 msgid ""
 "%1$s has declined your proposed changes on behalf of %2$s for the "
 "appointment %3$s."
@@ -616,7 +553,7 @@ msgstr ""
 "%1$s a respins modificările propuse de dvs. în numele utilizatorului %2$s "
 "pentru întâlnirea %3$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:99
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:101
 msgid ""
 "%1$s would like to be brought up to date about the appointment %2$s. Please "
 "send another invitation."
@@ -630,9 +567,13 @@ msgstr ""
 #. * <p>"UserXY has declined the invitation"
 #. * <p>"UserXY has tentatively accepted the invitation"
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:107
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:109
 msgid "%1$s has %2$s the invitation:"
 msgstr "%1$s a %2$s invitația:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:111
+msgid "%1$s has %2$s the invitation to an appointment of the series %3$s:"
+msgstr "%1$s a %2$s invitația la o întâlnire din seriei %3$s:"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on behalf of UserAB"
@@ -643,11 +584,20 @@ msgstr "%1$s a %2$s invitația:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:112
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:122
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:132
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:116
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:130
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:144
 msgid "%1$s has %2$s the invitation on behalf of %3$s:"
 msgstr "%1$s a %2$s invitația în numele utilizatorului %3$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:118
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:132
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:146
+msgid ""
+"%1$s has %2$s the invitation to an appointment of the series %3$s on behalf "
+"of %4$s:"
+msgstr ""
+"%1$s a %2$s invitația la o rezervare din seria %3$s în numele lui %4$s:"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on your behalf"
@@ -658,117 +608,158 @@ msgstr "%1$s a %2$s invitația în numele utilizatorului %3$s:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on your behalf"
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:117
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:127
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:123
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:137
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:151
 msgid "%1$s has %2$s the invitation on your behalf:"
 msgstr "%1$s a %2$s invitația în numele dumneavoastră:"
 
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:125
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:139
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:153
+msgid ""
+"%1$s has %2$s the invitation to an appointment of the series %3$s on your "
+"behalf:"
+msgstr "%1$s a %2$s invitația la întâlnirea din seriei %3$s în numele dvs.:"
+
 #. public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 #. Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:142
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:158
 msgid "%1$s sets the status to %2$s for this appointment:"
 msgstr "%1$s setează starea acestei întâlniri drept %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:144
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:160
+msgid "%1$s sets the status to %2$s for an appointment of the series %3$s:"
+msgstr "%1$s setează starea la %2$s pentru o întâlnire din seria %3$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:162
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
 msgstr ""
 "%1$s setează în numele utilizatorului %3$s starea pentru această întâlnire "
 "drept %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:146
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+msgid ""
+"On behalf of %4$s, %1$s sets the status for an appointment of the series "
+"%3$s to %2$s:"
+msgstr ""
+"%1$s setează în numele utilizatorului %4$s starea pentru o întâlnire din "
+"seria %3$s drept %2$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
 msgstr ""
-"%1$s setează în numele dumneavoastră starea dumneavoastră pentru această "
-"întâlnire drept %2$s:"
+"%1$s setează în numele dvs. starea dvs. pentru această întâlnire drept %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:148
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
+msgid ""
+"On your behalf, %1$s sets your status for an appointment of the series %3$s "
+"to %2$s:"
+msgstr ""
+"%1$s setează în numele dvs. starea dvs. pentru o întâlnire din seria %3$s "
+"drept %2$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
 msgid "none"
 msgstr "niciunul"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:150
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
 msgid "%1$s would like you to change the appointment:"
 msgstr "%1$s dorește să modificați întâlnirea:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:152
-msgid "%1$s has asked %2$s to change the event:"
-msgstr "%1$s a solicitat ca %2$s să modifice evenimentul:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+msgid "%1$s has asked %2$s to change the appointment:"
+msgstr "%1$s a solicitat %2$s să modifice întâlnirea:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:154
-msgid "You have been invited to an event by %1$s:"
-msgstr "Ați fost invitat la un eveniment de către %1$s:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
+msgid "You have been invited to an appointment by %1$s:"
+msgstr "Ați fost invitat la o întâlnire de către %1$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:156
-msgid "You have been invited to an event organized by %1$s on behalf of %2$s"
-msgstr ""
-"Ați fost invitat la un eveniment organizat de %1$s în numele utilizatorului "
-"%2$s"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
+msgid ""
+"You have been invited to an appointment organized by %1$s on behalf of %2$s"
+msgstr "Ați fost invitat la o întâlnire organizată de %1$s în numele lui %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:158
-msgid "%1$s is organizing an event on your behalf."
-msgstr "%1$s organizează un eveniment în numele dumneavoastră."
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+msgid "%1$s is organizing an appointment on your behalf."
+msgstr "%1$s organizează o întâlnire în numele dvs."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:160
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
 msgid "%1$s created a recurrence exception. Original date: %2$s:"
 msgstr "%1$s a creat o excepție într-o serie. Dată inițială: %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:162
-msgid "%1$s has changed an event:"
-msgstr "%1$s a modificat un eveniment:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+msgid "%1$s has changed an appointment:"
+msgstr "%1$s a modificat o întâlnire:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+msgid "%1$s has changed an appointment of the series %2$s:"
+msgstr "%1$s a modificat o întâlnire din seria %2$s:"
 
 #. %1$s
 #. E.g. Drive Client
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
 #. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
 msgid "%1$s"
 msgstr "%1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
-msgid "%1$s has changed an event on behalf of %2$s:"
-msgstr "%1$s a modificat un eveniment în numele utilizatorului %2$s:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
+msgid "%1$s has changed an appointment on behalf of %2$s:"
+msgstr "%1$s a modificat o întâlnire în numele lui %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
-msgid "%1$s has changed an event on your behalf:"
-msgstr "%1$s a modificat un eveniment în numele dumneavoastră:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
+msgid "%1$s has changed an appointment of the series %2$s on behalf of %3$s:"
+msgstr "%1$s a modificat o întâlnire din seria %2$s în numele lui %3$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+msgid "%1$s has changed an appointment on your behalf:"
+msgstr "%1$s a modificat o întâlnire în numele dvs.:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
+msgid "%1$s has changed an appointment of the series %2$s on your behalf:"
+msgstr "%1$s a modificat o întâlnire din seria %2$s în numele dvs.:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
 msgid "When:"
 msgstr "Când:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 msgid "Direct link:"
 msgstr "Legătură directă:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
 msgid "Where:"
 msgstr "Unde:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
-msgid "Participants:"
-msgstr "Participanți:"
+#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
+msgid "Participants"
+msgstr "Participanți"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
-msgid "Details:"
-msgstr "Detalii:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
+msgid "Details"
+msgstr "Detalii"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
 msgid "Show as:"
 msgstr "Afișează ca:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "Created:"
 msgstr "Creat:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "Modified:"
 msgstr "Modificat:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
@@ -776,75 +767,94 @@ msgstr ""
 "%1$s a șters un eveniment în numele utilizatorului %2$s sau ați fost "
 "eliminat ca participant:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+msgid ""
+"%1$s has deleted an appointment of the series %2$s on behalf of %3$s, or you "
+"have been removed as a participant:"
+msgstr ""
+"%1$s a șters o întâlnire din %2$s în numele lui %3$s sau ați fost eliminat "
+"ca participant:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s a șters un eveniment în numele dumneavoastră:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+msgid "%1$s has deleted an appointment of the series %2$s on your behalf:"
+msgstr "%1$s a șters o întâlnire din seria %2$s în numele dvs.:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr "%1$s a șters o întâlnire sau ați fost eliminat ca participant:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
+msgid ""
+"%1$s has deleted an appointment of the series %2$s, or you have been removed "
+"as a participant:"
+msgstr ""
+"%1$s a șters o întâlnire din seria %2$s sau ați fost eliminat ca participant:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:228
 msgid "Change the subject to %1$s."
 msgstr "Modifică subiectul în %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:230
 msgid "The appointment has a new subject: %1$s."
 msgstr "Întâlnirea are un subiect nou: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "Întâlnirea va fi acum afișată ca: \"%1$s\"."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:234
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "Fusul orar al întâlnirii a fost modificat în: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:238
 msgid "Change the location to %1$s."
 msgstr "Modifică locul în %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "Întâlnirea se desfășoară într-un alt loc: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:244
 msgid "Use the appointment description below."
 msgstr "Utilizați descrierea întâlnirii de mai jos."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:246
 msgid "The appointment description has changed."
 msgstr "Descrierea întâlnirii a fost modificată."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
 msgid "Please invite %1$s to the appointment."
 msgstr "Invitați utilizatorul %1$s la întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
 msgid "Add %1$s to the appointment."
 msgstr "Adaugă %1$s la întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
 msgid "%1$s has been invited to the appointment."
 msgstr "%1$s a fost invitat la întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
 msgid "Remove %1$s from the appointment."
 msgstr "Elimină utilizatorul %1$s din întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:258
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s a fost eliminat din întâlnire."
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:229
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s a %2$s întâlnirea."
 
@@ -856,60 +866,60 @@ msgstr "%1$s a %2$s întâlnirea."
 #. * Confirmation statuses
 #.
 #. waiting
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:235
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "în așteptare"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:239
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
 msgid "Invite the group %1$s to the appointment."
 msgstr "Invită grupul %1$s la întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
 msgid "The group %1$s has been invited to the appointment"
 msgstr "Grupul %1$s a fost invitat la întâlnire"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:245
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 msgid "Remove the group %1$s from the appointment."
 msgstr "Elimină grupul %1$s din întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
 msgid "The group %1$s has been removed from the appointment"
 msgstr "Grupul %1$s a fost eliminat din întâlnire"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "Reserve the resource %1$s for the appointment"
 msgstr "Rezervă resursa %1$s pentru întâlnire"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:287
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "Rezervă resursa %1$s pentru întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
 msgid "The resource %1$s has been reserved for the appointment"
 msgstr "Resursa %1$s a fost rezervată pentru întâlnire"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "Remove the resource %1$s from the appointment"
 msgstr "Elimină resursa %1$s din întâlnire"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 msgid "Remove the resource %1$s from the appointment."
 msgstr "Elimină resursa %1$s din întâlnire."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
 msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr "Resursa %1$s nu mai este rezervată pentru întâlnire"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
-msgstr "Întâlnirea a fost reprogramată. Data inițială: %1$s. Noua dată: %2$s"
+msgstr "Întâlnirea a fost reprogramată. Data inițială: %1$s. Dată nouă: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:299
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
@@ -917,89 +927,106 @@ msgstr ""
 "Fusul orar al întâlnirii a fost modificat. Fus orar inițial: %1$s. Fus orar "
 "nou: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
 msgid ""
-"The timezone of the appointments start date was changed. Original timezone: "
+"The timezone of the appointment's start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Fusul orar al datei inițiale a întâlnirii a fost modificat. Fus orar "
-"inițial: %1$s. Fus orar nou: %2$s"
+"Fusul orar al datei de începere a întâlnirii a fost modificat. Fus orar "
+"original: %1$s. Fus orar nou: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
 msgid ""
-"The timezone of the appointments end date was changed. Original timezone: "
+"The timezone of the appointment's end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Fusul orar al datei finale a întâlnirii a fost modificat. Fus orar inițial: "
-"%1$s. Fus orar nou: %2$s"
+"Fusul orar al datei de încheiere a întâlnirii a fost modificat. Fus orar "
+"original: %1$s. Fus orar nou: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
-msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
-msgstr "Reprogramează întâlnirea. Data inițială: %1$s. Noua dată: %2$s"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+msgid "Reschedule the appointment. Original date: %1$s. New date: %2$s"
+msgstr "Reprogramează întâlnirea. Data inițială: %1$s. Dată nouă: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
-msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
+msgid "The appointment series was updated, beginning at %1$s."
+msgstr "Seria de întâlniri a fost actualizată, începând de la %1$s."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:309
+msgid "The appointment's recurrence rule has changed to: %1$s."
+msgstr "Regula de recurență a întâlnirii a fost modificată la: %1$s."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:311
+msgid ""
+"Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
-"Reprogramează evenimentul. Data/ora inițială: %1$s. Noua dată/oră: %2$s"
+"Reprogramează întâlnirea. Data/ora originală: %1$s. Dată/oră nouă: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:313
+msgid "Resources"
+msgstr "Resurse"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The entire day"
+msgstr "Toată ziua"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
 msgid "New appointment: %1$s"
 msgstr "Întâlnire nouă: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
 msgid "Appointment changed: %1$s"
 msgstr "Întâlnire modificată: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
 msgid "Appointment canceled: %1$s"
 msgstr "Întâlnire anulată: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Modificări propuse pentru întâlnirea: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:326
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s setează starea pe 'niciunul' pentru: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:329
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s %2$s invitația: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:331
 msgid "Resend the invitation for: %1$s"
 msgstr "Retrimiteți invitația pentru: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
 msgid "Change not accepted for: %1$s"
 msgstr "Modificarea nu a fost acceptată pentru: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Toate orele vor fi afișate pentru fusul orar %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:300
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:338
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s a %2$s întâlnirea, dar dorește să facă o contrapropunere: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:341
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "Ați primit acest mesaj pentru că sunteți liderul acestei întâlniri."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:343
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr ""
 "Ați primit acest mesaj pentru că sunteți organizatorul acestei întâlniri."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
@@ -1008,7 +1035,7 @@ msgstr ""
 "o administrați."
 
 #. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:310
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:348
 msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
@@ -1019,14 +1046,14 @@ msgstr ""
 #. *
 #. * The organizer of the appointment has changed. New organizer is: %1$s
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:353
 msgid "The organizer of the appointment has changed. New organizer is: %1$s"
 msgstr "Organizatorul întâlnirii a fost modificat. Noul organizator este: %1$s"
 
 #. *
 #. * The organizer of the appointment has changed. This operation is not allowed.
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:320
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:358
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr ""
@@ -1254,32 +1281,22 @@ msgstr "Nu aveți acces la acest calendar."
 msgid "The requested page was not found."
 msgstr "Pagina solicitată nu a fost găsită."
 
-#. The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#. The remote calendar service is unavailable at the moment. Please try again later.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:68
 msgid ""
-"The remote SchedJoules service is unavailable at the moment. There is "
-"nothing we can do about it. Please try again later."
+"The remote calendar service is unavailable at the moment. Please try again "
+"later."
 msgstr ""
-"Serviciul la distanță SchedJoules este indisponibil în acest moment. Nu "
-"putem face nimic în această privință. Încercați din nou mai târziu."
+"Serviciul de calendar la distanță nu este disponibil momentan. Vă rugăm să "
+"încercați din nou mai târziu."
 
-#. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
+#. An error occurred on the remote calendar service. Please try again later.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
 msgid ""
-"An internal server error occurred on SchedJoules side. There is nothing we "
-"can do about it."
+"An error occurred at the remote calendar service. Please try again later."
 msgstr ""
-"A apărut o eroare internă de server pe partea SchedJoules. Nu putem face "
-"nimic în această privință."
-
-#. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
-#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
-msgid ""
-"A remote server error occurred on SchedJoules side. There is nothing we can "
-"do about it."
-msgstr ""
-"A apărut o eroare de server la distanță pe partea SchedJoules. Nu putem face "
-"nimic în această privință."
+"A apărut o eroare la serviciul de calendar la distanță. Vă rugăm să "
+"încercați din nou mai târziu."
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1294,6 +1311,12 @@ msgstr "Personal"
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
 msgid "Subject"
 msgstr "Subiect"
+
+#. * The displayed name for the {@link EventField#LOCATION} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
+msgid "Location"
+msgstr "Loc"
 
 #. * The displayed name for the {@link EventField#START_DATE} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:72
@@ -1348,22 +1371,33 @@ msgid "The requested appointment was not found."
 msgstr "Întâlnirea solicitată nu a fost găsită."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:64
+msgid "The requested version of the appointment was not found."
+msgstr "Versiunea solicitată a întâlnirii nu a fost găsită."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
 msgid "The requested folder was not found."
 msgstr "Dosarul solicitat nu a fost găsit."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:68
 msgid "The requested participant was not found."
 msgstr "Participantul solicitat nu a fost găsit."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:68
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:70
 msgid "The requested calendar account was not found."
 msgstr "Contul calendar solicitat nu a fost găsit."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:70
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:72
 msgid "The calendar provider \"%1$s\" is not available."
 msgstr "Furnizorul de calendar \"%1$s\" nu este disponibil."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:72
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:74
+msgid ""
+"The calendar storage is temporarily not available. Please try again later."
+msgstr ""
+"Stocarea calendarului nu este disponibilă temporar. Vă rugăm să încercați "
+"din nou mai târziu."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
 msgid ""
 "The requested calendar account is currently disabled. Please enable the "
 "account and try again."
@@ -1372,41 +1406,41 @@ msgstr ""
 "încercați din nou."
 
 #. An I/O error occurred: %1$s
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:74
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "An I/O error occurred: %1$s"
 msgstr "A apărut o eroare de I/O: %1$s"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
 msgid ""
 "The requested operation is not supported for calendar provider \"%1$s\"."
 msgstr ""
 "Operațiunea cerută nu este suportată pentru furnizorul de calendar \"%1$s\"."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
 msgid "The operation could not be completed due to insufficient permissions."
 msgstr "Operațiunea nu a putut fi finalizată, permisiuni insuficiente."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
 msgid ""
 "This modification can only be performed by the organizer of the appointment."
 msgstr ""
 "Modificarea poate fi efectuată numai de către organizatorul întâlnirii."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid "Organizer must also be an attendee."
 msgstr "Organizatorul trebuie să fie și participant."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid "All appointments of a series must contain the same organizer."
 msgstr "Toate rezervările unei serii trebuie să conțină același organizator."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid "The operation could not be completed due to missing capabilities."
 msgstr "Operațiunea nu a putut fi finalizată, lipsesc capabilități."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
@@ -1414,7 +1448,7 @@ msgstr ""
 "Dosarul furnizat nu este suportat. Selectați un dosar valid și încercați din "
 "nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -1422,7 +1456,7 @@ msgstr ""
 "Operațiunea nu a putut fi completată din cauza unei modificări concurente. "
 "Reîncărcați datele și încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
 "The changes could not be applied because a newer version of the appointment "
 "already exists."
@@ -1430,7 +1464,7 @@ msgstr ""
 "Imposibil de aplicat modificările, deoarece există deja o versiune mai nouă "
 "a rezervării."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
@@ -1438,18 +1472,18 @@ msgstr ""
 "Întâlnirea nu a putut fi creată din cauza unei alte întâlniri cu același "
 "identificator unic cu care intră în conflict."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid "The appointment conflicts with one or more other appointments."
 msgstr "Întâlnirea intră în conflict cu una sau mai multe alte întâlniri."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr ""
 "Câmpul \"%1$s\" este obligatoriu. Furnizați o valoare validă și încercați "
 "din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
@@ -1457,7 +1491,7 @@ msgstr ""
 "Data de final este înaintea datei de start. Corectați întâlnirea și "
 "încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
@@ -1465,11 +1499,11 @@ msgstr ""
 "Întâlnirile din dosare non-personale nu pot fi clasificate ca \"personal\" "
 "sau \"secret\"."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr "Întâlnirile cu resurse nu pot fi clasificate ca \"secret\"."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
@@ -1477,11 +1511,11 @@ msgstr ""
 "Întâlnirile clasificate ca \"personal\" sau \"secret\" nu pot fi mutate în "
 "acest tip de dosar."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr "Repetările unei serii de întâlniri nu pot avea diferite clasificări."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
@@ -1489,13 +1523,13 @@ msgstr ""
 "Regula de repetare furnizată este incorectă. Corectați regula și încercați "
 "din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
 "Mementoul furnizat este incorect. Corectați mementoul și încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
@@ -1503,7 +1537,7 @@ msgstr ""
 "Fusul orar furnizat este incorect. Selectați un fus orar valid și încercați "
 "din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
@@ -1511,7 +1545,7 @@ msgstr ""
 "Locația geografică furnizată este incorectă. Selectați coordonate valide și "
 "încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
@@ -1519,7 +1553,7 @@ msgstr ""
 "Tipul datei de start și final sunt incompatibile. Corectați întâlnirea și "
 "încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
@@ -1527,7 +1561,7 @@ msgstr ""
 "Regula de repetare furnizată nu este suportată. Modificați regula și "
 "încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
@@ -1535,7 +1569,7 @@ msgstr ""
 "Repetarea indicată nu face parte din seria de întâlniri. Selectați un "
 "identificator de repetare valid și încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
@@ -1543,11 +1577,11 @@ msgstr ""
 "Despărțirea seriei de întâlniri nu poate fi efectuată. Selectați un punct de "
 "despărțire valid și încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "Nu este permisă mutarea unei serii de întâlniri într-un alt dosar."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
@@ -1555,11 +1589,11 @@ msgstr ""
 "Mutarea unei repetări dintr-o serie de întâlniri într-un alt dosar nu este "
 "suportată."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "Utilizatorul de calendar \"%1$s\" este incorect."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
@@ -1568,7 +1602,7 @@ msgstr ""
 "din nou."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1578,7 +1612,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "Pentru a completa căutarea sunt necesare %1$d sau mai multe caractere."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1588,7 +1622,7 @@ msgstr ""
 "Caracterul \"%1$s\" din câmpul \"%2$s\" nu poate fi salvat. Eliminați "
 "caracterul problematic și încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
@@ -1596,57 +1630,61 @@ msgstr ""
 "Anumite date introduse depășesc limita câmpului. Scurtați valoarea pentru "
 "\"%1$s\" (limită: %2$d, valoare actuală: %3$d) și încercați din nou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "S-a depășit numărul maxim de înscrieri pentru calendare."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "Valoarea pentru \"%2$s\" este incorectă și nu a fost aplicată."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The value for \"%1$s\" is invalid and cannot be applied."
 msgstr "Valoarea pentru \"%1$s\" este incorectă și nu poate fi aplicată."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr "Valoarea pentru \"%2$s\" nu este suportată și nu a fost aplicată."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "'%1$s' fie nu este un utilizator intern, fie nu există."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "Authentication failed."
 msgstr "Autentificarea a eșuat."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr ""
 "Nu s-a putut crea contul. Au apărut probleme cu autentificarea furnizată."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "Contul '%1$s' în contextul '%2$s' depășește limita permisă."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
 msgid "The requested attachment was not found."
 msgstr "Fișierul atașat solicitat nu a fost găsit."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr ""
 "Au fost interogate prea multe întâlniri. Alegeți o perioadă mai scurtă."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:164
 msgid "The appointment contains too many participants."
 msgstr "Întâlnirea conține prea mulți participanți."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:166
 msgid "The appointment contains too many reminders."
 msgstr "Întâlnirea conține prea multe mementouri."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:168
+msgid "The method \"%1$s\" is not supported."
+msgstr "Metoda \"%1$s\" nu este acceptată."
 
 #. Your selection is not supported.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:70
@@ -1756,6 +1794,7 @@ msgstr "Pentru a vă configura dispozitivul apăsați pe această legătură: "
 
 #. The user salutation; e.g. "Dear John Doe,"
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:68
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:68
 msgid "Dear %1$s,"
 msgstr "Stimate domn/ Stimată doamnă %1$s,"
 
@@ -3528,6 +3567,15 @@ msgstr "⁺∕₋ 3 luni"
 msgid "⁺∕₋ 1 year"
 msgstr "⁺∕₋ 1 an"
 
+#. Status
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
+msgid "Accepted"
+msgstr "Acceptat"
+
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
+msgid "Declined"
+msgstr "Respins"
+
 #: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:103
 msgid "Tentative"
 msgstr "Tentativă"
@@ -3658,10 +3706,12 @@ msgid "Folders"
 msgstr "Dosare"
 
 #. Search in Persons.
+#. The path prefix within generated ZIP archive containing exported contacts
 #. *
 #. * The default file name for a vcard and csv export, when using batch data
 #.
 #: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportStrings.java:71
 #: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:66
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
@@ -3834,6 +3884,183 @@ msgstr ""
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
 msgid "The string cannot be parsed to a valid URL."
 msgstr "Șirul nu poate fi analizat ca un URL valid."
+
+#. The prefix for the diagnostics file
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/DataExportStrings.java:70
+msgid "Diagnostics"
+msgstr "Diagnosticare"
+
+#. The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:71
+msgid ""
+"The data archive that you have requested on %1$s is now ready for download. "
+"You can download the archive until %2$s."
+msgstr ""
+"Arhiva de date pe care ați solicitat-o la %1$s este acum gata pentru "
+"descărcare. Puteți descărca arhiva până la %2$s."
+
+#. The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:74
+msgid ""
+"The data archive that you have requested on %1$s is now ready for download."
+msgstr ""
+"Arhiva de date pe care ați solicitat-o la %1$s este acum gata pentru "
+"descărcare."
+
+#. The content of the E-Mail informing about failed data export. E.g. "Unfortunately the data export that you have requested on 09/01/2019 has failed. Please try again."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:77
+msgid ""
+"Unfortunately the data export that you have requested on %1$s has failed. "
+"Please try again."
+msgstr ""
+"Din păcate, exportul de date pe care l-ați solicitat la %1$s nu a reușit. Vă "
+"rugăm să încercați din nou."
+
+#. The content of the E-Mail informing about aborted data export. E.g. "The data export that you have requested on 09/01/2019 has been canceled."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:80
+msgid "The data export that you have requested on %1$s has been canceled."
+msgstr "Exportul de date pe care l-ați solicitat la %1$s a fost anulat."
+
+#. The subject of the E-Mail for a successful data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:83
+msgid "Your personal data archive is ready for download"
+msgstr "Arhiva de date personale este gata pentru descărcare"
+
+#. The subject of the E-Mail for a failed data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:86
+msgid "Your personal data export failed"
+msgstr "Exportul de date personale nu a reușit"
+
+#. The subject of the E-Mail for an aborted data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:89
+msgid "Your personal data export has been canceled"
+msgstr "Exportul de date personale a fost anulat"
+
+#. The label of the button linking to downloadable archives.
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:92
+msgid "Download archives"
+msgstr "Descarcă arhivele"
+
+#. The personal part for the no-reply address
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:95
+msgid "Service for dowloading your personal data"
+msgstr "Serviciu pentru descărcarea datele dvs. personale"
+
+#. The info footer provided for every data export notification E-Mail
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:98
+msgid ""
+"You are receiving this email because you have requested a personal data "
+"download recently."
+msgstr ""
+"Primiți acest e-mail deoarece ați solicitat recent o descărcare a datelor "
+"personale."
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:70
+msgid "enabled"
+msgstr "activat"
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:72
+msgid "includePublic"
+msgstr "includePublic"
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:74
+msgid "includeShared"
+msgstr "includeShared"
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:76
+msgid "includeUnsubscribed"
+msgstr "includeUnsubscribed"
+
+#. The path prefix within generated ZIP archive containing exported appointments
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportStrings.java:71
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Calendar"
+msgstr "Calendar"
+
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:76
+msgid "includeTrash"
+msgstr "includeTrash"
+
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:78
+msgid "includeAllVersions"
+msgstr "includeAllVersions"
+
+#. The path prefix within generated ZIP archive containing exported Drive files
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportStrings.java:71
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
+msgid "Drive"
+msgstr "Drive"
+
+#. The path prefix within generated ZIP archive containing exported E-Mails
+#: com.openexchange.gdpr.dataexport.provider.mail/src/com/openexchange/gdpr/dataexport/provider/mail/internal/MailDataExportStrings.java:71
+msgid "E-Mails"
+msgstr "E-mailuri"
+
+#. The path prefix within generated ZIP archive containing exported appointments
+#. *
+#. * The default file name for an ical task export, when using batch data
+#.
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportStrings.java:71
+#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
+msgid "Tasks"
+msgstr "Sarcini"
+
+#. There is already a running data export.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:69
+msgid "There is already a running data export"
+msgstr "Există deja un export de date în curs"
+
+#. There is no data export.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:72
+msgid "There is no data export"
+msgstr "Nu există nici un export de date"
+
+#. The data export is not yet finished. Please try again later.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:75
+msgid "The data export is not yet finished. Please try again later."
+msgstr ""
+"Exportul de date nu s-a terminat încă. Vă rugăm să încercați din nou mai "
+"târziu."
+
+#. The data export failed.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:78
+msgid "The data export failed"
+msgstr "Exportul de date nu a reușit"
+
+#. A data export has already been requested
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:81
+msgid "A data export has already been requested"
+msgstr "Un export de date a fost deja solicitat"
+
+#. There is no data export or it has already been completed
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:84
+msgid "There is no data export or it has already been completed"
+msgstr "Nu există nici un export de date sau a fost deja finalizat"
+
+#. The data export has been aborted, but he/she tries to retrieve its results
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:87
+msgid "The data export has been aborted"
+msgstr "Exportul de date a fost anulat"
+
+#. User requested a package number that does not exist
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:90
+msgid "No such package"
+msgstr "Nici un astfel de pachet"
+
+#. User requested to delete a completed data export task, but task is not yet completed
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:93
+msgid "There is no data export or it is not yet completed"
+msgstr "Nu există nici un export de date sau nu este încă finalizat"
 
 #. The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
 #. %s is replaced with some login name.
@@ -4070,6 +4297,218 @@ msgstr "Sesiunea nu mai este disponibilă. Încercați din nou."
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:68
 msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr "Lipsește tichetul Kerberos din sesiune. Încercați din nou."
+
+#. *
+#. * Cannot clone object %1$s.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:71
+msgid "Cannot clone object \"%1$s\"."
+msgstr "Nu s-a putut clona obiectul \"%1$s\"."
+
+#. *
+#. * Hash algorithm %s isn't found.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:76
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
+msgid "Hash algorithm \"%s\" could not be found."
+msgstr "Algoritmul de hash \"%s\" nu a fost găsit."
+
+#. *
+#. * Encoding %s cannot be used.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:81
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:65
+msgid "Encoding \"%s\" cannot be used."
+msgstr "Codificarea \"%s\" nu poate fi utilizată."
+
+#. *
+#. * Cannot find user with identifier %1$s in context %2$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:86
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:77
+msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
+msgstr ""
+"Nu s-a putut găsi utilizatorul cu identificatorul \"%1$s\" în contextul %2$d."
+
+#. *
+#. * Found two user with same identifier %1$s in context %2$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:91
+msgid "Two users with same identifier \"%1$s\" in context %2$d found."
+msgstr ""
+"S-au găsit doi utilizatori cu același identificator \"%1$s\" în contextul "
+"%2$d."
+
+#. *
+#. * Problem putting an object into the cache.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:96
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
+msgid "Problem putting/removing an object into/from the cache."
+msgstr "Problemă la introducerea/eliminarea unui obiect în/din cache."
+
+#. No permission to modify resources in context %1$s
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:99
+msgid "No permission to modify resources in context \"%1$s\""
+msgstr "Nu aveți permisiuni de modificare a resurselor în contextul \"%1$s\""
+
+#. No permission to access resources in context %1$s
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:102
+msgid "No permission to access resources in context \"%1$s\""
+msgstr "Nu aveți permisiuni de acces a resurselor în contextul \"%1$s\""
+
+#. *
+#. * Missing or unknown password mechanism %1$s
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:107
+msgid "Missing or unknown password mechanism \"%1$s\""
+msgstr "Mecanism de parolă lipsă sau necunoscut \"%1$s\""
+
+#. *
+#. * New password contains invalid characters
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:112
+msgid "New password contains invalid characters."
+msgstr "Parola nouă conține caractere nepermise."
+
+#. *
+#. * Attributes of user %1$d in context %2$d have been erased.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:117
+msgid "Attributes of user %1$d in context %2$d have been erased."
+msgstr "Atributele utilizatorului %1$d din contextul %2$d au fost șterse."
+
+#. *
+#. * Loading one or more users failed.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:122
+msgid "Loading one or more users failed."
+msgstr "Încărcarea unuia sau mai multor utilizatori a eșuat."
+
+#. * Alias entries are missing for user %1$d in context %2$d.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:125
+msgid "Alias entries are missing for user %1$d in context %2$d."
+msgstr "Lipsesc intrările alias pentru utilizatorul %1$d în contextul %2$d."
+
+#. * Updating attributes failed in context %1$d for user %2$d.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:128
+msgid "Updating attributes failed in context %1$d for user %2$d."
+msgstr ""
+"Actualizarea atributelor a eșuat în contextul %1$d pentru utilizatorul %2$d."
+
+#. *
+#. * Invalid password length. The password must be of minimum length %1$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
+msgid ""
+"Invalid password length. The password must have a minimum length of %1$d."
+msgstr "Lungime incorectă a parolei. Lungimea minimă permisă este %1$d."
+
+#. *
+#. * Invalid password length. The password must be of maximum length %1$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
+msgid ""
+"Invalid password length. The password must have a maximum length of %1$d."
+msgstr "Lungime incorectă a parolei. Lungimea maximă permisă este %1$d."
+
+#. *
+#. * The parameter %s for this user is missing.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:143
+msgid "The parameter \"%s\" for this user is missing."
+msgstr "Lipsește parametrul \"%s\" pentru acest utilizator."
+
+#. *
+#. * %s is not a valid locale.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:148
+msgid "\"%s\" is not a valid locale."
+msgstr "\"%s\" nu este o localizare validă."
+
+#. *
+#. * %s is not a valid time zone.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:153
+msgid "\"%s\" is not a valid timezone."
+msgstr "\"%s\" nu este un fus orar valid."
+
+#. This is an internal exception to detect coding problems. A user will never see this exception.
+#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:157
+msgid ""
+"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
+"user's attributes."
+msgstr ""
+"Atributele de blocare ale mai multor utilizatori nu sunt permise. Ați "
+"încercat să blocați atributele utilizatorului %1$d."
+
+#. *
+#. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:162
+msgid ""
+"The entered password is illegal and can't be saved. Allowed characters are: "
+"%1$s"
+msgstr ""
+"Parola introdusă nu este validă și nu poate fi salvată. Caractere permise: "
+"%1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:167
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Parola actuală nu este corectă. Introduceți parola actuală corectă și "
+"încercați din nou."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:172
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr ""
+"Lipsește parola actuală. Introduceți parola actuală și încercați din nou."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:177
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Lipsește noua parolă. Introduceți noua parolă și încercați din nou."
+
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:181
+#: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+msgid "Denied concurrent update of user attributes."
+msgstr "Actualizare simultană a atributelor de utilizator refuzată."
+
+#. *
+#. * No recipient(s) has been defined for new message
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:71
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
+msgid "There are no recipient(s) for the new message."
+msgstr "Nu există niciun destinatar pentru mesajul nou."
+
+#. *
+#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:76
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
+msgid ""
+"The following recipient is not allowed: %1$s. Please remove associated "
+"address and try again."
+msgstr ""
+"Următorul destinatar nu este permis: %1$s. Eliminați adresa corespunzătoare "
+"și încercați din nou."
 
 #. A Guard error occurred: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
@@ -4612,12 +5051,11 @@ msgid "Appointments"
 msgstr "Întâlniri"
 
 #. *
-#. * The default file name for an ical task export, when using batch data
+#. * The default file name for an ical event export, when using batch data
 #.
-#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
-msgid "Tasks"
-msgstr "Sarcini"
+#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
+msgid "Events"
+msgstr "Evenimente"
 
 #. *
 #. * The default file name for an ical task export, when using batch data
@@ -6144,6 +6582,16 @@ msgstr ""
 "Nu s-a putut conecta RSS cu URL-ul: %1$s. Modificați URL-ul și încercați din "
 "nou."
 
+#. Problem parsing the security policy file
+#: com.openexchange.security.manager/src/com/openexchange/security/manager/exceptions/SecurityManagerExceptionMessages.java:63
+msgid "Problem parsing security policy file: %1$s"
+msgstr "Problemă la analiza fișierului politicii de securitate: %1$s"
+
+#. Error when updating the security manager
+#: com.openexchange.security.manager/src/com/openexchange/security/manager/exceptions/SecurityManagerExceptionMessages.java:66
+msgid "Problem updating security manager.  %1$s"
+msgstr "Problemă la actualizarea managerului de securitate.  %1$s"
+
 #. No appropriate anonymizer available.
 #: com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -7007,13 +7455,6 @@ msgstr "Nu s-a putut realiza conexiunea la zona de stocare a contextului."
 msgid "The account \"%1$s\" was not found."
 msgstr "Contul \"%1$s\" nu a fost găsit."
 
-#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
-#. This should happen in very rare conditions and is not visible to the client.
-#: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:181
-msgid "Denied concurrent update of user attributes."
-msgstr "Actualizare simultană a atributelor de utilizator refuzată."
-
 #. The default display name format for contacts with department: <firstname> <lastname> (department)
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/ContactDisplayNameFormat.java:62
 msgid "%1$s %2$s (%3$s)"
@@ -7083,10 +7524,6 @@ msgstr "Fișiere atașate mesajelor"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
 msgid "My files"
 msgstr "Fișierele mele"
-
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
-msgid "Drive"
-msgstr "Drive"
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
 msgid "Shared files"
@@ -8650,30 +9087,6 @@ msgstr "Căutarea durează prea mult pentru a fi completată."
 msgid "Version comment"
 msgstr "Comentariu versiune"
 
-#. *
-#. * Problem putting an object into the cache.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:96
-msgid "Problem putting/removing an object into/from the cache."
-msgstr "Problemă la introducerea/eliminarea unui obiect în/din cache."
-
-#. *
-#. * Hash algorithm %s isn't found.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:76
-msgid "Hash algorithm \"%s\" could not be found."
-msgstr "Algoritmul de hash \"%s\" nu a fost găsit."
-
-#. *
-#. * Encoding %s cannot be used.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:65
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:81
-msgid "Encoding \"%s\" cannot be used."
-msgstr "Codificarea \"%s\" nu poate fi utilizată."
-
 #. No resource group found for identifier \"%1$d\".
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:67
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:69
@@ -8702,171 +9115,10 @@ msgstr ""
 msgid "Cannot find user with E-Mail \"%s\"."
 msgstr "Nu s-a putut găsi utilizatorul cu e-mailul \"%s\"."
 
-#. *
-#. * Cannot find user with identifier %1$s in context %2$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:77
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:86
-msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
-msgstr ""
-"Nu s-a putut găsi utilizatorul cu identificatorul \"%1$s\" în contextul %2$d."
-
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:79
 msgid "Cannot find group with identifier \"%1$s\" in context %2$d."
 msgstr ""
 "Nu s-a putut găsui grupul cu identificatorul \"%1$s\" în contextul %2$d."
-
-#. *
-#. * Cannot clone object %1$s.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:71
-msgid "Cannot clone object \"%1$s\"."
-msgstr "Nu s-a putut clona obiectul \"%1$s\"."
-
-#. *
-#. * Found two user with same identifier %1$s in context %2$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:91
-msgid "Two users with same identifier \"%1$s\" in context %2$d found."
-msgstr ""
-"S-au găsit doi utilizatori cu același identificator \"%1$s\" în contextul "
-"%2$d."
-
-#. No permission to modify resources in context %1$s
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:99
-msgid "No permission to modify resources in context \"%1$s\""
-msgstr "Nu aveți permisiuni de modificare a resurselor în contextul \"%1$s\""
-
-#. No permission to access resources in context %1$s
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:102
-msgid "No permission to access resources in context \"%1$s\""
-msgstr "Nu aveți permisiuni de acces a resurselor în contextul \"%1$s\""
-
-#. *
-#. * Missing or unknown password mechanism %1$s
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:107
-msgid "Missing or unknown password mechanism \"%1$s\""
-msgstr "Mecanism de parolă lipsă sau necunoscut \"%1$s\""
-
-#. *
-#. * New password contains invalid characters
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:112
-msgid "New password contains invalid characters."
-msgstr "Parola nouă conține caractere nepermise."
-
-#. *
-#. * Attributes of user %1$d in context %2$d have been erased.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:117
-msgid "Attributes of user %1$d in context %2$d have been erased."
-msgstr "Atributele utilizatorului %1$d din contextul %2$d au fost șterse."
-
-#. *
-#. * Loading one or more users failed.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:122
-msgid "Loading one or more users failed."
-msgstr "Încărcarea unuia sau mai multor utilizatori a eșuat."
-
-#. * Alias entries are missing for user %1$d in context %2$d.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:125
-msgid "Alias entries are missing for user %1$d in context %2$d."
-msgstr "Lipsesc intrările alias pentru utilizatorul %1$d în contextul %2$d."
-
-#. * Updating attributes failed in context %1$d for user %2$d.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:128
-msgid "Updating attributes failed in context %1$d for user %2$d."
-msgstr ""
-"Actualizarea atributelor a eșuat în contextul %1$d pentru utilizatorul %2$d."
-
-#. *
-#. * Invalid password length. The password must be of minimum length %1$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
-msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
-msgstr "Lungime incorectă a parolei. Lungimea minimă permisă este %1$d."
-
-#. *
-#. * Invalid password length. The password must be of maximum length %1$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:138
-msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
-msgstr "Lungime incorectă a parolei. Lungimea maximă permisă este %1$d."
-
-#. *
-#. * The parameter %s for this user is missing.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:143
-msgid "The parameter \"%s\" for this user is missing."
-msgstr "Lipsește parametrul \"%s\" pentru acest utilizator."
-
-#. *
-#. * %s is not a valid locale.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:148
-msgid "\"%s\" is not a valid locale."
-msgstr "\"%s\" nu este o localizare validă."
-
-#. *
-#. * %s is not a valid time zone.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:153
-msgid "\"%s\" is not a valid timezone."
-msgstr "\"%s\" nu este un fus orar valid."
-
-#. This is an internal exception to detect coding problems. A user will never see this exception.
-#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:157
-msgid ""
-"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
-"user's attributes."
-msgstr ""
-"Atributele de blocare ale mai multor utilizatori nu sunt permise. Ați "
-"încercat să blocați atributele utilizatorului %1$d."
-
-#. *
-#. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:162
-msgid ""
-"The entered password is illegal and can't be saved. Allowed characters are: "
-"%1$s"
-msgstr ""
-"Parola introdusă nu este validă și nu poate fi salvată. Caractere permise: "
-"%1$s"
-
-#. *
-#. * The current password is incorrect. Please enter your correct current password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:167
-msgid ""
-"The current password is incorrect. Please enter your correct current "
-"password and try again."
-msgstr ""
-"Parola actuală nu este corectă. Introduceți parola actuală corectă și "
-"încercați din nou."
-
-#. *
-#. * The current password is missing. Please enter your current password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:172
-msgid ""
-"The current password is missing. Please enter your current password and try "
-"again."
-msgstr ""
-"Lipsește parola actuală. Introduceți parola actuală și încercați din nou."
-
-#. *
-#. * The new password is missing. Please enter your new password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
-msgid ""
-"The new password is missing. Please enter your new password and try again."
-msgstr "Lipsește noua parolă. Introduceți noua parolă și încercați din nou."
 
 #. *
 #. * User is missing for the reminder.
@@ -9884,6 +10136,21 @@ msgstr ""
 "unor probleme de autorizare. Reautorizați contul %5$s pentru a-l activa din "
 "nou."
 
+#. User tries to access an OAuth-linked mail server, but required open-xchange-oauth package is not installed
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:264
+msgid "Unsupported OAuth mail access to server %1$s"
+msgstr "Acces de e-mail OAuth neacceptat la serverul %1$s"
+
+#. User tries to access an OAuth-linked transport server, but required open-xchange-oauth package is not installed
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:267
+msgid "Unsupported OAuth transport access to server %1$s"
+msgstr "Acces de transport OAuth neacceptat la serverul %1$s"
+
+#. Although credentials are correct, the mail server denied the connect attempt for any reason
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:270
+msgid "Mail server %1$s denied connect attempt: %3$s"
+msgstr "Server de e-mail %1$s a negat încercarea de conectare: %3$s"
+
 #. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
 #. which is only applicable in case a reply is generated, but in-compose message is not a reply
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:72
@@ -9918,6 +10185,37 @@ msgid ""
 msgstr ""
 "Nu s-a găsit nicio cheie adecvată pentru spațiul de compoziție. Vă rugăm să "
 "recompuneți e-mailul."
+
+#. The user entered a very long subject, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:87
+msgid "The entered subject is too long. Please use a shorter one."
+msgstr ""
+"Subiectul introdus este prea lung. Vă rugăm să folosiți unul mai scurt."
+
+#. The user entered a very long From address, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:90
+msgid "The entered \"from\" address is too long."
+msgstr "Adresa introdusă în câmpul \"de la\" este prea lungă."
+
+#. The user entered a very long Sender address, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:93
+msgid "The entered \"sender\" address is too long."
+msgstr "Adresa \"expeditor\" introdusă este prea lungă."
+
+#. The user entered a very long To addresses, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:96
+msgid "The entered \"to\" addresses are too long."
+msgstr "Adresele introduse în câmpul \"la\" sunt prea lungi."
+
+#. The user entered a very long Cc addresses, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:99
+msgid "The entered \"cc\" addresses are too long."
+msgstr "Adresele \"cc\" introduse sunt prea lungi."
+
+#. The user entered a very long Bcc addresses, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:102
+msgid "The entered \"bcc\" addresses are too long."
+msgstr "Adresele \"bcc\" introduse sunt prea lungi."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -10319,6 +10617,21 @@ msgstr "Contul este în curs de configurare."
 msgid "There was an SSL problem."
 msgstr "A apărut o problemă SSL."
 
+#. The message advertising that the status of the account could not be determined.
+#: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:89
+msgid "The account status could not be determined."
+msgstr "Starea contului nu a putut fi determinată."
+
+#. The message advertising that the affected account is not supported.
+#: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:92
+msgid "The account is not supported."
+msgstr "Contul nu este acceptat."
+
+#. The message advertising that the affected account cannot be accessed.
+#: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:95
+msgid "The account cannot be accessed."
+msgstr "Contul nu poate fi accesat."
+
 #. Cannot find mail account for user "%2$s".
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
@@ -10522,6 +10835,21 @@ msgstr "Resursa \"%1$s\" selectată a fost modificată între timp."
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:96
 msgid "Missing mandatory field(s) in given resource."
 msgstr "Lipsesc unul sau mai multe câmpuri obligatorii în resursa dată."
+
+#. Missing mandatory name in given resource.
+#: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:99
+msgid "Missing mandatory name in given resource."
+msgstr "Lipsește numele necesar în resursa dată."
+
+#. Missing mandatory display name in given resource.
+#: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:102
+msgid "Missing mandatory display name in given resource."
+msgstr "Lipsește numele de afișat necesar în resursa dată."
+
+#. Missing mandatory E-Mail address in given resource.
+#: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:105
+msgid "Missing mandatory E-Mail address in given resource."
+msgstr "Lipsește adresa de e-mail obligatorie în resursa dată."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:69
 msgid "You do not have appropriate permissions for module \"%2$s\"."
@@ -10948,31 +11276,36 @@ msgstr ""
 "%1$s a partajat %2$s \"%3$s\" cu dvs. Introduceți parola de partajare pentru "
 "vizualizare."
 
-#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#. Login when opening a share protected with a password
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+msgid "Please enter your password to log into this account."
+msgstr "Introduceți parola pentru a vă autentifica în acest cont."
+
+#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
 msgstr ""
 "Am trimis un mesaj la %1$s cu instrucțiuni pentru setarea unei parole noi."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
 msgid "Please set a new password to regain access."
 msgstr "Setați o parolă nouă pentru a redobândi accesul."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:79
 msgid "The share you are looking for does not exist."
 msgstr "Partajarea căutată nu există."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
 msgid "This share cannot be accessed with your Web Browser."
 msgstr "Această partajare nu poate fi accesată cu navigatorul dumneavoastră."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
 msgid "We were unable to process your request."
 msgstr "Cererea nu a putut fi procesată."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -10980,7 +11313,7 @@ msgstr ""
 "Dosarul sau elementul pe care îl căutați nu mai este disponibil. Apăsați pe "
 "\"continuă\" pentru a vizualiza celelalte elemente partajate."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -10989,7 +11322,7 @@ msgstr ""
 "Operația de resetare a parolei va fi abandonată."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10998,7 +11331,7 @@ msgstr ""
 "proprietarul dacă doriți să îl accesați din nou."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11007,7 +11340,7 @@ msgstr ""
 "doriți să îl accesați din nou."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11016,7 +11349,7 @@ msgstr ""
 "proprietarul dacă doriți să îl accesați din nou."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -11025,7 +11358,7 @@ msgstr ""
 "doriți să îl accesați din nou."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -11034,7 +11367,7 @@ msgstr ""
 "proprietarul dacă doriți să îl accesați din nou."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -11043,7 +11376,7 @@ msgstr ""
 "%1$s dacă doriți să îl accesați din nou."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11054,7 +11387,7 @@ msgstr ""
 "celelalte fișiere partajate, apăsați pe \"Continuă\"."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11065,7 +11398,7 @@ msgstr ""
 "partajate, apăsați pe \"Continuă\"."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11076,7 +11409,7 @@ msgstr ""
 "celelalte fișiere partajate, apăsați pe \"Continuă\"."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -11087,7 +11420,7 @@ msgstr ""
 "partajate, apăsați pe \"Continuă\"."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -11098,7 +11431,7 @@ msgstr ""
 "celelalte fișiere partajate, apăsați pe \"Continuă\"."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, click \"Continue"
@@ -11109,7 +11442,7 @@ msgstr ""
 "fișiere partajate, apăsați pe \"Continuă\"."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11120,7 +11453,7 @@ msgstr ""
 "vizualiza celelalte fișiere partajate."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11130,7 +11463,7 @@ msgstr ""
 "fișiere partajate."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11141,7 +11474,7 @@ msgstr ""
 "vizualiza celelalte fișiere partajate."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -11152,7 +11485,7 @@ msgstr ""
 "fișiere partajate."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -11163,7 +11496,7 @@ msgstr ""
 "vizualiza celelalte fișiere partajate."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11861,24 +12194,6 @@ msgid ""
 msgstr ""
 "Mesajul este prea lung (%1$s caractere). Lungimea maximă este de %2$s "
 "caractere."
-
-#. *
-#. * No recipient(s) has been defined for new message
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
-msgid "There are no recipient(s) for the new message."
-msgstr "Nu există niciun destinatar pentru mesajul nou."
-
-#. *
-#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
-msgid ""
-"The following recipient is not allowed: %1$s. Please remove associated "
-"address and try again."
-msgstr ""
-"Următorul destinatar nu este permis: %1$s. Eliminați adresa corespunzătoare "
-"și încercați din nou."
 
 #. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:71
@@ -14417,6 +14732,93 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Week"
+#~ msgstr "Săptămână"
+
+#~ msgid "All-day events"
+#~ msgstr "Evenimente pe durata întregii zile"
+
+#~ msgid "Comments"
+#~ msgstr "Comentarii"
+
+#~ msgid "Tentatively accepted"
+#~ msgstr "Acceptat provizoriu"
+
+#~ msgid "Undecided"
+#~ msgstr "Indecis"
+
+#~ msgid "%1$s has asked %2$s to change the event:"
+#~ msgstr "%1$s a solicitat ca %2$s să modifice evenimentul:"
+
+#~ msgid "You have been invited to an event by %1$s:"
+#~ msgstr "Ați fost invitat la un eveniment de către %1$s:"
+
+#~ msgid ""
+#~ "You have been invited to an event organized by %1$s on behalf of %2$s"
+#~ msgstr ""
+#~ "Ați fost invitat la un eveniment organizat de %1$s în numele "
+#~ "utilizatorului %2$s"
+
+#~ msgid "%1$s is organizing an event on your behalf."
+#~ msgstr "%1$s organizează un eveniment în numele dumneavoastră."
+
+#~ msgid "%1$s has changed an event:"
+#~ msgstr "%1$s a modificat un eveniment:"
+
+#~ msgid "%1$s has changed an event on behalf of %2$s:"
+#~ msgstr "%1$s a modificat un eveniment în numele utilizatorului %2$s:"
+
+#~ msgid "%1$s has changed an event on your behalf:"
+#~ msgstr "%1$s a modificat un eveniment în numele dumneavoastră:"
+
+#~ msgid "Participants:"
+#~ msgstr "Participanți:"
+
+#~ msgid "Details:"
+#~ msgstr "Detalii:"
+
+#~ msgid ""
+#~ "The timezone of the appointments start date was changed. Original "
+#~ "timezone: %1$s. New timezone: %2$s"
+#~ msgstr ""
+#~ "Fusul orar al datei inițiale a întâlnirii a fost modificat. Fus orar "
+#~ "inițial: %1$s. Fus orar nou: %2$s"
+
+#~ msgid ""
+#~ "The timezone of the appointments end date was changed. Original timezone: "
+#~ "%1$s. New timezone: %2$s"
+#~ msgstr ""
+#~ "Fusul orar al datei finale a întâlnirii a fost modificat. Fus orar "
+#~ "inițial: %1$s. Fus orar nou: %2$s"
+
+#~ msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
+#~ msgstr "Reprogramează întâlnirea. Data inițială: %1$s. Noua dată: %2$s"
+
+#~ msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
+#~ msgstr ""
+#~ "Reprogramează evenimentul. Data/ora inițială: %1$s. Noua dată/oră: %2$s"
+
+#~ msgid ""
+#~ "The remote SchedJoules service is unavailable at the moment. There is "
+#~ "nothing we can do about it. Please try again later."
+#~ msgstr ""
+#~ "Serviciul la distanță SchedJoules este indisponibil în acest moment. Nu "
+#~ "putem face nimic în această privință. Încercați din nou mai târziu."
+
+#~ msgid ""
+#~ "An internal server error occurred on SchedJoules side. There is nothing "
+#~ "we can do about it."
+#~ msgstr ""
+#~ "A apărut o eroare internă de server pe partea SchedJoules. Nu putem face "
+#~ "nimic în această privință."
+
+#~ msgid ""
+#~ "A remote server error occurred on SchedJoules side. There is nothing we "
+#~ "can do about it."
+#~ msgstr ""
+#~ "A apărut o eroare de server la distanță pe partea SchedJoules. Nu putem "
+#~ "face nimic în această privință."
 
 #~ msgid "The requested page does not denote to a calendar."
 #~ msgstr "Pagina solicitată nu denotă un calendar."
