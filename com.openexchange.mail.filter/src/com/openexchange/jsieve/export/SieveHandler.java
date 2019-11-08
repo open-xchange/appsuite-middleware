@@ -467,7 +467,14 @@ public class SieveHandler {
                 /*
                  * Switch to TLS
                  */
-                s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
+                String[] protocols = Strings.splitByComma(MailFilterProperty.protocols.getDefaultValue().toString());
+                {
+                    String sProtocols = mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.protocols);
+                    if (Strings.isNotEmpty(sProtocols)) {
+                        protocols = Strings.splitByComma(sProtocols.trim());
+                    }
+                }
+                s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host, protocols);
                 bis_sieve = optionalCircuitBreaker.isPresent() ? new FailsafeCircuitBreakerBufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8), optionalCircuitBreaker.get()) : new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8));
                 bos_sieve = optionalCircuitBreaker.isPresent() ? new FailsafeCircuitBreakerBufferedOutputStream(s_sieve.getOutputStream(), optionalCircuitBreaker.get()) : new BufferedOutputStream(s_sieve.getOutputStream());
                 /*

@@ -303,3 +303,14 @@ properties:
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
       tags: ["Mail Filter", "Mail", "Sieve", "Black List"]
+    - key: com.openexchange.mail.filter.tls.protocols
+      description: |
+        Specifies which TLS/SSL protocols are supposed to be uses proved that TLS is enabled (and available).
+      defaultValue: "SSLv3, TLSv1, TLSv1.1, TLSv1.2"
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.filter.tls
+      file: mailfilter.properties
+      packageName: open-xchange-mailfilter
+      tags: ["Mail Filter", "Mail", "Sieve", "Security"]
