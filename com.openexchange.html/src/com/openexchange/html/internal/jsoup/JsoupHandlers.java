@@ -52,6 +52,7 @@ package com.openexchange.html.internal.jsoup;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 
 /**
  * {@link JsoupHandlers} - Utility class for {@link JsoupHandler Jsoup handlers}.
@@ -82,6 +83,9 @@ public class JsoupHandlers {
      * @return <code>true</code> for an inline/embedded image; otherwisae <code>false</code>
      */
     public static boolean isInlineImage(String src, boolean extactCheckForEmbeddedImage) {
+        if (Strings.isEmpty(src)) {
+            return false;
+        }
         String tmp = toLowerCase(src);
         return tmp.startsWith(CID) || (tmp.startsWith(DATA) && (extactCheckForEmbeddedImage ? isEmbeddedImage(tmp) : true)) || PATTERN_FILENAME.matcher(tmp).matches();
     }
