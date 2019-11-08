@@ -70,6 +70,7 @@ import com.openexchange.admin.mysql.CreateSequencesTables;
 import com.openexchange.admin.mysql.CreateSettingsTables;
 import com.openexchange.admin.mysql.CreateVirtualFolderTables;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
@@ -180,7 +181,10 @@ public class AdminActivator extends HousekeepingActivator {
             final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface>(context, OXResourcePluginInterface.class, defaultRanking);
             rememberTracker(rtracker);
 
-            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker);
+            final RankingAwareNearRegistryServiceTracker<ContextDbLookupPluginInterface> dbtracker = new RankingAwareNearRegistryServiceTracker<ContextDbLookupPluginInterface>(context, ContextDbLookupPluginInterface.class, defaultRanking);
+            rememberTracker(dbtracker);
+
+            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker).dbLookupPlugins(dbtracker);
 
             PluginInterfaces.setInstance(builder.build());
         }

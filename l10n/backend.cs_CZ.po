@@ -3,9 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
-"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-05-07 10:31+0200\n"
+"PO-Revision-Date: 2019-11-07 12:50+0100\n"
 "Last-Translator: Robert Kratky <robert@workshop-chapina.com>\n"
 "Language-Team: Czech <cs@workshop-chapina.com>\n"
 "Language: cs_CZ\n"
@@ -13,44 +12,44 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
-"X-Generator: Lokalize 18.12.2\n"
+"X-Generator: Poedit 2.1.1\n"
 "Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
 "X-Generator: Lokalize 1.4\n"
 "X-Language: cs\n"
 "X-Source-Language: en\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
 msgctxt "verb"
 msgid "accepted"
 msgstr "přijal(a)"
 
 #. The adjective "accepted", like "The users status is 'accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:85
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:87
 msgctxt "adjective"
 msgid "accepted"
 msgstr "přijat(a)"
 
 #. The verb "declined", like "User A has declined an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:101
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:116
 msgctxt "verb"
 msgid "declined"
 msgstr "odmítl(a)"
 
 #. The adjective "declined", like "The users status is 'declined'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:104
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:119
 msgctxt "adjective"
 msgid "declined"
 msgstr "odmítl(a)"
 
 #. The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:120
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:135
 msgctxt "verb"
 msgid "tentatively accepted"
 msgstr "předběžně přijal(a)"
 
 #. The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:123
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:138
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "předběžně přijal(a)"
@@ -123,76 +122,6 @@ msgstr "Přístup ke všem vašim schůzkám."
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
 msgid "Create, modify and delete appointments."
 msgstr "Vytváření, úpravy a mazání schůzek."
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
-msgid "Calendar"
-msgstr "Kalendář"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
-msgid "Week"
-msgstr "Týden"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
-msgid "All-day events"
-msgstr "Celodenní události"
-
-#. *
-#. * The default file name for an ical event export, when using batch data
-#.
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
-#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
-msgid "Events"
-msgstr "Události"
-
-#. * The displayed name for the {@link EventField#LOCATION} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
-msgid "Location"
-msgstr "Místo"
-
-#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
-msgid "Participants"
-msgstr "Účastníci"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
-msgid "Comments"
-msgstr "Komentáře"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
-#: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
-msgid "The entire day"
-msgstr "Celý den"
-
-#. Status
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
-msgid "Accepted"
-msgstr "Přijal(a)"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
-msgid "Declined"
-msgstr "Odmítl(a)"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
-msgid "Tentatively accepted"
-msgstr "Předběžně přijal(a)"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
-msgid "Undecided"
-msgstr "Nerozhodný(á)"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
-msgid "Resources"
-msgstr "Zdroje"
 
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
@@ -481,7 +410,15 @@ msgstr ""
 "Tato schůzka má přílohy. Kliknutím na následující odkaz otevřete schůzku a "
 "můžete stáhnout přílohy: %1$s."
 
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:68
+msgid "The appointment has a new attachment: %1$s."
+msgstr "Schůzka má novou přílohu: %1$s."
+
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:69
+msgid "The attachment %1$s was removed from the appointment."
+msgstr "Příkloha %1$s byla odebrána ze schůzky."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:71
 msgid ""
 "The organizer would like to create an exception for a  recurring appointment "
 "that could not be found. Either ignore this update, or ask the organizer to "
@@ -491,7 +428,7 @@ msgstr ""
 "nalézt. Buď tuto aktualizaci ignorujte, nebo požádejte organizátora o "
 "opětovné zaslání série schůzek."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:70
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:72
 msgid ""
 "The organizer would like to change the occurrence of a recurrence on a day "
 "that already contains such a change. The server can only store one change "
@@ -500,12 +437,12 @@ msgstr ""
 "Organizátor si přeje změnit výskyt série v den, který již takovou "
 "změnuobsahuje. Mohu uložit pouze jednu změnu série v jeden den."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:71
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:73
 msgid ""
 "The organizer would like to cancel an appointment that could not be found."
 msgstr "Organizátor si přeje zrušit schůzku, kterou se nepodařilo nalézt."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:72
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:74
 msgid ""
 "An attendee wanted to change his/her participant state in an appointment "
 "that could not be found. Probably the appointment was already canceled."
@@ -513,14 +450,14 @@ msgstr ""
 "Účastník chtěl změnit stav své účasti na schůzce, kterou se nepodařilo "
 "nalézt. Schůzka již byla pravděpodobně zrušena."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:73
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:75
 msgid ""
 "An attendee wanted to change his/her participant state in an appointment "
 "that was already deleted."
 msgstr ""
 "Účastník chtěl změnit stav své účasti na schůzce, která již byla zrušena."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:74
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:76
 msgid ""
 "This is an update to an appointment that has been changed in the meantime. "
 "Best ignore it."
@@ -528,7 +465,7 @@ msgstr ""
 "Toto je aktualizace schůzky, která byla mezitím změněna. Touto zprávou se "
 "nemusíte zabývat."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:75
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:77
 msgid ""
 "An attendee wants to change an appointment that could not be found. Probably "
 "the appointment was deleted. Best ignore it."
@@ -536,11 +473,11 @@ msgstr ""
 "Účastník si přeje změnit schůzku, kterou se nepodařilo nalézt. Schůzka byla "
 "pravděpodobně smazána. Touto zprávou se nemusíte zabývat."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:76
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
 msgid "The organizer declined your counter proposal for the appointment."
 msgstr "Organizátor odmítl váš protinávrh ohledně schůzky."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:77
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:79
 msgid ""
 "The organizer declined your counter proposal for an appointment that could "
 "not be found. It was probably deleted in the meantime."
@@ -548,7 +485,7 @@ msgstr ""
 "Organizátor odmítl váš protinávrh ohledně schůzky, kterou se nepodařilo "
 "nalézt. Pravděpodobně byla mezitím smazána."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:80
 msgid ""
 "An attendee wants to be brought up to date about an appointment that could "
 "not be found. It was probably deleted at some point. Best ignore this "
@@ -557,7 +494,7 @@ msgstr ""
 "Účastník si přeje aktuální informace o schůzce, kterou se nepodařilo nalézt. "
 "Schůzka byla pravděpodobně smazána, takže se touto zprávou nemusíte zabývat."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:79
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:81
 msgid ""
 "This message contains appointment updates that were already accepted by "
 "another user. Best ignore this message."
@@ -565,11 +502,11 @@ msgstr ""
 "Tato zpráva obsahuje aktualizace schůzky, které již přijal jiný uživatel. "
 "Touto zprávou se nemusíte zabývat."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:80
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:82
 msgid "This message comes from an internal user. Best ignore it."
 msgstr "Toto je zpráva od interního uživatele. Nemusíte se jí zabývat."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:81
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:83
 msgid ""
 "This invitation was sent to someone else, not you. This appointment would "
 "have to be created in a user's private folder to which you do not have write "
@@ -578,41 +515,41 @@ msgstr ""
 "Toto pozvání bylo posláno někomu jinému, ne vám. Schůzku by bylo nutné "
 "vytvořit v soukromé složce uživatele, ke které nemáte právo k zápisu."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:83
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:85
 msgid "The appointment's attachments have been changed"
 msgstr "Přílohy u schůzky se změnily"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:85
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:87
 msgid "One or more other fields have been updated"
 msgstr "Jedno nebo více dalších polí bylo aktualizováno"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:87
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:89
 msgid "Reserved"
 msgstr "Rezervováno"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:89
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:91
 msgid "Temporary"
 msgstr "Dočasné"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:91
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:93
 msgid "Absent"
 msgstr "Nepřítomen"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:93
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:95
 msgid "Free"
 msgstr "Volné"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:95
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:97
 msgid "%1$s has declined your proposed changes for the appointment %2$s."
 msgstr "%1$s odmítl(a) vámi navrhované změny ohledně schůzky %2$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:97
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:99
 msgid ""
 "%1$s has declined your proposed changes on behalf of %2$s for the "
 "appointment %3$s."
 msgstr "%1$s odmítl(a) jménem %2$s vámi navrhované změny ohledně schůzky %3$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:99
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:101
 msgid ""
 "%1$s would like to be brought up to date about the appointment %2$s. Please "
 "send another invitation."
@@ -626,9 +563,13 @@ msgstr ""
 #. * <p>"UserXY has declined the invitation"
 #. * <p>"UserXY has tentatively accepted the invitation"
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:107
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:109
 msgid "%1$s has %2$s the invitation:"
 msgstr "%1$s %2$s pozvání:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:111
+msgid "%1$s has %2$s the invitation to an appointment of the series %3$s:"
+msgstr "%1$s %2$s pozvánku na schůzku v sérii %3$s:"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on behalf of UserAB"
@@ -639,11 +580,19 @@ msgstr "%1$s %2$s pozvání:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:112
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:122
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:132
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:116
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:130
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:144
 msgid "%1$s has %2$s the invitation on behalf of %3$s:"
 msgstr "%1$s jménem %3$s %2$s pozvání:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:118
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:132
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:146
+msgid ""
+"%1$s has %2$s the invitation to an appointment of the series %3$s on behalf "
+"of %4$s:"
+msgstr "%1$s jménem %4$s %2$s pozvánku na schůzku v sérii %3$s"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on your behalf"
@@ -654,111 +603,151 @@ msgstr "%1$s jménem %3$s %2$s pozvání:"
 #. *
 #. * Example: "UserXY has tentatively accepted the invitation on your behalf"
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:117
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:127
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:123
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:137
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:151
 msgid "%1$s has %2$s the invitation on your behalf:"
 msgstr "%1$s vaším jménem %2$s pozvání:"
 
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:125
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:139
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:153
+msgid ""
+"%1$s has %2$s the invitation to an appointment of the series %3$s on your "
+"behalf:"
+msgstr "%1$s vaším jménem %4$s %2$s pozvánku na schůzku v sérii %3$s"
+
 #. public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 #. Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:142
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:158
 msgid "%1$s sets the status to %2$s for this appointment:"
 msgstr "%1$s nastavil(a) stav na %2$s pro tuto schůzku:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:144
-msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
-msgstr "%1$s nastavil(a) jménem uživatele %3$s stav pro tuto schůzku na %2$s:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:160
+msgid "%1$s sets the status to %2$s for an appointment of the series %3$s:"
+msgstr "%1$s nastavil(a) stav schůzky v sérii %3$s na %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:146
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:162
+msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
+msgstr "%1$s jménem %3$s nastavil(a) stav schůzky na %2$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+msgid ""
+"On behalf of %4$s, %1$s sets the status for an appointment of the series "
+"%3$s to %2$s:"
+msgstr "%1$s jménem %4$s nastavil(a) stav schůzky v sérii %3$s na %2$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
 msgstr "%1$s nastavil(a) vaším jménem stav pro tuto schůzku na %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:148
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
+msgid ""
+"On your behalf, %1$s sets your status for an appointment of the series %3$s "
+"to %2$s:"
+msgstr "%1$s vaším jménem nastavil(a) stav schůzky v sérii %3$s na %2$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
 msgid "none"
 msgstr "žádné"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:150
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
 msgid "%1$s would like you to change the appointment:"
 msgstr "%1$s si přeje, abyste změnil(a) schůzku:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:152
-msgid "%1$s has asked %2$s to change the event:"
-msgstr "%1$s požádal(a) %2$s, aby změnil(a) schůzku:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+msgid "%1$s has asked %2$s to change the appointment:"
+msgstr "%1$s požádal(a) %2$s o změnu schůzky:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:154
-msgid "You have been invited to an event by %1$s:"
-msgstr "%1$s vás pozval(a) na událost:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
+msgid "You have been invited to an appointment by %1$s:"
+msgstr "%1$s vás pozval(a) na schůzku:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:156
-msgid "You have been invited to an event organized by %1$s on behalf of %2$s"
-msgstr "Byli jste pozváni na událost, kterou organizuje %1$s jménem %2$s"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
+msgid ""
+"You have been invited to an appointment organized by %1$s on behalf of %2$s"
+msgstr "Byli jste pozváni na schůzku, kterou organizuje %1$s jménem %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:158
-msgid "%1$s is organizing an event on your behalf."
-msgstr "%1$s organizuje vaším jménem událost."
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+msgid "%1$s is organizing an appointment on your behalf."
+msgstr "%1$s organizuje vaším jménem schůzku."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:160
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
 msgid "%1$s created a recurrence exception. Original date: %2$s:"
 msgstr "%1$s vytvořil(a) výjimku opakování. Původní datum: %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:162
-msgid "%1$s has changed an event:"
-msgstr "%1$s změnil(a) událost:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+msgid "%1$s has changed an appointment:"
+msgstr "%1$s změnil(a) schůzku:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+msgid "%1$s has changed an appointment of the series %2$s:"
+msgstr "%1$s změnil(a) schůzku v sérii %2$s:"
 
 #. %1$s
 #. E.g. Drive Client
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
 #. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:164
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
 msgid "%1$s"
 msgstr "%1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:166
-msgid "%1$s has changed an event on behalf of %2$s:"
-msgstr "%1$s změnil(a) jménem %2$s událost:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
+msgid "%1$s has changed an appointment on behalf of %2$s:"
+msgstr "%1$s změnil(a) jménem %2$s schůzku:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:168
-msgid "%1$s has changed an event on your behalf:"
-msgstr "%1$s změnil(a) vaším jménem událost:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
+msgid "%1$s has changed an appointment of the series %2$s on behalf of %3$s:"
+msgstr "%1$s jménem %3$s změnil(a) schůzku v sérii %2$s:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:170
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+msgid "%1$s has changed an appointment on your behalf:"
+msgstr "%1$s změnil(a) vaším jménem schůzku:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
+msgid "%1$s has changed an appointment of the series %2$s on your behalf:"
+msgstr "%1$s vaším jménem změnil(a) schůzku v sérii %2$s"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
 msgid "When:"
 msgstr "Kdy:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:172
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 msgid "Direct link:"
 msgstr "Přímý odkaz:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:174
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
 msgid "Where:"
 msgstr "Kde:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:176
-msgid "Participants:"
-msgstr "Účastníci:"
+#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
+msgid "Participants"
+msgstr "Účastníci"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:178
-msgid "Details:"
-msgstr "Podrobnosti:"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
+msgid "Details"
+msgstr "Podrobnosti"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:180
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
 msgid "Show as:"
 msgstr "Zobrazit jako:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:182
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
 msgid "Created:"
 msgstr "Vytvořeno:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:184
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
 msgid "Modified:"
 msgstr "Upraveno:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:186
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
 msgid ""
 "%1$s has deleted an appointment on behalf of %2$s, or you have been removed "
 "as a participant:"
@@ -766,76 +755,96 @@ msgstr ""
 "%1$s smazal(a) jménem %2$s schůzku, nebo jste byl(a) odstraněn(a) ze seznamů "
 "účastníků:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:188
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+msgid ""
+"%1$s has deleted an appointment of the series %2$s on behalf of %3$s, or you "
+"have been removed as a participant:"
+msgstr ""
+"%1$s smazal(a) jménem %3$s schůzku v sérii $2$s, nebo jste byl(a) "
+"odstraněn(a) ze seznamů účastníků:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
 msgid "%1$s has deleted an appointment on your behalf:"
 msgstr "%1$s smazal(a) vaším jménem schůzku:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:190
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
+msgid "%1$s has deleted an appointment of the series %2$s on your behalf:"
+msgstr "%1$s vaším jménem smazal(a) schůzku v sérii %2$s:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
 msgid ""
 "%1$s has deleted an appointment, or you have been removed as a participant:"
 msgstr ""
 "%1$s smazal(a) schůzku, nebo jste byl(a) odstraněn(a) ze seznamů účastníků:"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:192
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:194
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
+msgid ""
+"%1$s has deleted an appointment of the series %2$s, or you have been removed "
+"as a participant:"
+msgstr ""
+"%1$s smazal(a) schůzku v sérii $2$s, nebo jste byl(a) odstraněn(a) ze "
+"seznamů účastníků:"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:226
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:228
 msgid "Change the subject to %1$s."
 msgstr "Změnit předmět na %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:196
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:230
 msgid "The appointment has a new subject: %1$s."
 msgstr "Schůzka má nový předmět: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:198
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:232
 msgid "The appointment will now be shown as: \"%1$s\"."
 msgstr "Schůzka bude nyní zobrazena jako: „%1$s“."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:234
 msgid "The appointment timezone was changed to: %1$s"
 msgstr "Časové pásmo schůzky bylo změněno na: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:236
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:238
 msgid "Change the location to %1$s."
 msgstr "Změňte místo konání na: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:206
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:240
 msgid "The appointment takes place in a new location: %1$s."
 msgstr "Schůzka proběhne na jiném místě: %1$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:208
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:210
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:242
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:244
 msgid "Use the appointment description below."
 msgstr "Využijte popis schůzky níže."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:212
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:246
 msgid "The appointment description has changed."
 msgstr "Popis schůzky se změnil."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:214
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:248
 msgid "Please invite %1$s to the appointment."
 msgstr "Pozvěte, prosím, %1$s na schůzku."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:216
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:250
 msgid "Add %1$s to the appointment."
 msgstr "Přidejte %1$s ke schůzce."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:218
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:252
 msgid "%1$s has been invited to the appointment."
 msgstr "%1$s byl(a) přizván(a) na schůzku."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:220
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:222
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:254
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:256
 msgid "Remove %1$s from the appointment."
 msgstr "Odeberte %1$s ze schůzky."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:224
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:258
 msgid "%1$s has been removed from the appointment."
 msgstr "%1$s byl(a) odebrán(a) ze schůzky."
 
 #. *
 #. * Example: "UserXY has accepted the appointment."
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:229
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s schůzku %2$s."
 
@@ -847,150 +856,166 @@ msgstr "%1$s schůzku %2$s."
 #. * Confirmation statuses
 #.
 #. waiting
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:235
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
 msgstr "čekám"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:239
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:241
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
 msgid "Invite the group %1$s to the appointment."
 msgstr "Pozvěte skupinu %1$s na schůzku."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:243
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
 msgid "The group %1$s has been invited to the appointment"
 msgstr "Skupina %1$s byla pozvána na schůzku"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:245
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:247
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
 msgid "Remove the group %1$s from the appointment."
 msgstr "Odeberte skupinu %1$s ze schůzky."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:249
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
 msgid "The group %1$s has been removed from the appointment"
 msgstr "Skupina %1$s byla odebrána ze schůzky."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:251
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
 msgid "Reserve the resource %1$s for the appointment"
 msgstr "Rezervujte, prosím, zdroj %1$s pro schůzku"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:253
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:287
 msgid "Reserve the resource %1$s for the appointment."
 msgstr "Rezervujte, prosím, zdroj %1$s pro schůzku."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:255
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:289
 msgid "The resource %1$s has been reserved for the appointment"
 msgstr "Zdroj %1$s byl pro schůzku rezervován"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:257
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
 msgid "Remove the resource %1$s from the appointment"
 msgstr "Odeberte zdroj %1$s ze schůzky."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:259
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
 msgid "Remove the resource %1$s from the appointment."
 msgstr "Odeberte zdroj %1$s od schůzky."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:261
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
 msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr "Zdroj %1$s již pro schůzku není rezervován"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:263
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr ""
 "Schůzka byla naplánována na jindy. Původní datum: %1$s. Nové datum: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:265
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:299
 msgid ""
 "The timezone of the appointment was changed. Original timezone: %1$s. New "
 "timezone: %2$s"
 msgstr ""
 "Časové pásmo schůzky bylo změněno. Původní pásmo: %1$s. Nové pásmo: %2$s."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:301
 msgid ""
-"The timezone of the appointments start date was changed. Original timezone: "
+"The timezone of the appointment's start date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Časové pásmo počátečního data schůzek bylo změněno. Původní pásmo: %1$s. "
-"Nové pásmo: %2$s."
+"Časové pásmo počátečního data schůzky bylo změněno. Původní pásmo: %1$s. "
+"Nové pásmo: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:269
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
 msgid ""
-"The timezone of the appointments end date was changed. Original timezone: "
+"The timezone of the appointment's end date was changed. Original timezone: "
 "%1$s. New timezone: %2$s"
 msgstr ""
-"Časové pásmo konečného data schůzek bylo změněno. Původní pásmo: %1$s. Nové "
-"pásmo: %2$s."
+"Časové pásmo konečného data schůzky bylo změněno. Původní pásmo: %1$s. Nové "
+"pásmo: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:271
-msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
-msgstr "Naplánujte událost na jindy. Původní datum: %1$s. Nové datum: %2$s"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+msgid "Reschedule the appointment. Original date: %1$s. New date: %2$s"
+msgstr "Naplánujte schůzku na jindy. Původní datum: %1$s. Nové datum: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:273
-msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
+msgid "The appointment series was updated, beginning at %1$s."
+msgstr "Série schůzek byla změněna, počínaje %1$s."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:309
+msgid "The appointment's recurrence rule has changed to: %1$s."
+msgstr "Frekvence opakování schůzek se změnila na %1$s."
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:311
+msgid ""
+"Reschedule the appointment. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
-"Naplánujte událost na jindy. Původní datum a čas: %1$s. Nové datum a čas: "
-"%2$s"
+"Naplánujte schůzku na jindy. Původní datum/čas: %1$s. Nové datum/čas: %2$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:313
+msgid "Resources"
+msgstr "Zdroje"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The entire day"
+msgstr "Celý den"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:317
 msgid "New appointment: %1$s"
 msgstr "Nová schůzka: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:281
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:319
 msgid "Appointment changed: %1$s"
 msgstr "Schůzka změněna: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:283
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:321
 msgid "Appointment canceled: %1$s"
 msgstr "Schůzka zrušena: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:285
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:323
 msgid "Proposed changes for appointment: %1$s"
 msgstr "Navrhované změny schůzky: %1$s"
 
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:288
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:326
 msgid "%1$s sets the status to 'none' for: %1$s"
 msgstr "%1$s nastavil(a) stav ‚žádné‘ pro: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:291
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:329
 msgid "%1$s %2$s the invitation: %3$s"
 msgstr "%1$s %2$s pozvání: %3$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:293
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:331
 msgid "Resend the invitation for: %1$s"
 msgstr "Pošlete, prosím, znovu pozvání pro: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:295
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:333
 msgid "Change not accepted for: %1$s"
 msgstr "Změny nebyly přijaty u: %1$s"
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:297
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:335
 msgid "All times will be shown in the timezone %1$s"
 msgstr "Všechny časy budou zobrazeny v časové zóně %1$s"
 
 #. E.g. "Jane has accepted the appointment, but would like to make a counter proposal: "
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:300
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:338
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
 msgstr "%1$s schůzku %2$s, ale chtěl by vznést protinávrh:"
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:303
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:341
 msgid ""
 "You have received this E-Mail because you are the chair for this appointment."
 msgstr "Dostal(a) jste tuto zprávu, protože této schůzce předsedáte."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:305
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:343
 msgid ""
 "You have received this E-Mail because you are the organizer of this "
 "appointment."
 msgstr "Dostal(a) jste tuto zprávu, protože jste organizátorem této schůzky."
 
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:307
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:345
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
@@ -999,7 +1024,7 @@ msgstr ""
 "spravujete."
 
 #. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:310
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:348
 msgid ""
 "You have received an E-Mail containing a reply to an appointment that you "
 "didn't organize. Best ignore it."
@@ -1010,14 +1035,14 @@ msgstr ""
 #. *
 #. * The organizer of the appointment has changed. New organizer is: %1$s
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:353
 msgid "The organizer of the appointment has changed. New organizer is: %1$s"
 msgstr "Organizátor schůzky se změnil. Nový organizátor je %1$s"
 
 #. *
 #. * The organizer of the appointment has changed. This operation is not allowed.
 #.
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:320
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:358
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr "Organizátor schůzky se změnil. Operace není povolená."
@@ -1240,30 +1265,18 @@ msgstr "K tomuto kalendáři nemáte přístup."
 msgid "The requested page was not found."
 msgstr "Požadovaná stránka nebyla nalezena."
 
-#. The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#. The remote calendar service is unavailable at the moment. Please try again later.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:68
 msgid ""
-"The remote SchedJoules service is unavailable at the moment. There is "
-"nothing we can do about it. Please try again later."
-msgstr ""
-"Služba SchedJoules není v tuto chvíli k dispozici. Nemůžeme s tím nic dělat. "
-"Zkuste to, prosím, později."
+"The remote calendar service is unavailable at the moment. Please try again "
+"later."
+msgstr "Kalendářová služba není právě k dispozici. Zkuste to později."
 
-#. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
+#. An error occurred on the remote calendar service. Please try again later.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
 msgid ""
-"An internal server error occurred on SchedJoules side. There is nothing we "
-"can do about it."
-msgstr ""
-"Na straně SchedJoules došlo k interní chybě serveru. Nemůžeme s tím nic "
-"dělat."
-
-#. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
-#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
-msgid ""
-"A remote server error occurred on SchedJoules side. There is nothing we can "
-"do about it."
-msgstr "Na straně SchedJoules došlo k chybě serveru. Nemůžeme s tím nic dělat."
+"An error occurred at the remote calendar service. Please try again later."
+msgstr "Na straně kalendářové služby došlo k chybě. Zkuste to později."
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1278,6 +1291,12 @@ msgstr "Soukromá"
 #: com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
 msgid "Subject"
 msgstr "Předmět"
+
+#. * The displayed name for the {@link EventField#LOCATION} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
+msgid "Location"
+msgstr "Místo"
 
 #. * The displayed name for the {@link EventField#START_DATE} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:72
@@ -1332,22 +1351,31 @@ msgid "The requested appointment was not found."
 msgstr "Požadovaná schůzka nebyla nalezena."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:64
+msgid "The requested version of the appointment was not found."
+msgstr "Požadovaná verze schůzky nebyla nalezena."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
 msgid "The requested folder was not found."
 msgstr "Požadovaná složka nebyla nalezena."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:68
 msgid "The requested participant was not found."
 msgstr "Požadovaný účastník nebyl nalezen."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:68
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:70
 msgid "The requested calendar account was not found."
 msgstr "Požadovaný kalendářní účet nebyl nalezen."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:70
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:72
 msgid "The calendar provider \"%1$s\" is not available."
 msgstr "Poskytovatel kalendáře „%1$s“ není dostupný."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:72
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:74
+msgid ""
+"The calendar storage is temporarily not available. Please try again later."
+msgstr "Úložiště kalendáře je dočasně nedostupné. Zkuste to později."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
 msgid ""
 "The requested calendar account is currently disabled. Please enable the "
 "account and try again."
@@ -1356,39 +1384,39 @@ msgstr ""
 "později."
 
 #. An I/O error occurred: %1$s
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:74
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
 #: com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "An I/O error occurred: %1$s"
 msgstr "Došlo k chybě I/O: %1$s"
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
 msgid ""
 "The requested operation is not supported for calendar provider \"%1$s\"."
 msgstr "Požadovaná operace není poskytovatelem kalendáře „%1$s“ podporovaná."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:78
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
 msgid "The operation could not be completed due to insufficient permissions."
 msgstr "Kvůli nedostatečným oprávněním nebylo možné operaci dokončit."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
 msgid ""
 "This modification can only be performed by the organizer of the appointment."
 msgstr "Tuto úpravu může provést pouze organizátor schůzky."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid "Organizer must also be an attendee."
 msgstr "Organizátor musí být zároveň účastníkem."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid "All appointments of a series must contain the same organizer."
 msgstr "Všechny schůzky v sérii musí mít stejného organizátora."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid "The operation could not be completed due to missing capabilities."
 msgstr "Kvůli nedostatečným oprávněním nebylo možné operaci dokončit."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
@@ -1396,7 +1424,7 @@ msgstr ""
 "Složka, kterou jste zadal(a), není podporována. Vyberte platnou složku a "
 "zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -1404,13 +1432,13 @@ msgstr ""
 "Operaci nebylo možné dokončit, protože došlo k souběhu úprav. Načtěte, "
 "prosím, data znovu a zkuste to ještě jednou."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
 "The changes could not be applied because a newer version of the appointment "
 "already exists."
 msgstr "Změny nebylo možné uložit, protože již existuje novější verze schůzky."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
@@ -1418,17 +1446,17 @@ msgstr ""
 "Schůzku nebylo možné vytvořit, protože již existuje jiná schůzka se stejným "
 "unikátním identifikátorem."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid "The appointment conflicts with one or more other appointments."
 msgstr "Schůzka se kryje s jednou nebo více jinými schůzkami."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr ""
 "Pole „%1$s“ je povinné. Zadejte, prosím, platnou hodnotu a zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
@@ -1436,7 +1464,7 @@ msgstr ""
 "Datum konce je dříve než datum začátku. Opravte, prosím, čas schůzky a "
 "zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
@@ -1444,11 +1472,11 @@ msgstr ""
 "Schůzky v jiných než osobních složkách musí být označené jako „soukromé“ "
 "nebo „důvěrné“."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr "Schůzky s přílohami nemohou být označené jako „tajné“."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
@@ -1456,24 +1484,24 @@ msgstr ""
 "Schůzky označené jako „soukromé“ nebo „důvěrné“ nelze přesunout do tohoto "
 "druhu složky."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr "Série schůzek není možné označit jinak."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
 msgstr ""
 "Zadané opakování není platné. Opravte, prosím, volbu a zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
 "Zadaná upomínka není platná. Opravte, prosím, nastavení a zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
@@ -1481,7 +1509,7 @@ msgstr ""
 "Zadané časové pásmo není platné. Zvolte, prosím, platné časové pásmo a "
 "zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
@@ -1489,7 +1517,7 @@ msgstr ""
 "Zadaná poloha není platná. Zadejte, prosím, platné souřadnice a zkuste to "
 "znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
@@ -1497,7 +1525,7 @@ msgstr ""
 "Zadaná data začátku a konce nejsou platná. Opravte, prosím, čas schůzky a "
 "zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
@@ -1505,7 +1533,7 @@ msgstr ""
 "Zadané opakování není podporované. Opravte, prosím, nastavení a zkuste to "
 "znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
@@ -1513,7 +1541,7 @@ msgstr ""
 "Požadovaná instance není součástí dané série schůzek. Vyberte, prosím, "
 "platný identifikátor schůzky a zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
@@ -1521,21 +1549,21 @@ msgstr ""
 "Rozdělení série schůzek nelze provést. Zadejte, prosím, platné datum pro "
 "rozdělení a zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "Není možné přesunout sérii schůzek do jiné složky."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
 msgstr "Není možné přesunout jednu instanci ze série schůzek do jiné složky."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "Uživatel kalendáře „%1$s“ neexistuje."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
@@ -1543,7 +1571,7 @@ msgstr ""
 "Zadané nastavení není platné. Opravte, prosím, nastavení a zkuste to znovu."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1553,7 +1581,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "Aby mohlo být vyhledávání provedeno, je potřeba alespoň %1$d znaků."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1563,7 +1591,7 @@ msgstr ""
 "Znak „%1$s“ v poli „%2$s“ nelze uložit. Odstraňte, prosím, problematický "
 "znak a zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
@@ -1571,55 +1599,59 @@ msgstr ""
 "Některé ze zadaných údajů přesáhly limit pole. Zkraťte, prosím, hodnotu "
 "„%1$s“ (aktuální: %2$d, limit: %3$d) a zkuste to znovu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "Byl překročen maximální počet přihlášených kalendářů."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "Hodnota „%2$s“ není platná a nebyla použita."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The value for \"%1$s\" is invalid and cannot be applied."
 msgstr "Hodnota „%1$s“ není platná a nebylo možné ji použít."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr "Hodnota „%2$s“ není podporovaná a nebyla použita."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "‚%1$s‘ buď není interní uživatel, nebo neexistuje."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "Authentication failed."
 msgstr "Autentizace selhala."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr "Nepodařilo se vytvořit účet. Problém s autentizací."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "Kvóta pro účet ‚%1$s‘ v kontextu ‚%2$s‘ byla překročena."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
 msgid "The requested attachment was not found."
 msgstr "Požadovaná příloha nebyla nalezena."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr "Je vyhledáváno příliš mnoho schůzek. Zadejte, prosím, menší interval."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:164
 msgid "The appointment contains too many participants."
 msgstr "Schůzka má příliš mnoho účastníků."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:166
 msgid "The appointment contains too many reminders."
 msgstr "Schůzka má příliš mnoho připomínek."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:168
+msgid "The method \"%1$s\" is not supported."
+msgstr "Metoda „%1$s“ není podporovaná."
 
 #. Your selection is not supported.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:70
@@ -1729,6 +1761,7 @@ msgstr "Pro nastavení svého zařízení klikněte na následující odkaz:"
 
 #. The user salutation; e.g. "Dear John Doe,"
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:68
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:68
 msgid "Dear %1$s,"
 msgstr "Vážená paní nebo pane %1$s,"
 
@@ -3290,8 +3323,8 @@ msgstr ""
 #. The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
 msgid ""
-"The S3 storage responds with \"Bad Request\". Please check whether "
-"com.openexchange.filestore.s3.[filestoreID].signerOverride is properly "
+"The S3 storage responds with \"Bad Request\". Please check whether com."
+"openexchange.filestore.s3.[filestoreID].signerOverride is properly "
 "configured for this filestore."
 msgstr ""
 "Odpověď úložiště S3 je „Chybný požadavek“. Prosím, zkontrolujte, jestli je "
@@ -3476,6 +3509,15 @@ msgstr "⁺∕₋ 3 měsíce"
 msgid "⁺∕₋ 1 year"
 msgstr "⁺∕₋ 1 rok"
 
+#. Status
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
+msgid "Accepted"
+msgstr "Přijal(a)"
+
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
+msgid "Declined"
+msgstr "Odmítl(a)"
+
 #: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:103
 msgid "Tentative"
 msgstr "Prozatímní"
@@ -3606,10 +3648,12 @@ msgid "Folders"
 msgstr "Složky"
 
 #. Search in Persons.
+#. The path prefix within generated ZIP archive containing exported contacts
 #. *
 #. * The default file name for a vcard and csv export, when using batch data
 #.
 #: com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportStrings.java:71
 #: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:66
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
@@ -3781,6 +3825,179 @@ msgstr ""
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
 msgid "The string cannot be parsed to a valid URL."
 msgstr "Řetězec nelze parsovat na platnou URL."
+
+#. The prefix for the diagnostics file
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/DataExportStrings.java:70
+msgid "Diagnostics"
+msgstr "Diagnostika"
+
+#. The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:71
+msgid ""
+"The data archive that you have requested on %1$s is now ready for download. "
+"You can download the archive until %2$s."
+msgstr ""
+"Datový archív, který jste si vyžádal(a) %1$s je nyní k dispozici ke stažení. "
+"Soubor můžete stáhnout do %2$s."
+
+#. The content of the E-Mail informing about successful data export. E.g. "The data archive that you have requested on 09/01/2019 is now ready for download. You can download the archive until 5th of September 2019."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:74
+msgid ""
+"The data archive that you have requested on %1$s is now ready for download."
+msgstr ""
+"Datový archív, který jste si vyžádal(a) %1$s je nyní k dispozici ke stažení."
+
+#. The content of the E-Mail informing about failed data export. E.g. "Unfortunately the data export that you have requested on 09/01/2019 has failed. Please try again."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:77
+msgid ""
+"Unfortunately the data export that you have requested on %1$s has failed. "
+"Please try again."
+msgstr ""
+"Export dat, který jste požadoval(a) %1$s, selhal. Zkuste to znovu později."
+
+#. The content of the E-Mail informing about aborted data export. E.g. "The data export that you have requested on 09/01/2019 has been canceled."
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:80
+msgid "The data export that you have requested on %1$s has been canceled."
+msgstr "Export dat, který jste požadoval(a) %1$s, byl zrušen."
+
+#. The subject of the E-Mail for a successful data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:83
+msgid "Your personal data archive is ready for download"
+msgstr "Váš osobní datový archív je k dispozici ke stažení"
+
+#. The subject of the E-Mail for a failed data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:86
+msgid "Your personal data export failed"
+msgstr "Export vašich osobních dat selhal"
+
+#. The subject of the E-Mail for an aborted data export result
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:89
+msgid "Your personal data export has been canceled"
+msgstr "Export vašich osobních dat byl zrušen"
+
+#. The label of the button linking to downloadable archives.
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:92
+msgid "Download archives"
+msgstr "Archivy stažených dat"
+
+#. The personal part for the no-reply address
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:95
+msgid "Service for dowloading your personal data"
+msgstr "Služba pro stahování vašich osobních dat"
+
+#. The info footer provided for every data export notification E-Mail
+#: com.openexchange.gdpr.dataexport.impl/src/com/openexchange/gdpr/dataexport/impl/notification/DataExportNotificationStrings.java:98
+msgid ""
+"You are receiving this email because you have requested a personal data "
+"download recently."
+msgstr ""
+"Dostal(a) jste tuto zprávu, protože jste si nedávno vyžádali stažení svých "
+"osobních údajů."
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:70
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:70
+msgid "enabled"
+msgstr "povolené"
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:72
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:72
+msgid "includePublic"
+msgstr "includePublic"
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.contacts/src/com/openexchange/gdpr/dataexport/provider/contacts/ContactsDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:74
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportPropertyNames.java:74
+msgid "includeShared"
+msgstr "includeShared"
+
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportPropertyNames.java:76
+msgid "includeUnsubscribed"
+msgstr "includeUnsubscribed"
+
+#. The path prefix within generated ZIP archive containing exported appointments
+#: com.openexchange.gdpr.dataexport.provider.calendar/src/com/openexchange/gdpr/dataexport/provider/calendar/CalendarDataExportStrings.java:71
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Calendar"
+msgstr "Kalendář"
+
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:76
+msgid "includeTrash"
+msgstr "includeTrash"
+
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportPropertyNames.java:78
+msgid "includeAllVersions"
+msgstr "includeAllVersions"
+
+#. The path prefix within generated ZIP archive containing exported Drive files
+#: com.openexchange.gdpr.dataexport.provider.infostore/src/com/openexchange/gdpr/dataexport/provider/infostore/InfostoreDataExportStrings.java:71
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
+msgid "Drive"
+msgstr "Drive"
+
+#. The path prefix within generated ZIP archive containing exported E-Mails
+#: com.openexchange.gdpr.dataexport.provider.mail/src/com/openexchange/gdpr/dataexport/provider/mail/internal/MailDataExportStrings.java:71
+msgid "E-Mails"
+msgstr "E-Mails"
+
+#. The path prefix within generated ZIP archive containing exported appointments
+#. *
+#. * The default file name for an ical task export, when using batch data
+#.
+#: com.openexchange.gdpr.dataexport.provider.tasks/src/com/openexchange/gdpr/dataexport/provider/tasks/TasksDataExportStrings.java:71
+#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
+msgid "Tasks"
+msgstr "Úkoly"
+
+#. There is already a running data export.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:69
+msgid "There is already a running data export"
+msgstr "Export dat již probíhá"
+
+#. There is no data export.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:72
+msgid "There is no data export"
+msgstr "Žádný export dat neprobíhá"
+
+#. The data export is not yet finished. Please try again later.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:75
+msgid "The data export is not yet finished. Please try again later."
+msgstr "Export dat ještě není dokončený. Zkuste to později."
+
+#. The data export failed.
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:78
+msgid "The data export failed"
+msgstr "Export dat selhal"
+
+#. A data export has already been requested
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:81
+msgid "A data export has already been requested"
+msgstr "Export dat byl již vyžádán"
+
+#. There is no data export or it has already been completed
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:84
+msgid "There is no data export or it has already been completed"
+msgstr "Žádný export dat neprobíhá, nebo již byl dokončen."
+
+#. The data export has been aborted, but he/she tries to retrieve its results
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:87
+msgid "The data export has been aborted"
+msgstr "Export dat byl zrušen"
+
+#. User requested a package number that does not exist
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:90
+msgid "No such package"
+msgstr "Takový balíček neexistuje"
+
+#. User requested to delete a completed data export task, but task is not yet completed
+#: com.openexchange.gdpr.dataexport/src/com/openexchange/gdpr/dataexport/DataExportExceptionMessage.java:93
+msgid "There is no data export or it is not yet completed"
+msgstr "Žádný export dat neprobíhá, nebo ještě nebyl dokončen."
 
 #. The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
 #. %s is replaced with some login name.
@@ -4016,6 +4233,214 @@ msgstr "Sezení už není dostupné. Přihlaste se, prosím, znovu."
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:68
 msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr "Sezení nemá ticket Kerberos. Zkuste to, prosím, znovu."
+
+#. *
+#. * Cannot clone object %1$s.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:71
+msgid "Cannot clone object \"%1$s\"."
+msgstr "Nelze klonovat objekt „%1$s“."
+
+#. *
+#. * Hash algorithm %s isn't found.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:76
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
+msgid "Hash algorithm \"%s\" could not be found."
+msgstr "Hašovací algoritmus „%s“ se nepodařilo nalézt."
+
+#. *
+#. * Encoding %s cannot be used.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:81
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:65
+msgid "Encoding \"%s\" cannot be used."
+msgstr "Kódování „%s“ nelze použít."
+
+#. *
+#. * Cannot find user with identifier %1$s in context %2$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:86
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:77
+msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
+msgstr "Nelze nalézt uživatele s identifikátorem „%1$s“ v kontextu %2$d."
+
+#. *
+#. * Found two user with same identifier %1$s in context %2$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:91
+msgid "Two users with same identifier \"%1$s\" in context %2$d found."
+msgstr ""
+"Nalezeni dva uživatelé se stejným identifikátorem „%1$s“ v kontextu %2$d."
+
+#. *
+#. * Problem putting an object into the cache.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:96
+#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
+msgid "Problem putting/removing an object into/from the cache."
+msgstr "Problém s vkládáním/odebíráním objektu do/z cache."
+
+#. No permission to modify resources in context %1$s
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:99
+msgid "No permission to modify resources in context \"%1$s\""
+msgstr "Nemám oprávnění k úpravě zdrojů v kontextu „%1$s“"
+
+#. No permission to access resources in context %1$s
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:102
+msgid "No permission to access resources in context \"%1$s\""
+msgstr "Nemám oprávnění pro přístup ke zdrojům v kontextu „%1$s“"
+
+#. *
+#. * Missing or unknown password mechanism %1$s
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:107
+msgid "Missing or unknown password mechanism \"%1$s\""
+msgstr "Chybějící nebo neznámý mechanismus hesla „%1$s“"
+
+#. *
+#. * New password contains invalid characters
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:112
+msgid "New password contains invalid characters."
+msgstr "Nové heslo obsahuje neplatné znaky."
+
+#. *
+#. * Attributes of user %1$d in context %2$d have been erased.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:117
+msgid "Attributes of user %1$d in context %2$d have been erased."
+msgstr "Atributy uživatele %1$d v kontextu %2$d byly vymazány."
+
+#. *
+#. * Loading one or more users failed.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:122
+msgid "Loading one or more users failed."
+msgstr "Načítání jednoho nebo více uživatelů selhalo."
+
+#. * Alias entries are missing for user %1$d in context %2$d.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:125
+msgid "Alias entries are missing for user %1$d in context %2$d."
+msgstr "Pro uživatele %1$d v kontextu %2$d chybí záznamy o aliasech."
+
+#. * Updating attributes failed in context %1$d for user %2$d.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:128
+msgid "Updating attributes failed in context %1$d for user %2$d."
+msgstr "Aktualizace atributů v kontextu %1$d pro uživatele %2$d selhala."
+
+#. *
+#. * Invalid password length. The password must be of minimum length %1$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
+msgid ""
+"Invalid password length. The password must have a minimum length of %1$d."
+msgstr "Neplatná délka hesla. Heslo musí mít alespoň %1$d znaků."
+
+#. *
+#. * Invalid password length. The password must be of maximum length %1$d.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
+msgid ""
+"Invalid password length. The password must have a maximum length of %1$d."
+msgstr "Neplatná délka hesla. Heslo nesmí mít více než %1$d znaků."
+
+#. *
+#. * The parameter %s for this user is missing.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:143
+msgid "The parameter \"%s\" for this user is missing."
+msgstr "Chybí parametr „%s“ pro tohoto uživatele."
+
+#. *
+#. * %s is not a valid locale.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:148
+msgid "\"%s\" is not a valid locale."
+msgstr "„%s“ není platné locale (národní nastavení)."
+
+#. *
+#. * %s is not a valid time zone.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:153
+msgid "\"%s\" is not a valid timezone."
+msgstr "„%s“ není platná časová zóna."
+
+#. This is an internal exception to detect coding problems. A user will never see this exception.
+#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:157
+msgid ""
+"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
+"user's attributes."
+msgstr ""
+"Zamknout atributy více uživatelů není povolené. Pokusili jste se uzamknout "
+"%1$d uživatelských atributů."
+
+#. *
+#. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:162
+msgid ""
+"The entered password is illegal and can't be saved. Allowed characters are: "
+"%1$s"
+msgstr ""
+"Zadané heslo je neplatné a nemůže být uloženo. Jsou povolené následující "
+"znaky: %1$s"
+
+#. *
+#. * The current password is incorrect. Please enter your correct current password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:167
+msgid ""
+"The current password is incorrect. Please enter your correct current "
+"password and try again."
+msgstr ""
+"Aktuální heslo není správné. Zadejte, prosím, správné heslo a zkuste to "
+"znovu."
+
+#. *
+#. * The current password is missing. Please enter your current password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:172
+msgid ""
+"The current password is missing. Please enter your current password and try "
+"again."
+msgstr "Chybí aktuální heslo. Zadejte, prosím, své heslo a zkuste to znovu."
+
+#. *
+#. * The new password is missing. Please enter your new password and try again.
+#.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:177
+msgid ""
+"The new password is missing. Please enter your new password and try again."
+msgstr "Nové heslo chybí. Zadejte, prosím, své nové heslo a zkuste to znovu."
+
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:181
+#: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+msgid "Denied concurrent update of user attributes."
+msgstr "Zamítnuta souběžná úprava uživatelských vlastností."
+
+#. *
+#. * No recipient(s) has been defined for new message
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:71
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
+msgid "There are no recipient(s) for the new message."
+msgstr "Nová zpráva nemá žádného adresáta."
+
+#. *
+#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:76
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
+msgid ""
+"The following recipient is not allowed: %1$s. Please remove associated "
+"address and try again."
+msgstr ""
+"Následující příjemce není povolený: %1$s. Odstraňte, prosím, příslušnou "
+"adresu a zkuste to znovu."
 
 #. A Guard error occurred: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
@@ -4545,12 +4970,11 @@ msgid "Appointments"
 msgstr "Schůzky"
 
 #. *
-#. * The default file name for an ical task export, when using batch data
+#. * The default file name for an ical event export, when using batch data
 #.
-#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
-msgid "Tasks"
-msgstr "Úkoly"
+#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
+msgid "Events"
+msgstr "Události"
 
 #. *
 #. * The default file name for an ical task export, when using batch data
@@ -4705,8 +5129,8 @@ msgstr "Neznámý index značek barev: %1$s"
 #. A duplicate folder named "%1$s" already exists below parent folder "%2$s".
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:82
 msgid ""
-"A duplicate folder named \"%1$s\" already exists below parent folder "
-"\"%2$s\"."
+"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
+"\"."
 msgstr ""
 "Duplicitní složka pojmenovaná „%1$s“ už existuje v nadřazené složce „%2$s“."
 
@@ -5516,8 +5940,8 @@ msgstr ""
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:164
 msgid ""
-"POP3 sort failed due to the following reason: %1$s Switching to "
-"application-based sorting"
+"POP3 sort failed due to the following reason: %1$s Switching to application-"
+"based sorting"
 msgstr ""
 "POP3 třídění selhalo z tohoto důvodu: %1$s. Přepínám na třídění v aplikaci"
 
@@ -6053,6 +6477,16 @@ msgstr ""
 "Na adrese %1$s se nelze připojit k RSS. Změňte, prosím, adresu a zkuste to "
 "znovu."
 
+#. Problem parsing the security policy file
+#: com.openexchange.security.manager/src/com/openexchange/security/manager/exceptions/SecurityManagerExceptionMessages.java:63
+msgid "Problem parsing security policy file: %1$s"
+msgstr "Problém při parsování souboru s bezpečnostním pravidlem: %1$s"
+
+#. Error when updating the security manager
+#: com.openexchange.security.manager/src/com/openexchange/security/manager/exceptions/SecurityManagerExceptionMessages.java:66
+msgid "Problem updating security manager.  %1$s"
+msgstr "Problém při aktualizaci manažeru bezpečnosti. %1$s"
+
 #. No appropriate anonymizer available.
 #: com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -6122,8 +6556,8 @@ msgstr "Prohlédnout a změnit nastavení."
 #. The policy you have entered is malformed. It should look like \"condition:action\"
 #: com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:62
 msgid ""
-"The policy you have entered is malformed. It should look like "
-"\"condition:action\""
+"The policy you have entered is malformed. It should look like \"condition:"
+"action\""
 msgstr ""
 "Pravidlo, které jste zadal(a), má chybný formát. Mělo by vypadat takto: "
 "„podmínka:činnost“"
@@ -6897,13 +7331,6 @@ msgstr "Nepodařilo se připojit k úložišti kontextu."
 msgid "The account \"%1$s\" was not found."
 msgstr "Účet „%1$s“ nebyl nalezen."
 
-#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
-#. This should happen in very rare conditions and is not visible to the client.
-#: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:181
-msgid "Denied concurrent update of user attributes."
-msgstr "Zamítnuta souběžná úprava uživatelských vlastností."
-
 #. The default display name format for contacts with department: <firstname> <lastname> (department)
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/ContactDisplayNameFormat.java:62
 msgid "%1$s %2$s (%3$s)"
@@ -6973,10 +7400,6 @@ msgstr "Přílohy e-mailu"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
 msgid "My files"
 msgstr "Moje soubory"
-
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
-msgid "Drive"
-msgstr "Drive"
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
 msgid "Shared files"
@@ -7865,7 +8288,7 @@ msgstr ""
 "======\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:509
 msgid ""
@@ -7913,7 +8336,7 @@ msgstr ""
 "======\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:540
 msgid ""
@@ -7969,7 +8392,7 @@ msgstr ""
 "======\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:572
 msgid ""
@@ -8021,7 +8444,7 @@ msgstr ""
 "======\n"
 "[resources]\n"
 "\n"
-"========================================== "
+"=========================================="
 
 #. -
 #. * MESSAGE SUBJECT PREFIXES
@@ -8536,30 +8959,6 @@ msgstr "Vámi zadané vyhledávání zabralo příliš mnoho času."
 msgid "Version comment"
 msgstr "Komentář k verzi"
 
-#. *
-#. * Problem putting an object into the cache.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:96
-msgid "Problem putting/removing an object into/from the cache."
-msgstr "Problém s vkládáním/odebíráním objektu do/z cache."
-
-#. *
-#. * Hash algorithm %s isn't found.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:76
-msgid "Hash algorithm \"%s\" could not be found."
-msgstr "Hašovací algoritmus „%s“ se nepodařilo nalézt."
-
-#. *
-#. * Encoding %s cannot be used.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:65
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:81
-msgid "Encoding \"%s\" cannot be used."
-msgstr "Kódování „%s“ nelze použít."
-
 #. No resource group found for identifier \"%1$d\".
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:67
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:69
@@ -8586,166 +8985,9 @@ msgstr "Nalezen(y) zdroj(e) se stejným identifikátorem „%1$s“."
 msgid "Cannot find user with E-Mail \"%s\"."
 msgstr "Nelze nalézt uživatele s e-mailem „%s“."
 
-#. *
-#. * Cannot find user with identifier %1$s in context %2$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:77
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:86
-msgid "Cannot find user with identifier \"%1$s\" in context %2$d."
-msgstr "Nelze nalézt uživatele s identifikátorem „%1$s“ v kontextu %2$d."
-
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:79
 msgid "Cannot find group with identifier \"%1$s\" in context %2$d."
 msgstr "Nelze nalézt skupinu s identifikátorem „%1$s“ v kontextu %2$d."
-
-#. *
-#. * Cannot clone object %1$s.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:71
-msgid "Cannot clone object \"%1$s\"."
-msgstr "Nelze klonovat objekt „%1$s“."
-
-#. *
-#. * Found two user with same identifier %1$s in context %2$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:91
-msgid "Two users with same identifier \"%1$s\" in context %2$d found."
-msgstr ""
-"Nalezeni dva uživatelé se stejným identifikátorem „%1$s“ v kontextu %2$d."
-
-#. No permission to modify resources in context %1$s
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:99
-msgid "No permission to modify resources in context \"%1$s\""
-msgstr "Nemám oprávnění k úpravě zdrojů v kontextu „%1$s“"
-
-#. No permission to access resources in context %1$s
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:102
-msgid "No permission to access resources in context \"%1$s\""
-msgstr "Nemám oprávnění pro přístup ke zdrojům v kontextu „%1$s“"
-
-#. *
-#. * Missing or unknown password mechanism %1$s
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:107
-msgid "Missing or unknown password mechanism \"%1$s\""
-msgstr "Chybějící nebo neznámý mechanismus hesla „%1$s“"
-
-#. *
-#. * New password contains invalid characters
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:112
-msgid "New password contains invalid characters."
-msgstr "Nové heslo obsahuje neplatné znaky."
-
-#. *
-#. * Attributes of user %1$d in context %2$d have been erased.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:117
-msgid "Attributes of user %1$d in context %2$d have been erased."
-msgstr "Atributy uživatele %1$d v kontextu %2$d byly vymazány."
-
-#. *
-#. * Loading one or more users failed.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:122
-msgid "Loading one or more users failed."
-msgstr "Načítání jednoho nebo více uživatelů selhalo."
-
-#. * Alias entries are missing for user %1$d in context %2$d.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:125
-msgid "Alias entries are missing for user %1$d in context %2$d."
-msgstr "Pro uživatele %1$d v kontextu %2$d chybí záznamy o aliasech."
-
-#. * Updating attributes failed in context %1$d for user %2$d.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:128
-msgid "Updating attributes failed in context %1$d for user %2$d."
-msgstr "Aktualizace atributů v kontextu %1$d pro uživatele %2$d selhala."
-
-#. *
-#. * Invalid password length. The password must be of minimum length %1$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:133
-msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
-msgstr "Neplatná délka hesla. Heslo musí mít alespoň %1$d znaků."
-
-#. *
-#. * Invalid password length. The password must be of maximum length %1$d.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:138
-msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
-msgstr "Neplatná délka hesla. Heslo nesmí mít více než %1$d znaků."
-
-#. *
-#. * The parameter %s for this user is missing.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:143
-msgid "The parameter \"%s\" for this user is missing."
-msgstr "Chybí parametr „%s“ pro tohoto uživatele."
-
-#. *
-#. * %s is not a valid locale.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:148
-msgid "\"%s\" is not a valid locale."
-msgstr "„%s“ není platné locale (národní nastavení)."
-
-#. *
-#. * %s is not a valid time zone.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:153
-msgid "\"%s\" is not a valid timezone."
-msgstr "„%s“ není platná časová zóna."
-
-#. This is an internal exception to detect coding problems. A user will never see this exception.
-#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:157
-msgid ""
-"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
-"user's attributes."
-msgstr ""
-"Zamknout atributy více uživatelů není povolené. Pokusili jste se uzamknout "
-"%1$d uživatelských atributů."
-
-#. *
-#. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:162
-msgid ""
-"The entered password is illegal and can't be saved. Allowed characters are: "
-"%1$s"
-msgstr ""
-"Zadané heslo je neplatné a nemůže být uloženo. Jsou povolené následující "
-"znaky: %1$s"
-
-#. *
-#. * The current password is incorrect. Please enter your correct current password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:167
-msgid ""
-"The current password is incorrect. Please enter your correct current "
-"password and try again."
-msgstr ""
-"Aktuální heslo není správné. Zadejte, prosím, správné heslo a zkuste to "
-"znovu."
-
-#. *
-#. * The current password is missing. Please enter your current password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:172
-msgid ""
-"The current password is missing. Please enter your current password and try "
-"again."
-msgstr "Chybí aktuální heslo. Zadejte, prosím, své heslo a zkuste to znovu."
-
-#. *
-#. * The new password is missing. Please enter your new password and try again.
-#.
-#: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:177
-msgid ""
-"The new password is missing. Please enter your new password and try again."
-msgstr "Nové heslo chybí. Zadejte, prosím, své nové heslo a zkuste to znovu."
 
 #. *
 #. * User is missing for the reminder.
@@ -9174,8 +9416,8 @@ msgstr "Nahraný soubor s id „%1$s“ se nepodařilo nalézt."
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:101
 msgid ""
-"Upload file's content type \"%1$s\" does not match given file filter "
-"\"%2$s\"."
+"Upload file's content type \"%1$s\" does not match given file filter \"%2$s"
+"\"."
 msgstr ""
 "Typ obsahu nahraného souboru „%1$s“ neodpovídá danému souborovému filtru "
 "„%2$s“."
@@ -9649,8 +9891,8 @@ msgid ""
 "can then access the attachments."
 msgstr ""
 "Přílohy k tomuto e-mailu přesahují limit velikosti příloh. Namísto zaslání "
-"příloh s e-mailem budou přílohy sdíleny a odkazy na ně budou přidány k "
-"e-mailu. Příjemce e-mailu pak bude mít k přílohám přístup."
+"příloh s e-mailem budou přílohy sdíleny a odkazy na ně budou přidány k e-"
+"mailu. Příjemce e-mailu pak bude mít k přílohám přístup."
 
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
@@ -9738,6 +9980,21 @@ msgstr ""
 "Váš poštovní přenosový účet pro %2$s byl vypnut kvůli problému s autorizací. "
 "Autorizujte, prosím, znovu účet %5$s, aby bylo možné jej opět zapnout."
 
+#. User tries to access an OAuth-linked mail server, but required open-xchange-oauth package is not installed
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:264
+msgid "Unsupported OAuth mail access to server %1$s"
+msgstr "Nepodporovaný přístup k serveru %1$s pomocí OAuth mail"
+
+#. User tries to access an OAuth-linked transport server, but required open-xchange-oauth package is not installed
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:267
+msgid "Unsupported OAuth transport access to server %1$s"
+msgstr "Nepodporovaný přístup k serveru %1$s pomocí OAuth transport"
+
+#. Although credentials are correct, the mail server denied the connect attempt for any reason
+#: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:270
+msgid "Mail server %1$s denied connect attempt: %3$s"
+msgstr "Poštovní server %1$s odmítl pokus o připojení: %3$s"
+
 #. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
 #. which is only applicable in case a reply is generated, but in-compose message is not a reply
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:72
@@ -9771,6 +10028,36 @@ msgid ""
 msgstr ""
 "Pro okno s novou zprávou nebyl nalezen žádný vhodný klíč. Napište, prosím, "
 "zprávu znovu."
+
+#. The user entered a very long subject, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:87
+msgid "The entered subject is too long. Please use a shorter one."
+msgstr "Zadaný předmět je příliš dlouhý. Zvolte kratší."
+
+#. The user entered a very long From address, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:90
+msgid "The entered \"from\" address is too long."
+msgstr "Zadaná adresa „od“ je příliš dlouhá."
+
+#. The user entered a very long Sender address, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:93
+msgid "The entered \"sender\" address is too long."
+msgstr "Zadaná adresa „odesílatel“ je příliš dlouhá."
+
+#. The user entered a very long To addresses, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:96
+msgid "The entered \"to\" addresses are too long."
+msgstr "Zadané adresy „pro“ jsou příliš dlouhé."
+
+#. The user entered a very long Cc addresses, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:99
+msgid "The entered \"cc\" addresses are too long."
+msgstr "Zadané adresy „kopie“ jsou příliš dlouhé."
+
+#. The user entered a very long Bcc addresses, which cannot be stored due to data truncation
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:102
+msgid "The entered \"bcc\" addresses are too long."
+msgstr "Zadané adresy „slepé kopie“ jsou příliš dlouhé."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -10168,6 +10455,21 @@ msgstr "Účet je v tuto chvíli připravován."
 msgid "There was an SSL problem."
 msgstr "Vyskytl se problém s SSL."
 
+#. The message advertising that the status of the account could not be determined.
+#: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:89
+msgid "The account status could not be determined."
+msgstr "Stav účtu se nepodařilo zjistit."
+
+#. The message advertising that the affected account is not supported.
+#: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:92
+msgid "The account is not supported."
+msgstr "Účet není podporovaný."
+
+#. The message advertising that the affected account cannot be accessed.
+#: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:95
+msgid "The account cannot be accessed."
+msgstr "K účtu nelze přistupovat."
+
 #. Cannot find mail account for user "%2$s".
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
@@ -10365,6 +10667,21 @@ msgstr "Vybraný zdroj („%1$s“) byl mezitím změněn."
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:96
 msgid "Missing mandatory field(s) in given resource."
 msgstr "Chybí povinné/á pole v daném zdroji."
+
+#. Missing mandatory name in given resource.
+#: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:99
+msgid "Missing mandatory name in given resource."
+msgstr "Chybí povinné jméno v daném zdroji."
+
+#. Missing mandatory display name in given resource.
+#: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:102
+msgid "Missing mandatory display name in given resource."
+msgstr "Chybí povinné jméno k zobrazení v daném zdroji."
+
+#. Missing mandatory E-Mail address in given resource.
+#: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:105
+msgid "Missing mandatory E-Mail address in given resource."
+msgstr "Chybí povinná e-mailová adresa v daném zdroji."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:69
 msgid "You do not have appropriate permissions for module \"%2$s\"."
@@ -10774,32 +11091,37 @@ msgid ""
 msgstr ""
 "%1$s s vámi sdílel(a) %2$s „%3$s“. Zadejte, prosím, heslo pro zobrazení."
 
-#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#. Login when opening a share protected with a password
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
+msgid "Please enter your password to log into this account."
+msgstr "Pro přihlášení k tomuto účtu zadejte své heslo."
+
+#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:75
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
 msgstr ""
 "Uživateli %1$s byla odeslána zpráva s postupem, jak nastavit nové heslo."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
 msgid "Please set a new password to regain access."
 msgstr "Nastavte, prosím, nové heslo, abyste znovu získal(a) přístup."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:79
 msgid "The share you are looking for does not exist."
 msgstr "Sdílený obsah, který hledáte, neexistuje."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:81
 msgid "This share cannot be accessed with your Web Browser."
 msgstr ""
 "Tato sdílená položka není přístupná prostřednictvím vašeho prohlížeče webu."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
 msgid "We were unable to process your request."
 msgstr "Nemůžeme zpracovat váš požadavek."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
 msgid ""
 "The folder or item you are looking for is no longer available. Please click "
 "\"continue\" to view your other shares."
@@ -10807,7 +11129,7 @@ msgstr ""
 "Složka nebo položka, kterou hledáte, již není k dispozici. Klikněte, prosím, "
 "na „pokračovat“ k prohlédnutí vašich ostatních sdílených položek."
 
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:84
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
 msgid ""
 "Your guest account is currently not protected with a password. Resetting "
 "password will be aborted."
@@ -10816,7 +11138,7 @@ msgstr ""
 "ukončeno."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:87
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10825,7 +11147,7 @@ msgstr ""
 "vlastníka, chcete-li získat přístup."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:90
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -10834,7 +11156,7 @@ msgstr ""
 "chcete-li získat přístup."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10843,7 +11165,7 @@ msgstr ""
 "vlastníka, chcete-li získat přístup."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:96
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again."
@@ -10852,7 +11174,7 @@ msgstr ""
 "chcete-li získat přístup."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:99
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again."
@@ -10861,7 +11183,7 @@ msgstr ""
 "prosím, vlastníka, chcete-li získat přístup."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:102
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again."
@@ -10870,7 +11192,7 @@ msgstr ""
 "prosím, %1$s, chcete-li získat přístup."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:105
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -10881,18 +11203,18 @@ msgstr ""
 "prohlédnutí vašich ostatních sdílených souborů."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click "
-"\"Continue\"."
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
 msgstr ""
 "Přístup k souboru, který hledáte, byl odebrán. Kontaktujte, prosím, %1$s, "
 "chcete-li získat přístup. Klikněte, prosím, na „pokračovat“ k prohlédnutí "
 "vašich ostatních sdílených souborů."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:111
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -10903,7 +11225,7 @@ msgstr ""
 "prohlédnutí vašich ostatních sdílených složek."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:114
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, click "
@@ -10914,7 +11236,7 @@ msgstr ""
 "vašich ostatních sdílených složek."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:117
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, click "
@@ -10925,18 +11247,18 @@ msgstr ""
 "„pokračovat“ k prohlédnutí vašich ostatních sdílených položek."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click "
-"\"Continue\"."
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
 msgstr ""
 "Přístup ke sdílené položce, kterou hledáte, byl odebrán. Kontaktujte, "
 "prosím, %1$s, chcete-li získat přístup. Klikněte, prosím, na „pokračovat“ k "
 "prohlédnutí vašich ostatních sdílených položek."
 
 #. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:123
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
 msgid ""
 "Access to the file you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -10947,7 +11269,7 @@ msgstr ""
 "sdílených souborů se, prosím, přihlaste."
 
 #. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:126
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -10957,7 +11279,7 @@ msgstr ""
 "se, prosím, přihlaste."
 
 #. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:129
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -10968,7 +11290,7 @@ msgstr ""
 "sdílených složek se, prosím, přihlaste."
 
 #. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:132
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
 msgid ""
 "Access to the folder you're looking for has been removed. Please contact "
 "%1$s if you want access again. To view your other shared files, please log "
@@ -10979,7 +11301,7 @@ msgstr ""
 "se, prosím, přihlaste."
 
 #. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:135
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
 msgid ""
 "Access to the share you're looking for has been removed. Please contact the "
 "owner if you want access again. To view your other shared files, please log "
@@ -10990,7 +11312,7 @@ msgstr ""
 "sdílených položek se, prosím, přihlaste."
 
 #. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
-#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:138
+#: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:141
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
 "if you want access again. To view your other shared files, please log in."
@@ -11666,24 +11988,6 @@ msgid ""
 msgstr ""
 "Vaše zpráva je příliš dlouhá (%1$s znaků). Maximální povolená délka je %2$s "
 "znaků."
-
-#. *
-#. * No recipient(s) has been defined for new message
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
-msgid "There are no recipient(s) for the new message."
-msgstr "Nová zpráva nemá žádného adresáta."
-
-#. *
-#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
-msgid ""
-"The following recipient is not allowed: %1$s. Please remove associated "
-"address and try again."
-msgstr ""
-"Následující příjemce není povolený: %1$s. Odstraňte, prosím, příslušnou "
-"adresu a zkuste to znovu."
 
 #. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:71
@@ -14222,6 +14526,91 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "Week"
+#~ msgstr "Týden"
+
+#~ msgid "All-day events"
+#~ msgstr "Celodenní události"
+
+#~ msgid "Comments"
+#~ msgstr "Komentáře"
+
+#~ msgid "Tentatively accepted"
+#~ msgstr "Předběžně přijal(a)"
+
+#~ msgid "Undecided"
+#~ msgstr "Nerozhodný(á)"
+
+#~ msgid "%1$s has asked %2$s to change the event:"
+#~ msgstr "%1$s požádal(a) %2$s, aby změnil(a) schůzku:"
+
+#~ msgid "You have been invited to an event by %1$s:"
+#~ msgstr "%1$s vás pozval(a) na událost:"
+
+#~ msgid ""
+#~ "You have been invited to an event organized by %1$s on behalf of %2$s"
+#~ msgstr "Byli jste pozváni na událost, kterou organizuje %1$s jménem %2$s"
+
+#~ msgid "%1$s is organizing an event on your behalf."
+#~ msgstr "%1$s organizuje vaším jménem událost."
+
+#~ msgid "%1$s has changed an event:"
+#~ msgstr "%1$s změnil(a) událost:"
+
+#~ msgid "%1$s has changed an event on behalf of %2$s:"
+#~ msgstr "%1$s změnil(a) jménem %2$s událost:"
+
+#~ msgid "%1$s has changed an event on your behalf:"
+#~ msgstr "%1$s změnil(a) vaším jménem událost:"
+
+#~ msgid "Participants:"
+#~ msgstr "Účastníci:"
+
+#~ msgid "Details:"
+#~ msgstr "Podrobnosti:"
+
+#~ msgid ""
+#~ "The timezone of the appointments start date was changed. Original "
+#~ "timezone: %1$s. New timezone: %2$s"
+#~ msgstr ""
+#~ "Časové pásmo počátečního data schůzek bylo změněno. Původní pásmo: %1$s. "
+#~ "Nové pásmo: %2$s."
+
+#~ msgid ""
+#~ "The timezone of the appointments end date was changed. Original timezone: "
+#~ "%1$s. New timezone: %2$s"
+#~ msgstr ""
+#~ "Časové pásmo konečného data schůzek bylo změněno. Původní pásmo: %1$s. "
+#~ "Nové pásmo: %2$s."
+
+#~ msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
+#~ msgstr "Naplánujte událost na jindy. Původní datum: %1$s. Nové datum: %2$s"
+
+#~ msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
+#~ msgstr ""
+#~ "Naplánujte událost na jindy. Původní datum a čas: %1$s. Nové datum a čas: "
+#~ "%2$s"
+
+#~ msgid ""
+#~ "The remote SchedJoules service is unavailable at the moment. There is "
+#~ "nothing we can do about it. Please try again later."
+#~ msgstr ""
+#~ "Služba SchedJoules není v tuto chvíli k dispozici. Nemůžeme s tím nic "
+#~ "dělat. Zkuste to, prosím, později."
+
+#~ msgid ""
+#~ "An internal server error occurred on SchedJoules side. There is nothing "
+#~ "we can do about it."
+#~ msgstr ""
+#~ "Na straně SchedJoules došlo k interní chybě serveru. Nemůžeme s tím nic "
+#~ "dělat."
+
+#~ msgid ""
+#~ "A remote server error occurred on SchedJoules side. There is nothing we "
+#~ "can do about it."
+#~ msgstr ""
+#~ "Na straně SchedJoules došlo k chybě serveru. Nemůžeme s tím nic dělat."
+
 #~ msgid "The requested page does not denote to a calendar."
 #~ msgstr "Požadovaná stránka není kalendář."
 
@@ -14412,8 +14801,8 @@ msgstr "Zulu"
 #~ msgstr "Vytváření, úpravy a mazání událostí."
 
 #~ msgid ""
-#~ "Appointments in non-personal folders must not be classified as "
-#~ "\"private\" or \"confidential\"."
+#~ "Appointments in non-personal folders must not be classified as \"private"
+#~ "\" or \"confidential\"."
 #~ msgstr ""
 #~ "Schůzky v jiných než osobních složkách musí být označené jako „soukromé“ "
 #~ "nebo „důvěrné“."
@@ -14638,8 +15027,8 @@ msgstr "Zulu"
 #~ msgstr "Nemáte příslušná oprávnění ke čtení obsahu složky „%1$s“."
 
 #~ msgid ""
-#~ "You do not have the appropriate permissions to edit tasks in folder "
-#~ "\"%1$s\"."
+#~ "You do not have the appropriate permissions to edit tasks in folder \"%1$s"
+#~ "\"."
 #~ msgstr "Nemáte příslušná oprávnění k úpravě úkolů ve složce „%1$s“."
 
 #~ msgid "All attachments"
@@ -14849,8 +15238,8 @@ msgstr "Zulu"
 #~ msgstr "Uživatel „%2$s“ v kontextu „%3$s“ složku „%1$s“ nevidí"
 
 #~ msgid ""
-#~ "The content type you provided is not allowed for the given folder "
-#~ "\"%1$s\"."
+#~ "The content type you provided is not allowed for the given folder \"%1$s"
+#~ "\"."
 #~ msgstr ""
 #~ "Druh obsahu, který jste zadal(a), není pro danou složku („%1$s“) povolený."
 
@@ -14866,9 +15255,9 @@ msgstr "Zulu"
 #~ msgstr "Nemáte příslušná oprávnění ke přesunutí složky „%1$s“."
 
 #~ msgid ""
-#~ "Found two folders named \"%1$s\" located below the parent folder "
-#~ "\"%2$s\". Please rename one of the folders. There should be no two "
-#~ "folders with the same name."
+#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s"
+#~ "\". Please rename one of the folders. There should be no two folders with "
+#~ "the same name."
 #~ msgstr ""
 #~ "V nadřazené složce „%2$s“ byly nalezeny dvě složky s názvem „%1$s“. "
 #~ "Přejmenujte, prosím, jednu z těchto složek. Není vhodné mít dvě složky se "
@@ -14956,8 +15345,8 @@ msgstr "Zulu"
 #~ msgstr "Nemáte příslušná oprávnění k přesunu všech podsložek složky „%2$s“."
 
 #~ msgid ""
-#~ "You do not have appropriate permissions to delete the shared folder "
-#~ "\"%2$s\"."
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
 #~ msgstr "Nemáte příslušná oprávnění ke smazání sdílené složky „%2$s“."
 
 #~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
@@ -16371,11 +16760,11 @@ msgstr "Zulu"
 #~ msgstr "Přístup k souboru zamítnut kvůli oprávněním operačního systému."
 
 #~ msgid ""
-#~ "This template was not whitelisted in "
-#~ "'com.openexchange.templating.templateWhitelist'."
+#~ "This template was not whitelisted in 'com.openexchange.templating."
+#~ "templateWhitelist'."
 #~ msgstr ""
-#~ "Tato šablona není na seznamu povolených v "
-#~ "‚com.openexchange.templating.templateWhitelist‘."
+#~ "Tato šablona není na seznamu povolených v ‚com.openexchange.templating."
+#~ "templateWhitelist‘."
 
 #~ msgid "The consumer key/consumer secret pair is missing in configuration."
 #~ msgstr "V konfiguraci chybí zákaznický klíč/zákaznický tajný pár."
@@ -16527,8 +16916,8 @@ msgstr "Zulu"
 #~ msgid ""
 #~ "The body of your POST request is not well-formed multipart/form-data."
 #~ msgstr ""
-#~ "Tělo vašeho POST požadavku není správně formátované jako "
-#~ "multipart/form-data."
+#~ "Tělo vašeho POST požadavku není správně formátované jako multipart/form-"
+#~ "data."
 
 #~ msgid ""
 #~ "The XML was not well-formed or did not validate against our published "
@@ -16772,8 +17161,8 @@ msgstr "Zulu"
 #~ "The folderid object is null. This is an internal error. Please notify "
 #~ "Open-Xchange."
 #~ msgstr ""
-#~ "Objekt folderid je null. Jde o interní chybu. Uvědomte, prosím, "
-#~ "Open-Xchange."
+#~ "Objekt folderid je null. Jde o interní chybu. Uvědomte, prosím, Open-"
+#~ "Xchange."
 
 #~ msgid ""
 #~ "The search object contains more than one folder id. This is not supported "
@@ -17020,15 +17409,15 @@ msgstr "Zulu"
 #~ "komunikaci („%1$s“)."
 
 #~ msgid ""
-#~ "An external error occured while processing the free/busy request "
-#~ "(\"%1$s\")."
+#~ "An external error occured while processing the free/busy request (\"%1$s"
+#~ "\")."
 #~ msgstr ""
 #~ "Při zpracovávání požadavku na stav volný/zaneprázdněný došlo k externí "
 #~ "chybě („%1$s“)."
 
 #~ msgid ""
-#~ "An internal error occured while processing the free/busy request "
-#~ "(\"%1$s\")."
+#~ "An internal error occured while processing the free/busy request (\"%1$s"
+#~ "\")."
 #~ msgstr ""
 #~ "Při zpracovávání požadavku na stav volný/zaneprázdněný došlo k interní "
 #~ "chybě („%1$s“)."
@@ -17141,8 +17530,8 @@ msgstr "Zulu"
 #~ msgstr "line.separator"
 
 #~ msgid ""
-#~ "Client login IP changed from %1$s to %2$s and is not covered by IP "
-#~ "white-list or netmask."
+#~ "Client login IP changed from %1$s to %2$s and is not covered by IP white-"
+#~ "list or netmask."
 #~ msgstr ""
 #~ "Přihlašovací IP klienta se změnila z %1$s na %2$s, která není na "
 #~ "whitelistu nebo součástí netmask."
@@ -17228,29 +17617,29 @@ msgstr "Zulu"
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup"
 
 #~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
+#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující hledání"
 
 #~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
+#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující čtení"
 
 #~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
+#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující mazání"
 
 #~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
+#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující vkládání."
@@ -17263,11 +17652,11 @@ msgstr "Zulu"
 #~ "(uživatel=%4$s, kontext=%5$s) nemám administrátorský přístup"
 
 #~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
+#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující zápis."
+#~ "K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) nemám přístup povolující zápis."
 
 #~ msgid ""
 #~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
@@ -17296,8 +17685,8 @@ msgstr "Zulu"
 #~ msgid ""
 #~ "The composed rights could not be applied to new folder %1$s due to "
 #~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
+#~ "However, the folder has been created on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Poskládaná oprávnění se nepodařilo na novou složku %1$s aplikovat, "
 #~ "protože ve výchozích oprávněních určených IMAP serverem chybí "
@@ -17308,8 +17697,8 @@ msgstr "Zulu"
 #~ "No administer permission specified for folder %1$s on server %2$s with "
 #~ "login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nejsou určena žádná administrátorská práva"
+#~ "Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) nejsou určena žádná administrátorská práva"
 
 #~ msgid ""
 #~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
@@ -17350,8 +17739,8 @@ msgstr "Zulu"
 #~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
 #~ "context=%5$s)"
 #~ msgstr ""
-#~ "Složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) smazat"
+#~ "Složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) smazat"
 
 #~ msgid ""
 #~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
@@ -17371,9 +17760,9 @@ msgstr "Zulu"
 #~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
 #~ "(user=%4$s, context=%5$s). Switching to application-based search."
 #~ msgstr ""
-#~ "IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám "
-#~ "na vyhledávání v aplikaci."
+#~ "IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na "
+#~ "vyhledávání v aplikaci."
 
 #~ msgid ""
 #~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
@@ -17479,8 +17868,8 @@ msgstr "Zulu"
 #~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
 #~ "with login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
+#~ "Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
 
 #~ msgid ""
 #~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
@@ -17490,8 +17879,8 @@ msgstr "Zulu"
 #~ "jménem %5$s (uživatel=%6$s, kontext=%7$s) selhalo s chybou „%3$s“."
 
 #~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
+#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující přejmenovávat"
@@ -17674,9 +18063,9 @@ msgstr "Zulu"
 #~ "Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error "
 #~ "code."
 #~ msgstr ""
-#~ "Došlo k chybě API Facebooku. Chybový kód: %1$s. Chybová zpráva: "
-#~ "„%2$s“.Vysvětlení chybového kódu najdete na stránce "
-#~ "http://fbdevwiki.com/wiki/Error_codes"
+#~ "Došlo k chybě API Facebooku. Chybový kód: %1$s. Chybová zpráva: „%2$s“."
+#~ "Vysvětlení chybového kódu najdete na stránce http://fbdevwiki.com/wiki/"
+#~ "Error_codes"
 
 #~ msgid "Confirmed ham folder"
 #~ msgstr "Složka potvrzené normální pošty"
@@ -17880,8 +18269,8 @@ msgstr "Zulu"
 #~ msgstr "Nepovolený přesun."
 
 #~ msgid ""
-#~ "Missing required capability %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
+#~ "Missing required capability %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Chybí vyžadovaná podpora funkce %1$s na serveru %2$s s přihlašovacím "
 #~ "jménem %3$s (uživatel=%4$s, kontext=%5$s)."
@@ -18141,8 +18530,8 @@ msgstr "Zulu"
 #~ msgstr "Typ složky „SHARED“ není v této situaci povolen."
 
 #~ msgid ""
-#~ "Unexpected state for deleting a virtual appointment (exception). "
-#~ "uid:oid:position %d:%d:%d"
+#~ "Unexpected state for deleting a virtual appointment (exception). uid:oid:"
+#~ "position %d:%d:%d"
 #~ msgstr ""
 #~ "Neočekávaný stav po vymazání virtuální schůzky (výjimka). uid:oid: pozice "
 #~ "%d:%d:%d"
@@ -18174,8 +18563,8 @@ msgstr "Zulu"
 #~ msgstr "Nemohu vytvořit výjimku, pozici opakování nelze vypočítat."
 
 #~ msgid ""
-#~ "Got an UserParticipant object with an identifier < 1 "
-#~ "Identifier:Folder_Type = %d:%d"
+#~ "Got an UserParticipant object with an identifier < 1 Identifier:"
+#~ "Folder_Type = %d:%d"
 #~ msgstr ""
 #~ "Narazil jsem na objekt UserParticipant s identifikátorem < 1 "
 #~ "Identifikátor: Folder_Type = %d:%d"
@@ -18188,8 +18577,8 @@ msgstr "Zulu"
 #~ "Identifikátor = %d"
 
 #~ msgid ""
-#~ "Got an UserParticipant object with a private folder id in a public folder "
-#~ ": Identifier = %d"
+#~ "Got an UserParticipant object with a private folder id in a public "
+#~ "folder : Identifier = %d"
 #~ msgstr ""
 #~ "Narazil jsem na objekt UserParticipant s id soukromé složky ve veřejné "
 #~ "složce: Identifikátor = %d"
@@ -18869,8 +19258,8 @@ msgstr "Zulu"
 #~ msgstr "Pole zprávy %1$s nelze zpracovat"
 
 #~ msgid ""
-#~ "Message field %1$s cannot be handled on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
+#~ "Message field %1$s cannot be handled on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Pole zprávy %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) zpracovat"
@@ -18950,15 +19339,15 @@ msgstr "Zulu"
 #~ msgstr "Neplatná hodnota Content-Disposition: %1$s"
 
 #~ msgid ""
-#~ "A folder named %1$s already exists on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
+#~ "A folder named %1$s already exists on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Složka s názvem %1$s již na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "existuje (uživatel=%4 $s, kontext=%5$s)."
 
 #~ msgid ""
-#~ "No create access on mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
+#~ "No create access on mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující vytvářet."
@@ -18967,8 +19356,8 @@ msgstr "Zulu"
 #~ msgstr "Poštovní složku se nepodařilo nalézt: %1$s."
 
 #~ msgid ""
-#~ "Referenced mail %1$s could not be found in folder %2$s. Therefore "
-#~ "reply/forward operation cannot be performed."
+#~ "Referenced mail %1$s could not be found in folder %2$s. Therefore reply/"
+#~ "forward operation cannot be performed."
 #~ msgstr ""
 #~ "Odkazovanou zprávu %1$s se ve složce %2$s nepodařilo nalézt. Operace "
 #~ "odpověď/přesměrování tedy nemůže být provedena."
@@ -18999,8 +19388,8 @@ msgstr "Zulu"
 #~ "přihlašovacím jménem %3$s (uživatel=%4$s, kontext=%5$s) nalézt."
 
 #~ msgid ""
-#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Probably your request took too long."
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s). Probably your request took too long."
 #~ msgstr ""
 #~ "Složka „%1$s“ byla na poštovním serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4 $s, kontext=%5$s) zavřena. Váš požadavek pravděpodobně trval "
@@ -19036,11 +19425,11 @@ msgstr "Zulu"
 #~ msgstr "Neplatný výraz pro vyhledávání: %1$s"
 
 #~ msgid ""
-#~ "Connection closed to mail server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s)."
+#~ "Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
+#~ "%4$s)."
 #~ msgstr ""
-#~ "Spojení s poštovním serverem %1$s s přihlašovacím jménem %2$s "
-#~ "(uživatel=%3$s, kontext=%4$s) ukončeno."
+#~ "Spojení s poštovním serverem %1$s s přihlašovacím jménem %2$s (uživatel="
+#~ "%3$s, kontext=%4$s) ukončeno."
 
 #~ msgid "Could not bind connection to local port %1$s"
 #~ msgstr "Nepodařilo se navázat spojení na místní port %1$s"
@@ -19076,8 +19465,8 @@ msgstr "Zulu"
 #~ msgstr "Příkaz odeslaný poštovnímu serveru selhal. Odpověď serveru: %1$s"
 
 #~ msgid ""
-#~ "A command failed on mail server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s). Server response: %5$s"
+#~ "A command failed on mail server %1$s with login %2$s (user=%3$s, context="
+#~ "%4$s). Server response: %5$s"
 #~ msgstr ""
 #~ "Selhal příkaz na poštovním serveru %1$s s přihlašovacím jménem %2$s "
 #~ "(uživatel=%3$s, kontext=%4$s). Odpověď serveru: %5$s"
@@ -19089,15 +19478,15 @@ msgstr "Zulu"
 #~ "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
 #~ "context=%4$s). Server response: %5$s"
 #~ msgstr ""
-#~ "Poštovní server %1$s s přihlašovacím jménem %2$s (uživatel=%3$s, "
-#~ "kontext=%4$s) ohlásil neplatný příkaz. Odpověď serveru: %5$s"
+#~ "Poštovní server %1$s s přihlašovacím jménem %2$s (uživatel=%3$s, kontext="
+#~ "%4$s) ohlásil neplatný příkaz. Odpověď serveru: %5$s"
 
 #~ msgid "Error in mail server protocol. Error message: %1$s"
 #~ msgstr "Chyba v protokolu poštovního serveru. Chybová zpráva: %1$s"
 
 #~ msgid ""
-#~ "Protocol error in data sent to the mail server %1$s with login %2$s "
-#~ "(user=%3$s, context=%4$s). Error message: %5$s"
+#~ "Protocol error in data sent to the mail server %1$s with login %2$s (user="
+#~ "%3$s, context=%4$s). Error message: %5$s"
 #~ msgstr ""
 #~ "Chyba protokolu v datech odeslaných poštovnímu serveru %1$s s "
 #~ "přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4). Chybová zpráva: "
@@ -19194,15 +19583,15 @@ msgstr "Zulu"
 #~ "Password encryption failed for login %1$s on server %2$s (user=%3$s, "
 #~ "context=%4$s)."
 #~ msgstr ""
-#~ "Šifrování hesla pro přihlašovací jméno %1$s na serveru %2$s "
-#~ "(uživatel=%3$s, kontext=%4$s) selhalo."
+#~ "Šifrování hesla pro přihlašovací jméno %1$s na serveru %2$s (uživatel="
+#~ "%3$s, kontext=%4$s) selhalo."
 
 #~ msgid ""
 #~ "Password decryption failed for login %1$s on server %2$s (user=%3$s, "
 #~ "context=%4$s)."
 #~ msgstr ""
-#~ "Dešifrování hesla pro přihlašovací jméno %1$s na serveru %2$s "
-#~ "(uživatel=%3$s, kontext=%4$s) selhalo."
+#~ "Dešifrování hesla pro přihlašovací jméno %1$s na serveru %2$s (uživatel="
+#~ "%3$s, kontext=%4$s) selhalo."
 
 #~ msgid ""
 #~ "The Unified Mail account already exists for user %1$s in context %2$s."
@@ -19304,8 +19693,8 @@ msgstr "Zulu"
 #~ "pro kontrolu neporušenosti dat."
 
 #~ msgid ""
-#~ "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" "
-#~ "(current size: %4$d) is invalid."
+#~ "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s"
+#~ "\" (current size: %4$d) is invalid."
 #~ msgstr ""
 #~ "Požadovaný rozsah souboru „%3$s“ není platný (offset: %1$d, délka: %2$d, "
 #~ "aktuální velikost: %4$d)"
@@ -20049,8 +20438,8 @@ msgstr "Zulu"
 #~ msgstr "Složka „%1$s“ byla zavřena."
 
 #~ msgid ""
-#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s) ."
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) ."
 #~ msgstr ""
 #~ "Složka „%1$s“ na poštovním serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) byla zavřena."

@@ -47,56 +47,48 @@
  *
  */
 
-package com.openexchange.imageconverter.api;
+package com.openexchange.admin.plugins;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
- * {@link FileItemException}
+ * {@link ContextDbLookupPluginInterface}
  *
- * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.10.0
+ * Database lookup related plugin interface to be able to manipulate {@link Context} instances before or after they are looked up
+ * from the database.
+ *
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @since v7.10.3
  */
-public class FileItemException extends OXException {
+public interface ContextDbLookupPluginInterface {
 
     /**
-     * serialVersionUID
+     * Ability to manipulate the given {@link Context} as provided via provisioning API before it is being looked
+     * up from the database.
+     *
+     * @param credentials The admin credentials
+     * @param ctx The contexts
+     * @throws PluginException When manipulating data fails
      */
-    private static final long serialVersionUID = 331089657199858445L;
+    public void beforeContextDbLookup(final Credentials credentials, final Context[] ctx) throws PluginException;
 
     /**
-     * Initializes a new {@link FileItemException}.
+     * Ability to manipulate the given {@link Context} loaded from the database before handing out via API
+     *
+     * @param credentials The admin credentials
+     * @param ctx The contexts
+     * @throws PluginException When manipulating data fails
      */
-    public FileItemException() {
-        super();
-    }
+    public void afterContextDbLookup(final Credentials credentials, final Context[] ctx) throws PluginException;
 
     /**
-     * Initializes a new {@link FileItemException}.
-     * @param displayMessage
-     * @param e
+     * Ability to manipulate the searchPattern before it is used to search Contexts within the database.
+     *
+     * @param credentials The admin credentials
+     * @param searchPattern The search pattern
+     * @return manipulated The manipulated search pattern
+     * @throws PluginException When manipulating data fails
      */
-    public FileItemException(final String displayMessage) {
-        super();
-        setDisplayMessage(displayMessage);
-    }
-
-    /**
-     * Initializes a new {@link FileItemException}.
-     * @param cause
-     */
-    public FileItemException(final Throwable e) {
-        super(e);
-
-    }
-
-    /**
-     * Initializes a new {@link FileItemException}.
-     * @param displayMessage
-     * @param e
-     */
-    public FileItemException(final String displayMessage, final Throwable e) {
-        super(e);
-        setDisplayMessage(displayMessage);
-    }
+    public String searchPatternDbLookup(final Credentials credentials, final String searchPattern) throws PluginException;
 }

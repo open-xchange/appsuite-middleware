@@ -58,6 +58,7 @@ import com.openexchange.admin.plugin.hosting.services.PluginInterfaces;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextGroupStorageInterface;
 import com.openexchange.admin.plugin.hosting.storage.mysqlStorage.OXContextGroupMySQLStorage;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.plugins.ContextDbLookupPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
@@ -146,7 +147,10 @@ public class PluginHostingActivator extends HousekeepingActivator {
             final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<>(context, OXResourcePluginInterface.class, defaultRanking);
             rememberTracker(rtracker);
 
-            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker);
+            final RankingAwareNearRegistryServiceTracker<ContextDbLookupPluginInterface> dbtracker = new RankingAwareNearRegistryServiceTracker<>(context, ContextDbLookupPluginInterface.class, defaultRanking);
+            rememberTracker(dbtracker);
+
+            final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker).dbLookupPlugins(dbtracker);
 
             PluginInterfaces.setInstance(builder.build());
         }

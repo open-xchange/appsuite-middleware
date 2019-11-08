@@ -67,6 +67,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -396,12 +397,12 @@ public final class LogProperties {
 
         private static final Map<String, Name> STRING2NAME;
         static {
-            final Name[] values = Name.values();
-            final Map<String, Name> m = new HashMap<String, Name>(values.length);
-            for (final Name name : values) {
+            Name[] values = Name.values();
+            ImmutableMap.Builder<String, Name> m = ImmutableMap.builderWithExpectedSize(values.length);
+            for (Name name : values) {
                 m.put(name.getName(), name);
             }
-            STRING2NAME = m;
+            STRING2NAME = m.build();
         }
 
         /**

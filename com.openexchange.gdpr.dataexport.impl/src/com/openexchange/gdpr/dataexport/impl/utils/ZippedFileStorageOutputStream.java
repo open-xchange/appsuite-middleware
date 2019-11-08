@@ -22,17 +22,16 @@ import com.openexchange.server.ServiceLookup;
 public abstract class ZippedFileStorageOutputStream extends OutputStream {
 
     /**
-     * Creates a new zipped output stream writing to given file storage.
+     * Creates a new default zipped output stream writing to given file storage.
+     * <p>
+     * The default zipped output stream does <b>not</b> use a piped approach, but appends data successively to an existent file storage location.
      *
-     * @param piped Whether to use a piped mechanism to transport bytes into file storage
      * @param fileStorage The file storage to write to
      * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
-     * @param services The service look-up
      * @return The zipped output stream
-     * @throws IOException If initialization fails
      */
-    public static ZippedFileStorageOutputStream createDefaultZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel) throws IOException {
-        return createZippedFileStorageOutputStream(false, fileStorage, compressionLevel, AppendingFileStorageOutputStream.DEFAULT_IN_MEMORY_THRESHOLD, null);
+    public static ZippedFileStorageOutputStream createDefaultZippedFileStorageOutputStream(FileStorage fileStorage, int compressionLevel) {
+        return new AppendingZippedFileStorageOutputStream(fileStorage, compressionLevel, AppendingFileStorageOutputStream.DEFAULT_IN_MEMORY_THRESHOLD);
     }
 
     /**
@@ -41,9 +40,10 @@ public abstract class ZippedFileStorageOutputStream extends OutputStream {
      * @param piped Whether to use a piped mechanism to transport bytes into file storage
      * @param fileStorage The file storage to write to
      * @param compressionLevel The compression level to use (default is {@link java.util.zip.Deflater#DEFAULT_COMPRESSION DEFAULT_COMPRESSION})
-     * @param bufferSize The size for the in-memory buffer; if that buffer size is exceeded data will be flushed into file storage
-     *                   (default is {@link AppendingFileStorageOutputStream#DEFAULT_IN_MEMORY_THRESHOLD})
-     * @param services The service look-up
+     * @param bufferSize The size for the in-memory buffer; only needed when parameter <code>piped</code> is set to <code>false</code>.
+     *                   If that buffer size is exceeded data will be flushed into file storage (default is
+     *                   {@link AppendingFileStorageOutputStream#DEFAULT_IN_MEMORY_THRESHOLD})
+     * @param services The service look-up; only needed when parameter <code>piped</code> is set to <code>true</code>
      * @return The zipped output stream
      * @throws IOException If initialization fails
      */

@@ -281,7 +281,7 @@ public class ChunkedZippedOutputStream {
         storageService.addResultFile(fileStorageLocation, ++currentChunkNumber, currentSize, task.getId(), task.getContextId());
     }
 
-    private void constructNewStream() throws IOException {
+    private void constructNewStream() {
         zipOutputStream = ZippedFileStorageOutputStream.createDefaultZippedFileStorageOutputStream(fileStorage, Deflater.DEFAULT_COMPRESSION);
         currentSize = 0;
     }
