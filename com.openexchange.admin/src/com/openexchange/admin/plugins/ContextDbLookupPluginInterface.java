@@ -56,7 +56,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
  * {@link ContextDbLookupPluginInterface}
  *
  * Database lookup related plugin interface to be able to manipulate {@link Context} instances before or after they are looked up
- * from the database.
+ * from the database.<br>
+ *<br>
+ * <b>Note:</b> Only one registered implementation of this plugin can ensure deterministic behavior!
  *
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @since v7.10.3
