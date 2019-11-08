@@ -91,7 +91,7 @@ public enum CompositionSpaceErrorCode implements DisplayableOXExceptionCode {
     /**
      * Found no such composition space for identifier: %1$s
      */
-    NO_SUCH_COMPOSITION_SPACE("Found no such composition space for identifier: %1$s", null, CATEGORY_ERROR, 7),
+    NO_SUCH_COMPOSITION_SPACE("Found no such composition space for identifier: %1$s", null, CATEGORY_USER_INPUT, 7),
     /**
      * The operation cannot be performed because composed message is not a reply.
      */
