@@ -11,7 +11,7 @@ The Appsuite middleware server utilizes the java security manager, along with th
 The security manager must be started using JAVA parameters specified in ox-scriptconf.sh
 
 ```
--Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/policies.policy
+-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy
 ```
 
 The parameters are as follows
