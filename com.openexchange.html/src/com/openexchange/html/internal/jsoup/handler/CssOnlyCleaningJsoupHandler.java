@@ -437,16 +437,18 @@ public final class CssOnlyCleaningJsoupHandler implements JsoupHandler {
             } else {
                 if (dropExternalImages) {
                     String val = attribute.getValue();
-                    if ("background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
-                        attribute.setValue("");
-                        imageURLFound = true;
-                    } else if ("src".equals(attr) && ("img".equals(tagName) || "input".equals(tagName))) {
-                        if (isInlineImage(val, true)) {
-                            // Allow inline images
-                        } else {
+                    if (Strings.isNotEmpty(val)) {
+                        if ("background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                             attribute.setValue("");
-                            startTag.attr("data-original-src", val);
                             imageURLFound = true;
+                        } else if ("src".equals(attr) && ("img".equals(tagName) || "input".equals(tagName))) {
+                            if (isInlineImage(val, true)) {
+                                // Allow inline images
+                            } else {
+                                attribute.setValue("");
+                                startTag.attr("data-original-src", val);
+                                imageURLFound = true;
+                            }
                         }
                     }
                 }

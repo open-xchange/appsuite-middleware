@@ -137,7 +137,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
-            callBeforeDbLookupPluginMethods(new Context[] {ret}, auth);
+            callBeforeDbLookupPluginMethods(new Context[] { ret }, auth);
             if (isAnyPluginLoaded()) {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
@@ -172,6 +172,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
 
             final Context retval = createmaincall(ret, admin_user, db, access, auth, schemaSelectStrategy);
+            callAfterDbLookupPluginMethods(new Context[] { retval }, auth);
             if (retval.getName() == null) {
                 retval.setName(String.valueOf(retval.getId()));
             }
@@ -206,19 +207,55 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
      */
     protected void callBeforeDbLookupPluginMethods(final Context[] ctxs, final Credentials credentials) throws StorageException {
         final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-        if (null != pluginInterfaces) {
-            for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
-                final String bundlename = dbLookupPlugin.getClass().getName();
-                try {
-                    LOGGER.debug("Calling beforeDBLookup for plugin: {}", bundlename);
-                    dbLookupPlugin.beforeContextDbLookup(credentials, ctxs);
-                } catch (PluginException e) {
-                    LOGGER.error("Error while calling beforeDBLookup of plugin {}", bundlename, e);
-                    throw StorageException.wrapForRMI(e);
-                }
+        if (null == pluginInterfaces) {
+            return;
+        }
+        for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+            try {
+                LOGGER.debug("Calling beforeDBLookup for plugin: {}", dbLookupPlugin.getClass().getName());
+                dbLookupPlugin.beforeContextDbLookup(credentials, ctxs);
+            } catch (PluginException e) {
+                LOGGER.error("Error while calling beforeDBLookup of plugin {}", dbLookupPlugin.getClass().getName(), e);
+                throw StorageException.wrapForRMI(e);
             }
         }
     }
 
+    protected void callAfterDbLookupPluginMethods(final Context[] ctxs, final Credentials auth) throws StorageException {
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        if (null == pluginInterfaces) {
+            return;
+        }
+        for (final ContextDbLookupPluginInterface dbLookupPlugin : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+            try {
+                LOGGER.debug("Calling afterContextDBLookup for plugin: {}", dbLookupPlugin.getClass().getName());
+                dbLookupPlugin.afterContextDbLookup(auth, ctxs);
+            } catch (PluginException e) {
+                LOGGER.error("Error while calling afterContextDBLookup of plugin {}", dbLookupPlugin.getClass().getName(), e);
+                throw StorageException.wrapForRMI(e);
+            }
+        }
+    }
+
+    protected String callSearchDbLookupPluginMethods(String search_pattern, Credentials auth) throws StorageException {
+        final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+        if (null == pluginInterfaces) {
+            return search_pattern;
+        }
+
+        for (ContextDbLookupPluginInterface dblu : pluginInterfaces.getDBLookupPlugins().getServiceList()) {
+            LOGGER.debug("Calling searchTermDBLookup for plugin: {}", dblu.getClass().getName());
+            try {
+                String new_search_pattern = dblu.searchPatternDbLookup(auth, search_pattern);
+                if (null != new_search_pattern) {
+                    search_pattern = new_search_pattern;
+                }
+            } catch (PluginException e) {
+                LOGGER.error("Error while calling method searchTermDBLookup of plugin {}", dblu.getClass().getName(), e);
+                throw StorageException.wrapForRMI(e);
+            }
+        }
+        return search_pattern;
+    }
 
 }

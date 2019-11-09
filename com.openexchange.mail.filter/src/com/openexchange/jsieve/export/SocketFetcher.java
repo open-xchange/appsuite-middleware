@@ -101,7 +101,7 @@ public final class SocketFetcher {
     /**
      * Start TLS on an existing socket. Supports the "STARTTLS" command in many protocols.
      */
-    public static Socket startTLS(final Socket socket, final String host) throws IOException {
+    public static Socket startTLS(Socket socket, String host, String[] protocols) throws IOException {
         final int port = socket.getPort();
         try {
             // Get SSL socket factory
@@ -113,7 +113,7 @@ public final class SocketFetcher {
             // Create new socket layered over an existing socket connected to the named host, at the given port.
             SSLSocketFactory ssf =  factoryProvider.getDefault();
             Socket newSocket = ssf.createSocket(socket, host, port, true);
-            configureSSLSocket(newSocket);
+            configureSSLSocket(newSocket, protocols);
             return newSocket;
         } catch (Exception ex) {
             if (ex instanceof InvocationTargetException) {
@@ -179,10 +179,10 @@ public final class SocketFetcher {
     /**
      * Configure the SSL options for the socket (if it's an SSL socket).
      */
-    private static void configureSSLSocket(final Socket socket) {
+    private static void configureSSLSocket(Socket socket, String[] protocols) {
         if (socket instanceof SSLSocket) {
             final SSLSocket sslsocket = (SSLSocket) socket;
-            sslsocket.setEnabledProtocols(new String[] { "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2" });
+            sslsocket.setEnabledProtocols(protocols == null || protocols.length <= 0 ? new String[] { "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2" } : protocols);
         }
     }
 

@@ -118,6 +118,11 @@ public enum MailFilterProperty implements Property {
     tls(Boolean.TRUE),
 
     /**
+     * What protocols to use if TLS is enabled
+     */
+    protocols("SSLv3, TLSv1, TLSv1.1, TLSv1.2", true, "com.openexchange.mail.filter.tls."),
+
+    /**
      * Specify here if vacation messages should only be sent to specific domains
      * If multiple domains are given, they should be separated by ","
      * e.g. VACATION_DOMAINS=testdomain.com,example.com

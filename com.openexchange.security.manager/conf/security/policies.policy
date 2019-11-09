@@ -13,6 +13,10 @@
 
 ALLOW {
     ( java.io.FilePermission "${openexchange.propdir}${/}-" "READ" )
+} "Allow access to configuration directory"
+
+ALLOW {
+    ( java.io.FilePermission "${openexchange.propdir}${/}" "READ" )
 } "Allow access to configuration"
 
 ALLOW {
