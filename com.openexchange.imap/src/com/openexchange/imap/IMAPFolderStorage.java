@@ -2085,6 +2085,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  * Proceed update
                  */
                 if (imapConfig.isSupportsACLs() && toUpdate.containsPermissions()) {
+                	MailFolder mailFolder = getFolder(fullName);
+                	if(mailFolder.getOwnPermission().isFolderAdmin() == false) {
+                		throw MailExceptionCode.INSUFFICIENT_PERMISSIONS.create();
+                	}
                     final ACL[] oldACLs = getACLSafe(updateMe);
                     if (oldACLs != null) {
                         final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
