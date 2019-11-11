@@ -140,10 +140,12 @@ public class Bug65533Test extends AbstractITipTest {
         iMip = iMip.replaceAll(Pattern.quote("{{UID}}"), uid);
         iMip = iMip.replaceAll(Pattern.quote("{{SUMMARY}}"), summary);
         sendIMip(apiClientC2, iMip);
+
         /*
          * receive & analyze iMIP request as user a
          */
         MailData iMipRequestData = receiveIMip(apiClient, organizerMail, summary, 0, SchedulingMethod.REQUEST);
+        rememberMail(apiClientC2, iMipRequestData);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClient, iMipRequestData)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(uid, newEvent.getUid());
@@ -179,6 +181,7 @@ public class Bug65533Test extends AbstractITipTest {
          */
         MailData iMipReplyData = receiveIMip(apiClientC2, recipientMail, summary, 0, SchedulingMethod.REPLY);
         assertNotNull(iMipReplyData);
+        rememberMail(iMipReplyData);
         ImportedCalendar iTipReply = parseICalAttachment(apiClientC2, iMipReplyData);
         assertEquals("REPLY", iTipReply.getMethod());
         assertTrue(null != iTipReply.getEvents() && 1 == iTipReply.getEvents().size());

@@ -58,6 +58,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.io.File;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.junit.Test;
@@ -85,7 +86,7 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
     @Test
     public void testBug59220() throws Exception {
 
-        String summary = "Test for bug 59220";
+        String summary = "Test for bug 59220 " + UUID.randomUUID().toString();
         EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
         Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
         createdEvent = createEvent(eventToCreate);
@@ -94,6 +95,7 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
+        rememberMail(iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -104,11 +106,13 @@ public class ReplyBugsTest extends AbstractITipAnalyzeTest {
          */
         EventData eventData = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
         assertAttendeePartStat(eventData.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
+        rememberForCleanup(apiClientC2, eventData);
         
         /*
          * Receive mail as organizer and download
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
+        rememberMail(reply);
         MailSourceResponse source = new MailApi(apiClient).getMailSource(apiClient.getSession(), reply.getFolderId(), reply.getId(), reply.getId(), null, null);
         assertNull(source.getError());
         String mail = source.getData();

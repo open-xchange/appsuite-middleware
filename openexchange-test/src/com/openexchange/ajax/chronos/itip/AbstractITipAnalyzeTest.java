@@ -88,16 +88,9 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
 
     @Override
     public void tearDown() throws Exception {
-        try {
-            if (null != createdEvent) {
-                deleteEvent(createdEvent);
-            }
-            if (null != mailData) {
-                removeMail(apiClient, mailData);
-            }
-        } finally {
-            super.tearDown();
-        }
+        rememberForCleanup(createdEvent);
+        rememberMail(apiClient, mailData);
+        super.tearDown();
     }
 
     protected Attendee prepareCommonAttendees(EventData event) {

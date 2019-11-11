@@ -63,6 +63,7 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -96,12 +97,16 @@ public class ITipRequestTests extends AbstractITipTest {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
             // Attendees will be overwritten by setup, so '0' is fine
-            { "SingleTwoHourEvent", EventFactory.createSingleTwoHourEvent(0, "SingleTwoHourEvent") },
-            { "SeriesEventFiveOccurences", EventFactory.createSeriesEvent(0, "SeriesEventFiveOccurences", 5, null) },
-            { "MonthlySeriesEvent", EventFactory.createSeriesEvent(0, "MonthlySeriesEvent", 5, null, EventFactory.RecurringFrequency.MONTHLY) }
+            { "SingleTwoHourEvent", EventFactory.createSingleTwoHourEvent(0, null) },
+            { "SeriesEventFiveOccurences", EventFactory.createSeriesEvent(0, null, 5, null) },
+            { "MonthlySeriesEvent", EventFactory.createSeriesEvent(0, null, 5, null, EventFactory.RecurringFrequency.MONTHLY) }
         });
     }
     //@formatter:on
+
+    private final String summary;
+
+    private final EventData event;
 
     /**
      * Initializes a new {@link ITipRequestTests}.
@@ -116,11 +121,7 @@ public class ITipRequestTests extends AbstractITipTest {
         this.event = event;
     }
 
-    private String summary;
-
     private MailData mailData;
-
-    private EventData event;
 
     /** Organizer from context 2, user B */
     private Attendee organizer;
@@ -130,6 +131,8 @@ public class ITipRequestTests extends AbstractITipTest {
 
     /** The event managed by the organizer */
     private EventData organizerInstance;
+
+    private String uniqueSummary;
 
     @Override
     public void setUp() throws Exception {
@@ -156,23 +159,14 @@ public class ITipRequestTests extends AbstractITipTest {
         event.setOrganizer(c);
         event.setCalendarUser(c);
 
+        uniqueSummary = summary + UUID.randomUUID().toString();
+        event.setSummary(uniqueSummary);
+
         organizerInstance = createEvent(apiClientC2, event, folderIdC2);
+        rememberForCleanup(apiClientC2, organizerInstance);
 
-        mailData = receiveIMip(apiClient, organizer.getEmail(), summary, 0, SchedulingMethod.REQUEST);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != mailData) {
-                removeMail(mailData);
-            }
-            if (null != organizerInstance) {
-                deleteEvent(apiClientC2, organizerInstance);
-            }
-        } finally {
-            super.tearDown();
-        }
+        mailData = receiveIMip(apiClient, organizer.getEmail(), uniqueSummary, 0, SchedulingMethod.REQUEST);
+        rememberMail(mailData);
     }
 
     @Test
@@ -208,17 +202,15 @@ public class ITipRequestTests extends AbstractITipTest {
         /*
          * Validate event from organizer perspective
          */
-        MailData replyMail = receiveIMip(apiClientC2, attendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
+        MailData replyMail = receiveIMip(apiClientC2, attendee.getEmail(), uniqueSummary, 0, SchedulingMethod.REPLY);
         assertNotNull(replyMail);
+        rememberMail(apiClientC2, replyMail);
 
         ImportedCalendar iTipReply = parseICalAttachment(apiClientC2, replyMail);
         assertEquals(SchedulingMethod.REPLY.name(), iTipReply.getMethod());
         assertThat("Only one object should have been handled", Integer.valueOf(iTipReply.getEvents().size()), is(Integer.valueOf(1)));
         Event replyEvent = iTipReply.getEvents().get(0);
         assertAttendeePartStat(replyEvent.getAttendees(), attendee.getEmail(), partStat);
-
-        // Clean up .. 
-        removeMail(apiClientC2, replyMail);
     }
 
 }

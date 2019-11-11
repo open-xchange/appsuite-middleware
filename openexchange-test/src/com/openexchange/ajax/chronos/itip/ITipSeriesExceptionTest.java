@@ -82,7 +82,6 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
 
     private String summary;
     private Attendee replyingAttendee;
-    private EventData attendeeEvent;
 
     @Override
     public void setUp() throws Exception {
@@ -108,17 +107,6 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
 
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            deleteEvent(apiClientC2, attendeeEvent);
-        } catch (Exception e) {
-            //Ignore
-        }
-
-        super.tearDown();
-    }
-
     @Test
     public void testAddToSingleOccurrence() throws Exception {
         /*
@@ -141,6 +129,7 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
         assertNotNull(result.getData().getCreated());
         assertTrue(result.getData().getCreated().size() == 1);
         EventData changeException = result.getData().getCreated().get(0);
+        rememberForCleanup(changeException);
         assertFalse(createdEvent.getId().equals(changeException.getId()));
         assertTrue(createdEvent.getId().equals(changeException.getSeriesId()));
         assertTrue(changeException.getAttendees().size() == 2);
@@ -149,36 +138,40 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
+        rememberMail(iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         assertNull("error during analysis: " + analyzeResponse.getError(), analyzeResponse.getCode());
         assertEquals("unexpected analysis number in response", 1, analyzeResponse.getData().size());
         analyze(analyzeResponse, CustomConsumers.IGNORE);
 
         //        XXX Use code below once the server can accept to single event occurrences
-        //        AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
-        //        assertNotNull(newEvent);
-        //        assertEquals(createdEvent.getUid(), newEvent.getUid());
-        //        assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION.status);
-        //
-        //        /*
-        //         * reply with "accepted"
-        //         */
-        //        attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
-        //        assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
-        //
-        //        /*
-        //         * Receive mail as organizer and check actions
-        //         */
-        //        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
-        //        analyze(reply.getId());
-        //
-        //        /*
-        //         * Take over accept and check in calendar
-        //         */
-        //        EventData event = assertSingleEvent(update(constructBody(reply)));
-        //        for (Attendee attendee : event.getAttendees()) {
-        //            assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
-        //        }
+//        AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
+//        assertNotNull(newEvent);
+//        assertEquals(createdEvent.getUid(), newEvent.getUid());
+//        assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION);
+//
+//        /*
+//         * reply with "accepted"
+//         */
+//        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
+//        assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
+//        rememberForCleanup(apiClientC2, attendeeEvent);
+//
+//        /*
+//         * Receive mail as organizer and check actions
+//         */
+//        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
+//        rememberMail(reply);
+//        analyze(reply.getId());
+//
+//        /*
+//         * Take over accept and check in calendar
+//         */
+//        EventData event = assertSingleEvent(update(constructBody(reply)));
+//        rememberForCleanup(event);
+//        for (Attendee attendee : event.getAttendees()) {
+//            assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
+//        }
     }
 
     private List<EventData> getAllEventsOfCreatedEvent() throws ApiException {

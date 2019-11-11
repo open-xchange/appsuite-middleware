@@ -87,6 +87,10 @@ import com.openexchange.testing.httpclient.models.UpdateEventBody;
 
 /**
  * {@link ITipSeriesTest}
+ * 
+ * User A from context 1 will create a series with 10 occurrences with user B from context 2 as attendee.
+ * User B will accept the event in the setup and the change will be accepted by the organizer.
+ * 
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
@@ -94,10 +98,10 @@ import com.openexchange.testing.httpclient.models.UpdateEventBody;
 public class ITipSeriesTest extends AbstractITipAnalyzeTest {
 
     private String summary;
+    
+    /** User B from context 2*/
     private Attendee replyingAttendee;
-    private EventData attendeeEvent;
-    private MailData inviteMail;
-
+    
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -110,7 +114,8 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Receive mail as attendee
          */
-        inviteMail = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
+        MailData inviteMail = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
+        rememberMail(inviteMail);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, inviteMail)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -119,8 +124,9 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * reply with "accepted"
          */
-        attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(inviteMail)), createdEvent.getUid());
+        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(inviteMail)), createdEvent.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
+        rememberForCleanup(apiClientC2, attendeeEvent);
 
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
@@ -135,21 +141,6 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         for (Attendee attendee : createdEvent.getAttendees()) {
             assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
         }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != attendeeEvent) {
-                deleteEvent(apiClientC2, attendeeEvent);
-            }
-            if (null != inviteMail) {
-                removeMail(apiClientC2, inviteMail);
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
-        super.tearDown();
     }
 
     @Test
@@ -184,6 +175,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
          * Receive deletion as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
+        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         analyze(analyzeResponse, CustomConsumers.CANCEL);
     }
