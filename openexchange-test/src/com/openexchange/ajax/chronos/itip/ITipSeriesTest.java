@@ -96,6 +96,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
     private String summary;
     private Attendee replyingAttendee;
     private EventData attendeeEvent;
+    private MailData inviteMail;
 
     @Override
     public void setUp() throws Exception {
@@ -109,8 +110,8 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Receive mail as attendee
          */
-        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
-        AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
+        inviteMail = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
+        AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, inviteMail)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
         assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION.status);
@@ -118,12 +119,9 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * reply with "accepted"
          */
-        attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
+        attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(inviteMail)), createdEvent.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
 
-        /*
-         * Receive mail as organizer and check actions
-         */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
 
@@ -137,6 +135,21 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         for (Attendee attendee : createdEvent.getAttendees()) {
             assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
         }
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            if (null != attendeeEvent) {
+                deleteEvent(apiClientC2, attendeeEvent);
+            }
+            if (null != inviteMail) {
+                removeMail(apiClientC2, inviteMail);
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        super.tearDown();
     }
 
     @Test
@@ -170,7 +183,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Receive deletion as attendee
          */
-        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 0, SchedulingMethod.CANCEL);
+        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         analyze(analyzeResponse, CustomConsumers.CANCEL);
     }
