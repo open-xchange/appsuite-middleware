@@ -101,6 +101,7 @@ import com.openexchange.folderstorage.internal.performers.ClearPerformer;
 import com.openexchange.folderstorage.internal.performers.CreatePerformer;
 import com.openexchange.folderstorage.internal.performers.DeletePerformer;
 import com.openexchange.folderstorage.internal.performers.InstanceStorageParametersProvider;
+import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
 import com.openexchange.folderstorage.internal.performers.SessionStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.StorageParametersProvider;
@@ -634,6 +635,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
      * @throws OXException If put into cache fails
      */
     public void putFolder(Folder folder, String treeId, StorageParameters storageParameters, boolean invalidate) throws OXException {
+    	if(folder.getSubfolderIDs() == null || folder.getSubfolderIDs().length == 0) {
+    		bug55625Logging(treeId, folder.getParentID());
+    	}
+    	
         /*
          * Put to cache
          */
@@ -1596,6 +1601,13 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
     }
 
+	private void bug55625Logging(String treeId, String parentId) {
+		if (ListPerformer.LOG2.isDebugEnabled()) {
+			if (treeId.equals("0") && parentId.equals("default0")) {
+				ListPerformer.LOG2.debug("Caching: Subfolder ids are empty", new Exception("Caching: Subfolder ids are empty"));
+			}
+		}
+	}
 
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
@@ -1606,12 +1618,16 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             for (int i = 0; i < ret.length; i++) {
                 ret[i] = new CacheSortableId(subfolders[i], i, null);
             }
+            if(ret.length == 0) {
+            	bug55625Logging(treeId, parentId);
+            }
             return ret;
         }
 
         // Get needed storages
         FolderStorage[] neededStorages = getFolderStoragesForParent(treeId, parentId, storageParameters);
         if (0 == neededStorages.length) {
+        	bug55625Logging(treeId, parentId);
             return new SortableId[0];
         }
 
@@ -1690,6 +1706,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
 
             // Sort them
             Collections.sort(allSubfolderIds);
+            if(allSubfolderIds.isEmpty()) {
+            	bug55625Logging(treeId, parentId);
+            }
             return allSubfolderIds.toArray(new SortableId[allSubfolderIds.size()]);
         } catch (RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());

@@ -276,7 +276,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         }
     }
 
-    private static Logger LOG2 = LoggerFactory.getLogger(ListPerformer.class.getCanonicalName() + "2");
+    public static Logger LOG2 = LoggerFactory.getLogger(ListPerformer.class.getCanonicalName() + "2");
 
     private UserizedFolder[] logAndReturn(final String treeId, final String parentId, UserizedFolder[] result) {
         if (LOG2.isDebugEnabled()) {
