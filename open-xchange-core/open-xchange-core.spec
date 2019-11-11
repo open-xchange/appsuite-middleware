@@ -738,6 +738,15 @@ EOF
       ox_scr_done ${SCR}
     }
 
+    SCR=SCR-502
+    ox_scr_todo ${SCR} && {
+      scriptconf=/opt/open-xchange/etc/ox-scriptconf.sh
+      contains JAVA_OPTS_SECURITY= ${scriptconf}  || {
+        sed -i -e '/^JAVA_OPTS_SERVER=.*$/a #JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles"' ${scriptconf}
+      }
+      ox_scr_done ${SCR}
+    }
+
     # obsoletes SoftwareChange_Request-2665
     SCR=SCR-548
     ox_scr_todo ${SCR} && {
@@ -776,6 +785,7 @@ com.openexchange.hazelcast.network.join=empty
 EOF
   fi
   ox_add_property com.openexchange.hazelcast.network.join.dns.domainNames "" /opt/open-xchange/etc/hazelcast.properties
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
