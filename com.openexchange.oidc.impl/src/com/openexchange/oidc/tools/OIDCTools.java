@@ -484,9 +484,9 @@ public class OIDCTools {
      * @param params
      */
     public static Optional<OAuthTokens> convertTokenMap(Map<String, String> params) {
-        String accessToken = params.get(Session.PARAM_OAUTH_ACCESS_TOKEN);
-        String expiryString = params.get(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
-        String refreshToken = params.get(Session.PARAM_OAUTH_REFRESH_TOKEN);
+        String accessToken = params.get(OIDCTools.ACCESS_TOKEN);
+        String expiryString = params.get(OIDCTools.ACCESS_TOKEN_EXPIRY);
+        String refreshToken = params.get(OIDCTools.REFRESH_TOKEN);
 
         Date expiryDate = null;
         if (expiryString != null) {
