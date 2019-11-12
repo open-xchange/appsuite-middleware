@@ -83,7 +83,7 @@ public class FolderPermission {
     }
 
     /**
-     * What should be allowed in this folder.  Read/Write/ or both
+     * What should be allowed in this folder. Read/Write/ or both
      * {@link Allow}
      *
      * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
@@ -101,6 +101,11 @@ public class FolderPermission {
         }
 
         public String getValue() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
             return this.value;
         }
     }
@@ -125,6 +130,7 @@ public class FolderPermission {
 
     /**
      * Initializes a new {@link FolderPermission}.
+     * 
      * @param name
      * @param directory
      * @param decision
@@ -156,6 +162,7 @@ public class FolderPermission {
 
     /**
      * Return a new permission info populated with the folder information
+     * 
      * @return
      */
     public PermissionInfo getPermissionInfo() {
@@ -164,6 +171,7 @@ public class FolderPermission {
 
     /**
      * Return a new permission info populated with the folder information
+     * 
      * @return
      */
     public PermissionInfo getRecursivePermissionInfo() {
@@ -175,12 +183,12 @@ public class FolderPermission {
      *
      * @return
      */
-    public String getDecision () {
+    public String getDecision() {
         return this.decision.getValue();
     }
 
     /**
-     * Get the name of this action.  Must be unique
+     * Get the name of this action. Must be unique
      *
      * @return
      */

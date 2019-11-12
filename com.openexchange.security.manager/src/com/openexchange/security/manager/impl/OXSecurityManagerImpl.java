@@ -91,7 +91,7 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
      * @param serviceLookup
      * @throws OXException
      */
-    public OXSecurityManagerImpl (ServiceLookup serviceLookup) throws OXException {
+    public OXSecurityManagerImpl(ServiceLookup serviceLookup) throws OXException {
         this.condPermAdminService = serviceLookup.getServiceSafe(ConditionalPermissionAdmin.class);
         this.serviceLookup = serviceLookup;
     }
@@ -102,62 +102,86 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
      * @return A new ConditionalPermissionUpdate
      * @throws OXException
      */
-    private ConditionalPermissionUpdate getPermissionUpdate () {
+    private ConditionalPermissionUpdate getPermissionUpdate() {
         return condPermAdminService.newConditionalPermissionUpdate();
     }
 
     /**
-     * Replace variables in the policy file with java system parameters
+     * Replace variable in the policy file with java system parameters
+     * Allows single variable plus optional file separator variable
      *
-     * @param encoded the String from the configuration file with parameters
-     * @return String with variables populated with the system values
+     * @param encoded the OSGI encoded String from the configuration file with parameters
+     * @return List of ConditionalPermissionInfo from the encoded string
      */
-    private static String replaceVariables (String encoded) {
+    private List<ConditionalPermissionInfo> createPermissions(String encoded) {
         if (encoded == null) {
             return null;
         }
+        ArrayList<ConditionalPermissionInfo> newPermissions = new ArrayList<ConditionalPermissionInfo>();
+
+        // Replace file separator parameter
         encoded = encoded.replaceAll("\\$\\{/\\}", File.separator);
+
+        // Check if has variable that need populating with values
         Matcher matcher = VAR_PATTERN.matcher(encoded);
-        while (matcher.find()) {
-            String param = matcher.group().trim();
-            String variable = System.getProperty(param.substring(2, param.length() -1));
-            if (variable == null || variable.isEmpty()) {
-                LOG.debug("Wiping rule {} due to missing parameter", encoded);
-                return null;   /// Wiping the rule if we can't find all parameters
-            }
-            encoded = encoded.replace(param, variable);
+        boolean hasVariable = matcher.find();
+
+        if (!hasVariable) {  // If no variables, just return the permission from encoded info
+            newPermissions.add(condPermAdminService.newConditionalPermissionInfo(encoded));
+            return newPermissions;
         }
-        return encoded;
+
+        // Pull the parameter and populate values
+        String param = matcher.group().trim();
+        String variable = System.getProperty(param.substring(2, param.length() - 1));
+        if (variable == null || variable.isEmpty()) {  // This variable is empty.  Skip
+            LOG.debug("Wiping rule {} due to missing parameter", encoded);
+            return null;
+        }
+        if (("/").equals(variable) || ("\\").equals(variable)) {  // Bad variable, would add root
+            LOG.debug("Ignoring security rule as it would be adding root: {}", encoded);
+            return null;
+        }
+        // Some java parameters have separate paths separated with :
+        String[] paths = variable.split(":");
+        for (int i = 0; i < paths.length; i++) {
+            final String path = paths[i];
+            String newEncoded = encoded.replace(param, path);
+            if (i > 0) {  // If adding more than one path, need to make each name unique
+                int endQuote = newEncoded.lastIndexOf("\"");
+                if (endQuote > 0) {
+                    newEncoded = newEncoded.substring(0, endQuote) + " rule-" + Integer.toString(i + 1) + "\"";
+                }
+            }
+            ConditionalPermissionInfo conditionalPermissionInfo = condPermAdminService.newConditionalPermissionInfo(newEncoded);
+            newPermissions.add(conditionalPermissionInfo);
+        }
+        return newPermissions;
     }
 
     /**
      * Get a ConditionalPermissionInfo from a FolderPermission
      *
-     * @param folderPermission  The foldePermission
-     * @param recursive  If should be recursive
-     * @return  ConditionalPermissionInfo based on the FolderPermission
+     * @param folderPermission The foldePermission
+     * @param recursive If should be recursive
+     * @return ConditionalPermissionInfo based on the FolderPermission
      */
-    private ConditionalPermissionInfo getInfoFromFolderPerm (FolderPermission folderPermission, boolean recursive) {
-        return condPermAdminService.newConditionalPermissionInfo(
-            recursive ? folderPermission.getRecursiveName() : folderPermission.getName(),
-            new ConditionInfo[0],
-            new PermissionInfo[] {
-                recursive ? folderPermission.getRecursivePermissionInfo() : folderPermission.getPermissionInfo()},
-            folderPermission.getDecision());
+    private ConditionalPermissionInfo getInfoFromFolderPerm(FolderPermission folderPermission, boolean recursive) {
+        return condPermAdminService.newConditionalPermissionInfo(recursive ? folderPermission.getRecursiveName() : folderPermission.getName(), new ConditionInfo[0], new PermissionInfo[] { recursive ? folderPermission.getRecursivePermissionInfo() : folderPermission.getPermissionInfo() }, folderPermission.getDecision());
     }
 
     /**
-     * Get a list of ConditionalPermissionInfo for a Folderpermission.  Will include recursive if applicable
+     * Get a list of ConditionalPermissionInfo for a Folderpermission. Will include recursive if applicable
      *
      * @param folderPermission
      * @return List of COnfitionalPermissionInfo based on the FolderPermission
      */
-    private List<ConditionalPermissionInfo> getInfoListFromFolderPerm (FolderPermission folderPermission) {
+    private List<ConditionalPermissionInfo> getInfoListFromFolderPerm(FolderPermission folderPermission) {
         ArrayList<ConditionalPermissionInfo> newList = new ArrayList<ConditionalPermissionInfo>(2);
         if (folderPermission.getType() == FolderPermission.Type.RECURSIVE) {
             newList.add(getInfoFromFolderPerm(folderPermission, true));
         }
-        newList.add(getInfoFromFolderPerm(folderPermission,false));
+        newList.add(getInfoFromFolderPerm(folderPermission, false));
         return newList;
 
     }
@@ -166,7 +190,7 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
     public void insertFolderPolicy(List<FolderPermission> folderPermissions) throws OXException {
         ConditionalPermissionUpdate permissionUpdate = getPermissionUpdate();
         List<ConditionalPermissionInfo> list = permissionUpdate.getConditionalPermissionInfos();
-        for (FolderPermission folderPermission: folderPermissions) {
+        for (FolderPermission folderPermission : folderPermissions) {
             list.addAll(0, getInfoListFromFolderPerm(folderPermission));
         }
         final boolean commited = permissionUpdate.commit();
@@ -212,11 +236,9 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
                 List<String> encodedPolicies = policyParser.readPolicies();
                 for (String encodedPolicy : encodedPolicies) {
                     try {
-                        String policy = replaceVariables(encodedPolicy);
-                        if (policy != null) {
-                            ConditionalPermissionInfo conditionalPermissionInfo =
-                                condPermAdminService.newConditionalPermissionInfo(policy);
-                            list.add(conditionalPermissionInfo);
+                        List<ConditionalPermissionInfo> policies = createPermissions(encodedPolicy);
+                        if (policies != null && !policies.isEmpty()) {
+                            list.addAll(policies);
                         }
                     } catch (Exception e) {
                         LOG.error("Error while parsing the following policy: {}. The policy will be ignored.", encodedPolicy, e.getMessage());
@@ -226,6 +248,7 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
                 if (!commited) {
                     LOG.error("Cannot apply security policies because \"Conditional Permission Admin\" was modified concurrently");
                 }
+
             } catch (IOException ex) {
                 throw SecurityManagerExceptionCodes.PROBLEM_POLICY_FILE.create(ex.getCause(), ex);
             } catch (IllegalStateException e) {
@@ -271,8 +294,8 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
                 currentList.removeIf(p -> (toRem.getName().equals(p.getName())));
             }
             // Add new values
-            for (FolderPermission perm: updatedPermissions) {
-                changed=true;
+            for (FolderPermission perm : updatedPermissions) {
+                changed = true;
                 currentList.addAll(0, getInfoListFromFolderPerm(perm));
             }
 
@@ -305,6 +328,5 @@ public class OXSecurityManagerImpl implements OXSecurityManager {
         }
         return Reloadables.interestsForProperties(configReader.getReloadableConfigurationPaths());
     }
-
 
 }

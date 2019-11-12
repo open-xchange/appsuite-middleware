@@ -49,16 +49,16 @@
 
 package com.openexchange.security.manager.configurationReader;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.security.manager.OXSecurityManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadables;
+import com.openexchange.exception.OXException;
+import com.openexchange.security.manager.OXSecurityManager;
 import com.openexchange.security.manager.impl.FolderPermission;
 import com.openexchange.security.manager.impl.FolderPermission.Allow;
-import com.openexchange.config.Reloadables;
 
 /**
  * {@link ConfigurationReader}
@@ -83,11 +83,12 @@ public class ConfigurationReader {
      * @since v7.10.3
      */
     private static class SecurityAddition {
+
         private final String path;
         private final boolean file;
         private final Allow allow;
 
-        public SecurityAddition (String path, boolean file, Allow allow) {
+        public SecurityAddition(String path, boolean file, Allow allow) {
             this.path = path;
             this.file = file;
             this.allow = allow;
@@ -115,15 +116,15 @@ public class ConfigurationReader {
     /**
      * Parse the configuration line for permissions and type
      *
-     * @param add  The configuration to add
+     * @param add The configuration to add
      * @return
      */
-    private SecurityAddition getSecurityAddition (String add) {
+    private SecurityAddition getSecurityAddition(String add) {
         Allow allow = getAllow(add);
         boolean isFile = add.startsWith("file:");
         add = cleanup(add);
         if (isFile) {
-            return new SecurityAddition (add, true, allow);
+            return new SecurityAddition(add, true, allow);
         }
         return new SecurityAddition(add, false, allow);
     }
@@ -132,7 +133,7 @@ public class ConfigurationReader {
      * Validate that the path is a valid property name
      * Add to reloadable list for the security manager
      *
-     * @param config  Configuration
+     * @param config Configuration
      */
     private void addReloadConfigurationPath(String config) {
         try {
@@ -145,10 +146,11 @@ public class ConfigurationReader {
 
     /**
      * Gets Allow type from the end of a configuration
+     * 
      * @param config
      * @return
      */
-    private Allow getAllow (String config) {
+    private Allow getAllow(String config) {
         if (config == null) {
             return null;
         }
@@ -167,6 +169,7 @@ public class ConfigurationReader {
 
     /**
      * Removes file prefix and write permission suffixes
+     * 
      * @param config
      * @return
      */
@@ -180,6 +183,7 @@ public class ConfigurationReader {
     /**
      * Adds a system variable containg directories, separated with ":"
      * Example is sun.boot.class.path
+     * 
      * @param folderPermissions
      * @param config
      */
@@ -189,16 +193,16 @@ public class ConfigurationReader {
         }
         Allow allow = getAllow(var);
         var = cleanup(var);
-        String permissionString = System.getProperty(var.substring(2, var.length() -1));
+        String permissionString;
+        if (var.startsWith("${")) {  // java variable
+            permissionString = System.getProperty(var.substring(2, var.length() - 1));
+        } else { // system environment variable
+            permissionString = System.getenv(var.substring(1));
+        }
         if (permissionString != null) {
             String[] perms = permissionString.split(":");
-            for (String perm: perms) {
-                FolderPermission folder =
-                    new FolderPermission(perm,
-                        perm,
-                        FolderPermission.Decision.ALLOW,
-                        allow,
-                        FolderPermission.Type.DIRECTORY);
+            for (String perm : perms) {
+                FolderPermission folder = new FolderPermission(var + ": " + perm, perm, FolderPermission.Decision.ALLOW, allow, FolderPermission.Type.DIRECTORY);
                 folderPermissions.add(folder);
             }
         }
@@ -209,7 +213,7 @@ public class ConfigurationReader {
      * Loads the config from configuration service and adds
      *
      * @param folderPermissions
-     * @param config  Config to pull from the config file
+     * @param config Config to pull from the config file
      */
     private void addConfiguration(ArrayList<FolderPermission> folderPermissions, String config) {
         SecurityAddition toAdd = getSecurityAddition(config);  // Parse the configuration requirement for permissions
@@ -217,12 +221,7 @@ public class ConfigurationReader {
         addReloadConfigurationPath(toAdd.getPath());  // Keep track of configuration paths
         if (directory != null && !directory.isEmpty()) {
             // Create the folder permission
-            FolderPermission folder =
-                new FolderPermission(config,
-                    directory,
-                    FolderPermission.Decision.ALLOW,
-                    toAdd.getAllow(),
-                    toAdd.isFile() ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE);
+            FolderPermission folder = new FolderPermission(config, directory, FolderPermission.Decision.ALLOW, toAdd.getAllow(), toAdd.isFile() ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE);
             folderPermissions.add(folder);
         } else {
             LOG.debug("Security manager: Missing configuration for " + toAdd.getPath());
@@ -233,20 +232,14 @@ public class ConfigurationReader {
      * Add individual folder from the list file
      *
      * @param folderPermissions
-     * @param folder  The folder to add
+     * @param folder The folder to add
      */
     private void addFolder(ArrayList<FolderPermission> folderPermissions, String folder) {
         Allow allow = getAllow(folder);
         folder = cleanup(folder);
-        FolderPermission folderToAdd =
-            new FolderPermission(folder,
-                folder,
-                FolderPermission.Decision.ALLOW,
-                allow,
-                FolderPermission.Type.DIRECTORY);
+        FolderPermission folderToAdd = new FolderPermission(folder, folder, FolderPermission.Decision.ALLOW, allow, FolderPermission.Type.DIRECTORY);
         folderPermissions.add(folderToAdd);
     }
-
 
     /**
      * Reads the list of configuration values we need from the security files.
@@ -254,7 +247,7 @@ public class ConfigurationReader {
      *
      * @throws OXException
      */
-    public List<FolderPermission> readConfigFolders () throws OXException {
+    public List<FolderPermission> readConfigFolders() throws OXException {
         List<String> configurations = null;
         try {
             configurations = new ConfigurationFileParser(configService).getConfigList();
@@ -281,11 +274,10 @@ public class ConfigurationReader {
         return null;
     }
 
-
     /**
      * Return a list of reloadable configuration paths that were loaded.
      *
-     * @return  List of configuration paths
+     * @return List of configuration paths
      */
     public String[] getReloadableConfigurationPaths() {
         return this.reloadableConfigurationPaths.toArray(new String[reloadableConfigurationPaths.size()]);
