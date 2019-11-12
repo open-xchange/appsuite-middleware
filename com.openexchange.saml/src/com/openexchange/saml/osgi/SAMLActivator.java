@@ -53,10 +53,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.saml.impl.DefaultConfig;
 import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
-import com.openexchange.saml.impl.SAMLSessionSsoProvider;
 import com.openexchange.saml.impl.SAMLSessionStorageParameterNamesProvider;
 import com.openexchange.saml.spi.SAMLConfigRegistry;
-import com.openexchange.session.SessionSsoProvider;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 
 /**
@@ -87,7 +85,6 @@ public class SAMLActivator extends HousekeepingActivator {
         registerService(SAMLConfigRegistry.class, configRegistry);
 
         registerService(SessionStorageParameterNamesProvider.class, new SAMLSessionStorageParameterNamesProvider());
-        registerService(SessionSsoProvider.class, new SAMLSessionSsoProvider());
     }
 
     @Override

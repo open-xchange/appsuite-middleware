@@ -260,7 +260,6 @@ import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.SessionHolder;
-import com.openexchange.session.SessionSsoService;
 import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
@@ -500,9 +499,6 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Push notification service (PNS)
         track(PushNotificationService.class, new RegistryCustomizer<PushNotificationService>(context, PushNotificationService.class));
-
-        // Session SSO checker
-        track(SessionSsoService.class, new RegistryCustomizer<SessionSsoService>(context, SessionSsoService.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));

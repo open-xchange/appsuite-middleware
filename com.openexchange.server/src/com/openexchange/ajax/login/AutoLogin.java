@@ -79,7 +79,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
-import com.openexchange.session.SessionSsoService;
 import com.openexchange.session.inspector.Reason;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -130,44 +129,6 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
                 loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
                 if (null == loginResult) {
-                    /*
-                     * In case of SSO, public session cookie
-                     */
-                    loginResult = AutoLoginTools.tryAutologinByAlternativeId(conf, req, resp, hash);
-                    /*
-                     * Verify non-null and that stay signed-in is false (which should be the case for SSO)
-                     */
-                    if (null == loginResult || loginResult.getSession().isStaySignedIn()) {
-                        /*
-                         * auto-login failed
-                         */
-                        SessionUtility.removeOXCookies(hash, req, resp);
-                        if (doAutoLogin(req, resp)) {
-                            SessionUtility.removeJSESSIONID(req, resp);
-                            if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
-                                return;
-                            }
-                            throw OXJSONExceptionCodes.INVALID_COOKIE.create();
-                        }
-                        return;
-                    }
-                    /*
-                     * Check for an SSO session
-                     */
-                    SessionSsoService ssoService = ServerServiceRegistry.getInstance().getService(SessionSsoService.class);
-                    if (ssoService != null && ssoService.isSsoSession(loginResult.getSession())) {
-                        /*-
-                         *  Auto-login disabled for SSO sessions.
-                         *  Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
-                         */
-                        if (doAutoLogin(req, resp)) {
-                            if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
-                                return;
-                            }
-                            throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
-                        }
-                        return;
-                    }
                     /*
                      * auto-login failed
                      */

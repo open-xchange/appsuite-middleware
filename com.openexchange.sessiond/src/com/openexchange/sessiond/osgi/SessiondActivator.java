@@ -84,14 +84,12 @@ import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
-import com.openexchange.session.SessionSsoService;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionMetricHandler;
-import com.openexchange.sessiond.impl.SessionSsoServiceImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondRMIServiceImpl;
@@ -306,10 +304,6 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             registerService(CustomPortableFactory.class, new PortableContextSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableTokenSessionControlFactory());
 
-            // SSO checker
-            SessionSsoServiceImpl ssoServiceImpl = new SessionSsoServiceImpl(context);
-            rememberTracker(ssoServiceImpl);
-
             // Initialize token session container
             TokenSessionContainer.getInstance().setNotActiveExceptionHandler(this);
 
@@ -349,8 +343,6 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             trackService(UserService.class);
             track(SessionSerializationInterceptor.class, new SessionSerializationInterceptorTracker(context));
             openTrackers();
-
-            registerService(SessionSsoService.class, ssoServiceImpl);
 
             final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
             final SessiondEventHandler eventHandler = new SessiondEventHandler();
