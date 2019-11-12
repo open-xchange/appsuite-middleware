@@ -21524,399 +21524,48 @@
           }
         }
       },
-      "EventResponse" : {
+      "ChronosAttachment" : {
         "type" : "object",
         "properties" : {
-          "data" : {
-            "$ref" : "#/components/schemas/EventData"
-          },
-          "error" : {
+          "filename" : {
             "type" : "string",
-            "description" : "The translated error message. Present in case of errors."
+            "description" : "The name of the attachment file."
           },
-          "error_params" : {
-            "type" : "array",
-            "description" : "Empty JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "error_id" : {
+          "fmtType" : {
             "type" : "string",
-            "description" : "Unique error identifier to help finding this error instance in the server logs."
+            "description" : "The format type of the attachment."
           },
-          "error_desc" : {
-            "type" : "string",
-            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
-          },
-          "error_stack" : {
-            "type" : "array",
-            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "code" : {
-            "type" : "string",
-            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
-          },
-          "categories" : {
-            "type" : "string",
-            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
-          },
-          "category" : {
-            "type" : "integer",
-            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
-          },
-          "timestamp" : {
+          "size" : {
             "type" : "integer",
             "format" : "int64",
-            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
-          }
-        }
-      },
-      "EventsResponse" : {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/EventData"
-            }
-          },
-          "error" : {
-            "type" : "string",
-            "description" : "The translated error message. Present in case of errors."
-          },
-          "error_params" : {
-            "type" : "array",
-            "description" : "Empty JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "error_id" : {
-            "type" : "string",
-            "description" : "Unique error identifier to help finding this error instance in the server logs."
-          },
-          "error_desc" : {
-            "type" : "string",
-            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
-          },
-          "error_stack" : {
-            "type" : "array",
-            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "code" : {
-            "type" : "string",
-            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
-          },
-          "categories" : {
-            "type" : "string",
-            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
-          },
-          "category" : {
-            "type" : "integer",
-            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
-          },
-          "timestamp" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
-          }
-        }
-      },
-      "MultipleFolderEventsResponse" : {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/MultipleEventData"
-            }
-          }
-        }
-      },
-      "EventData" : {
-        "type" : "object",
-        "properties" : {
-          "startDate" : {
-            "$ref" : "#/components/schemas/DateTimeData",
-            "description" : "The starting date of the event."
-          },
-          "endDate" : {
-            "$ref" : "#/components/schemas/DateTimeData",
-            "description" : "The ending date of the event."
+            "description" : "The size of the attachment in bytes."
           },
           "created" : {
             "type" : "integer",
             "format" : "int64",
-            "description" : "The creation time."
+            "description" : "The creation date."
           },
-          "timestamp" : {
+          "managedId" : {
             "type" : "integer",
-            "format" : "int64",
-            "description" : "The timestamp of the event.",
-            "readOnly" : true
+            "description" : "The manage id of the attachment."
           },
-          "categories" : {
-            "type" : "array",
-            "description" : "An array of categories.",
-            "items" : {
-              "type" : "string",
-              "description" : "A category."
-            }
-          },
-          "filename" : {
+          "uri" : {
             "type" : "string",
-            "description" : "The filename of the event."
-          },
-          "uid" : {
-            "type" : "string",
-            "description" : "The universal identifier of the event."
-          },
-          "description" : {
-            "type" : "string",
-            "description" : "The event's description."
-          },
-          "attendees" : {
-            "type" : "array",
-            "description" : "The attendees of the event.",
-            "items" : {
-              "$ref" : "#/components/schemas/Attendee"
-            }
-          },
-          "alarms" : {
-            "type" : "array",
-            "description" : "The alarms of the event for the current user.",
-            "items" : {
-              "$ref" : "#/components/schemas/Alarm"
-            }
-          },
-          "lastModified" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The last modification time."
-          },
-          "modifiedBy" : {
-            "$ref" : "#/components/schemas/CalendarUser",
-            "description" : "The id of the user who lastly modified the event."
-          },
-          "summary" : {
-            "type" : "string",
-            "description" : "The summary of the event."
-          },
-          "sequence" : {
-            "type" : "integer",
-            "description" : "The sequence number of the event."
-          },
-          "id" : {
-            "type" : "string",
-            "description" : "The identifier of the event."
-          },
-          "class" : {
-            "type" : "string",
-            "description" : "The classification of the event."
-          },
-          "organizer" : {
-            "$ref" : "#/components/schemas/CalendarUser",
-            "description" : "The organizer of the event."
-          },
-          "transp" : {
-            "type" : "string",
-            "description" : "Defines whether the event is shown in the free-busy view.",
-            "enum" : [ "OPAQUE", "TRANSPARENT" ]
-          },
-          "color" : {
-            "type" : "string",
-            "description" : "The color of the even as a css3 color definition."
-          },
-          "folder" : {
-            "type" : "string",
-            "description" : "The folder identifier."
-          },
-          "createdBy" : {
-            "$ref" : "#/components/schemas/CalendarUser",
-            "description" : "The creator of the event."
-          },
-          "changeExceptionDates" : {
-            "type" : "array",
-            "description" : "An array of changed recurrences.",
-            "items" : {
-              "type" : "string",
-              "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
-            }
-          },
-          "deleteExceptionDates" : {
-            "type" : "array",
-            "description" : "An array of deleted recurrences.",
-            "items" : {
-              "type" : "string",
-              "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
-            }
-          },
-          "recurrenceId" : {
-            "type" : "string",
-            "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
-          },
-          "calendarUser" : {
-            "$ref" : "#/components/schemas/CalendarUser",
-            "description" : "The user of this calendar."
-          },
-          "rrule" : {
-            "type" : "string",
-            "description" : "The recurrence rule according to rfc 5545 chapter 3.8.5.3."
-          },
-          "attachments" : {
-            "type" : "array",
-            "description" : "An array of attachments.",
-            "items" : {
-              "$ref" : "#/components/schemas/ChronosAttachment"
-            }
-          },
-          "extendedProperties" : {
-            "$ref" : "#/components/schemas/ExtendedProperties"
-          },
-          "geo" : {
-            "type" : "object",
-            "title" : "Geo",
-            "description" : "The geolocation of the event.",
-            "properties" : {
-              "lat" : {
-                "type" : "number",
-                "format" : "double",
-                "description" : "The latitude geographic coordinate."
-              },
-              "long" : {
-                "type" : "number",
-                "format" : "double",
-                "description" : "The longitude geographic coordinate."
-              }
-            }
-          },
-          "attendeePrivileges" : {
-            "type" : "string",
-            "description" : "The privileges attendees have on an event."
-          },
-          "url" : {
-            "type" : "string",
-            "description" : "The uniform resource locator (URL) of the event."
-          },
-          "seriesId" : {
-            "type" : "string",
-            "description" : "The identifier of the event series."
-          },
-          "status" : {
-            "type" : "string",
-            "description" : "The status of the event."
-          },
-          "location" : {
-            "type" : "string",
-            "description" : "The location of the event."
-          },
-          "flags" : {
-            "type" : "array",
-            "description" : "Flags indicating certain aspects of an event, as described in [Event Flags](#event-flags).",
-            "items" : {
-              "type" : "string",
-              "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
-              "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
-            }
-          },
-          "relatedTo" : {
-            "type" : "string",
-            "description" : "The relationship between this and other events."
+            "description" : "A uniform resource identifier to the attachment file."
           }
         }
       },
-      "ExtendedProperties" : {
+      "ChronosFolderBody" : {
         "type" : "object",
         "properties" : {
-          "extendedProperty" : {
-            "additionalProperties" : {
-              "$ref" : "#/components/schemas/ExtendedProperty"
-            }
-          }
-        }
-      },
-      "ExtendedProperty" : {
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "value" : {
-            "type" : "string"
-          }
-        }
-      },
-      "MultipleEventData" : {
-        "type" : "object",
-        "properties" : {
-          "error" : {
-            "type" : "object",
-            "properties" : {
-              "error" : {
-                "type" : "string",
-                "description" : "The translated error message. Present in case of errors."
-              },
-              "error_params" : {
-                "type" : "array",
-                "description" : "Empty JSON array.",
-                "items" : {
-                  "type" : "string"
-                }
-              },
-              "error_id" : {
-                "type" : "string",
-                "description" : "Unique error identifier to help finding this error instance in the server logs."
-              },
-              "error_desc" : {
-                "type" : "string",
-                "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
-              },
-              "error_stack" : {
-                "type" : "array",
-                "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
-                "items" : {
-                  "type" : "string"
-                }
-              },
-              "code" : {
-                "type" : "string",
-                "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
-              },
-              "categories" : {
-                "type" : "string",
-                "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
-              },
-              "category" : {
-                "type" : "integer",
-                "description" : "Maintained for legacy reasons: The numeric representation of the first category."
-              },
-              "timestamp" : {
-                "type" : "integer",
-                "format" : "int64",
-                "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
-              }
-            }
-          },
-          "folder" : {
-            "type" : "string"
-          },
-          "events" : {
+          "folders" : {
             "type" : "array",
+            "description" : "The folder ids to query.",
             "items" : {
-              "$ref" : "#/components/schemas/EventData"
+              "type" : "string",
+              "title" : "folderId",
+              "description" : "The id of a folder to query."
             }
-          },
-          "timestamp" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The timestamp of the event.",
-            "readOnly" : true
           }
         }
       },
@@ -21942,24 +21591,17 @@
           }
         }
       },
-      "CalendarUser" : {
+      "DateTimeData" : {
         "type" : "object",
+        "title" : "DateTime",
         "properties" : {
-          "uri" : {
+          "value" : {
             "type" : "string",
-            "description" : "The universal resource identifier of the user."
+            "description" : "A date-time value without timezone information as specified in rfc 5545 chapter 3.3.5. E.g. \"20170708T220000\""
           },
-          "cn" : {
+          "tzid" : {
             "type" : "string",
-            "description" : "The common name of the user."
-          },
-          "email" : {
-            "type" : "string",
-            "description" : "The mail address of the user."
-          },
-          "entity" : {
-            "type" : "integer",
-            "description" : "The internal user identifier."
+            "description" : "A timezone identifier. E.g. \"America/New_York\""
           }
         }
       },
@@ -22183,7 +21825,385 @@
             "description" : "The description of this alarm."
           },
           "extendedProperties" : {
-            "$ref" : "#/components/schemas/ExtendedProperties"
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "properties" : {
+                "value" : {
+                  "type" : "object"
+                },
+                "parameters" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "value" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "CalendarUser" : {
+        "type" : "object",
+        "properties" : {
+          "uri" : {
+            "type" : "string",
+            "description" : "The universal resource identifier of the user."
+          },
+          "cn" : {
+            "type" : "string",
+            "description" : "The common name of the user."
+          },
+          "email" : {
+            "type" : "string",
+            "description" : "The mail address of the user."
+          },
+          "entity" : {
+            "type" : "integer",
+            "description" : "The internal user identifier."
+          }
+        }
+      },
+      "EventData" : {
+        "type" : "object",
+        "properties" : {
+          "startDate" : {
+            "$ref" : "#/components/schemas/DateTimeData",
+            "description" : "The starting date of the event."
+          },
+          "endDate" : {
+            "$ref" : "#/components/schemas/DateTimeData",
+            "description" : "The ending date of the event."
+          },
+          "created" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The creation time."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The timestamp of the event.",
+            "readOnly" : true
+          },
+          "categories" : {
+            "type" : "array",
+            "description" : "An array of categories.",
+            "items" : {
+              "type" : "string",
+              "description" : "A category."
+            }
+          },
+          "filename" : {
+            "type" : "string",
+            "description" : "The filename of the event."
+          },
+          "uid" : {
+            "type" : "string",
+            "description" : "The universal identifier of the event."
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "The event's description."
+          },
+          "attendees" : {
+            "type" : "array",
+            "description" : "The attendees of the event.",
+            "items" : {
+              "$ref" : "#/components/schemas/Attendee"
+            }
+          },
+          "alarms" : {
+            "type" : "array",
+            "description" : "The alarms of the event for the current user.",
+            "items" : {
+              "$ref" : "#/components/schemas/Alarm"
+            }
+          },
+          "lastModified" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The last modification time."
+          },
+          "modifiedBy" : {
+            "$ref" : "#/components/schemas/CalendarUser",
+            "description" : "The id of the user who lastly modified the event."
+          },
+          "summary" : {
+            "type" : "string",
+            "description" : "The summary of the event."
+          },
+          "sequence" : {
+            "type" : "integer",
+            "description" : "The sequence number of the event."
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The identifier of the event."
+          },
+          "class" : {
+            "type" : "string",
+            "description" : "The classification of the event."
+          },
+          "organizer" : {
+            "$ref" : "#/components/schemas/CalendarUser",
+            "description" : "The organizer of the event."
+          },
+          "transp" : {
+            "type" : "string",
+            "description" : "Defines whether the event is shown in the free-busy view.",
+            "enum" : [ "OPAQUE", "TRANSPARENT" ]
+          },
+          "color" : {
+            "type" : "string",
+            "description" : "The color of the even as a css3 color definition."
+          },
+          "folder" : {
+            "type" : "string",
+            "description" : "The folder identifier."
+          },
+          "createdBy" : {
+            "$ref" : "#/components/schemas/CalendarUser",
+            "description" : "The creator of the event."
+          },
+          "changeExceptionDates" : {
+            "type" : "array",
+            "description" : "An array of changed recurrences.",
+            "items" : {
+              "type" : "string",
+              "description" : "The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+            }
+          },
+          "deleteExceptionDates" : {
+            "type" : "array",
+            "description" : "An array of deleted recurrences.",
+            "items" : {
+              "type" : "string",
+              "description" : "The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+            }
+          },
+          "recurrenceId" : {
+            "type" : "string",
+            "description" : "The recurrence id of this recurrence. The value is either a utc date-time value (E.g. \"20170708T220000Z\"), a floating date-time (E.g. \"20170708T220000\") \nor a date (E.g. \"20170708\"). See rfc 5545 chapter 3.3.5. for more informations.\n"
+          },
+          "calendarUser" : {
+            "$ref" : "#/components/schemas/CalendarUser",
+            "description" : "The user of this calendar."
+          },
+          "rrule" : {
+            "type" : "string",
+            "description" : "The recurrence rule according to rfc 5545 chapter 3.8.5.3."
+          },
+          "attachments" : {
+            "type" : "array",
+            "description" : "An array of attachments.",
+            "items" : {
+              "$ref" : "#/components/schemas/ChronosAttachment"
+            }
+          },
+          "extendedProperties" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "properties" : {
+                "value" : {
+                  "type" : "object"
+                },
+                "parameters" : {
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "value" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "geo" : {
+            "type" : "object",
+            "title" : "Geo",
+            "description" : "The geolocation of the event.",
+            "properties" : {
+              "lat" : {
+                "type" : "number",
+                "format" : "double",
+                "description" : "The latitude geographic coordinate."
+              },
+              "long" : {
+                "type" : "number",
+                "format" : "double",
+                "description" : "The longitude geographic coordinate."
+              }
+            }
+          },
+          "attendeePrivileges" : {
+            "type" : "string",
+            "description" : "The privileges attendees have on an event."
+          },
+          "url" : {
+            "type" : "string",
+            "description" : "The uniform resource locator (URL) of the event."
+          },
+          "seriesId" : {
+            "type" : "string",
+            "description" : "The identifier of the event series."
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The status of the event."
+          },
+          "location" : {
+            "type" : "string",
+            "description" : "The location of the event."
+          },
+          "flags" : {
+            "type" : "array",
+            "description" : "Flags indicating certain aspects of an event, as described in [Event Flags](#event-flags).",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ],
+              "description" : "Event Flags:\n * `attachments` - The event contains at least one attachment. \n * `alarms` - The calendar user has at least one alarm associated with the event.\n * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.\n * `organizer` - The calendar user is the <i>organizer<i> of the meeting. \n * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.\n * `attendee` - The calendar user is <i>attendee<i> of the meeting.\n * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.\n * `private` - Event is classified <i>private</i>, so is invisible for others. \n * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.\n * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.\n * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.\n * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.\n * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.\n * `needs_action` - The calendar user's participation status is <i>needs action</i>. \n * `accepted` - The calendar user's participation status is <i>accepted</i>.\n * `declined` - The calendar user's participation status is <i>declined</i>.\n * `tentative` - The calendar user's participation status is <i>tentative</i>.\n * `delegated` - The calendar user's participation status is <i>delegated</i>.\n * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. \n * `overridden` - The event represents an exception / overridden instance of a recurring event series.\n * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.\n * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.\n"
+            }
+          },
+          "relatedTo" : {
+            "type" : "string",
+            "description" : "The relationship between this and other events."
+          }
+        }
+      },
+      "EventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/EventData"
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "EventsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EventData"
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "ChronosConflictDataRaw" : {
+        "type" : "object",
+        "title" : "Conflict",
+        "description" : "A conflict.",
+        "properties" : {
+          "hard_conflict" : {
+            "type" : "boolean",
+            "description" : "Defines whether the conflict is a hard conflict or not."
+          },
+          "conflicting_attendees" : {
+            "type" : "array",
+            "description" : "An array of conflicting attendees.",
+            "items" : {
+              "$ref" : "#/components/schemas/Attendee"
+            }
+          },
+          "event" : {
+            "description" : "The conflicting event.",
+            "$ref" : "#/components/schemas/EventData"
           }
         }
       },
@@ -22222,320 +22242,6 @@
                   "$ref" : "#/components/schemas/ChronosConflictDataRaw"
                 }
               }
-            }
-          },
-          "error" : {
-            "type" : "string",
-            "description" : "The translated error message. Present in case of errors."
-          },
-          "error_params" : {
-            "type" : "array",
-            "description" : "Empty JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "error_id" : {
-            "type" : "string",
-            "description" : "Unique error identifier to help finding this error instance in the server logs."
-          },
-          "error_desc" : {
-            "type" : "string",
-            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
-          },
-          "error_stack" : {
-            "type" : "array",
-            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "code" : {
-            "type" : "string",
-            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
-          },
-          "categories" : {
-            "type" : "string",
-            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
-          },
-          "category" : {
-            "type" : "integer",
-            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
-          },
-          "timestamp" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
-          }
-        }
-      },
-      "ChronosMultipleCalendarResultResponse" : {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "type" : "array",
-            "title" : "CalendarResults",
-            "items" : {
-              "$ref" : "#/components/schemas/ChronosErrorAwareCalendarResult"
-            }
-          },
-          "error" : {
-            "type" : "string",
-            "description" : "The translated error message. Present in case of errors."
-          },
-          "error_params" : {
-            "type" : "array",
-            "description" : "Empty JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "error_id" : {
-            "type" : "string",
-            "description" : "Unique error identifier to help finding this error instance in the server logs."
-          },
-          "error_desc" : {
-            "type" : "string",
-            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
-          },
-          "error_stack" : {
-            "type" : "array",
-            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "code" : {
-            "type" : "string",
-            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
-          },
-          "categories" : {
-            "type" : "string",
-            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
-          },
-          "category" : {
-            "type" : "integer",
-            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
-          },
-          "timestamp" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
-          }
-        }
-      },
-      "ChronosErrorAwareCalendarResult" : {
-        "type" : "object",
-        "title" : "CalendarResult",
-        "properties" : {
-          "folderId" : {
-            "type" : "string",
-            "description" : "The folder id."
-          },
-          "id" : {
-            "type" : "string",
-            "description" : "The event id."
-          },
-          "recurrenceId" : {
-            "type" : "string",
-            "description" : "The recurrence id."
-          },
-          "error" : {
-            "type" : "object",
-            "description" : "In case an error occurs this field contains error relevant data.",
-            "title" : "Error",
-            "properties" : {
-              "error" : {
-                "type" : "string",
-                "description" : "The translated error message. Present in case of errors."
-              },
-              "error_params" : {
-                "type" : "array",
-                "description" : "An array of error params.",
-                "items" : {
-                  "type" : "string"
-                }
-              },
-              "error_id" : {
-                "type" : "string",
-                "description" : "Unique error identifier to help finding this error instance in the server logs."
-              },
-              "error_desc" : {
-                "type" : "string",
-                "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
-              },
-              "error_stack" : {
-                "type" : "array",
-                "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides \nthe stack trace of associated Java exception represented as a JSON array.\n",
-                "items" : {
-                  "type" : "string"
-                }
-              },
-              "code" : {
-                "type" : "string",
-                "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
-              },
-              "categories" : {
-                "type" : "string",
-                "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
-              },
-              "category" : {
-                "type" : "integer",
-                "description" : "Maintained for legacy reasons: The numeric representation of the first category."
-              }
-            }
-          },
-          "created" : {
-            "type" : "array",
-            "description" : "The created events.",
-            "items" : {
-              "$ref" : "#/components/schemas/EventData"
-            }
-          },
-          "updated" : {
-            "type" : "array",
-            "description" : "The updated events.",
-            "items" : {
-              "$ref" : "#/components/schemas/EventData"
-            }
-          },
-          "deleted" : {
-            "type" : "array",
-            "description" : "The deleted events.",
-            "items" : {
-              "$ref" : "#/components/schemas/EventData"
-            }
-          },
-          "conflicts" : {
-            "type" : "array",
-            "description" : "An array of conflicts.",
-            "items" : {
-              "$ref" : "#/components/schemas/ChronosConflictDataRaw"
-            }
-          }
-        }
-      },
-      "ChronosUpdatesResponse" : {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "type" : "object",
-            "title" : "UpdatesResult",
-            "properties" : {
-              "newAndModified" : {
-                "type" : "array",
-                "description" : "The new and updated events.",
-                "items" : {
-                  "$ref" : "#/components/schemas/EventData"
-                }
-              },
-              "deleted" : {
-                "type" : "array",
-                "description" : "The deleted events.",
-                "items" : {
-                  "$ref" : "#/components/schemas/EventData"
-                }
-              }
-            }
-          },
-          "error" : {
-            "type" : "string",
-            "description" : "The translated error message. Present in case of errors."
-          },
-          "error_params" : {
-            "type" : "array",
-            "description" : "Empty JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "error_id" : {
-            "type" : "string",
-            "description" : "Unique error identifier to help finding this error instance in the server logs."
-          },
-          "error_desc" : {
-            "type" : "string",
-            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
-          },
-          "error_stack" : {
-            "type" : "array",
-            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "code" : {
-            "type" : "string",
-            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
-          },
-          "categories" : {
-            "type" : "string",
-            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
-          },
-          "category" : {
-            "type" : "integer",
-            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
-          },
-          "timestamp" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
-          }
-        }
-      },
-      "ChronosAttachment" : {
-        "type" : "object",
-        "properties" : {
-          "filename" : {
-            "type" : "string",
-            "description" : "The name of the attachment file."
-          },
-          "fmtType" : {
-            "type" : "string",
-            "description" : "The format type of the attachment."
-          },
-          "size" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The size of the attachment in bytes."
-          },
-          "created" : {
-            "type" : "integer",
-            "format" : "int64",
-            "description" : "The creation date."
-          },
-          "managedId" : {
-            "type" : "integer",
-            "description" : "The manage id of the attachment."
-          },
-          "uri" : {
-            "type" : "string",
-            "description" : "A uniform resource identifier to the attachment file."
-          }
-        }
-      },
-      "DateTimeData" : {
-        "type" : "object",
-        "title" : "DateTime",
-        "properties" : {
-          "value" : {
-            "type" : "string",
-            "description" : "A date-time value without timezone information as specified in rfc 5545 chapter 3.3.5. E.g. \"20170708T220000\""
-          },
-          "tzid" : {
-            "type" : "string",
-            "description" : "A timezone identifier. E.g. \"America/New_York\""
-          }
-        }
-      },
-      "ChronosFreeBusyResponse" : {
-        "type" : "object",
-        "properties" : {
-          "data" : {
-            "type" : "array",
-            "description" : "An array of free-busy response data.",
-            "items" : {
-              "$ref" : "#/components/schemas/ChronosFreeBusyResponseData"
             }
           },
           "error" : {
@@ -22751,7 +22457,26 @@
                       }
                     },
                     "extendedProperties" : {
-                      "$ref" : "#/components/schemas/ExtendedProperties"
+                      "type" : "object",
+                      "additionalProperties" : {
+                        "type" : "object",
+                        "properties" : {
+                          "value" : {
+                            "type" : "object"
+                          },
+                          "parameters" : {
+                            "type" : "object",
+                            "properties" : {
+                              "name" : {
+                                "type" : "string"
+                              },
+                              "value" : {
+                                "type" : "string"
+                              }
+                            }
+                          }
+                        }
+                      }
                     },
                     "geo" : {
                       "type" : "object",
@@ -22858,38 +22583,350 @@
           }
         }
       },
-      "ChronosConflictDataRaw" : {
+      "ChronosFreeBusyResponse" : {
         "type" : "object",
-        "title" : "Conflict",
-        "description" : "A conflict.",
         "properties" : {
-          "hard_conflict" : {
-            "type" : "boolean",
-            "description" : "Defines whether the conflict is a hard conflict or not."
-          },
-          "conflicting_attendees" : {
+          "data" : {
             "type" : "array",
-            "description" : "An array of conflicting attendees.",
+            "description" : "An array of free-busy response data.",
             "items" : {
-              "$ref" : "#/components/schemas/Attendee"
+              "$ref" : "#/components/schemas/ChronosFreeBusyResponseData"
             }
           },
-          "event" : {
-            "description" : "The conflicting event.",
-            "$ref" : "#/components/schemas/EventData"
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
           }
         }
       },
-      "ChronosFolderBody" : {
+      "ChronosErrorAwareCalendarResult" : {
+        "type" : "object",
+        "title" : "CalendarResult",
+        "properties" : {
+          "folderId" : {
+            "type" : "string",
+            "description" : "The folder id."
+          },
+          "id" : {
+            "type" : "string",
+            "description" : "The event id."
+          },
+          "recurrenceId" : {
+            "type" : "string",
+            "description" : "The recurrence id."
+          },
+          "error" : {
+            "type" : "object",
+            "description" : "In case an error occurs this field contains error relevant data.",
+            "title" : "Error",
+            "properties" : {
+              "error" : {
+                "type" : "string",
+                "description" : "The translated error message. Present in case of errors."
+              },
+              "error_params" : {
+                "type" : "array",
+                "description" : "An array of error params.",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "error_id" : {
+                "type" : "string",
+                "description" : "Unique error identifier to help finding this error instance in the server logs."
+              },
+              "error_desc" : {
+                "type" : "string",
+                "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+              },
+              "error_stack" : {
+                "type" : "array",
+                "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides \nthe stack trace of associated Java exception represented as a JSON array.\n",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "code" : {
+                "type" : "string",
+                "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+              },
+              "categories" : {
+                "type" : "string",
+                "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+              },
+              "category" : {
+                "type" : "integer",
+                "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+              }
+            }
+          },
+          "created" : {
+            "type" : "array",
+            "description" : "The created events.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventData"
+            }
+          },
+          "updated" : {
+            "type" : "array",
+            "description" : "The updated events.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventData"
+            }
+          },
+          "deleted" : {
+            "type" : "array",
+            "description" : "The deleted events.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventData"
+            }
+          },
+          "conflicts" : {
+            "type" : "array",
+            "description" : "An array of conflicts.",
+            "items" : {
+              "$ref" : "#/components/schemas/ChronosConflictDataRaw"
+            }
+          }
+        }
+      },
+      "ChronosMultipleCalendarResultResponse" : {
         "type" : "object",
         "properties" : {
-          "folders" : {
+          "data" : {
             "type" : "array",
-            "description" : "The folder ids to query.",
+            "title" : "CalendarResults",
             "items" : {
-              "type" : "string",
-              "title" : "folderId",
-              "description" : "The id of a folder to query."
+              "$ref" : "#/components/schemas/ChronosErrorAwareCalendarResult"
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "ChronosUpdatesResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "object",
+            "title" : "UpdatesResult",
+            "properties" : {
+              "newAndModified" : {
+                "type" : "array",
+                "description" : "The new and updated events.",
+                "items" : {
+                  "$ref" : "#/components/schemas/EventData"
+                }
+              },
+              "deleted" : {
+                "type" : "array",
+                "description" : "The deleted events.",
+                "items" : {
+                  "$ref" : "#/components/schemas/EventData"
+                }
+              }
+            }
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "MultipleEventData" : {
+        "type" : "object",
+        "properties" : {
+          "error" : {
+            "type" : "object",
+            "properties" : {
+              "error" : {
+                "type" : "string",
+                "description" : "The translated error message. Present in case of errors."
+              },
+              "error_params" : {
+                "type" : "array",
+                "description" : "Empty JSON array.",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "error_id" : {
+                "type" : "string",
+                "description" : "Unique error identifier to help finding this error instance in the server logs."
+              },
+              "error_desc" : {
+                "type" : "string",
+                "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+              },
+              "error_stack" : {
+                "type" : "array",
+                "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "code" : {
+                "type" : "string",
+                "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+              },
+              "categories" : {
+                "type" : "string",
+                "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+              },
+              "category" : {
+                "type" : "integer",
+                "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+              },
+              "timestamp" : {
+                "type" : "integer",
+                "format" : "int64",
+                "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+              }
+            }
+          },
+          "folder" : {
+            "type" : "string"
+          },
+          "events" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/EventData"
+            }
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The timestamp of the event.",
+            "readOnly" : true
+          }
+        }
+      },
+      "MultipleFolderEventsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MultipleEventData"
             }
           }
         }
@@ -23383,7 +23420,26 @@
                               }
                             },
                             "extendedProperties" : {
-                              "$ref" : "#/components/schemas/ExtendedProperties"
+                              "type" : "object",
+                              "additionalProperties" : {
+                                "type" : "object",
+                                "properties" : {
+                                  "value" : {
+                                    "type" : "object"
+                                  },
+                                  "parameters" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                      "name" : {
+                                        "type" : "string"
+                                      },
+                                      "value" : {
+                                        "type" : "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
                             },
                             "geo" : {
                               "type" : "object",
@@ -23655,7 +23711,26 @@
                 }
               },
               "extendedProperties" : {
-                "$ref" : "#/components/schemas/ExtendedProperties"
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "object",
+                  "properties" : {
+                    "value" : {
+                      "type" : "object"
+                    },
+                    "parameters" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "value" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  }
+                }
               },
               "geo" : {
                 "type" : "object",
@@ -23848,7 +23923,26 @@
                 }
               },
               "extendedProperties" : {
-                "$ref" : "#/components/schemas/ExtendedProperties"
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "object",
+                  "properties" : {
+                    "value" : {
+                      "type" : "object"
+                    },
+                    "parameters" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "value" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  }
+                }
               },
               "geo" : {
                 "type" : "object",
@@ -24041,7 +24135,26 @@
                 }
               },
               "extendedProperties" : {
-                "$ref" : "#/components/schemas/ExtendedProperties"
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "object",
+                  "properties" : {
+                    "value" : {
+                      "type" : "object"
+                    },
+                    "parameters" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "value" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  }
+                }
               },
               "geo" : {
                 "type" : "object",
@@ -24234,7 +24347,26 @@
                 }
               },
               "extendedProperties" : {
-                "$ref" : "#/components/schemas/ExtendedProperties"
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "object",
+                  "properties" : {
+                    "value" : {
+                      "type" : "object"
+                    },
+                    "parameters" : {
+                      "type" : "object",
+                      "properties" : {
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "value" : {
+                          "type" : "string"
+                        }
+                      }
+                    }
+                  }
+                }
               },
               "geo" : {
                 "type" : "object",
