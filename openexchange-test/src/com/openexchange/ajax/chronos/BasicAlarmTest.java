@@ -58,9 +58,8 @@ import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
+import com.openexchange.testing.httpclient.models.AlarmExtendedProperties;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.ExtendedProperties;
-import com.openexchange.testing.httpclient.models.ExtendedProperty;
 
 /**
  *
@@ -185,14 +184,11 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             alarm.setUid(changedAlarm.getUid());
             alarm.setId(changedAlarm.getId());
             alarm.setAttendees(changedAlarm.getAttendees());
-            ExtendedProperties properties = new ExtendedProperties();
             //HashMap<String, String> map = new HashMap<>();
             //map.put("value", "SERVER");
-            ExtendedProperty extendedProperty = new ExtendedProperty(); 
-            extendedProperty.setName("value");
-            extendedProperty.setValue("server");
-            properties.putExtendedPropertyItem("ALARM-AGENT", extendedProperty);
-            alarm.setExtendedProperties(properties);
+            AlarmExtendedProperties extendedProperty = new AlarmExtendedProperties();
+            extendedProperty.setValue("SERVER");
+            alarm.putExtendedPropertiesItem("ALARM-AGENT", extendedProperty);
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
 
