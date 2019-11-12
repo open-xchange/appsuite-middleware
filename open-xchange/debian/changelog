@@ -1,3 +1,15 @@
+open-xchange (7.10.2-17) stable; urgency=medium
+
+  * Build for patch 2019-11-11 (5473)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 Nov 2019 15:50:43 +0100
+
+open-xchange (7.10.2-16) stable; urgency=medium
+
+  * Build for patch 2019-11-11 (5473)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Sat, 02 Nov 2019 11:46:30 +0100
+
 open-xchange (7.10.2-15) stable; urgency=medium
 
   * Build for patch 2019-10-28 (5461)

@@ -1196,9 +1196,6 @@ public final class QuotedInternetAddress extends InternetAddress {
         if (Strings.isEmpty(address)) {
             throw new AddressException("Empty address");
         }
-        if (address.indexOf('@') < 0) {
-            throw new AddressException("Illegal address", address);
-        }
         InternetAddress[] a;
         try {
             // use our address parsing utility routine to parse the string
