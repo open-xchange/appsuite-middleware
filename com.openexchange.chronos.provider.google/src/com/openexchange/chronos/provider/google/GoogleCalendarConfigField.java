@@ -69,5 +69,6 @@ public class GoogleCalendarConfigField {
     public static final String COLOR = "color";
     public static final String DEFAULT_REMINDER = "default_reminders";
     public static final String DESCRIPTION = "description";
+    public static final String NAME = "name";
 
 }
