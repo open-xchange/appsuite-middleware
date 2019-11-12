@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,58 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.sessiond.impl;
 
-import org.osgi.framework.BundleActivator;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.BundleContext;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.session.Session;
+import com.openexchange.session.SessionSsoProvider;
+import com.openexchange.session.SessionSsoService;
+
 
 /**
- * OSGi activator for com.openexchange.saml.
+ * {@link SessionSsoServiceImpl}
  *
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class SAMLActivator implements BundleActivator {
+public class SessionSsoServiceImpl extends RankingAwareNearRegistryServiceTracker<SessionSsoProvider> implements SessionSsoService {
 
-    private SAMLFeature samlFeature;
-
-    @Override
-    public synchronized void start(BundleContext context) throws Exception {
-        samlFeature = new SAMLFeature(context);
-        samlFeature.open();
+    /**
+     * Initializes a new {@link SessionSsoServiceImpl}.
+     *
+     * @param context The bundle context
+     */
+    public SessionSsoServiceImpl(BundleContext context) {
+        super(context, SessionSsoProvider.class);
     }
 
     @Override
-    public synchronized void stop(BundleContext context) throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-            samlFeature = null;
+    public boolean isSsoSession(Session session) throws OXException {
+        if (session == null) {
+            return false;
         }
+
+        for (SessionSsoProvider provider : this) {
+            if (provider.isSsoSession(session)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean skipAutoLoginAttempt(HttpServletRequest request, HttpServletResponse response) throws OXException {
+        for (SessionSsoProvider provider : this) {
+            if (provider.skipAutoLoginAttempt(request, response)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

@@ -79,6 +79,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSsoService;
 import com.openexchange.session.inspector.Reason;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -123,6 +124,18 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              */
             LoginResult loginResult = AutoLoginTools.tryGuestAutologin(shareConf.getLoginConfig(), req, resp);
             if (null == loginResult) {
+                if (skipAutoLoginForSsoSession(req, resp)) {
+                    // Auto-login disabled per configuration.
+                    // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
+                    if (doAutoLogin(req, resp)) {
+                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
+                            return;
+                        }
+                        throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
+                    }
+                    return;
+                }
+
                 /*
                  * try auto-login for regular user
                  */
@@ -309,6 +322,26 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         return b.build();
+    }
+
+    /**
+     * Checks whether auto login attempt shall be skipped due to SSO requirements.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @return <code>true</code> if auto login should abort afterwards; otherwise <code>false</code>
+     */
+    private static boolean skipAutoLoginForSsoSession(HttpServletRequest req, HttpServletResponse resp) {
+        SessionSsoService ssoService = ServerServiceRegistry.getInstance().getService(SessionSsoService.class);
+        if (ssoService != null) {
+            try {
+                return ssoService.skipAutoLoginAttempt(req, resp);
+            } catch (OXException e) {
+                LOG.warn("Error while checking if autologin shall be skipped due to SSO requirements", e);
+            }
+        }
+
+        return false;
     }
 
 }

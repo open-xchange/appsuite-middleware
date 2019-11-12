@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,44 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.session;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
 
 /**
- * OSGi activator for com.openexchange.saml.
+ * {@link SessionSsoProvider} - Checks if a given session has been spawned by an SSO system.
  *
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.10.3
  */
-public class SAMLActivator implements BundleActivator {
+public interface SessionSsoProvider {
 
-    private SAMLFeature samlFeature;
+    /**
+     * Checks whether processing of an inbound {@code /login?action=login} request shall be skipped, to
+     * keep any session cookies and potentially perform some SSO mechanism specific actions during subsequent
+     * HTTP requests.
+     * <p>
+     * If {@code false} is returned, the processing of the request continues as usual. Otherwise it is handled
+     * as if an {@code AjaxExceptionCodes.DISABLED_ACTION} would have been thrown.
+     *
+     * @param request The inbound HTTP request
+     * @param response The according HTTP response
+     * @return {@code true} to skip further auto-login processing of the core login handler, {@code false} to
+     *         continue as usual
+     * @throws OXException If check fails; the processing is then continued as if {@code false} was returned
+     */
+    boolean skipAutoLoginAttempt(HttpServletRequest request, HttpServletResponse response) throws OXException;
 
-    @Override
-    public synchronized void start(BundleContext context) throws Exception {
-        samlFeature = new SAMLFeature(context);
-        samlFeature.open();
-    }
-
-    @Override
-    public synchronized void stop(BundleContext context) throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-            samlFeature = null;
-        }
-    }
+    /**
+     * Checks if given session has been spawned by an SSO system.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if spawned by an SSO system; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isSsoSession(Session session) throws OXException;
 
 }

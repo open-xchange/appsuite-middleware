@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,60 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.saml.impl;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.exception.OXException;
+import com.openexchange.saml.SAMLSessionParameters;
+import com.openexchange.saml.tools.SAMLLoginTools;
+import com.openexchange.session.Session;
+import com.openexchange.session.SessionSsoProvider;
+import com.openexchange.sessiond.SessiondService;
 
 /**
- * OSGi activator for com.openexchange.saml.
+ * {@link SAMLSessionSsoProvider}
  *
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.10.3
  */
-public class SAMLActivator implements BundleActivator {
+public class SAMLSessionSsoProvider implements SessionSsoProvider {
 
-    private SAMLFeature samlFeature;
+    private final LoginConfigurationLookup loginConfigLookup;
 
-    @Override
-    public synchronized void start(BundleContext context) throws Exception {
-        samlFeature = new SAMLFeature(context);
-        samlFeature.open();
+    private final SessiondService sessiondService;
+
+    /**
+     * Initializes a new {@link SAMLSessionSsoProvider}.
+     * @param sessiondService
+     */
+    public SAMLSessionSsoProvider(LoginConfigurationLookup loginConfigLookup, SessiondService sessiondService) {
+        super();
+        this.loginConfigLookup = loginConfigLookup;
+        this.sessiondService = sessiondService;
     }
 
     @Override
-    public synchronized void stop(BundleContext context) throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-            samlFeature = null;
+    public boolean isSsoSession(Session session) throws OXException {
+        return session != null && "true".equals(session.getParameter(SAMLSessionParameters.AUTHENTICATED));
+    }
+
+    @Override
+    public boolean skipAutoLoginAttempt(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        LoginConfiguration loginConfiguration = loginConfigLookup.getLoginConfiguration();
+        Cookie samlCookie = SAMLLoginTools.getSAMLCookie(httpRequest, loginConfiguration);
+        Session session = SAMLLoginTools.getLocalSessionForSAMLCookie(samlCookie, sessiondService);
+        if (session == null) {
+            return false;
         }
+
+        String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+        return SAMLLoginTools.isValidSession(httpRequest, session, hash);
     }
 
 }

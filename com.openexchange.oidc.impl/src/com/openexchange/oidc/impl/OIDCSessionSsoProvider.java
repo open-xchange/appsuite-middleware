@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,63 @@
  *
  */
 
-package com.openexchange.saml.osgi;
+package com.openexchange.oidc.impl;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.exception.OXException;
+import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.session.Session;
+import com.openexchange.session.SessionSsoProvider;
+
 
 /**
- * OSGi activator for com.openexchange.saml.
+ * {@link OIDCSessionSsoProvider}
  *
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.10.3
  */
-public class SAMLActivator implements BundleActivator {
+public class OIDCSessionSsoProvider implements SessionSsoProvider {
 
-    private SAMLFeature samlFeature;
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCSessionSsoProvider.class);
 
-    @Override
-    public synchronized void start(BundleContext context) throws Exception {
-        samlFeature = new SAMLFeature(context);
-        samlFeature.open();
+    /**
+     * Initializes a new {@link OIDCSessionSsoProvider}.
+     */
+    public OIDCSessionSsoProvider() {
+        super();
     }
 
     @Override
-    public synchronized void stop(BundleContext context) throws Exception {
-        if (samlFeature != null) {
-            samlFeature.close();
-            samlFeature = null;
+    public boolean isSsoSession(Session session) throws OXException {
+        return session != null && null != session.getParameter(OIDCTools.IDTOKEN);
+    }
+
+    @Override
+    public boolean skipAutoLoginAttempt(HttpServletRequest request, HttpServletResponse response) throws OXException {
+        LoginConfiguration loginConfiguration = LoginServlet.getLoginConfiguration();
+        if (loginConfiguration == null) {
+            LOG.warn("Cannot verify autologin request due to missing login configuration");
+            return false;
         }
+
+        Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, loginConfiguration);
+        if (autologinCookie == null) {
+            return false;
+        }
+
+        Session session = OIDCTools.getSessionFromAutologinCookie(autologinCookie, request);
+        if (session == null) {
+            return false;
+        }
+
+        return true;
     }
 
 }

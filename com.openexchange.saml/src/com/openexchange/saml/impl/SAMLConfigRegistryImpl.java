@@ -49,8 +49,8 @@
 
 package com.openexchange.saml.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.spi.SAMLConfigRegistry;
 
@@ -60,7 +60,7 @@ import com.openexchange.saml.spi.SAMLConfigRegistry;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public class SAMLConfigRegistryImpl implements SAMLConfigRegistry{
+public class SAMLConfigRegistryImpl implements SAMLConfigRegistry {
 
     private static final SAMLConfigRegistryImpl INSTANCE = new SAMLConfigRegistryImpl();
 
@@ -68,7 +68,7 @@ public class SAMLConfigRegistryImpl implements SAMLConfigRegistry{
         return INSTANCE;
     }
 
-    private final Map<String,SAMLConfig> configs = new HashMap<String, SAMLConfig>();
+    private final ConcurrentMap<String,SAMLConfig> configs = new ConcurrentHashMap<String, SAMLConfig>();
     public static final String DEFAULT_KEY = "";
 
     @Override

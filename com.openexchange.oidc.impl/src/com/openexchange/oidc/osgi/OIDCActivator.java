@@ -68,10 +68,12 @@ import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.impl.OIDCPasswordGrantAuthentication;
 import com.openexchange.oidc.impl.OIDCSessionInspectorService;
 import com.openexchange.oidc.impl.OIDCSessionParameterNamesProvider;
+import com.openexchange.oidc.impl.OIDCSessionSsoProvider;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.SessionSsoProvider;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.oauth.SessionOAuthTokenService;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -152,6 +154,7 @@ public class OIDCActivator extends HousekeepingActivator{
             registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
         }
         registerService(SessionStorageParameterNamesProvider.class, new OIDCSessionParameterNamesProvider());
+        registerService(SessionSsoProvider.class, new OIDCSessionSsoProvider());
     }
 
     @Override
