@@ -372,7 +372,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 /*
                  * get thumbnail link from file
                  */
-                com.google.api.services.drive.model.File file = drive.files().get(id).setFields(FIELDS_MINIMAL + "," + THUMBNAIL).execute();
+                com.google.api.services.drive.model.File file = drive.files().get(id).setFields(FIELDS_MINIMAL + "," + THUMBNAIL.getField()).execute();
                 checkFileValidity(file);
                 String thumbnailLink = file.getThumbnailLink();
                 if (Strings.isEmpty(thumbnailLink)) {
