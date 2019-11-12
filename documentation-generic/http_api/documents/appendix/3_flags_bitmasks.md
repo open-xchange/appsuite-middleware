@@ -30,6 +30,12 @@
 | **28**     | **Admin flag:** |
 |            | 0 (no permissions) |
 |            | 1 (every operation modifying the folder in some way requires this permission (e.g. changing the folder name) |
+| **29**     | **User flag support:** (for Mail folder only)|
+|            | 0 (no user flag support) |
+|            | 1 (user flag support) |
+| **30**     | **Rename support:** (for Mail folder only)|
+|            | 0 (not allowed to rename) |
+|            | 1 (allowed to rename) |
 </div>
 
 ## Capabilities

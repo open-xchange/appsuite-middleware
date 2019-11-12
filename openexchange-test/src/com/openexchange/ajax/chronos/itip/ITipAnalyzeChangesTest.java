@@ -69,7 +69,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
@@ -129,6 +128,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Receive mail as attendee
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
+        rememberMail(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -146,6 +146,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
+        rememberMail(reply);
 
         /*
          * Take over accept and check in calendar
@@ -157,19 +158,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         for (Attendee attendee : createdEvent.getAttendees()) {
             assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
         }
-    }
-
-    @After
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            if (null != attendeeEvent) {
-                deleteEvent(apiClientC2, attendeeEvent);
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
-        super.tearDown();
     }
 
     @Test
@@ -413,35 +401,35 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
         TestUser testUser3 = context2.acquireUser();
-        try {
-
-            Attendee addedAttendee = ITipUtil.convertToAttendee(testUser3, Integer.valueOf(0));
-            addedAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
-            deltaEvent.getAttendees().add(addedAttendee);
-            updateEventAsOrganizer(deltaEvent);
-
-            /*
-             * Check that the event has a new attendee
-             */
-            AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL);
-            AnalysisChange change = assertSingleChange(analyzeResponse);
-            assertSingleDescription(change, "has been invited to the appointment");
-
-            /*
-             * Check invite mail for new attendee
-             */
-            ApiClient apiClient3 = generateApiClient(testUser3);
-            rememberClient(apiClient3);
-            MailData iMip = receiveIMip(apiClient3, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
-            analyzeResponse = analyze(apiClient3, iMip);
-            AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
-            assertNotNull(newEvent);
-            assertEquals(attendeeEvent.getUid(), newEvent.getUid());
-            assertAttendeePartStat(newEvent.getAttendees(), addedAttendee.getEmail(), PartStat.NEEDS_ACTION.getStatus());
-            analyze(analyzeResponse, CustomConsumers.ACTIONS);
-        } finally {
+        addTearDownOperation(() -> {
             context2.backUser(testUser3);
-        }
+        });
+
+        Attendee addedAttendee = ITipUtil.convertToAttendee(testUser3, Integer.valueOf(0));
+        addedAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
+        deltaEvent.getAttendees().add(addedAttendee);
+        updateEventAsOrganizer(deltaEvent);
+
+        /*
+         * Check that the event has a new attendee
+         */
+        AnalyzeResponse analyzeResponse = receiveUpdateAsAttendee(PartStat.ACCEPTED, CustomConsumers.ALL);
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        assertSingleDescription(change, "has been invited to the appointment");
+
+        /*
+         * Check invite mail for new attendee
+         */
+        ApiClient apiClient3 = generateApiClient(testUser3);
+        rememberClient(apiClient3);
+        MailData iMip = receiveIMip(apiClient3, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
+        rememberMail(apiClient3, iMip);
+        analyzeResponse = analyze(apiClient3, iMip);
+        AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
+        assertNotNull(newEvent);
+        assertEquals(attendeeEvent.getUid(), newEvent.getUid());
+        assertAttendeePartStat(newEvent.getAttendees(), addedAttendee.getEmail(), PartStat.NEEDS_ACTION.getStatus());
+        analyze(analyzeResponse, CustomConsumers.ACTIONS);
     }
 
     @Test
@@ -455,6 +443,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         updateEventAsOrganizer(deltaEvent);
 
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
+        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         analyze(analyzeResponse, CustomConsumers.CANCEL);
 
@@ -487,6 +476,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
 
     private AnalyzeResponse receiveUpdateAsAttendee(PartStat partStat, CustomConsumers consumer, String summary, int sequnce) throws Exception {
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, sequnce, SchedulingMethod.REQUEST);
+        rememberMail(apiClientC2, iMip);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
         assertNotNull(newEvent);

@@ -276,7 +276,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         }
     }
 
-    private static Logger LOG2 = LoggerFactory.getLogger(ListPerformer.class.getCanonicalName() + "2");
+    public static Logger LOG2 = LoggerFactory.getLogger(ListPerformer.class.getCanonicalName() + "2");
 
     private UserizedFolder[] logAndReturn(final String treeId, final String parentId, UserizedFolder[] result) {
         if (LOG2.isDebugEnabled()) {
@@ -404,15 +404,25 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
          */
         IdsOrObjects idsOrObjects = collectAndSortSubfolderIds(treeId, parentId, all, checkOnly);
         if (idsOrObjects.isEmpty()) {
+        	bug55625Logging(treeId, parentId);
             return new UserizedFolder[0];
         }
 
         return null != idsOrObjects.folders ? idsOrObjects.folders : loadFolders(treeId, idsOrObjects.ids, all, checkOnly);
     }
+    
+	private void bug55625Logging(String treeId, String parentId) {
+		if (LOG2.isDebugEnabled()) {
+			if (treeId.equals("0") && parentId.equals("default0")) {
+				LOG2.debug("Subfolder ids are empty", new Exception("Subfolder ids are empty"));
+			}
+		}
+	}
 
     private IdsOrObjects collectAndSortSubfolderIds(final String treeId, final String parentId, final boolean all, final boolean checkOnly) throws OXException {
         FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
         if (null == neededStorages || 0 == neededStorages.length) {
+        	bug55625Logging(treeId, parentId);
             return EMPTY_IDS_OR_OBJECTS;
         }
 
@@ -446,7 +456,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         for (final FolderStorage fs : openedStorages) {
                             fs.commitTransaction(storageParameters);
                         }
-
+                        if(subfolders.length == 0) {
+                        	bug55625Logging(treeId, parentId);
+                        }
                         return new IdsOrObjects(subfolders);
                     }
 
@@ -516,7 +528,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             SortableId subfolderId = allSubfolderIds.get(i);
             subfolderIds[i] = subfolderId.getId();
         }
-
+        if(subfolderIds.length == 0) {
+        	bug55625Logging(treeId, parentId);
+        }
         return new IdsOrObjects(subfolderIds);
     }
 

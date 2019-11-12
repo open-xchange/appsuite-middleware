@@ -80,6 +80,14 @@ import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
  * {@link ITipOnBehalfTest}
+ * 
+ * Scenario:
+ * User A from context 1
+ * user C from context 1
+ * 
+ * User B from context 2
+ * 
+ * Share a calendar with another user (user C) of the same context (context 1) to check the "On behalf" functionality
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
@@ -88,9 +96,10 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
 
     private String sharedFolder;
 
+    /** The user C from context 1 */
     private TestUser testUserC1_2;
+    /** The user C's client */
     private ApiClient apiClientC1_2;
-    private UserResponse userResponseC1_2;
 
     @Override
     @Before
@@ -101,9 +110,14 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
          * Get another user of context 1
          */
         testUserC1_2 = testContext.acquireUser();
+        addTearDownOperation(() -> {
+            context2.backUser(testUserC1_2);
+        });
         apiClientC1_2 = generateApiClient(testUserC1_2);
+        rememberClient(apiClientC1_2);
+
         UserApi anotherUserApi = new UserApi(apiClientC1_2);
-        userResponseC1_2 = anotherUserApi.getUser(apiClientC1_2.getSession(), String.valueOf(apiClientC1_2.getUserId()));
+        UserResponse userResponseC1_2 = anotherUserApi.getUser(apiClientC1_2.getSession(), String.valueOf(apiClientC1_2.getUserId()));
         assertNull(userResponseC1_2.getError());
 
         /*
@@ -119,7 +133,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         permissions.add(permission);
         folder.setPermissions(permissions);
         folder.setModule("event");
-        folder.setTitle("Shared for ITipOnBehalfTest");
+        folder.setTitle("Shared for " + this.getClass().getSimpleName());
         folder.setSubscribed(Boolean.TRUE);
         body.setFolder(folder);
         sharedFolder = folderManager.createFolder(body);
@@ -145,22 +159,21 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         String summary = this.getClass().getSimpleName() + ".testOnBehalfOfInvitation";
         EventData data = EventFactory.createSingleTwoHourEvent(getUserId(), summary, defaultFolderId);
         Attendee replyingAttendee = prepareAttendees(data);
-        createdEvent = createEvent(apiClientC1_2, data, sharedFolder);
+        EventData secretaryEvent = createEvent(apiClientC1_2, data, sharedFolder);
 
         /*
          * Check event within folder of organizer
          */
-        EventData organizerEvent = eventManager.getEvent(sharedFolder, createdEvent.getId());
-        rememberForCleanup(organizerEvent);
-        assertEquals(createdEvent.getUid(), organizerEvent.getUid());
-        assertAttendeePartStat(organizerEvent.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED);
-        assertAttendeePartStat(organizerEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION);
+        createdEvent = eventManager.getEvent(sharedFolder, secretaryEvent.getId());
+        assertEquals(secretaryEvent.getUid(), createdEvent.getUid());
+        assertAttendeePartStat(createdEvent.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED);
+        assertAttendeePartStat(createdEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION);
 
         /*
          * Check notification mail within organizers inbox
          * 
          */
-        receiveIMip(apiClient, testUser.getLogin(), summary, 0, null);
+        rememberMail(receiveIMip(apiClient, testUser.getLogin(), summary, 0, null));
 
         /*
          * Receive iMIP as attendee
@@ -181,13 +194,13 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
          * Receive accept as organizer
          */
         iMip = receiveIMip(apiClient, testUserC2.getLogin(), summary, 0, SchedulingMethod.REPLY);
+        rememberMail(iMip);
         analyzeResponse = analyze(apiClient, iMip);
         newEvent = assertSingleChange(analyzeResponse).getNewEvent();
         assertNotNull(newEvent);
-        assertEquals(organizerEvent.getUid(), newEvent.getUid());
+        assertEquals(createdEvent.getUid(), newEvent.getUid());
         assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
         analyze(analyzeResponse, CustomConsumers.UPDATE);
-
     }
 
 }

@@ -59,6 +59,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
@@ -82,18 +83,24 @@ import com.openexchange.testing.httpclient.modules.MailComposeApi;
  */
 public class ITipAnalyzeReplyTest extends AbstractITipAnalyzeTest {
 
-    private final static String SUMMARY = "ITipAnalyzeReplyTest";
+    private String summary;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        this.summary = "ITipAnalyzeReplyTest" + UUID.randomUUID().toString();
+    }
 
     @Test
     public void testSimple() throws Exception {
-        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, SUMMARY);
+        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
         Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
         createdEvent = createEvent(eventToCreate);
 
         /*
          * Receive mail as attendee
          */
-        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), SUMMARY, 0, SchedulingMethod.REQUEST);
+        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -108,20 +115,21 @@ public class ITipAnalyzeReplyTest extends AbstractITipAnalyzeTest {
         /*
          * Receive mail as organizer and check actions
          */
-        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), SUMMARY, 0, SchedulingMethod.REPLY);
+        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId());
+        rememberMail(reply);
     }
 
     @Test
     public void testPartyCrasher() throws Exception {
-        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, SUMMARY);
+        EventData eventToCreate = EventFactory.createSingleTwoHourEvent(0, summary);
         Attendee replyingAttendee = prepareCommonAttendees(eventToCreate);
         createdEvent = createEvent(eventToCreate);
 
         /*
          * Receive mail as attendee
          */
-        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), SUMMARY, 0, SchedulingMethod.REQUEST);
+        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -131,6 +139,9 @@ public class ITipAnalyzeReplyTest extends AbstractITipAnalyzeTest {
          * Forward to other user of same context
          */
         TestUser partyCrasher = context2.acquireUser();
+        addTearDownOperation(() -> {
+            context2.backUser(partyCrasher);
+        });
         String crashersMail = partyCrasher.getLogin();
 
         /*
@@ -163,7 +174,9 @@ public class ITipAnalyzeReplyTest extends AbstractITipAnalyzeTest {
          */
         ApiClient apiClient3 = generateApiClient(partyCrasher);
         rememberClient(apiClient3);
-        iMip = receiveIMip(apiClient3, userResponseC2.getData().getEmail1(), SUMMARY, 0, SchedulingMethod.REQUEST);
+        iMip = receiveIMip(apiClient3, userResponseC2.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
+        rememberMail(apiClient3, iMip);
+
         newEvent = assertSingleChange(analyze(apiClient3, iMip)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -174,13 +187,14 @@ public class ITipAnalyzeReplyTest extends AbstractITipAnalyzeTest {
          */
         EventData eventData = assertSingleEvent(accept(apiClient3, constructBody(iMip)), createdEvent.getUid());
         assertAttendeePartStat(eventData.getAttendees(), crashersMail, PartStat.ACCEPTED.status);
+        rememberForCleanup(apiClient3, eventData);
 
         /*
          * Receive mail as organizer and check actions for party crasher
          */
-        MailData reply = receiveIMip(apiClient, crashersMail, SUMMARY, 0, SchedulingMethod.REPLY);
+        MailData reply = receiveIMip(apiClient, crashersMail, summary, 0, SchedulingMethod.REPLY);
         analyze(reply.getId(), CustomConsumers.PARTY_CRASHER);
-        context2.backUser(partyCrasher);
+        rememberMail(reply);
     }
 
 }
