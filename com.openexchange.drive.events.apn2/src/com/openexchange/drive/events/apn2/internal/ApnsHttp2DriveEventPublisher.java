@@ -66,7 +66,9 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.turo.pushy.apns.ApnsClient;
+import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.PushType;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 
@@ -247,7 +249,9 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
             .withCustomField("action", "sync")
             .withContentAvailable(true)
             .withExpiration(TimeUnit.DAYS.toMillis(1L))
-        .build();
+            .withPriority(DeliveryPriority.CONSERVE_POWER)
+            .withPushType(PushType.BACKGROUND)
+            .build();
     }
 
     static boolean removeSubscription(Subscription subscription, DriveSubscriptionStore subscriptionStore) {
