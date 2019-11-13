@@ -90,15 +90,27 @@ public abstract class AbstractRESTClient implements Closeable {
 
     /**
      * Initialises a new {@link AbstractRESTClient}.
-     * 
+     *
      * @param userAgent The user agent to use for this RESTClient
      * @param timeout The timeout for socket read and connections
      * @param parser The {@link RESTResponseParser} to use when parsing the responses
      */
     public AbstractRESTClient(String userAgent, int timeout, RESTResponseParser parser) {
+        this(null, userAgent, timeout, parser);
+    }
+
+    /**
+     * Initialises a new {@link AbstractRESTClient}.
+     *
+     * @param clientName HTTP client name
+     * @param userAgent The user agent to use for this RESTClient
+     * @param timeout The timeout for socket read and connections
+     * @param parser The {@link RESTResponseParser} to use when parsing the responses
+     */
+    public AbstractRESTClient(String clientName, String userAgent, int timeout, RESTResponseParser parser) {
         super();
         this.parser = parser;
-        this.httpClient = initializeHttpClient(userAgent, timeout);
+        this.httpClient = initializeHttpClient(clientName, userAgent, timeout);
     }
 
     /**
@@ -118,7 +130,7 @@ public abstract class AbstractRESTClient implements Closeable {
 
     /**
      * Executes the specified {@link HttpRequestBase} and returns the response.
-     * 
+     *
      * @param httpRequest The HTTP request to execute
      * @return The parsed HTTP REST response
      * @throws OXException if a client protocol error or an I/O error occurs
@@ -140,7 +152,7 @@ public abstract class AbstractRESTClient implements Closeable {
     /**
      * Executes the specified {@link HttpRequestBase} and returns the {@link InputStream}
      * of the response. Use to stream data to client.
-     * 
+     *
      * @param httpRequest The HTTP request to execute
      * @return The {@link InputStream} of the response
      * @throws OXException if a client protocol error or an I/O error occurs
@@ -198,7 +210,7 @@ public abstract class AbstractRESTClient implements Closeable {
 
     /**
      * Add any additional headers to the request
-     * 
+     *
      * @param request The request to add the headers to
      * @param headers the headers to add
      */
@@ -210,7 +222,7 @@ public abstract class AbstractRESTClient implements Closeable {
 
     /**
      * Adds an optional body to the specified HTTP request
-     * 
+     *
      * @param httpRequest the request to add the body to
      * @param body The body to add to the request
      * @throws OXException if the default HTTP charset is not supported
@@ -233,7 +245,7 @@ public abstract class AbstractRESTClient implements Closeable {
 
     /**
      * Prepares the query parameters and returns a query string
-     * 
+     *
      * @param queryParams The {@link Map} with the query parameters to prepare
      * @return the query string
      */
@@ -254,11 +266,15 @@ public abstract class AbstractRESTClient implements Closeable {
     /**
      * Initialises the HTTP client
      *
+     * @param clientName HTTP client name
      * @param userAgent The user agent
      * @param timeout The timeout to use for connections and socket reads
      * @return The initialised {@link CloseableHttpClient}
      */
-    private CloseableHttpClient initializeHttpClient(String userAgent, int timeout) {
+    private CloseableHttpClient initializeHttpClient(String clientName, String userAgent, int timeout) {
+        if (clientName == null) {
+            clientName = "unknown-rest";
+        }
         ClientConfig clientConfig = ClientConfig.newInstance();
         clientConfig.setUserAgent(userAgent);
         clientConfig.setConnectionTimeout(timeout);
@@ -271,7 +287,7 @@ public abstract class AbstractRESTClient implements Closeable {
      * Executes the specified {@link HttpRequestBase} and returns the response.
      * This is the lower layer of the RESTClient stack before data leaves the middleware's
      * premises.
-     * 
+     *
      * @param httpRequest The HTTP request to execute
      * @return The HTTP response
      * @throws ClientProtocolException if a client protocol error occurs

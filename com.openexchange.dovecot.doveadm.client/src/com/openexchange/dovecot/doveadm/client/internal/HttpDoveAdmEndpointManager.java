@@ -126,8 +126,12 @@ public class HttpDoveAdmEndpointManager {
         }
     }
 
-    private static CloseableHttpClient newHttpClient(int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) throws OXException {
-        ClientConfig clientConfig = ClientConfig.newInstance()
+    private static CloseableHttpClient newHttpClient(HttpDoveAdmCall call, int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) throws OXException {
+        String name = "doveadm";
+        if (call != HttpDoveAdmCall.DEFAULT) {
+            name = "doveadm-" + call.getName();
+        }
+        ClientConfig clientConfig = ClientConfig.newInstance(name)
             .setUserAgent("OX Dovecot Http Client v" + Services.getService(VersionService.class).getVersionString())
             .setMaxTotalConnections(totalConnections)
             .setMaxConnectionsPerRoute(maxConnectionsPerRoute)
@@ -137,7 +141,7 @@ public class HttpDoveAdmEndpointManager {
         return HttpClients.getHttpClient(clientConfig);
     }
 
-    private static EndpointListing listingFor(String endPoints, EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
+    private static EndpointListing listingFor(HttpDoveAdmCall call, String endPoints, EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
         // Parse end-point list
         List<String> l = Arrays.asList(Strings.splitByComma(endPoints.trim()));
 
@@ -157,7 +161,7 @@ public class HttpDoveAdmEndpointManager {
         int checkInterval = configService.getIntProperty(propPrefix.append("checkInterval").toString(), 60000);
 
         // Initialize HTTP client for the listing
-        CloseableHttpClient httpClient = newHttpClient(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
+        CloseableHttpClient httpClient = newHttpClient(call, totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
 
         // Setup end-point manager for the listing
         EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, availableStrategy, checkInterval, TimeUnit.MILLISECONDS);
@@ -206,11 +210,11 @@ public class HttpDoveAdmEndpointManager {
                         return false;
                     }
 
-                    fallBackEntry = listingFor(endPoints, factory, availableStrategy, new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.'), configService);
+                    fallBackEntry = listingFor(call, endPoints, factory, availableStrategy, new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.'), configService);
                 }
                 endpoints.put(call, fallBackEntry);
             } else {
-                endpoints.put(call, listingFor(endPoints, factory, availableStrategy, new StringBuilder(propName.length() + 1).append(propName).append('.'), configService));
+                endpoints.put(call, listingFor(call, endPoints, factory, availableStrategy, new StringBuilder(propName.length() + 1).append(propName).append('.'), configService));
             }
         }
 

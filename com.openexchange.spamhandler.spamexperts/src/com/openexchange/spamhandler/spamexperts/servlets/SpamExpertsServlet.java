@@ -97,7 +97,7 @@ public final class SpamExpertsServlet extends DataServlet {
         this.config = config;
 
         String versionString = versionService.getVersionString();
-        httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
+        httpClient = HttpClients.getHttpClient(ClientConfig.newInstance("spamexperts")
             .setUserAgent("OX Spam Experts Client v" + versionString)
             .setMaxTotalConnections(32)
             .setMaxConnectionsPerRoute(32)

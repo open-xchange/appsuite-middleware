@@ -127,7 +127,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             {
                 int readTimeout = 10000;
                 int connecTimeout = 3000;
-                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client").setDenyLocalRedirect(false == isLocalAddress);
+                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance("autoconfig-server").setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client").setDenyLocalRedirect(false == isLocalAddress);
 
                 ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
                 ConfigView view = configViewFactory.getView(userId, contextId);
