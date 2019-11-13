@@ -62,6 +62,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.container.Response;
@@ -173,7 +174,7 @@ public class TasksTest extends AbstractAJAXSession {
         GetResponse getResponse = getClient().execute(getRequest);
 
         Date lastModified = getResponse.getTimestamp();
-        Task reload = (Task) getResponse.getData();
+        Task reload = getResponse.getTask(TimeZone.getDefault());
         assertEquals("Number of participants differ", firstParticipants.size(), reload.getParticipants().length);
         for (final Participant p1 : firstParticipants) {
             boolean found = false;
