@@ -889,7 +889,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             breakerList.add(genericBreaker);
         }
         for (String name : names) {
-            Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(name, configuration, genericBreaker);
+            Optional<AbstractFailsafeCircuitBreakerCommandExecutor> optBreaker = initCircuitBreakerForName(Optional.of(name), configuration, genericBreaker);
             if (optBreaker.isPresent()) {
                 AbstractFailsafeCircuitBreakerCommandExecutor circuitBreaker = optBreaker.get();
                 breakerList.add(circuitBreaker);
@@ -909,14 +909,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initGenericCircuitBreaker(ConfigurationService configuration) {
-        return initCircuitBreakerForName(null, configuration, null);
+        return initCircuitBreakerForName(Optional.empty(), configuration, null);
     }
 
-    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(String infix, ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
-        if (infix == null) {
+    private static Optional<AbstractFailsafeCircuitBreakerCommandExecutor> initCircuitBreakerForName(Optional<String> optionalInfix, ConfigurationService configuration, GenericFailsafeCircuitBreakerCommandExecutor genericBreaker) {
+        if (!optionalInfix.isPresent()) {
             // The generic IMAP circuit breaker
             String propertyName = "com.openexchange.imap.breaker.enabled";
-            boolean enabled = configuration.getBoolProperty(propertyName, true);
+            boolean enabled = configuration.getBoolProperty(propertyName, false);
             if (!enabled) {
                 return Optional.empty();
             }
@@ -1004,10 +1004,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             return Optional.of(new GenericFailsafeCircuitBreakerCommandExecutor(new Ratio(failures, failureExecutions), new Ratio(success, successExecutions), delayMillis));
         } // End of generic
 
+        String infix = optionalInfix.get();
         if ("primary".equals(infix)) {
             // The IMAP circuit breaker form primary account
             String propertyName = "com.openexchange.imap.breaker.primary.enabled";
-            boolean enabled = configuration.getBoolProperty(propertyName, true);
+            boolean enabled = configuration.getBoolProperty(propertyName, false);
             if (!enabled) {
                 if (genericBreaker != null) {
                     genericBreaker.excludePrimaryAccount();
@@ -1112,7 +1113,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         propertyName = "com.openexchange.imap.breaker." + infix + ".enabled";
-        boolean enabled = configuration.getBoolProperty(propertyName, true);
+        boolean enabled = configuration.getBoolProperty(propertyName, false);
         if (!enabled) {
             if (genericBreaker != null) {
                 genericBreaker.addHostsToExclude(hosts);
