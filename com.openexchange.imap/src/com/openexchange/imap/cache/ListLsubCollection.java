@@ -621,6 +621,9 @@ final class ListLsubCollection implements Serializable {
                 ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
                 if (null != rootEntry) {
                     rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                    if(LOG.isDebugEnabled()) {
+                    	LOG.debug("Dropped folder {} from root", lsubEntry.getFullName());
+                    }
                 }
             }
         }
@@ -631,6 +634,9 @@ final class ListLsubCollection implements Serializable {
                 ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
                 if (null != rootEntry) {
                     rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                    if(LOG.isDebugEnabled()) {
+                    	LOG.debug("Dropped folder {} from root", lsubEntry.getFullName());
+                    }
                 }
             }
         }
