@@ -80,6 +80,7 @@ import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -279,29 +280,29 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
 
         try {
             updated.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
-            if (config.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
-                updated.put(GoogleCalendarConfigField.FOLDER, config.getString(GoogleCalendarConfigField.FOLDER));
+            ExtendedProperties extendedProperties = settings.getExtendedProperties();
+            String folder = optPropertyValue(extendedProperties, GoogleCalendarConfigField.FOLDER, String.class);
+            if (Strings.isNotEmpty(folder)) {
+                updated.put(GoogleCalendarConfigField.FOLDER, folder);
             }
-            if (config.hasAndNotNull("name")) {
-                updated.put("name", settings.getName());
+            if (Strings.isNotEmpty(settings.getName())) {
+                updated.put(GoogleCalendarConfigField.NAME, settings.getName());
             }
 
-            Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
+            Object colorValue = optPropertyValue(extendedProperties, COLOR_LITERAL);
             if (colorValue != null) {
                 updated.put(GoogleCalendarConfigField.COLOR, colorValue);
             }
 
-            if (config.hasAndNotNull(GoogleCalendarConfigField.DESCRIPTION)) {
-                updated.put(GoogleCalendarConfigField.DESCRIPTION, config.getString(GoogleCalendarConfigField.DESCRIPTION));
+            String desc = optPropertyValue(extendedProperties, GoogleCalendarConfigField.DESCRIPTION, String.class);
+            if (Strings.isNotEmpty(desc)) {
+                updated.put(GoogleCalendarConfigField.DESCRIPTION, desc);
             }
         } catch (JSONException e) {
             // never happens
             LOG.debug("{}", e.getMessage(), e);
         }
-        if (updated.isEqualTo(config)) {
-            return null;
-        }
-        return updated;
+        return updated.isEqualTo(config) ? null : updated;
     }
 
     @Override

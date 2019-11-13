@@ -108,7 +108,7 @@ attachments:
   items:
     $ref: "#/components/schemas/ChronosAttachment"
 extendedProperties:
-  $ref: "#/components/schemas/ExtendedProperties"
+  $ref: ExtendedProperties.yaml
 geo:
   type: object
   title: Geo

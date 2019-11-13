@@ -56,6 +56,5 @@ properties:
     type: string
     description: The description of this alarm.
   extendedProperties:
-    $ref: "#/components/schemas/ExtendedProperties"
-
-
+    $ref: ExtendedProperties.yaml
+   
