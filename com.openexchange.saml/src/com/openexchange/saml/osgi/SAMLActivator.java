@@ -49,15 +49,8 @@
 
 package com.openexchange.saml.osgi;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.saml.impl.DefaultConfig;
-import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
-import com.openexchange.saml.impl.SAMLSessionSsoProvider;
-import com.openexchange.saml.impl.SAMLSessionStorageParameterNamesProvider;
-import com.openexchange.saml.spi.SAMLConfigRegistry;
-import com.openexchange.session.SessionSsoProvider;
-import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
  * OSGi activator for com.openexchange.saml.
@@ -66,38 +59,22 @@ import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLActivator extends HousekeepingActivator {
+public class SAMLActivator implements BundleActivator {
 
     private SAMLFeature samlFeature;
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected synchronized void startBundle() throws Exception {
-        SAMLFeature samlFeature = new SAMLFeature(context);
+    public synchronized void start(BundleContext context) throws Exception {
+        samlFeature = new SAMLFeature(context);
         samlFeature.open();
-        this.samlFeature = samlFeature;
-
-        SAMLConfigRegistryImpl configRegistry = SAMLConfigRegistryImpl.getInstance();
-        DefaultConfig config = DefaultConfig.init(getService(ConfigurationService.class));
-        configRegistry.registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
-        registerService(SAMLConfigRegistry.class, configRegistry);
-
-        registerService(SessionStorageParameterNamesProvider.class, new SAMLSessionStorageParameterNamesProvider());
-        registerService(SessionSsoProvider.class, new SAMLSessionSsoProvider());
     }
 
     @Override
-    protected synchronized void stopBundle() throws Exception {
-        SAMLFeature samlFeature = this.samlFeature;
+    public synchronized void stop(BundleContext context) throws Exception {
         if (samlFeature != null) {
-            this.samlFeature = null;
             samlFeature.close();
+            samlFeature = null;
         }
-        super.stopBundle();
     }
 
 }
