@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.alarm.json;
 
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.List;
@@ -78,7 +77,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class UpdateAlarmsAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_PUSH_TOKEN);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_PUSH_TOKEN, PARAM_EXPAND, PARAM_SCHEDULING, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_FIELDS); 
 
     @Override
     protected Set<String> getOptionalParameters() {

@@ -70,7 +70,6 @@ import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.converter.mapper.ListItemMapping;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
@@ -79,6 +78,7 @@ import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FreeBusyAction}
@@ -90,7 +90,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
 public class FreeBusyAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS, CalendarParameters.PARAMETER_MASK_ID);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_FIELDS, PARAM_MASK_ID);
 
     private static final String ATTENDEES = "attendees";
 
@@ -161,7 +161,8 @@ public class FreeBusyAction extends ChronosAction {
 
         try {
             @SuppressWarnings("unchecked") ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
-            TimeZone timeZone = TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone());
+            ServerSession session = requestData.getSession();
+            TimeZone timeZone = session == null ? TimeZone.getTimeZone("UTC") :  TimeZone.getTimeZone(session.getUser().getTimeZone());
             JSONArray attendeesArray = requestBody.getJSONArray(ATTENDEES);
             for (int index = 0; index < attendeesArray.length(); index++) {
                 JSONObject attendeeJSON = attendeesArray.getJSONObject(index);
