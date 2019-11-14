@@ -72,7 +72,7 @@ public class NoopGauge implements Gauge<Double> {
 
     @Override
     public Double getValue() {
-        return 0.0D;
+        return new Double(0.0D);
     }
 
 }
