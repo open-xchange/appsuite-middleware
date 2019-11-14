@@ -12,15 +12,15 @@ Please note that this is not an complete overview about about all registered ser
 
 | Servlet             | Path                        | Package                           | Expose to    | Property to configure                     |
 |---------------------|:---------------------------:|:---------------------------------:|:------------:|------------------------------------------:|
-| DAV                 | /servlet/dav                | open-xchange-dav                  | Clients      | [com.openexchange.dav.prefixPath](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.prefixPath)   |
-| Dispatcher          | /ajax                       | open-xchange-core                 | Clients      | [com.openexchange.dispatcher.prefixPath](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dispatcher.prefix)   |
+| DAV                 | /servlet/dav                | open-xchange-dav                  | Clients      | [com.openexchange.dav.prefixPath](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.prefixPath)   |
+| Dispatcher          | /ajax                       | open-xchange-core                 | Clients      | [com.openexchange.dispatcher.prefixPath](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dispatcher.prefix)   |
 | EAS                 | /serlvet/mobileconfig       | open-xchange-eas-provisioning     | Clients      |                                           |
 | Guard               | /oxguard                    | open-xchange-guard                | Clients      |                                           |
 | Infostore           | /infostore, /files, /drive, /servlet/webdav.infostore, /servlet/webdav.drive"   | open-xchange-core     | Clients    |     |
 | Jolokia             | /monitoring/jolokia         | open-xchange-core                 | Admins       |                                           |
 | Proxy               | /servlet/proxy              | open-xchange-core                 | Clients      |                                           |
 | REST                | /                           | open-xchange-core                 | See below    |                                           |
-| SOAP CXF            | /webservices, /servlet/axis2/services   | open-xchange-soap-cxf   | Admins     | [com.openexchange.soap.cxf.baseAddress](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.soap.cxf.baseAddress)   |
+| SOAP CXF            | /webservices, /servlet/axis2/services   | open-xchange-soap-cxf   | Admins     | [com.openexchange.soap.cxf.baseAddress](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.soap.cxf.baseAddress)   |
 | websockets          | /socket.io                  | open-xchange-core                 | Clients      |                                           |
 
 
@@ -28,7 +28,7 @@ Please note that this is not an complete overview about about all registered ser
 
 ## DAV
 
-Enables the DAV related functionality for the MW, in particular support for CalDAV and CardDAV. See [CalDAV and CardDAV](http://documentation.open-xchange.com{{ site.baseurl }}/middleware/miscellaneous/caldav_carddav.html)
+Enables the DAV related functionality for the MW, in particular support for CalDAV and CardDAV. See [CalDAV and CardDAV](https://documentation.open-xchange.com{{ site.baseurl }}/middleware/miscellaneous/caldav_carddav.html)
 
 ## Dispatcher
 
@@ -86,7 +86,7 @@ REST API endpoints created by the middleware have multiple different path. There
 | Mail resolver             | /preliminary/utilities/mailResolver/v1                                | open-xchange-rest           | Basic Auth login   |
 | User Feedback             | /userfeedback/v1                                                      | open-xchange-userfeedback   | Basic Auth login   |
 
-Note: The "Basic Auth login" can be adjusted via [com.openexchange.rest.services.basic-auth.login](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.rest.services.basic-auth.login)
+Note: The "Basic Auth login" can be adjusted via [com.openexchange.rest.services.basic-auth.login](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.rest.services.basic-auth.login)
 
 ### Further reading
 
