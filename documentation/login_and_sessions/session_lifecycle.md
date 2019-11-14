@@ -117,7 +117,7 @@ Note the cookie `open-xchange-session-IaxgQLSrL7j1zE1Yceasg` containing the **Se
 
 ## Session hibernation for long running sessions
 
-OX App Suite supports long running sessions, that can be revived even after many days. To facilitate that, sessions that are not in active use are slimmed down and placed in a kind of 'hibernation mode'. Autologin can still reactivate these sessions while they don't take up as much memory as a regular active sessions. You can fine tune when a session is sent into hibernation, and when a session is discarded in the[configuration]({{site.baseurl}}/components/middleware/config/latest/#mode=tags&tag=Session).
+OX App Suite supports long running sessions, that can be revived even after many days. To facilitate that, sessions that are not in active use are slimmed down and placed in a kind of 'hibernation mode'. Autologin can still reactivate these sessions while they don't take up as much memory as a regular active sessions. You can fine tune when a session is sent into hibernation, and when a session is discarded in the [configuration](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}#mode=tags&tag=Session).
 
 ### Session rotation
 
