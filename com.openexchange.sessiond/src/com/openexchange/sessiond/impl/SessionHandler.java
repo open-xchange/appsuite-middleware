@@ -1393,7 +1393,7 @@ public final class SessionHandler {
      * @return The session associated with given session identifier; otherwise <code>null</code> if expired or none found
      */
     protected static SessionControl getSession(String sessionId, final boolean considerSessionStorage) {
-        return getSession(sessionId, true, considerSessionStorage);
+        return getSession(sessionId, true, considerSessionStorage, false);
     }
 
     /**
@@ -1403,9 +1403,10 @@ public final class SessionHandler {
      * @param considerLocalStorage <code>true</code> to consider local storage; otherwise <code>false</code>
      * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
      *            <code>false</code>
+     * @param peek <code>true</code> to only peek session from session storage ut don't add it to local SessionD; otherwise <code>false</code>
      * @return The session associated with given session identifier; otherwise <code>null</code> if expired or none found
      */
-    protected static SessionControl getSession(String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
+    protected static SessionControl getSession(String sessionId, boolean considerLocalStorage, boolean considerSessionStorage, boolean peek) {
         LOG.debug("getSession <{}>", sessionId);
 
         SessionData sessionData = SESSION_DATA_REF.get();
@@ -1419,17 +1420,17 @@ public final class SessionHandler {
                 return null;
             }
 
-            return optSessionFromSessionStorage(sessionId, sessionData);
+            return optSessionFromSessionStorage(sessionId, peek, sessionData);
         }
 
         SessionControl sessionControl = sessionData.getSession(sessionId);
         if (considerSessionStorage && null == sessionControl) {
-            sessionControl = optSessionFromSessionStorage(sessionId, sessionData);
+            sessionControl = optSessionFromSessionStorage(sessionId, peek, sessionData);
         }
         return sessionControl;
     }
 
-    private static SessionControl optSessionFromSessionStorage(String sessionId, SessionData sessionData) {
+    private static SessionControl optSessionFromSessionStorage(String sessionId, boolean peek, SessionData sessionData) {
         SessionStorageService storageService = Services.optService(SessionStorageService.class);
         if (storageService == null) {
             // No session storage available
@@ -1442,6 +1443,10 @@ public final class SessionHandler {
                 return null;
             }
 
+            if (peek) {
+                return new SessionControl(unwrappedSession);
+            }
+
             SessionControl sc = sessionData.addSession(unwrappedSession, noLimit, true);
             if (unwrappedSession == sc.getSession()) {
                 // This thread restored the session first
@@ -1452,8 +1457,8 @@ public final class SessionHandler {
 
             // Post event for restored session
             postSessionRestauration(sc.getSession());
-
             return sc;
+
         } catch (OXException e) {
             if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
                 LOG.warn("Session look-up failed in session storage.", e);

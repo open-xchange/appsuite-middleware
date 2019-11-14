@@ -211,19 +211,22 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public Session peekSession(String sessionId) {
+        if (null == sessionId) {
+            return null;
+        }
+
+        SessionControl sessionControl = SessionHandler.getSession(sessionId, true, true, true);
+        return null == sessionControl ? null : sessionControl.getSession();
+    }
+
+    @Override
     public SessionImpl getSession(String sessionId, boolean considerSessionStorage) {
         if (null == sessionId) {
             return null;
         }
+
         SessionControl sessionControl = SessionHandler.getSession(sessionId, considerSessionStorage);
-        /*-
-         *
-        if (!considerSessionStorage && null == sessionControl) {
-            // No local session found. Maybe available in session storage...
-            sessionControl = SessionHandler.getSession(sessionId, false, true);
-        }
-         *
-         */
         if (null == sessionControl) {
             LOG.debug("Session not found. ID: {}", sessionId);
             return null;
