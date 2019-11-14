@@ -49,15 +49,34 @@
 
 package com.openexchange.session;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link SessionSsoProvider} - Checks if a given session has been spawned by an SSO system.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.3
  */
 public interface SessionSsoProvider {
+
+    /**
+     * Checks whether processing of an inbound {@code /login?action=login} request shall be skipped, to
+     * keep any session cookies and potentially perform some SSO mechanism specific actions during subsequent
+     * HTTP requests.
+     * <p>
+     * If {@code false} is returned, the processing of the request continues as usual. Otherwise it is handled
+     * as if an {@code AjaxExceptionCodes.DISABLED_ACTION} would have been thrown.
+     *
+     * @param request The inbound HTTP request
+     * @param response The according HTTP response
+     * @return {@code true} to skip further auto-login processing of the core login handler, {@code false} to
+     *         continue as usual
+     * @throws OXException If check fails; the processing is then continued as if {@code false} was returned
+     */
+    boolean skipAutoLoginAttempt(HttpServletRequest request, HttpServletResponse response) throws OXException;
 
     /**
      * Checks if given session has been spawned by an SSO system.

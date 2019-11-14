@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.BundleContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -85,6 +87,17 @@ public class SessionSsoServiceImpl extends RankingAwareNearRegistryServiceTracke
                 return true;
             }
         }
+        return false;
+    }
+
+    @Override
+    public boolean skipAutoLoginAttempt(HttpServletRequest request, HttpServletResponse response) throws OXException {
+        for (SessionSsoProvider provider : this) {
+            if (provider.skipAutoLoginAttempt(request, response)) {
+                return true;
+            }
+        }
+
         return false;
     }
 

@@ -1373,7 +1373,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     LOG.debug("Context {} is being created. Therefore can't load context sensitive properties. Try to load \"{}\" on global view.", I(contextId), propertyName, e);
                     return getConfigViewValue(propertyName, null, viewFactory);
                 }
-                LOG.warn("Unable to load {}.", propertyName, e);
+                LOG.debug("Unable to load {}.", propertyName, e);
             }
         }
         return defaultValue;
@@ -1392,7 +1392,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             ConfigView view = viewFactory.getView();
             return view.get(propertyName, Boolean.class);
         } catch (OXException e) {
-            LOG.warn("Unable to load {}.", propertyName, e);
+            LOG.debug("Unable to load {}.", propertyName, e);
         }
         return defaultValue;
     }

@@ -124,50 +124,24 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              */
             LoginResult loginResult = AutoLoginTools.tryGuestAutologin(shareConf.getLoginConfig(), req, resp);
             if (null == loginResult) {
+                if (skipAutoLoginForSsoSession(req, resp)) {
+                    // Auto-login disabled per configuration.
+                    // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
+                    if (doAutoLogin(req, resp)) {
+                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
+                            return;
+                        }
+                        throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
+                    }
+                    return;
+                }
+
                 /*
                  * try auto-login for regular user
                  */
                 String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
                 loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
                 if (null == loginResult) {
-                    /*
-                     * In case of SSO, public session cookie
-                     */
-                    loginResult = AutoLoginTools.tryAutologinByAlternativeId(conf, req, resp, hash);
-                    /*
-                     * Verify non-null and that stay signed-in is false (which should be the case for SSO)
-                     */
-                    if (null == loginResult || loginResult.getSession().isStaySignedIn()) {
-                        /*
-                         * auto-login failed
-                         */
-                        SessionUtility.removeOXCookies(hash, req, resp);
-                        if (doAutoLogin(req, resp)) {
-                            SessionUtility.removeJSESSIONID(req, resp);
-                            if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
-                                return;
-                            }
-                            throw OXJSONExceptionCodes.INVALID_COOKIE.create();
-                        }
-                        return;
-                    }
-                    /*
-                     * Check for an SSO session
-                     */
-                    SessionSsoService ssoService = ServerServiceRegistry.getInstance().getService(SessionSsoService.class);
-                    if (ssoService != null && ssoService.isSsoSession(loginResult.getSession())) {
-                        /*-
-                         *  Auto-login disabled for SSO sessions.
-                         *  Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
-                         */
-                        if (doAutoLogin(req, resp)) {
-                            if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
-                                return;
-                            }
-                            throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
-                        }
-                        return;
-                    }
                     /*
                      * auto-login failed
                      */
@@ -348,6 +322,26 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         return b.build();
+    }
+
+    /**
+     * Checks whether auto login attempt shall be skipped due to SSO requirements.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @return <code>true</code> if auto login should abort afterwards; otherwise <code>false</code>
+     */
+    private static boolean skipAutoLoginForSsoSession(HttpServletRequest req, HttpServletResponse resp) {
+        SessionSsoService ssoService = ServerServiceRegistry.getInstance().getService(SessionSsoService.class);
+        if (ssoService != null) {
+            try {
+                return ssoService.skipAutoLoginAttempt(req, resp);
+            } catch (OXException e) {
+                LOG.warn("Error while checking if autologin shall be skipped due to SSO requirements", e);
+            }
+        }
+
+        return false;
     }
 
 }

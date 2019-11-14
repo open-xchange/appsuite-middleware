@@ -206,7 +206,7 @@ public enum MailFilterProperty implements Property {
     /**
      * The enabled flag for mail filter circuit breaker
      */
-    enabled(Boolean.TRUE, true, "com.openexchange.mail.filter.breaker."),
+    enabled(Boolean.FALSE, true, "com.openexchange.mail.filter.breaker."),
 
     /**
      * The failure threshold for mail filter circuit breaker, which is the number of successive failures that must occur in order to open

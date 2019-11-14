@@ -49,6 +49,13 @@
 
 package com.openexchange.oidc.impl;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
@@ -59,9 +66,12 @@ import com.openexchange.session.SessionSsoProvider;
  * {@link OIDCSessionSsoProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.10.3
  */
 public class OIDCSessionSsoProvider implements SessionSsoProvider {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCSessionSsoProvider.class);
 
     /**
      * Initializes a new {@link OIDCSessionSsoProvider}.
@@ -73,6 +83,27 @@ public class OIDCSessionSsoProvider implements SessionSsoProvider {
     @Override
     public boolean isSsoSession(Session session) throws OXException {
         return session != null && null != session.getParameter(OIDCTools.IDTOKEN);
+    }
+
+    @Override
+    public boolean skipAutoLoginAttempt(HttpServletRequest request, HttpServletResponse response) throws OXException {
+        LoginConfiguration loginConfiguration = LoginServlet.getLoginConfiguration();
+        if (loginConfiguration == null) {
+            LOG.warn("Cannot verify autologin request due to missing login configuration");
+            return false;
+        }
+
+        Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, loginConfiguration);
+        if (autologinCookie == null) {
+            return false;
+        }
+
+        Session session = OIDCTools.getSessionFromAutologinCookie(autologinCookie, request);
+        if (session == null) {
+            return false;
+        }
+
+        return true;
     }
 
 }

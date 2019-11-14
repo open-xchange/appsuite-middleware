@@ -183,45 +183,6 @@ public class AutoLoginTools {
         return null;
     }
 
-    /**
-     * Tries to lookup an existing session by the cookies supplied with the request.
-     *
-     * @param loginConfig A reference to the login configuration
-     * @param request The request to try and perform the auto-login for
-     * @param response The corresponding response
-     * @return The login result if a valid session was found, or <code>null</code>, otherwise
-     */
-    public static LoginResult tryAutologinByAlternativeId(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return tryAutologinByAlternativeId(loginConfig, request, response, HashCalculator.getInstance().getHash(request));
-    }
-
-    /**
-     * Tries to lookup an existing session by the cookies supplied with the request.
-     *
-     * @param loginConfig A reference to the login configuration
-     * @param request The request to try and perform the auto-login for
-     * @param response The corresponding response
-     * @param hash The client-specific hash for the cookie names
-     * @return The login result if a valid session was found, or <code>null</code>, otherwise
-     */
-    public static LoginResult tryAutologinByAlternativeId(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response, String hash) throws OXException {
-        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-        if (null == cookies) {
-            return null;
-        }
-
-        // Try by public session cookie
-        Cookie publicSessionCookie = cookies.get(LoginServlet.PUBLIC_SESSION_PREFIX + hash);
-        if (publicSessionCookie != null) {
-            LOG.debug("Successfully looked up public session cookie for hash {}, continuing auto-login procedure.", hash);
-            String publicSessionID = publicSessionCookie.getValue();
-            return tryAutoLoginyAlternativeId(loginConfig, request, response, publicSessionID);
-        }
-
-        LOG.debug("No public session cookie for hash {} found, aborting auto-login procedure.", hash);
-        return null;
-    }
-
     private static void logout(String sessionID) throws OXException {
         LoginPerformer.getInstance().doLogout(sessionID);
     }
@@ -375,55 +336,6 @@ public class AutoLoginTools {
             return null;
         }
         return sessiondService.getSession(sessionID);
-    }
-
-    private static LoginResult tryAutoLoginyAlternativeId(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response, String publicSessionID) throws OXException {
-        /*
-         * lookup matching session
-         */
-        Session session = getSessionByAlternativeId(publicSessionID);
-        if (null == session) {
-            /*
-             * not found
-             */
-            LOG.debug("Session not found by alternative ID {}, aborting auto-login procedure.", publicSessionID);
-            return null;
-        }
-        LOG.debug("Successfully looked up session by alternative ID {}, verifying if session is valid.", publicSessionID);
-        /*
-         * Session HIT -- Consult session inspector
-         */
-        if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionHit(session, request, response)) {
-            return null;
-        }
-        /*
-         * check & take over remote IP
-         */
-        String remoteAddress = request.getRemoteAddr();
-        SessionUtility.checkIP(session, remoteAddress);
-        updateIPAddress(loginConfig, remoteAddress, session);
-        /*
-         * ensure user & context are enabled
-         */
-        Context context = ContextStorage.getInstance().getContext(session.getContextId());
-        User user = UserStorage.getInstance().getUser(session.getUserId(), context);
-        if (false == context.isEnabled() || false == user.isMailEnabled()) {
-            throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-        }
-        /*
-         * wrap valid session into login result & return
-         */
-        LOG.debug("Auto-login successful for session with alternative ID {} of user {} in context {}.", publicSessionID, I(user.getId()), I(context.getContextId()));
-        return new LoginResultImpl(session, context, user);
-    }
-
-    private static Session getSessionByAlternativeId(String publicSessionID) {
-        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null == sessiondService) {
-            LOG.error("", ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName()));
-            return null;
-        }
-        return sessiondService.getSessionByAlternativeId(publicSessionID);
     }
 
     /**

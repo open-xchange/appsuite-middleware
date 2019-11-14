@@ -49,7 +49,6 @@
 
 package com.openexchange.session;
 
-
 /**
  * {@link SessionSsoService}
  *
@@ -57,6 +56,5 @@ package com.openexchange.session;
  * @since v7.10.3
  */
 public interface SessionSsoService extends SessionSsoProvider {
-
     // Nothing
 }

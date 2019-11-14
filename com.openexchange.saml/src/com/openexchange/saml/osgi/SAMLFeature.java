@@ -66,15 +66,24 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.saml.SAMLProperties;
+import com.openexchange.saml.impl.DefaultConfig;
+import com.openexchange.saml.impl.DefaultLoginConfigurationLookup;
+import com.openexchange.saml.impl.VeryDangerousSAMLBackend;
 import com.openexchange.saml.impl.SAMLConfigRegistryImpl;
 import com.openexchange.saml.impl.SAMLSessionInspector;
+import com.openexchange.saml.impl.SAMLSessionSsoProvider;
+import com.openexchange.saml.impl.SAMLSessionStorageParameterNamesProvider;
 import com.openexchange.saml.impl.hz.PortableAuthnRequestInfoFactory;
 import com.openexchange.saml.impl.hz.PortableLogoutRequestInfoFactory;
 import com.openexchange.saml.oauth.service.OAuthAccessTokenService;
+import com.openexchange.saml.spi.SAMLBackend;
+import com.openexchange.saml.spi.SAMLConfigRegistry;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.SessionSsoProvider;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
@@ -127,7 +136,19 @@ public class SAMLFeature extends DependentServiceStarter {
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(sessiondService), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthnRequestInfoFactory(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestInfoFactory(), null));
+            serviceRegistrations.push(context.registerService(SessionStorageParameterNamesProvider.class, new SAMLSessionStorageParameterNamesProvider(), null));
+            serviceRegistrations.push(context.registerService(SessionSsoProvider.class, new SAMLSessionSsoProvider(new DefaultLoginConfigurationLookup(), sessiondService), null));
+
             getSamlBackend(services);
+
+            SAMLConfigRegistryImpl configRegistry = SAMLConfigRegistryImpl.getInstance();
+            DefaultConfig config = DefaultConfig.init(configService);
+            configRegistry.registerSAMLConfig(SAMLConfigRegistryImpl.DEFAULT_KEY, config);
+            serviceRegistrations.push(context.registerService(SAMLConfigRegistry.class, configRegistry, null));
+
+            if (configService.getBoolProperty("com.openexchange.saml.startVeryDangerousDebugBackend", false)) {
+                serviceRegistrations.push(context.registerService(SAMLBackend.class, new VeryDangerousSAMLBackend(services.getService(UserService.class), services.getService(ContextService.class)), null));
+            }
         } else {
             LOG.info("SAML 2.0 support is disabled by configuration. Skipping initialization...");
         }
