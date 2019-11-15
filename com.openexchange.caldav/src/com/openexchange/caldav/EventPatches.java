@@ -869,18 +869,18 @@ public class EventPatches {
          * @param master The master event
          * @param exceptions The event exceptions
          */
-        private void restoreActorsParticipantStatus(EventResource resource, Event event) {
+        private void restoreParticipantStatus(EventResource resource, Event event) {
             if (false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
                 return;
             }
             try {
-                restoreActorsParticipantStatus(event);
+                restoreParticipantStatus(event);
             } catch (OXException e) {
                 LOG.warn("Error restoring the participant status", e);
             }
         }
 
-        private void restoreActorsParticipantStatus(Event event) throws OXException {
+        private void restoreParticipantStatus(Event event) throws OXException {
             if (null == event || isNullOrEmpty(event.getAttendees())) {
                 return;
             }
@@ -903,10 +903,10 @@ public class EventPatches {
                         Attendee copy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
                         copy.setPartStat(originalAttendee.getPartStat());
                         attendees.set(i, copy);
-                        event.setAttendees(attendees);
                     }
                 }
             }
+            event.setAttendees(attendees);
         }
 
         /**
@@ -963,7 +963,7 @@ public class EventPatches {
                 applyManagedAttachments(importedEvent, factory.getConfigViewFactory());
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
                 removeOrganizerAttendee(resource, importedEvent, importedChangeExceptions);
-                restoreActorsParticipantStatus(resource, importedEvent);
+                restoreParticipantStatus(resource, importedEvent);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*
@@ -977,7 +977,7 @@ public class EventPatches {
                     applyManagedAttachments(importedChangeException, factory.getConfigViewFactory());
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
-                    restoreActorsParticipantStatus(resource, importedChangeException);
+                    restoreParticipantStatus(resource, importedChangeException);
                 }
             }
             /*
