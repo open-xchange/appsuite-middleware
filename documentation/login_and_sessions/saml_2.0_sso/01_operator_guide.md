@@ -6,7 +6,8 @@ tags: SAML, Installation, Configuration, SSO
 
 # Installation
 
-After development of the SAML backend is done you can setup OX App Suite as usual. Additionally you need to install `open-xchange-saml-core` and a package that provides `open-xchange-saml-backend` and contains your custom SAML backend. It is also necessary that a package providing `open-xchange-authentication` is installed. For your convenience you can install the metapackage `open-xchange-saml` which depends on a core and backend package. Finally the package for SAML support within App Suite UI is needed: `open-xchange-appsuite-saml`.
+The SAML integration is provided by the `open-xchange-saml-core` package and requires an additional package that provides `open-xchange-saml-backend` and contains your custom SAML backend. It is also necessary that a package providing `open-xchange-authentication` is installed. For your convenience you can install the metapackage `open-xchange-saml` which depends on a core and backend package. Finally the package for SAML support within App Suite UI is needed: `open-xchange-appsuite-saml`.
+
 
 # Configuration
 
@@ -16,15 +17,18 @@ The main configuration takes place in `/opt/open-xchange/etc/saml.properties`. S
 
 When multiple *SAML backends* are installed, it may be required to have individual configuration. Please refer to the specific *SAML backend* documentation if it supplies own configuration or relies upon `/opt/open-xchange/etc/saml.properties`.
 
-Have a look at the properties in `/opt/open-xchange/etc/sessiond.properties`. Its noteworthy that every refresh (e.g. closing the App Suite browser tab and opening it again at a later point) will create a new user session. So the lifetime of App Suite sessions should be short while a user should be able to acquire quite some sessions in parallel.
-
-The path of the final login redirect that ends up in the web UI along with a valid session must be configured via `/opt/open-xchange/etc/server.properties`. If you haven't already (because of other requirements), set [com.openexchange.UIWebPath](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.UIWebPath) to `/appsuite/`. App Suite is the only officially supported frontend for SAML authentication.
-
-Note that session fail-over is currently not possible, because the central session storage only works with autologin enabled.
+The path of the final login redirect that ends up in the web UI along with a valid session must be configured via `/opt/open-xchange/etc/server.properties`. If you haven't already (because of other requirements), set [com.openexchange.UIWebPath](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.UIWebPath) to `/appsuite/`.
 
 SAML sessions will not contain the users password. Thus it cannot be used to encrypt/decrypt secrets for external services (e.g. OAuth token). Configure `/opt/open-xchange/etc/secret.properties` to support other encryption/decryption mechanisms (e.g. "\<list\>").
 
-The same problem exists for the primary mail account. Therefore the IMAP accounts must be accessible with a global master password. You need to configure this in `/opt/open-xchange/etc/mail.properties`
+The same problem exists for the primary mail account. Therefore the IMAP accounts must be accessible with a global master password or OAuth tokens. You need to configure this in `/opt/open-xchange/etc/mail.properties`
+
+
+### Autologin
+
+By default every page refresh (e.g. closing the App Suite browser tab and opening it again at a later point) will create a new user session. So the lifetime of App Suite sessions should be short while a user should be able to acquire quite some sessions in parallel. To let App Suite reuse existing web sessions without inititating an IdP roundtrip, consider to enable the `com.openexchange.saml.enableAutoLogin` property. It will create an addtional cookie with browser session lifetime that enables to re-enter an existing App Suite session. This works independently from the usual App Suite autologin behavior, which is not considered in SAML scenarios.
+
+Furthermore it is possible to re-enter an existing App Suite session when returning from an IdP login roundtrip, if the according IdP session also was still active. This is realized by relating the `SessionIndex` attribute of the SAML assertion to the App Suite session that was created as a result of it. The `SessionIndex` attribute is stored within App Suite sessions and can be used to look-up and re-use an existing session created with the same `SessionIndex` value before. The mechanism relies on the HTTP sticky session, i.e. an App Suite session can only be re-used if the IdP-to-SP redirect ends up on the same middleware node where an according session has been created before. The config setting to enable this behavior is `com.openexchange.saml.enableSessionIndexAutoLogin`.
 
 
 ## Frontend Configuration
