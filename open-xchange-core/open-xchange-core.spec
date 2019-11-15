@@ -72,6 +72,8 @@ mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}
 find %{buildroot}/opt/open-xchange/etc \
      %{buildroot}/opt/open-xchange/importCSV \
+        \( -path %{buildroot}/opt/open-xchange/etc/security/policies.policy -o ! -path "%{buildroot}/opt/open-xchange/etc/security*" \) \
+        ! -path %{buildroot}/opt/open-xchange/etc/all.policy \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
@@ -742,7 +744,7 @@ EOF
     ox_scr_todo ${SCR} && {
       scriptconf=/opt/open-xchange/etc/ox-scriptconf.sh
       contains JAVA_OPTS_SECURITY= ${scriptconf}  || {
-        sed -i -e '/^JAVA_OPTS_SERVER=.*$/a #JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles"' ${scriptconf}
+        sed -i -e '/^JAVA_OPTS_SERVER=.*$/a #JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles -Djna.platform.library.path=/usr/lib/x86_64-linux-gnu:/usr/lib64"' ${scriptconf}
       }
       ox_scr_done ${SCR}
     }
@@ -811,9 +813,11 @@ exit 0
 %dir /opt/open-xchange/documentation/etc
 /opt/open-xchange/documentation/etc/*.yml
 %dir /opt/open-xchange/etc
+/opt/open-xchange/etc/all.policy
 %dir /opt/open-xchange/etc/contextSets
 %dir /opt/open-xchange/etc/meta
 %dir /opt/open-xchange/etc/security
+/opt/open-xchange/etc/security/*.list
 %dir /opt/open-xchange/etc/settings
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/

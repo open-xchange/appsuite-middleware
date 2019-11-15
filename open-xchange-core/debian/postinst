@@ -703,7 +703,7 @@ EOF
     ox_scr_todo ${SCR} && {
       scriptconf=/opt/open-xchange/etc/ox-scriptconf.sh
       contains JAVA_OPTS_SECURITY= ${scriptconf}  || {
-        sed -i -e '/^JAVA_OPTS_SERVER=.*$/a #JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles"' ${scriptconf}
+        sed -i -e '/^JAVA_OPTS_SERVER=.*$/a #JAVA_OPTS_SECURITY="-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles -Djna.platform.library.path=/usr/lib/x86_64-linux-gnu:/usr/lib64"' ${scriptconf}
       }
       ox_scr_done ${SCR}
     }
