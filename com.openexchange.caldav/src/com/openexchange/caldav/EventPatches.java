@@ -59,6 +59,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -67,6 +68,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -81,6 +83,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -94,6 +97,7 @@ import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -857,6 +861,83 @@ public class EventPatches {
                 }
             }
         }
+        
+        /**
+         * Restores the actors participant status on incoming event patches if the client
+         * set the status to {@link ParticipationStatus#NEEDS_ACTION}
+         *
+         * @param resource The event resource
+         * @param master The master event
+         * @param exceptions The event exceptions
+         */
+        private void restoreActorsParticipantStatus(EventResource resource, Event event) {
+            if (false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
+                return;
+            }
+            int userId = factory.getSession().getUserId();
+            try {
+                restoreActorsParticipantStatus(event, userId);
+            } catch (OXException e) {
+                LOG.warn("Error restoring the participant status of the acting user {}", I(userId), e);
+            }
+        }
+
+        private void restoreActorsParticipantStatus(Event event, int userId) throws OXException {
+            if (null == event || userId <= 0 || isNullOrEmpty(event.getAttendees())) {
+                return;
+            }
+            List<Attendee> attendees = new LinkedList<Attendee>(event.getAttendees());
+            for (int i = 0; i < attendees.size(); i++) {
+                Attendee attendee = attendees.get(i);
+                if (userId == attendee.getEntity()) {
+                    /*
+                     * Found matching user, try replace status if necessary
+                     */
+                    if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+                        ParticipationStatus partStat = getPartStatForUser(event, userId);
+                        if (null != partStat && false == ParticipationStatus.NEEDS_ACTION.equals(partStat)) {
+                            /*
+                             * Replace with the new status
+                             */
+                            Attendee copy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                            copy.setPartStat(partStat);
+                            attendees.set(i, copy);
+                            event.setAttendees(attendees);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        /**
+         * Loads the original event from the DB and returns the participant status of the given user 
+         *
+         * @param event The event to load
+         * @param userId The identifier of the user to get the status for
+         * @return The participant status or <code>null</code> if event or user can't be found 
+         * @throws OXException
+         */
+        private ParticipationStatus getPartStatForUser(Event event, int userId) throws OXException {
+            return new CalendarAccessOperation<ParticipationStatus>(factory) {
+
+                @Override
+                protected ParticipationStatus perform(IDBasedCalendarAccess access) throws OXException {
+                    /*
+                     * Get existing event and and search for user
+                     */
+                    Event original = access.getEvent(getEventID(event));
+                    if (null == original) {
+                        return null;
+                    }
+                    Attendee originalAttendee = CalendarUtils.find(original.getAttendees(), userId);
+                    if (null != originalAttendee) {
+                        return originalAttendee.getPartStat();
+                    }
+                    return null;
+                }
+            }.execute(factory.getSession());
+        }
 
         /**
          * Applies all known patches to an event after importing.
@@ -887,6 +968,7 @@ public class EventPatches {
                 applyManagedAttachments(importedEvent, factory.getConfigViewFactory());
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
                 removeOrganizerAttendee(resource, importedEvent, importedChangeExceptions);
+                restoreActorsParticipantStatus(resource, importedEvent);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*
@@ -900,6 +982,7 @@ public class EventPatches {
                     applyManagedAttachments(importedChangeException, factory.getConfigViewFactory());
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
+                    restoreActorsParticipantStatus(resource, importedChangeException);
                 }
             }
             /*
