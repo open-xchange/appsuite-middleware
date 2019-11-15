@@ -59,7 +59,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -863,7 +862,7 @@ public class EventPatches {
         }
         
         /**
-         * Restores the actors participant status on incoming event patches if the client
+         * Restores the participant status of attendees on incoming event patches if the client
          * set the status to {@link ParticipationStatus#NEEDS_ACTION}
          *
          * @param resource The event resource
@@ -874,67 +873,63 @@ public class EventPatches {
             if (false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
                 return;
             }
-            int userId = factory.getSession().getUserId();
             try {
-                restoreActorsParticipantStatus(event, userId);
+                restoreActorsParticipantStatus(event);
             } catch (OXException e) {
-                LOG.warn("Error restoring the participant status of the acting user {}", I(userId), e);
+                LOG.warn("Error restoring the participant status", e);
             }
         }
 
-        private void restoreActorsParticipantStatus(Event event, int userId) throws OXException {
-            if (null == event || userId <= 0 || isNullOrEmpty(event.getAttendees())) {
+        private void restoreActorsParticipantStatus(Event event) throws OXException {
+            if (null == event || isNullOrEmpty(event.getAttendees())) {
                 return;
             }
             List<Attendee> attendees = new LinkedList<Attendee>(event.getAttendees());
+            List<Attendee> originalAttendees = null;
             for (int i = 0; i < attendees.size(); i++) {
                 Attendee attendee = attendees.get(i);
-                if (userId == attendee.getEntity()) {
+                if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
                     /*
-                     * Found matching user, try replace status if necessary
+                     * Found user to check the status in DB for
                      */
-                    if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
-                        ParticipationStatus partStat = getPartStatForUser(event, userId);
-                        if (null != partStat && false == ParticipationStatus.NEEDS_ACTION.equals(partStat)) {
-                            /*
-                             * Replace with the new status
-                             */
-                            Attendee copy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
-                            copy.setPartStat(partStat);
-                            attendees.set(i, copy);
-                            event.setAttendees(attendees);
-                        }
+                    if (null == originalAttendees) {
+                        originalAttendees = getAttendees(event);
                     }
-                    break;
+                    Attendee originalAttendee = CalendarUtils.find(originalAttendees, attendee);
+                    if (null != originalAttendee && false == ParticipationStatus.NEEDS_ACTION.matches(originalAttendee.getPartStat())) {
+                        /*
+                         * Replace with the original status
+                         */
+                        Attendee copy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                        copy.setPartStat(originalAttendee.getPartStat());
+                        attendees.set(i, copy);
+                        event.setAttendees(attendees);
+                    }
                 }
             }
         }
 
         /**
-         * Loads the original event from the DB and returns the participant status of the given user 
+         * Loads the original event from the DB and returns the attendee list
          *
          * @param event The event to load
-         * @param userId The identifier of the user to get the status for
-         * @return The participant status or <code>null</code> if event or user can't be found 
+         * @return The attendees or empty list if event can't be found
          * @throws OXException
          */
-        private ParticipationStatus getPartStatForUser(Event event, int userId) throws OXException {
-            return new CalendarAccessOperation<ParticipationStatus>(factory) {
+        private List<Attendee> getAttendees(Event event) throws OXException {
+            return new CalendarAccessOperation<List<Attendee>>(factory) {
 
                 @Override
-                protected ParticipationStatus perform(IDBasedCalendarAccess access) throws OXException {
+                protected List<Attendee> perform(IDBasedCalendarAccess access) throws OXException {
                     /*
                      * Get existing event and and search for user
                      */
                     Event original = access.getEvent(getEventID(event));
                     if (null == original) {
-                        return null;
+                        return Collections.emptyList();
                     }
-                    Attendee originalAttendee = CalendarUtils.find(original.getAttendees(), userId);
-                    if (null != originalAttendee) {
-                        return originalAttendee.getPartStat();
-                    }
-                    return null;
+                    List<Attendee> attendees = original.getAttendees();
+                    return isNullOrEmpty(attendees) ? Collections.emptyList() : attendees;
                 }
             }.execute(factory.getSession());
         }
