@@ -61,7 +61,7 @@ public class TokenRefreshConfig {
 
     /**
      * Creates a new builder instance.
-     * 
+     *
      * @return The new builder
      */
     public static Builder newBuilder() {
@@ -86,7 +86,7 @@ public class TokenRefreshConfig {
 
         /**
          * Threshold within an access token is eagerly considered expired
-         * 
+         *
          * @param threshold
          * @param unit
          * @return This builder instance
@@ -100,7 +100,7 @@ public class TokenRefreshConfig {
         /**
          * Max. time to wait for obtaining the token lock if another thread
          * is trying to refresh concurrently
-         * 
+         *
          * @param timeout The timeout
          * @param unit The time unit for the timeout
          * @return This builder instance
@@ -115,7 +115,7 @@ public class TokenRefreshConfig {
          * Enables to try to obtain potentially more recent oauth tokens from the
          * stored version of the session within session storage. This is performed
          * after the local refresh token was considered invalid during token exchange.
-         * 
+         *
          * @return This builder instance
          */
         public Builder enableTryRecoverStoredTokens() {
@@ -127,7 +127,7 @@ public class TokenRefreshConfig {
          * Sets whether to try to obtain potentially more recent oauth tokens from the
          * stored version of the session within session storage. This is performed
          * after the local refresh token was considered invalid during token exchange.
-         * 
+         *
          * @param value <code>true</code> to obtain more recent tokens,
          *            <code>false</code> otherwise
          * @return This builder instance
@@ -139,7 +139,7 @@ public class TokenRefreshConfig {
 
         /**
          * Creates a new {@link TokenRefreshConfig} instance
-         * 
+         *
          * @return The configuration
          * @throws IllegalArgumentException if refresh threshold or lock timeout have been set to values < 0
          */
@@ -153,7 +153,7 @@ public class TokenRefreshConfig {
             return new TokenRefreshConfig(refreshThreshold, refreshThresholdUnit, lockTimeout, lockTimeoutUnit, tryRecoverStoredTokens);
         }
     }
-    
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final long refreshThreshold;
@@ -164,7 +164,7 @@ public class TokenRefreshConfig {
 
     /**
      * Initializes a new {@link TokenRefreshConfig}.
-     * 
+     *
      * @param refreshThreshold The refresh threshold
      * @param refreshThresholdUnit The time unit for the refresh threshold
      * @param lockTimeout The lock timeout
@@ -181,36 +181,38 @@ public class TokenRefreshConfig {
     }
 
     /**
-     * Gets the refreshThreshold
+     * Gets the raw refresh threshold value. It makes only sense in conjunction
+     * with the according time unit, which can be gotten with {@link #getRefreshThresholdUnit()}.
      *
-     * @return The refreshThreshold
+     * @return The raw refresh threshold value
      */
     public long getRefreshThreshold() {
         return refreshThreshold;
     }
 
     /**
-     * Gets the refreshThresholdUnit
+     * Gets the refresh threshold time unit
      *
-     * @return The refreshThresholdUnit
+     * @return The unit
      */
     public TimeUnit getRefreshThresholdUnit() {
         return refreshThresholdUnit;
     }
 
     /**
-     * Gets the lockTimeout
+     * Gets the raw refresh lock timeout value. It makes only sense in conjunction
+     * with the according time unit, which can be gotten with {@link #getLockTimeoutUnit()}.
      *
-     * @return The lockTimeout
+     * @return The raw lock timeout value
      */
     public long getLockTimeout() {
         return lockTimeout;
     }
 
     /**
-     * Gets the lockTimeoutUnit
+     * Gets the lock timeout time unit
      *
-     * @return The lockTimeoutUnit
+     * @return The unit
      */
     public TimeUnit getLockTimeoutUnit() {
         return lockTimeoutUnit;

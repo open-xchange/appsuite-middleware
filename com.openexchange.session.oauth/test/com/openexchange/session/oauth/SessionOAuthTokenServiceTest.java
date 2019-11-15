@@ -95,7 +95,7 @@ import com.openexchange.sessionstorage.SessionStorageService;
  */
 public class SessionOAuthTokenServiceTest {
 
-    private static final long TOKEN_EXPIRY_MILLIS = 1000L;
+    private static final long DEFAULT_TOKEN_EXPIRY_MILLIS = 1000L;
 
     private ServiceLookup services;
     private SessiondService sessiondService;
@@ -243,6 +243,24 @@ public class SessionOAuthTokenServiceTest {
             .build();
 
         RefreshResult result = tokenService.checkOrRefreshTokens(session, new PermanentErrorRefresher(), refreshConfig);
+        assertFailureResult(FailReason.PERMANENT_ERROR, result);
+
+        Optional<OAuthTokens> tokensAfterCheck = tokenService.getFromSession(session);
+        assertEquals(oldTokens, tokensAfterCheck.get());
+    }
+
+    @Test
+    public void testRefresherReturnsTooSoonExpiryDate() throws InterruptedException, OXException {
+        OAuthTokens oldTokens = createTokens(expiresInMillis(0L));
+        tokenService.setInSession(session, oldTokens);
+
+        TokenRefreshConfig refreshConfig = TokenRefreshConfig.newBuilder()
+            .setLockTimeout(100L, TimeUnit.MILLISECONDS)
+            .setRefreshThreshold(2L, TimeUnit.SECONDS)
+            .build();
+
+        // new expiry is lower than refresh threshold (99ms vs. 100ms)
+        RefreshResult result = tokenService.checkOrRefreshTokens(session, new AlwaysSucceedRefresher(1000l), refreshConfig);
         assertFailureResult(FailReason.PERMANENT_ERROR, result);
 
         Optional<OAuthTokens> tokensAfterCheck = tokenService.getFromSession(session);
@@ -405,13 +423,20 @@ public class SessionOAuthTokenServiceTest {
 
     private static final class AlwaysSucceedRefresher implements TokenRefresher {
 
+        private final long expiryMillis;
+
         public AlwaysSucceedRefresher() {
+            this(DEFAULT_TOKEN_EXPIRY_MILLIS);
+        }
+
+        public AlwaysSucceedRefresher(long expiryMillis) {
             super();
+            this.expiryMillis = expiryMillis;
         }
 
         @Override
         public TokenRefreshResponse execute(OAuthTokens currentTokens) throws OXException {
-            return new TokenRefreshResponse(createTokens(expiresInMillis(TOKEN_EXPIRY_MILLIS)));
+            return new TokenRefreshResponse(createTokens(expiresInMillis(expiryMillis)));
         }
     }
 
@@ -443,7 +468,7 @@ public class SessionOAuthTokenServiceTest {
         @Override
         public TokenRefreshResponse execute(OAuthTokens currentTokens) throws OXException {
             if (predicate.test(currentTokens)) {
-                return new TokenRefreshResponse(createTokens(expiresInMillis(TOKEN_EXPIRY_MILLIS)));
+                return new TokenRefreshResponse(createTokens(expiresInMillis(DEFAULT_TOKEN_EXPIRY_MILLIS)));
             }
 
             return errorResponse;
@@ -504,7 +529,7 @@ public class SessionOAuthTokenServiceTest {
                 throw new IllegalStateException(e);
             }
             LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(blockMillis));
-            return new TokenRefreshResponse(createTokens(expiresInMillis(TOKEN_EXPIRY_MILLIS)));
+            return new TokenRefreshResponse(createTokens(expiresInMillis(DEFAULT_TOKEN_EXPIRY_MILLIS)));
         }
     }
 

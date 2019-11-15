@@ -162,6 +162,16 @@ public class OAuthTokens {
         return refreshToken;
     }
 
+    /**
+     * Gets the milliseconds in which the access token will expire, based on
+     * {@link System#currentTimeMillis()}.
+     *
+     * @return The expires-in ms. Can be {@code 0} or negative in case token is already expired.
+     */
+    public long getExpiresInMillis() {
+        return expiryDate.getTime() - System.currentTimeMillis();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
