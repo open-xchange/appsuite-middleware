@@ -271,6 +271,10 @@ public final class ListLsubCache {
         if (null != collection) {
             synchronized (collection) {
                 collection.remove(fullName);
+                if(LOG2.isDebugEnabled()) {
+                    String msg = String.format("Removed folder %s from collection of account %s", fullName, String.valueOf(accountId));
+                    LOG2.debug(msg, new Exception(msg));
+                }
             }
 
             fireInvalidateCacheEvent(session);

@@ -58,18 +58,14 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
-import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.sessionstorage.StoredSession;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -95,32 +91,6 @@ public class SessionRESTService {
     public SessionRESTService(ServiceLookup services) {
         super();
         this.services = services;
-    }
-
-    private volatile Integer timeout;
-
-    /**
-     * Gets the default timeout for session-storage operations.
-     *
-     * @return The default timeout in milliseconds
-     */
-    private int timeout() {
-        Integer tmp = timeout;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = timeout;
-                if (null == tmp) {
-                    int defaultTimeout = 3000;
-                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
-                    if (service == null) {
-                        return defaultTimeout;
-                    }
-                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
-                    timeout = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
     }
 
     /**
@@ -165,10 +135,7 @@ public class SessionRESTService {
 
             Session ses;
             if (sessiondService instanceof SessiondServiceExtended) {
-                ses = ((SessiondServiceExtended) sessiondService).getSession(session, false);
-                if (ses == null) {
-                    ses = optFromSessionStorage(session);
-                }
+                ses = ((SessiondServiceExtended) sessiondService).peekSession(session);
             } else {
                 ses = sessiondService.getSession(session);
             }
@@ -198,20 +165,4 @@ public class SessionRESTService {
         }
     }
 
-    private Session optFromSessionStorage(String sessionId) throws OXException {
-        SessionStorageService sessionStorageService = services.getOptionalService(SessionStorageService.class);
-        if (sessionStorageService == null) {
-            return null;
-        }
-
-        Session session = sessionStorageService.lookupSession(sessionId, timeout());
-        if (session instanceof StoredSession) {
-            ObfuscatorService obfuscator = services.getOptionalService(ObfuscatorService.class);
-            if (obfuscator != null) {
-                StoredSession storedSession = (StoredSession) session;
-                storedSession.setPassword(obfuscator.unobfuscate(storedSession.getPassword()));
-            }
-        }
-        return session;
-    }
 }

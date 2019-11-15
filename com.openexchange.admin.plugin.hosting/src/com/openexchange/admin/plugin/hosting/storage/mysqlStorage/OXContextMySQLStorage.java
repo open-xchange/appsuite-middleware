@@ -1649,7 +1649,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
 
-            LOG.debug("Using schema \"{}\" from database {} for creation of context {}", db.getScheme(), db.getId(), ctx.getId());
+            LOG.info("Using schema \"{}\" based on schema strategy \"{}\" from database {} for creation of context {}", db.getScheme(), effectiveStrategy.getStrategy(), db.getId(), ctx.getId());
 
             // Create context (within transaction)
             Context context;
