@@ -177,6 +177,8 @@ public class ScheduleChangeImpl implements ScheduleChange {
         } else {
             participants = resources = Collections.emptyList();
         }
+        participants = ChangesUtils.sortAttendees(participants);
+        resources = ChangesUtils.sortAttendees(resources, CalendarUserType.RESOURCE);
 
         Map<String, Object> env = new HashMap<String, Object>();
         env.put("mail", new NotificationMail(event, participants, resources));
