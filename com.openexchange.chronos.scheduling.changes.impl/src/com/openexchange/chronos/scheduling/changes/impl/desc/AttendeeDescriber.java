@@ -49,24 +49,21 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
+import com.openexchange.chronos.scheduling.changes.impl.ChangesUtils;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
@@ -142,7 +139,7 @@ public class AttendeeDescriber implements ChangeDescriber {
         for (CalendarUserType cuType : DESCRIBABLE_TYPES) {
             boolean isIndividual = CalendarUserType.INDIVIDUAL.matches(cuType);
             String message = messages.get(cuType);
-            for (Attendee attendee : getAttendees(attendees, cuType)) {
+            for (Attendee attendee : ChangesUtils.sortAttendees(attendees, cuType)) {
                 SentenceImpl sentence = new SentenceImpl(message).add(getReferenceName(attendee), ArgumentType.PARTICIPANT);
                 if (isIndividual) {
                     sentence.addStatus(attendee.getPartStat());
@@ -152,59 +149,4 @@ public class AttendeeDescriber implements ChangeDescriber {
         }
     }
 
-    private List<Attendee> getAttendees(List<Attendee> attendees, CalendarUserType cuType) {
-        return new ArrayList<>(attendees).stream().filter(a -> cuType.matches(a.getCuType())).sorted(new AttendeeComperator(cuType)).collect(Collectors.toList());
-    }
-
-    private static class AttendeeComperator implements Comparator<Attendee> {
-
-        private final CalendarUserType cuType;
-
-        /**
-         * Initializes a new {@link AttendeeDescriber.AttendeeComperator}.
-         * 
-         * @param cuType The {@link CalendarUserType}
-         */
-        public AttendeeComperator(CalendarUserType cuType) {
-            super();
-            this.cuType = cuType;
-        }
-
-        @Override
-        public int compare(Attendee a1, Attendee a2) {
-            if (CalendarUtils.isInternal(a1, cuType)) {
-                if (CalendarUtils.isInternal(a2, cuType)) {
-                    // Both internal users
-                    return a1.getCn().compareTo(a2.getCn());
-                }
-                return -1;
-            }
-            if (CalendarUtils.isInternal(a2, cuType)) {
-                // a1 is not, a2 is internal
-                return 1;
-            }
-            // Check URI of externals
-            if (Strings.isNotEmpty(a1.getUri())) {
-                if (Strings.isNotEmpty(a2.getUri())) {
-                    return a1.getUri().compareTo(a2.getUri());
-                }
-                return -1;
-            }
-            if (Strings.isNotEmpty(a2.getUri())) {
-                return 1;
-            }
-            // Last fallback, use mail
-            if (Strings.isNotEmpty(a1.getEMail())) {
-                if (Strings.isNotEmpty(a2.getEMail())) {
-                    return a1.getEMail().compareTo(a2.getEMail());
-                }
-                return -1;
-            }
-            if (Strings.isNotEmpty(a2.getEMail())) {
-                return 1;
-            }
-            return 0;
-        };
-
-    }
 }

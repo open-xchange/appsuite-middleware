@@ -20,11 +20,11 @@ The **cookie hash** (not the other way around) is a **unique string identifier c
 
 ## Client
 
-The **client** is a string identifier, used to **identify a client** that wants to use a session. Its values follow the reverse-domain-name convention of java packages, so for example the OX App Suite identifies itself as **open-xchange-appsuite**. The client is usually passed as a parameter to the login call and becomes one component of the **cookie hash**. 
+The **client** is a string identifier, used to **identify a client** that wants to use a session. For example the OX App Suite identifies itself as **open-xchange-appsuite**. The client is usually passed as a parameter to the login call and becomes one component of the **cookie hash**.
 
 ## Form login
 
-The **form login** describes a login call that can be triggered by an external and custom form. This was formerly (pre 6.20) known as the **easy login**. If you want to provide your own login form, this is the way to go about it. You can read all the details in section 'Form Login'.
+The **form login** describes a login call that can be triggered by an external and custom form. If you want to provide your own login form, this is the way to go about it. You can read all the details in section 'Form Login'.
 
 ## IP Check
 

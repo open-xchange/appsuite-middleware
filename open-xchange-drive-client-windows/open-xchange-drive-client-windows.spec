@@ -59,13 +59,14 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) /opt/open-xchange/etc/drive-client-windows.properties
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+/opt/open-xchange/etc/security/drive.list
 
 %changelog
 * Thu Oct 17 2019 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>

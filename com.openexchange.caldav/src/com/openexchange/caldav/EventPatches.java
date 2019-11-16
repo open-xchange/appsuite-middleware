@@ -67,6 +67,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -81,6 +82,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -94,6 +96,7 @@ import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -857,6 +860,79 @@ public class EventPatches {
                 }
             }
         }
+        
+        /**
+         * Restores the participant status of attendees on incoming event patches if the client
+         * set the status to {@link ParticipationStatus#NEEDS_ACTION}
+         *
+         * @param resource The event resource
+         * @param master The master event
+         * @param exceptions The event exceptions
+         */
+        private void restoreParticipantStatus(EventResource resource, Event event) {
+            if (false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
+                return;
+            }
+            try {
+                restoreParticipantStatus(event);
+            } catch (OXException e) {
+                LOG.warn("Error restoring the participant status", e);
+            }
+        }
+
+        private void restoreParticipantStatus(Event event) throws OXException {
+            if (null == event || isNullOrEmpty(event.getAttendees())) {
+                return;
+            }
+            List<Attendee> attendees = new LinkedList<Attendee>(event.getAttendees());
+            List<Attendee> originalAttendees = null;
+            for (int i = 0; i < attendees.size(); i++) {
+                Attendee attendee = attendees.get(i);
+                if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+                    /*
+                     * Found user to check the status in DB for
+                     */
+                    if (null == originalAttendees) {
+                        originalAttendees = getAttendees(event);
+                    }
+                    Attendee originalAttendee = CalendarUtils.find(originalAttendees, attendee);
+                    if (null != originalAttendee && false == ParticipationStatus.NEEDS_ACTION.matches(originalAttendee.getPartStat())) {
+                        /*
+                         * Replace with the original status
+                         */
+                        Attendee copy = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                        copy.setPartStat(originalAttendee.getPartStat());
+                        attendees.set(i, copy);
+                    }
+                }
+            }
+            event.setAttendees(attendees);
+        }
+
+        /**
+         * Loads the original event from the DB and returns the attendee list
+         *
+         * @param event The event to load
+         * @return The attendees or empty list if event can't be found
+         * @throws OXException
+         */
+        private List<Attendee> getAttendees(Event event) throws OXException {
+            return new CalendarAccessOperation<List<Attendee>>(factory) {
+
+                @Override
+                protected List<Attendee> perform(IDBasedCalendarAccess access) throws OXException {
+                    /*
+                     * Get existing event and and search for user
+                     */
+                    Event original = access.getEvent(getEventID(event));
+                    if (null == original) {
+                        return Collections.emptyList();
+                    }
+                    List<Attendee> attendees = original.getAttendees();
+                    return isNullOrEmpty(attendees) ? Collections.emptyList() : attendees;
+                }
+            }.execute(factory.getSession());
+        }
 
         /**
          * Applies all known patches to an event after importing.
@@ -887,6 +963,7 @@ public class EventPatches {
                 applyManagedAttachments(importedEvent, factory.getConfigViewFactory());
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
                 removeOrganizerAttendee(resource, importedEvent, importedChangeExceptions);
+                restoreParticipantStatus(resource, importedEvent);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*
@@ -900,6 +977,7 @@ public class EventPatches {
                     applyManagedAttachments(importedChangeException, factory.getConfigViewFactory());
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
+                    restoreParticipantStatus(resource, importedChangeException);
                 }
             }
             /*

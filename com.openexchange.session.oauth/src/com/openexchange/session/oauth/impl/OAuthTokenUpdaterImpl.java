@@ -141,8 +141,8 @@ public class OAuthTokenUpdaterImpl {
 
                 TokenRefreshResponse response = refresher.execute(tokens);
                 if (response.isSuccess()) {
-                    handleSuccess(response.getTokens());
-                    return RefreshResult.success(SuccessReason.REFRESHED);
+                    return handleSuccess(response.getTokens());
+
                 }
 
                 return handleError(oldTokens, response.getError());
@@ -152,20 +152,35 @@ public class OAuthTokenUpdaterImpl {
         }
     }
 
-    private void handleSuccess(OAuthTokens tokens) {
+    private RefreshResult handleSuccess(OAuthTokens tokens) {
+        if (tokens.accessExpiresWithin(refreshConfig.getRefreshThreshold(), refreshConfig.getRefreshThresholdUnit())) {
+            // Some IDMs assign a max. lifetime to refresh tokens token, too. Often aligned with
+            // SSO session duration. As a result, fresh access tokens might have a shorter validity
+            // period than the previous ones (expiry == max. refresh token lifetime).
+            // In case the expiration time becomes lower than the configured refresh threshold,
+            // it doesn't make sense to use the new token pair at all. Any subsequent request
+            // would immediately try to refresh it again.
+            LOG.info("Discarding refreshed tokens for session '{}'. Expiration is lower than configured refresh threshold: {}sec / {}sec",
+                session.getSessionID(),
+                TimeUnit.MILLISECONDS.toSeconds(tokens.getExpiresInMillis()),
+                refreshConfig.getRefreshThresholdUnit().toSeconds(refreshConfig.getRefreshThreshold()));
+            return RefreshResult.fail(FailReason.PERMANENT_ERROR, "Expiration date of new tokens is lower than refresh threshold");
+        }
+
         tokenGetterSetter.setInSession(session, tokens);
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (sessiondService == null) {
             LOG.warn("Storing tokens in stored session failed. SessiondService unavailable.");
-            return;
+        } else {
+            try {
+                LOG.info("Storing updated tokens in stored session '{}'", session.getSessionID());
+                sessiondService.storeSession(session.getSessionID(), false);
+            } catch (OXException e) {
+                LOG.warn("Storing tokens in stored session failed", e);
+            }
         }
 
-        try {
-            LOG.info("Storing updated tokens in stored session '{}'", session.getSessionID());
-            sessiondService.storeSession(session.getSessionID(), false);
-        } catch (OXException e) {
-            LOG.warn("Storing tokens in stored session failed", e);
-        }
+        return RefreshResult.success(SuccessReason.REFRESHED);
     }
 
     private RefreshResult handleError(OAuthTokens oldTokens, Error error) {

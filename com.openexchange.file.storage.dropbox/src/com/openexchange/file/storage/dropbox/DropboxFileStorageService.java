@@ -101,7 +101,7 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
     @Override
     public List<FileStoragePermission> getRootFolderPermissions(String accountId, Session session) throws OXException {
         DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-        permission.setAdmin(false);
+        permission.setAdmin(true);
         permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
         permission.setEntity(session.getUserId());
         return Collections.<FileStoragePermission> singletonList(permission);

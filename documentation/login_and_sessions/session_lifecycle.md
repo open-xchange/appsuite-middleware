@@ -33,7 +33,7 @@ The first thing we have to look at is the client identifier (&client=...). The c
 
 `POST /ajax/login?action=login&client=open-xchange-appsuite&staySignedIn=true HTTP/1.1`
 
-The second thing that jumps out is the `staySignedIn` parameter. This parameter affects the lifetime of the created session and its cookies. If set to `false`, the session will time-out after 60 inactive minutes and the cookies will be set without TTL, meaning they will be gone if the web browser is closed. If set to `true`, the session will not time-out, the cookies are decorated with configured TTL and can be restored via the `autologin` call.
+The second thing that jumps out is the `staySignedIn` parameter. This parameter affects the lifetime of the created session and its cookies. If left away or set to `false`, the session will time-out after 60 inactive minutes (default, can be controlled by `com.openexchange.sessiond.sessionDefaultLifeTime`) and the cookies will be set without TTL, meaning they will be gone if the web browser is closed. If set to `true`, the session will last for an idle time as long as `com.openexchange.sessiond.sessionLongLifeTime`. The cookies are decorated with that configured TTL and can be restored via the `autologin` call.
 
 `User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0`
 
@@ -41,7 +41,7 @@ The User-Agent header is also used in constructing the cookie names used, or mor
 
 `name=username%40contextname&password=somePassword`
 
-This line contains the parameters sent in the POST request. "name" is set to username@contextname, and the password is set to "somePassword". This information will be used by the authentication system to authenticate the user or deny the login request. Let's say everything goes right with our login attempts and look at the servers answer, again redacted for brevity and relevance to our discussion:
+This line contains the parameters sent in the POST request. "name" is set to "username@contextname", and the password is set to "somePassword". This information will be used by the authentication system to authenticate the user or deny the login request. Let's say everything goes right with our login attempts and look at the servers answer, again redacted for brevity and relevance to our discussion:
 
 ```
 HTTP/1.1 200 OK
@@ -64,7 +64,7 @@ Set-Cookie: open-xchange-session-IaxgQLSrL7j1zE1Yceasg=4eea89150dab48f683a34e6cb
 Transfer-Encoding: chunked
 ```
 
-Notice the name of the cookies, which always starts with `open-xchange-secret-` and `open-xchange-session-` followed by the **cookie hash** that is normally calculated from the User-Agent header of the login request, and the value of the client parameter and an additional hash to prevent brute force attacks on cookie names. The expiry time of the cookie is goverened by the cookie lifetime configuration parameter and whether `staySignedIn` is requested or not. As I tried this request on Wed, 13-Nov-2019 with `staySignedIn` set to `true`, the cookie will live one week.
+Notice the name of the cookies, which always starts with `open-xchange-secret-` and `open-xchange-session-` followed by the **cookie hash** that is normally calculated from the User-Agent header of the login request, and the value of the client parameter and an additional hash to prevent brute force attacks on cookie names. The expiry time of the cookie is goverened by the cookie lifetime configuration parameter (`com.openexchange.cookie.ttl`) and whether `staySignedIn` is requested or not. As I tried this request on Wed, 13-Nov-2019 with `staySignedIn` set to `true`, the cookie will live one week.
 
 If `staySignedIn` was set to `false`, the *Set-Cookie* lines would look like this, the *Expires* parameter is not set, those cookies will be removed when closing the browser:
 
