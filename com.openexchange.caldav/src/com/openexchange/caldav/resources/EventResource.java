@@ -117,7 +117,7 @@ public class EventResource extends DAVObjectResource<Event> {
      * @param event The represented event
      * @param url The WebDAV path to the resource
      */
-    public EventResource(EventCollection parent, Event event, WebdavPath url) throws OXException {
+    public EventResource(EventCollection parent, Event event, WebdavPath url) {
         super(parent, event, url);
         this.parent = parent;
         this.object = event;

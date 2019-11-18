@@ -98,7 +98,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    protected CommonResource(FolderCollection<T> parent, T object, WebdavPath url) throws OXException {
+    protected CommonResource(FolderCollection<T> parent, T object, WebdavPath url) {
         super(parent, object, url);
         this.parent = parent;
     }
