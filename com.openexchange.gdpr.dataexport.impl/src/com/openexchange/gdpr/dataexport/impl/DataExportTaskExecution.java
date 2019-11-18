@@ -500,11 +500,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                 LOG.info("Completed \"{}\" work item for data export task {} of user {} in context {}", moduleId, stringFor(taskId), I(userId), I(contextId));
 
                 // Await file storage location
-                Optional<String> optFileStorageLocation = sink.finish();
-                String fileStorageLocation = null;
-                if(optFileStorageLocation.isPresent()) {
-                    fileStorageLocation = optFileStorageLocation.get();
-                } 
+                String fileStorageLocation = sink.finish().orElse(null);
 
                 boolean err = true;
                 try {
