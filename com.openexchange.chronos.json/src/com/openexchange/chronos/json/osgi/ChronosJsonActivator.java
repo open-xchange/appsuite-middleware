@@ -81,6 +81,7 @@ import com.openexchange.chronos.json.converter.handler.OXException2JsonDataHandl
 import com.openexchange.chronos.json.converter.handler.Object2JsonDataHandler;
 import com.openexchange.chronos.json.converter.handler.XProperties2JsonDataHandler;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
+import com.openexchange.chronos.json.converter.mapper.Event2JSONDataHandler;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
@@ -195,6 +196,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(DataHandler.class, new OXException2JsonDataHandler(), singletonDictionary("identifier", DataHandlers.OXEXCEPTION2JSON));
             registerService(DataHandler.class, new Json2OXExceptionDataHandler(), singletonDictionary("identifier", DataHandlers.JSON2OXEXCEPTION));
             registerService(DataHandler.class, new EventFieldDataHandler(), singletonDictionary("identifier", DataHandlers.STRING_ARRAY_TO_EVENT_FIELDS));
+            registerService(DataHandler.class, new Event2JSONDataHandler(), singletonDictionary("identifier", DataHandlers.EVENT2JSON));
 
         } catch (Exception e) {
             getLogger(ChronosJsonActivator.class).error("error starting {}", context.getBundle(), e);
