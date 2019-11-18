@@ -1117,7 +1117,7 @@ public class SchedulingHelper {
                 return false; // infinite recurrence
             }
         }
-        if (eventEnd.isFloating() && null != timeZone) {
+        if (false == eventEnd.isFloating() && null != timeZone) {
             eventEnd = eventEnd.swapTimeZone(timeZone);
         }
         return eventEnd.before(dtNow);
@@ -1232,7 +1232,9 @@ public class SchedulingHelper {
     private static DateTime getEndDate(Event event) {
         DateTime endDate = event.getEndDate();
         if (null == endDate) {
-            endDate = event.getStartDate();
+            DateTime startDate = event.getStartDate();
+            TimeZone timeZone = null == startDate.getTimeZone() ? DateTime.UTC : startDate.getTimeZone();
+            endDate = new DateTime(timeZone, startDate.getTimestamp());
             if (endDate.isAllDay()) {
                 endDate.addDuration(new Duration(1, 1, 0));
             }
