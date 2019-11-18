@@ -102,26 +102,31 @@ public class Event2JSONDataHandler implements DataHandler {
          */
         Event convertee = (Event) object;
         ArrayList<EventField> fields = new ArrayList<>();
-        if (Strings.isNotEmpty(dataArguments.get(FIELDS))) {
+        if (null != dataArguments && Strings.isNotEmpty(dataArguments.get(FIELDS))) {
             String sFields = dataArguments.get(FIELDS);
             for (String field : sFields.split(",")) {
                 fields.add(EventField.valueOf(field));
             }
 
         }
+        String timeZone = null;
+        if (null != dataArguments) {
+            timeZone = dataArguments.get(TIMEZONE);
+        }
+
         /*
          * Convert data via mapper
          */
         ConversionResult result = new ConversionResult();
         JSONObject out = new JSONObject();
         try {
-            EventMapper.getInstance().serialize(convertee, out, fields.toArray(new EventField[fields.size()]), dataArguments.get(TIMEZONE), session);
+            EventMapper.getInstance().serialize(convertee, out, fields.isEmpty() ? EventMapper.getInstance().getMappedFields(): fields.toArray(new EventField[fields.size()]), timeZone, session);
         } catch (JSONException e) {
             LOGGER.debug("Unable to convert event to JSON", e);
             result.addWarning(new OXException(e));
         }
 
-        result.setData(data);
+        result.setData(out);
         return result;
     }
 

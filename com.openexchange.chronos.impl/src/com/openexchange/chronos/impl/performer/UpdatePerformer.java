@@ -191,6 +191,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * track scheduling-related notifications & return result
          */
         handleScheduling(result);
+        logPerform(result.getEventUpdate());
         return resultTracker.getResult();
     }
 
