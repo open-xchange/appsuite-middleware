@@ -870,18 +870,18 @@ public class EventPatches {
          * @param exceptions The event exceptions
          */
         private void restoreParticipantStatus(EventResource resource, Event event) {
-            if (false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
+            if (false == resource.exists() || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
                 return;
             }
             try {
-                restoreParticipantStatus(event);
+                restoreParticipantStatus(event, resource.getEvent().getFolderId(), resource.getEvent().getId());
             } catch (OXException e) {
                 LOG.warn("Error restoring the participant status", e);
             }
         }
 
-        private void restoreParticipantStatus(Event event) throws OXException {
-            if (null == event || isNullOrEmpty(event.getAttendees())) {
+        private void restoreParticipantStatus(Event event, String folderId, String eventId) throws OXException {
+            if (null == event || isNullOrEmpty(event.getAttendees()) || Strings.isEmpty(folderId) || Strings.isEmpty(eventId)) {
                 return;
             }
             List<Attendee> attendees = new LinkedList<Attendee>(event.getAttendees());
@@ -893,7 +893,7 @@ public class EventPatches {
                      * Found user to check the status in DB for
                      */
                     if (null == originalAttendees) {
-                        originalAttendees = getAttendees(event);
+                        originalAttendees = getAttendees(event, folderId, eventId);
                     }
                     Attendee originalAttendee = CalendarUtils.find(originalAttendees, attendee);
                     if (null != originalAttendee && false == ParticipationStatus.NEEDS_ACTION.matches(originalAttendee.getPartStat())) {
@@ -913,10 +913,11 @@ public class EventPatches {
          * Loads the original event from the DB and returns the attendee list
          *
          * @param event The event to load
+         * @param folderId The ID of the folder
          * @return The attendees or empty list if event can't be found
          * @throws OXException
          */
-        private List<Attendee> getAttendees(Event event) throws OXException {
+        private List<Attendee> getAttendees(Event event, String folderId, String eventId) throws OXException {
             return new CalendarAccessOperation<List<Attendee>>(factory) {
 
                 @Override
@@ -924,7 +925,13 @@ public class EventPatches {
                     /*
                      * Get existing event and and search for user
                      */
-                    Event original = access.getEvent(getEventID(event));
+                    EventID id;
+                    if (null != event.getRecurrenceId()) {
+                        id = new EventID(folderId, eventId, event.getRecurrenceId());
+                    } else {
+                        id = new EventID(folderId, eventId);
+                    }
+                    Event original = access.getEvent(id);
                     if (null == original) {
                         return Collections.emptyList();
                     }
