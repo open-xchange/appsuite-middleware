@@ -1660,7 +1660,8 @@ public class SieveHandler {
         try {
             keyword = WelcomeKeyword.valueOf(token);
         } catch (IllegalArgumentException e) {
-            log.debug("Unknown keyword '{}'", token, e);
+            log.debug("Unknown keyword '{}'", token);
+            capa.addExtendedProperty(token, Strings.unquote(value));
             return;
         }
 
