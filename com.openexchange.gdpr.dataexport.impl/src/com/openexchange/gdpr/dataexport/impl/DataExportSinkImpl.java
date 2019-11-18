@@ -96,6 +96,7 @@ public class DataExportSinkImpl implements DataExportSink {
      */
     private static final int BUFFER_SIZE = DataExportUtility.BUFFER_SIZE;
 
+    @SuppressWarnings("unused")
     private final ServiceLookup services;
     private final DataExportTask task;
     private final String moduleId;
@@ -425,7 +426,7 @@ public class DataExportSinkImpl implements DataExportSink {
         }
 
         // Return new file storage location
-        return Optional.of(newFileStorageLocation);
+        return Optional.ofNullable(newFileStorageLocation);
     }
 
     @Override

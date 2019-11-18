@@ -564,10 +564,8 @@ public class DataExportServiceImpl implements DataExportService {
 
     /**
      * Invoked when service has been stopped.
-     *
-     * @throws OXException If trigger fails
      */
-    public void onStopped() throws OXException {
+    public void onStopped() {
         ScheduledTimerTask checkAbortedTimerTask = this.checkAbortedTimerTask;
         if (null != checkAbortedTimerTask) {
             checkAbortedTimerTask.cancel(false);
@@ -862,7 +860,7 @@ public class DataExportServiceImpl implements DataExportService {
         return addDiagnosticsReport;
     }
 
-    synchronized void stopProcessingTasks(boolean cancelStartStopTimerTasks) throws OXException {
+    synchronized void stopProcessingTasks(boolean cancelStartStopTimerTasks) {
         if (cancelStartStopTimerTasks) {
             cancelTimerTasks(periodicStartTask, false, false);
             cancelTimerTasks(stopTask, false, false);
