@@ -74,15 +74,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.gdpr.dataexport.DataExportAbortedException;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
+import com.openexchange.gdpr.dataexport.DataExportDiagnosticsReport;
 import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
+import com.openexchange.gdpr.dataexport.DataExportJob;
 import com.openexchange.gdpr.dataexport.DataExportProvider;
 import com.openexchange.gdpr.dataexport.DataExportProviderRegistry;
-import com.openexchange.gdpr.dataexport.DataExportDiagnosticsReport;
 import com.openexchange.gdpr.dataexport.DataExportSavepoint;
 import com.openexchange.gdpr.dataexport.DataExportStatus;
 import com.openexchange.gdpr.dataexport.DataExportStorageService;
 import com.openexchange.gdpr.dataexport.DataExportTask;
-import com.openexchange.gdpr.dataexport.DataExportJob;
 import com.openexchange.gdpr.dataexport.DataExportWorkItem;
 import com.openexchange.gdpr.dataexport.ExportResult;
 import com.openexchange.gdpr.dataexport.Message;
@@ -500,7 +500,11 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                 LOG.info("Completed \"{}\" work item for data export task {} of user {} in context {}", moduleId, stringFor(taskId), I(userId), I(contextId));
 
                 // Await file storage location
-                String fileStorageLocation = sink.finish().get();
+                Optional<String> optFileStorageLocation = sink.finish();
+                String fileStorageLocation = null;
+                if(optFileStorageLocation.isPresent()) {
+                    fileStorageLocation = optFileStorageLocation.get();
+                } 
 
                 boolean err = true;
                 try {
