@@ -57,6 +57,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.resources.FolderCollection;
@@ -87,6 +89,9 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @since v7.8.1
  */
 public class AttachmentUtils {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentUtils.class);
+
     
     private static final AttachmentMetadataFactory FACTORY = new AttachmentMetadataFactory();
 
@@ -215,7 +220,13 @@ public class AttachmentUtils {
     }
 
     public static AttachmentMetadata decodeName(String name) throws IllegalArgumentException {
-        String decodedName = new String(BaseEncoding.base64Url().omitPadding().decode(name), Charsets.UTF_8);
+        String decodedName;
+        try {
+            decodedName = new String(BaseEncoding.base64Url().omitPadding().decode(name), Charsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("Unable to decode {}", name, e);
+            throw e;
+        }
         String[] splitted = Strings.splitByDelimNotInQuotes(decodedName, '-');
         if (null == splitted || 4 != splitted.length) {
             throw new IllegalArgumentException(name);
