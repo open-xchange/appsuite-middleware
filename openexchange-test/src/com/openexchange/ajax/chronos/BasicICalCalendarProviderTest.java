@@ -75,7 +75,6 @@ import org.apache.http.HttpStatus;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
@@ -109,7 +108,6 @@ import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-@Ignore
 public class BasicICalCalendarProviderTest extends AbstractExternalProviderChronosTest {
 
     public BasicICalCalendarProviderTest() {
@@ -744,7 +742,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         //get events to fill table
         List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365)), true, newFolderId, null, null);
-        assertEquals(6, allEvents.size());
+        assertEquals(4, allEvents.size());
 
         for (Iterator<EventData> iterator = allEvents.iterator(); iterator.hasNext();) {
             EventData eventData = iterator.next();
@@ -752,7 +750,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
                 iterator.remove();
             }
         }
-        assertEquals(6, allEvents.size());
+        assertEquals(4, allEvents.size());
 
         EventData master = null;
         for (EventData event : allEvents) {
