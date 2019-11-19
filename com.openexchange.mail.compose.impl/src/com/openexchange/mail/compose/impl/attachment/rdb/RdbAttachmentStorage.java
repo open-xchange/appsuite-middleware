@@ -83,6 +83,8 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
 
     /**
      * Initializes a new {@link RdbAttachmentStorage}.
+     *
+     * @param services The service look-up
      */
     public RdbAttachmentStorage(ServiceLookup services) {
         super(services);
