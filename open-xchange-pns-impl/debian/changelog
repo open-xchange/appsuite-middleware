@@ -1,3 +1,9 @@
+open-xchange-pns-impl (7.10.2-18) stable; urgency=medium
+
+  * Build for patch 2019-11-25 (5484)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 19 Nov 2019 12:33:50 +0100
+
 open-xchange-pns-impl (7.10.2-17) stable; urgency=medium
 
   * Build for patch 2019-11-11 (5473)
