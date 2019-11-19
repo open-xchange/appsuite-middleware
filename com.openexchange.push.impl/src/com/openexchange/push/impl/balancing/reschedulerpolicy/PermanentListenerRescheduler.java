@@ -216,7 +216,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         try {
-            planReschedule(true);
+            planReschedule(true, "Cluster member added: " + membershipEvent.getMember().getAddress());
         } catch (Exception e) {
             LOG.error("Failed to plan rescheduling", e);
         }
@@ -225,7 +225,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         try {
-            planReschedule(true);
+            planReschedule(true, "Cluster member removed: " + membershipEvent.getMember().getAddress());
         } catch (Exception e) {
             LOG.error("Failed to plan rescheduling", e);
         }
@@ -243,7 +243,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         if (UpdaterEventConstants.TOPIC.equals(event.getTopic())) {
             if (ReschedulePolicy.MASTER.equals(policy)) {
                 try {
-                    planReschedule(true);
+                    planReschedule(true, "Update tasks executed.");
                 } catch (Exception e) {
                     LOG.error("Failed to plan rescheduling", e);
                 }
@@ -251,7 +251,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                 // Only handle if locally received
                 if (event.containsProperty(CommonEvent.PUBLISH_MARKER)) {
                     try {
-                        planReschedule(true);
+                        planReschedule(true, "Update tasks executed.");
                     } catch (Exception e) {
                         LOG.error("Failed to plan rescheduling", e);
                     }
@@ -268,7 +268,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * @param remotePlan <code>true</code> for remote rescheduling; otherwise <code>false</code>
      * @throws OXException If timer service is absent
      */
-    public void planReschedule(boolean remotePlan) throws OXException {
+    public void planReschedule(boolean remotePlan, String reason) throws OXException {
         synchronized (this) {
             // Stopped
             if (stopped) {
@@ -295,11 +295,11 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             // Plan rescheduling
             if (remotePlan) {
                 rescheduleQueue.offerOrReplace(ReschedulePlan.getInstance(true));
-                LOG.info("Planned rescheduling including remote plan");
+                LOG.info("Planned rescheduling including remote plan. Reason: {}", reason);
             } else {
                 boolean added = rescheduleQueue.offerIfAbsentElseReset(ReschedulePlan.getInstance(false));
                 if (added) {
-                    LOG.info("Planned rescheduling with local-only plan");
+                    LOG.info("Planned rescheduling with local-only plan. Reason: {}", reason);
                 }
             }
         }
@@ -446,7 +446,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             hzInstancerRef.set(hzInstance);
 
-            planReschedule(true);
+            planReschedule(true, "Hazelcast instance appeared");
 
             return hzInstance;
         } catch (Exception e) {
