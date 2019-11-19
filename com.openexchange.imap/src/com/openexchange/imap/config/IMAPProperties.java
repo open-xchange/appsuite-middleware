@@ -943,6 +943,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 if (Strings.isNotEmpty(sFailures)) {
                     try {
                         failureExecutions = Integer.parseInt(sFailures.trim());
+                        if (failureExecutions == 0) {
+                            LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
+                            return Optional.empty();
+                        }
                     } catch (@SuppressWarnings("unused") NumberFormatException e) {
                         LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
                         return Optional.empty();
@@ -975,6 +979,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 if (Strings.isNotEmpty(sSuccess)) {
                     try {
                         successExecutions = Integer.parseInt(sSuccess.trim());
+                        if (successExecutions == 0) {
+                            LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
+                            return Optional.empty();
+                        }
                     } catch (@SuppressWarnings("unused") NumberFormatException e) {
                         LOG.warn("Invalid value for property {}. Not a number. Skipping generic breaker configuration", propertyName);
                         return Optional.empty();
@@ -1038,6 +1046,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 if (Strings.isNotEmpty(sFailures)) {
                     try {
                         failureExecutions = Integer.parseInt(sFailures.trim());
+                        if (failureExecutions == 0) {
+                            LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
+                            return Optional.empty();
+                        }
                     } catch (@SuppressWarnings("unused") NumberFormatException e) {
                         LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for primary account", propertyName);
                         return Optional.empty();
@@ -1070,6 +1082,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 if (Strings.isNotEmpty(sSuccess)) {
                     try {
                         successExecutions = Integer.parseInt(sSuccess.trim());
+                        if (successExecutions == 0) {
+                            LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
+                            return Optional.empty();
+                        }
                     } catch (@SuppressWarnings("unused") NumberFormatException e) {
                         LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for primary account", propertyName);
                         return Optional.empty();
@@ -1094,11 +1110,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for primary account", propertyName);
                     return Optional.empty();
                 }
-            }
-
-            if (failureExecutions == 0 || successExecutions == 0) {
-                // Division by zero
-                return Optional.empty();
             }
 
             return Optional.of(new PrimaryFailsafeCircuitBreakerCommandExecutor(new Ratio(failures, failureExecutions), new Ratio(success, successExecutions), delayMillis));
@@ -1149,6 +1160,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             if (Strings.isNotEmpty(sFailures)) {
                 try {
                     failureExecutions = Integer.parseInt(sFailures.trim());
+                    if (failureExecutions == 0) {
+                        LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
+                        return Optional.empty();
+                    }
                 } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, infix);
                     return Optional.empty();
@@ -1181,6 +1196,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             if (Strings.isNotEmpty(sSuccess)) {
                 try {
                     successExecutions = Integer.parseInt(sSuccess.trim());
+                    if (successExecutions == 0) {
+                        LOG.warn("Invalid value for property {}, value must not be '0' to prevent division by zero", propertyName);
+                        return Optional.empty();
+                    }
                 } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, infix);
                     return Optional.empty();
@@ -1221,11 +1240,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     return Optional.empty();
                 }
             }
-        }
-
-        if (failureExecutions == 0 || successExecutions == 0) {
-            // Division by zero
-            return Optional.empty();
         }
 
         return Optional.of(new FailsafeCircuitBreakerCommandExecutor(hostList, portSet, new Ratio(failures, failureExecutions), new Ratio(success, successExecutions), delayMillis, 100));
