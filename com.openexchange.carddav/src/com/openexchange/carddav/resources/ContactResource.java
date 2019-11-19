@@ -123,7 +123,7 @@ public class ContactResource extends CommonResource<Contact> {
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    public ContactResource(GroupwareCarddavFactory factory, CardDAVCollection parent, Contact object, WebdavPath url) throws OXException {
+    public ContactResource(GroupwareCarddavFactory factory, CardDAVCollection parent, Contact object, WebdavPath url) {
         super(parent, object, url);
         this.factory = factory;
         this.parent = parent;
@@ -138,7 +138,7 @@ public class ContactResource extends CommonResource<Contact> {
      * @param vCardImport The vCard import to apply
      * @return The new contact resource
      */
-    static ContactResource fromImport(GroupwareCarddavFactory factory, CardDAVCollection parent, WebdavPath url, VCardImport vCardImport) throws OXException {
+    static ContactResource fromImport(GroupwareCarddavFactory factory, CardDAVCollection parent, WebdavPath url, VCardImport vCardImport) {
         ContactResource contactResource = new ContactResource(factory, parent, null, url);
         contactResource.vCardImport = vCardImport;
         return contactResource;

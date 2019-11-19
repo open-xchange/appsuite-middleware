@@ -86,6 +86,7 @@ public class ChunkedZippedOutputStream {
 
     private final DataExportStorageService storageService;
     private final DataExportTask task;
+    @SuppressWarnings("unused")
     private final ServiceLookup services; // Currently not used
     private final FileStorage fileStorage;
     private final long maxFileSize;

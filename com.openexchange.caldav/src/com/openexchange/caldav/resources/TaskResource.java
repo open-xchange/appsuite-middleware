@@ -120,7 +120,7 @@ public class TaskResource extends CommonResource<Task> {
     private byte[] iCalFile;
     private int retryCount;
 
-    public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) throws OXException {
+    public TaskResource(GroupwareCaldavFactory factory, TaskCollection parent, Task object, WebdavPath url) {
         super(parent, object, url);
         this.parent = parent;
         this.factory = factory;

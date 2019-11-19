@@ -96,6 +96,7 @@ public class DataExportSinkImpl implements DataExportSink {
      */
     private static final int BUFFER_SIZE = DataExportUtility.BUFFER_SIZE;
 
+    @SuppressWarnings("unused")
     private final ServiceLookup services;
     private final DataExportTask task;
     private final String moduleId;
@@ -218,12 +219,14 @@ public class DataExportSinkImpl implements DataExportSink {
 
     @Override
     public synchronized boolean export(Directory directory) throws OXException {
+        ZippedFileStorageOutputStream zipOutput = null;
+        boolean success = false; // Pessimistic
         try {
             if (canceled.get()) {
                 return false;
             }
 
-            ZippedFileStorageOutputStream zipOutput = getZipOutputStream();
+            zipOutput = getZipOutputStream();
             String name = directory.getName();
             String pathPrefix = directory.getPath();
             if (pathPrefix.length() > 0 && pathPrefix.charAt(pathPrefix.length() - 1) != '/') {
@@ -263,26 +266,37 @@ public class DataExportSinkImpl implements DataExportSink {
             }
             zipOutput.closeArchiveEntry();
             zipOutput.flush();
+
+            exportCalled.set(true);
+            success = true;
+            return true;
         } catch (IOException e) {
             throw DataExportExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw DataExportExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (Error e) {
             throw e;
+        } finally {
+            if (!success && zipOutput != null) {
+                Optional<String> optionalLocation = zipOutput.getOptionalFileStorageLocation();
+                if (optionalLocation.isPresent()) {
+                    deleteQuietly(optionalLocation.get(), fileStorage);
+                }
+            }
         }
-
-        exportCalled.set(true);
-        return true;
     }
 
     @Override
-    public synchronized boolean export(InputStream data, Item item) throws OXException {
+    public synchronized boolean export(InputStream in, Item item) throws OXException {
+        ZippedFileStorageOutputStream zipOutput = null;
+        boolean success = false; // Pessimistic
+        InputStream data = in;
         try {
             if (canceled.get()) {
                 return false;
             }
 
-            ZippedFileStorageOutputStream zipOutput = getZipOutputStream();
+            zipOutput = getZipOutputStream();
             String name = item.getName();
             String pathPrefix = item.getPath() == null ? "" : item.getPath();
             if (pathPrefix.length() > 0 && pathPrefix.charAt(pathPrefix.length() - 1) != '/') {
@@ -331,10 +345,16 @@ public class DataExportSinkImpl implements DataExportSink {
                 size += read;
             }
             entry.setSize(size);
+            Streams.close(data);
+            data = null;
 
             // Complete the entry
             zipOutput.closeArchiveEntry();
             zipOutput.flush();
+
+            exportCalled.set(true);
+            success = true;
+            return true;
         } catch (IOException e) {
             throw DataExportExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -343,10 +363,13 @@ public class DataExportSinkImpl implements DataExportSink {
             throw e;
         } finally {
             Streams.close(data);
+            if (!success && zipOutput != null) {
+                Optional<String> optionalLocation = zipOutput.getOptionalFileStorageLocation();
+                if (optionalLocation.isPresent()) {
+                    deleteQuietly(optionalLocation.get(), fileStorage);
+                }
+            }
         }
-
-        exportCalled.set(true);
-        return true;
     }
 
     @Override
@@ -425,7 +448,7 @@ public class DataExportSinkImpl implements DataExportSink {
         }
 
         // Return new file storage location
-        return Optional.of(newFileStorageLocation);
+        return Optional.ofNullable(newFileStorageLocation);
     }
 
     @Override

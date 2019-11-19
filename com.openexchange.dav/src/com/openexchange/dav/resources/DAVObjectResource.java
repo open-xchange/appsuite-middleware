@@ -84,7 +84,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    protected DAVObjectResource(FolderCollection<T> parent, T object, WebdavPath url) throws OXException {
+    protected DAVObjectResource(FolderCollection<T> parent, T object, WebdavPath url) {
         super(parent.getFactory(), url);
         this.parent = parent;
         this.object = object;

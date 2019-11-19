@@ -134,8 +134,8 @@ public class SchedulingHelper {
      * @param services A service lookup reference
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
-     * @param timestamp The timestamp to use for tracked scheduling messages and notifications
      * @param tracker The underlying result tracker
+     * @throws OXException If calendar user can't be found
      */
     public SchedulingHelper(ServiceLookup services, CalendarSession session, CalendarFolder folder, ResultTracker tracker) throws OXException {
         super();
@@ -1117,7 +1117,7 @@ public class SchedulingHelper {
                 return false; // infinite recurrence
             }
         }
-        if (eventEnd.isFloating() && null != timeZone) {
+        if (false == eventEnd.isFloating() && null != timeZone) {
             eventEnd = eventEnd.swapTimeZone(timeZone);
         }
         return eventEnd.before(dtNow);
@@ -1232,7 +1232,9 @@ public class SchedulingHelper {
     private static DateTime getEndDate(Event event) {
         DateTime endDate = event.getEndDate();
         if (null == endDate) {
-            endDate = event.getStartDate();
+            DateTime startDate = event.getStartDate();
+            TimeZone timeZone = null == startDate.getTimeZone() ? DateTime.UTC : startDate.getTimeZone();
+            endDate = new DateTime(timeZone, startDate.getTimestamp());
             if (endDate.isAllDay()) {
                 endDate.addDuration(new Duration(1, 1, 0));
             }

@@ -104,6 +104,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.JSONPrintableEvent;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -1086,4 +1087,14 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
     }
     
+    /**
+     * If <code>TRACE</code> logging is enabled, the original and the updated event
+     * will be logged as JSON
+     *
+     * @param update The event update to log
+     */
+    protected void logPerform(EventUpdate update) {
+        LOG.trace("Original: >\n{}\nUpdated: >\n{}", new JSONPrintableEvent(session, update.getOriginal()), new JSONPrintableEvent(session, update.getUpdate()));
+    }
+
 }
