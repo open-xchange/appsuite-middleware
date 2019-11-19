@@ -34,6 +34,7 @@ package net.fortuna.ical4j.model;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -294,17 +295,31 @@ public class DateTime extends Date {
 
         try {
             if (value.endsWith("Z")) {
-                setTime(value, (DateFormat) UTC_FORMAT.get(), null);
+                setTime(value, UTC_FORMAT.get(), null);
                 setUtc(true);
             } else {
                 if (timezone != null) {
-                    setTime(value, (DateFormat) DEFAULT_FORMAT.get(), timezone);
+                    try {
+                        setTime(value, DEFAULT_FORMAT.get(), timezone);
+                    } catch (ParseException e) {
+                        // possibly incomplete timezone; retry parsing with a well-known timezone if possible
+                        if (null != timezone.getID() && timezone.getID().equals(TimeZone.getTimeZone(timezone.getID()).getID())) {
+                            try {
+                                setTime(value, DEFAULT_FORMAT.get(), TimeZone.getTimeZone(timezone.getID()));
+                            } catch (Exception x) {
+                                // ignore & throw previous parse exception
+                                throw e;
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
                 } else {
                     // Use lenient parsing for floating times. This is to
                     // overcome
                     // the problem of parsing VTimeZone dates that specify dates
                     // that the strict parser does not accept.
-                    setTime(value, (DateFormat) LENIENT_DEFAULT_FORMAT.get(),
+                    setTime(value, LENIENT_DEFAULT_FORMAT.get(),
                             getFormat().getTimeZone());
                 }
                 setTimeZone(timezone);
@@ -313,16 +328,16 @@ public class DateTime extends Date {
             if (CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_VCARD_COMPATIBILITY)) {
 
             	try {
-	                setTime(value, (DateFormat) VCARD_FORMAT.get(), timezone);
+	                setTime(value, VCARD_FORMAT.get(), timezone);
 	                setTimeZone(timezone);
             	} catch (ParseException pe2) {
                     if (CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING)) {
-    	                setTime(value, (DateFormat) RELAXED_FORMAT.get(), timezone);
+    	                setTime(value, RELAXED_FORMAT.get(), timezone);
     	                setTimeZone(timezone);
                     }            		
             	}
             } else if (CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING)) {
-                setTime(value, (DateFormat) RELAXED_FORMAT.get(), timezone);
+                setTime(value, RELAXED_FORMAT.get(), timezone);
                 setTimeZone(timezone);
             } else {
                 throw pe;
@@ -370,7 +385,7 @@ public class DateTime extends Date {
 				.getInstance(pattern);
 		if (utc) {
 			setTime(value, format,
-					((DateFormat) UTC_FORMAT.get()).getTimeZone());
+					UTC_FORMAT.get().getTimeZone());
 		} else {
 			setTime(value, format, null);
 		}
@@ -398,7 +413,8 @@ public class DateTime extends Date {
 	/**
 	 * {@inheritDoc}
 	 */
-	public final void setTime(final long time) {
+	@Override
+    public final void setTime(final long time) {
 		super.setTime(time);
 		// need to check for null time due to Android java.util.Date(long)
 		// constructor
@@ -474,7 +490,8 @@ public class DateTime extends Date {
 	/**
 	 * {@inheritDoc}
 	 */
-	public final String toString() {
+	@Override
+    public final String toString() {
 		final StringBuffer b = new StringBuffer(super.toString());
 		b.append('T');
 		b.append(time.toString());
@@ -484,7 +501,8 @@ public class DateTime extends Date {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean equals(final Object arg0) {
+	@Override
+    public boolean equals(final Object arg0) {
 		// TODO: what about compareTo, before, after, etc.?
 
 		if (arg0 instanceof DateTime) {
@@ -497,13 +515,18 @@ public class DateTime extends Date {
 	/**
 	 * {@inheritDoc}
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		return super.hashCode();
 	}
 
 	private static class DateFormatCache {
 
-		private final Map threadMap = new WeakHashMap();
+		/**
+         * This map needs to keep weak references (to avoid memory leaks - see r1.37)
+         * and be thread-safe (since it may be concurrently modified in get() below).
+         */
+        private final Map<Thread, DateFormat> threadMap = Collections.synchronizedMap(new WeakHashMap<Thread, DateFormat>());
 
 		private final DateFormat templateFormat;
 
@@ -512,8 +535,7 @@ public class DateTime extends Date {
 		}
 
 		public DateFormat get() {
-			DateFormat dateFormat = (DateFormat) threadMap.get(Thread
-					.currentThread());
+            DateFormat dateFormat = threadMap.get(Thread.currentThread());
 			if (dateFormat == null) {
 				dateFormat = (DateFormat) templateFormat.clone();
 				threadMap.put(Thread.currentThread(), dateFormat);
