@@ -1,26 +1,32 @@
 ---
-title: deleteuserfeedback
-icon: fa-trash
+title: senduserfeedback
+icon: far fa-circle
 tags: Administration, Command Line tools, User, Feedback
 ---
 
 # NAME
 
-deleteuserfeedback - Delete user feedback
+senduserfeedback - Send user feedback
 
 # SYNOPSIS
 
-**deleteuserfeedback -U myUser:myPassword [-t type] [-g ctx_grp] [-s time] [-e time]**
+**senduserfeedback -U myUser:myPassword [OPTIONS]**
 
 # DESCRIPTION
 
-This command line tool deletes the user feedback.
+This command line tool sends the user feedback via mail.
  
 # OPTIONS
 
 
 **--api-root** *arg*
 : URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1/'
+
+ **-b**, **--body** *arg*
+: The mail body (plain text).
+
+**-c**, **--compress**
+: Use to gzip-compress exported feedback.
 
 **-e**, **--end-time** *arg*
 : End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.
@@ -31,9 +37,15 @@ This command line tool deletes the user feedback.
 **-h**, **--help**
 : Prints the help text
 
+**-r**, **--recipients** *arg*
+: Single Recipient's mail address like "Displayname <email@example.com>" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.
+
 **-s**, **--start-time** *arg*
 : Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.
 
+**-S**, **--subject** *arg*
+: The mail subject. Default: "User Feedback Report: [time range]".
+ 
 **-t**, **--type** *arg*
 : The feedback type to delete. Default: 'star-rating-v1'.
 
@@ -43,9 +55,9 @@ This command line tool deletes the user feedback.
 
 # EXAMPLES
 
-**deleteuserfeedback -s 1487348317**
+**senduserfeedback -U myUser:myPassword -s 1487348317 -r "Displayname <email@example.com>"**
 
 
 # SEE ALSO
 
-[exportuserfeedback(1)](exportuserfeedback), [senduserfeedback(1)](senduserfeedback)
+[exportuserfeedback(1)](exportuserfeedback), [deleteuserfeedback(1)](deleteuserfeedback)
