@@ -264,8 +264,9 @@ public class AttachmentUtils {
      * @param attachments The attachment service instance to use for the operation
      * @param collection The parent folder collection
      * @param originalMetadata The metadata of the attachment to copy
-     * @param targetObject The target groupware object for adding the attachment
+     * @param targetObjectID The target groupware object for adding the attachment
      * @return The copied attachment metadata
+     * @throws OXException In case attachment can't be copied
      */
     public static AttachmentMetadata copyAttachment(AttachmentBase attachments, FolderCollection<?> collection, AttachmentMetadata originalMetadata, int targetObjectID) throws OXException {
         DAVFactory factory = collection.getFactory();
@@ -288,11 +289,13 @@ public class AttachmentUtils {
      * @param attachments The attachment service instance to use for the operation
      * @param collection The parent folder collection
      * @param inputStream The attachment data to store
-     * @param targetObject The target groupware object for adding the attachment
+     * @param folderID The folder identifier
+     * @param objectID The attachment identifier
      * @param contentType The content type of the attachment
      * @param fileName The filename of the attachment
      * @param size The indicated size in bytes of the attachment
      * @return The added attachment's metadata
+     * @throws OXException If max upload size is surpassed or adding to attachments fails
      */
     public static AttachmentMetadata addAttachment(AttachmentBase attachments, FolderCollection<?> collection, InputStream inputStream, int folderID, int objectID, String contentType, String fileName, long size) throws OXException {
         long maxSize = AttachmentConfig.getMaxUploadSize();
