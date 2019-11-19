@@ -77,6 +77,7 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.scheduling.changes.ChangeAction;
@@ -219,11 +220,11 @@ public class MimeMessageBuilder {
      * @param recipient The recipient
      * @param action The {@link ChangeAction} to set as type
      * @param event The changed event
+     * @param partStat The participant status of the originator
      * @return This {@link MimeMessageBuilder} instance
      * @throws MessagingException If header can't be set
-     * @throws OXException In case folder can't be loaded
      */
-    public MimeMessageBuilder setOXHeader(CalendarUser recipient, ChangeAction action, Event event) throws MessagingException {
+    public MimeMessageBuilder setOXHeader(CalendarUser recipient, ChangeAction action, Event event, ParticipationStatus partStat) throws MessagingException {
         if (false == Utils.isInternalCalendarUser(recipient) || null == event) {
             return this;
         }
@@ -234,7 +235,7 @@ public class MimeMessageBuilder {
             LOGGER.warn("Unable to get folder view for recipient {}, omitting {}-header.", recipient, Constants.HEADER_X_OX_REMINDER, e);
         }
         mime.setHeader(Constants.HEADER_X_OX_MODULE, Constants.VALUE_X_OX_MODULE);
-        mime.setHeader(Constants.HEADER_X_OX_TYPE, action.name());
+        mime.setHeader(Constants.HEADER_X_OX_TYPE, getTypeHeaderValue(action, partStat));
         mime.setHeader(Constants.HEADER_X_OX_OBJECT, event.getId());
         mime.setHeader(Constants.HEADER_X_OX_SEQUENCE, String.valueOf(event.getSequence()));
         mime.setHeader(Constants.HEADER_X_OX_UID, event.getUid());
@@ -382,4 +383,36 @@ public class MimeMessageBuilder {
         return calendarUser.getEMail();
     }
 
+    /**
+     * Get the value for the header {@link Constants#HEADER_X_OX_TYPE}
+     *
+     * @param action The action that has been performed
+     * @param partStat The participant status of the originator. Important in case of the <code>REPLY</code> action.
+     * @return The value as String
+     */
+    private String getTypeHeaderValue(ChangeAction action, ParticipationStatus partStat) {
+        switch (action) {
+            case CREATE:
+                return "New";
+            case CANCEL:
+                return "Deleted";
+            case REPLY:
+                if (ParticipationStatus.ACCEPTED.equals(partStat)) {
+                    return "Accepted";
+                }
+                if (ParticipationStatus.DECLINED.equals(partStat)) {
+                    return "Declined";
+                }
+                if (ParticipationStatus.TENTATIVE.equals(partStat)) {
+                    return "Tentatively accepted";
+                }
+                // null == partStat || ParticipationStatus.NEEDS_ACTION.equals(partStat)) || ParticipationStatus.DELEGATED.equals(partStat) 
+                return "Not yet accepted";
+            case UPDATE:
+                return "Modified";
+            case NONE:
+            default:
+                return "Refresh";
+        }
+    }
 }
