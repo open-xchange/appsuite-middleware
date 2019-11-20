@@ -739,9 +739,21 @@ final class ListLsubCollection implements Serializable {
         final ListLsubEntryImpl p = lle.getParentImpl();
         if (null != p) {
             p.removeChild(lle);
+            bug55625(p, lle);
             if (p.isDummy() && p.emptyChildren()) {
                 // Drop dummy parent, too
                 dropEntryFrom(p, map);
+            }
+        }
+    }
+    
+    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
+    
+    private static void bug55625(ListLsubEntryImpl parent, ListLsubEntryImpl child) {
+        if(LOG2.isDebugEnabled()) {
+            if(ROOT_FULL_NAME.equals(parent.getFullName())) {
+                String text = String.format("Removed %s from root", child.getFullName());
+                LOG2.debug(text, new Exception(text));
             }
         }
     }
