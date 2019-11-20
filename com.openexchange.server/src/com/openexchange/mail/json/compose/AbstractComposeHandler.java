@@ -967,6 +967,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                         .guestLanguage(jSecuritySettings.optString("language", null))
                         .guestMessage(jSecuritySettings.optString("message", null))
                         .pin(jSecuritySettings.optString("pin", null))
+                        .msgRef(jSecuritySettings.optString("msgRef", null))
                         .build();
                     if (settings.anythingSet()) {
                         composedMail.setSecuritySettings(settings);
