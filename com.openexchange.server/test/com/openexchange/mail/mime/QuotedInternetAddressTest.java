@@ -315,4 +315,15 @@ public class QuotedInternetAddressTest {
             fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testBug68346() {
+        try {
+            QuotedInternetAddress adr = new QuotedInternetAddress("mail@\u0938\u0902\u0935\u093e\u0926.net", false);
+
+            assertEquals("Unexpected toUnicodeString() representation", "mail@\u0938\u0902\u0935\u093e\u0926.net", adr.toUnicodeString());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
 }
