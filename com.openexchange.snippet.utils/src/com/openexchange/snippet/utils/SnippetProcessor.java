@@ -318,6 +318,7 @@ public class SnippetProcessor {
             httpURLConnection.getInputStream();
             if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
                 String redirectUrl = httpURLConnection.getHeaderField("Location");
+                httpURLConnection.disconnect();
                 return getFinalURL(redirectUrl, validate);
             }
         }
