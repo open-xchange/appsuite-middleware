@@ -271,10 +271,6 @@ public final class ListLsubCache {
         if (null != collection) {
             synchronized (collection) {
                 collection.remove(fullName);
-                if(LOG2.isDebugEnabled()) {
-                    String msg = String.format("Removed folder %s from collection of account %s", fullName, String.valueOf(accountId));
-                    LOG2.debug(msg, new Exception(msg));
-                }
             }
 
             fireInvalidateCacheEvent(session);
@@ -750,15 +746,6 @@ public final class ListLsubCache {
         return IMAPProperties.getInstance().allowFolderCaches() ? DEFAULT_TIMEOUT : 20000L;
     }
 
-    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
-    
-    private static List<ListLsubEntry> bug55625Logging(String parent, List<ListLsubEntry> entries){
-        if((entries == null || entries.isEmpty()) && "".equals(parent)) {
-            LOG2.debug("ListLsubCache: ListLsubEntry list is empty", new Exception("ListLsubCache: ListLsubEntry list is empty"));
-        }
-        return entries;
-    }
-    
     /**
      * Gets all LIST/LSUB entries.
      *
@@ -776,23 +763,23 @@ public final class ListLsubCache {
         ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
         if (isAccessible(collection)) {
             if (null == optParentFullName) {
-                return bug55625Logging(optParentFullName,  subscribedOnly ? collection.getLsubsIgnoreDeprecated() : collection.getLists());
+                return subscribedOnly ? collection.getLsubsIgnoreDeprecated() : collection.getLists();
             }
 
             ListLsubEntry entry = subscribedOnly ? collection.getLsubIgnoreDeprecated(optParentFullName) : collection.getListIgnoreDeprecated(optParentFullName);
             if (null != entry) {
-                return bug55625Logging(optParentFullName, entry.getChildren());
+                return entry.getChildren();
             }
         }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection, ignoreSubscriptions)) {
                 if (null == optParentFullName) {
-                    return bug55625Logging(optParentFullName, subscribedOnly ? collection.getLsubs() : collection.getLists());
+                    return subscribedOnly ? collection.getLsubs() : collection.getLists();
                 }
 
                 ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
                 if (null != entry) {
-                    return bug55625Logging(optParentFullName, entry.getChildren());
+                    return entry.getChildren();
                 }
             }
             /*
@@ -801,14 +788,14 @@ public final class ListLsubCache {
             collection.reinit(imapStore, ignoreSubscriptions);
             fireInvalidateCacheEvent(session);
             if (null == optParentFullName) {
-                return bug55625Logging(optParentFullName, subscribedOnly ? collection.getLsubs() : collection.getLists());
+                return subscribedOnly ? collection.getLsubs() : collection.getLists();
             }
 
             ListLsubEntry entry = subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName);
             if (null != entry) {
-                return bug55625Logging(optParentFullName, entry.getChildren());
+                return entry.getChildren();
             }
-            return bug55625Logging(optParentFullName, Collections.emptyList());
+            return Collections.emptyList();
         }
     }
 
