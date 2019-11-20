@@ -51,9 +51,6 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.json.fields.ChronosJsonFields.COMMENT;
 import static com.openexchange.chronos.json.fields.ChronosJsonFields.ORGANIZER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SCHEDULING;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.Set;
@@ -82,7 +79,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class ChangeOrganizerAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS, PARAMETER_PUSH_TOKEN, PARAMETER_SCHEDULING);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAM_FIELDS, PARAM_PUSH_TOKEN, PARAM_SCHEDULING);
 
     @Override
     protected Set<String> getOptionalParameters() {

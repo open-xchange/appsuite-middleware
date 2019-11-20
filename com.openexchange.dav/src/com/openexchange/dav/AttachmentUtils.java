@@ -57,6 +57,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.resources.FolderCollection;
@@ -87,6 +89,9 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @since v7.8.1
  */
 public class AttachmentUtils {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentUtils.class);
+
     
     private static final AttachmentMetadataFactory FACTORY = new AttachmentMetadataFactory();
 
@@ -215,7 +220,13 @@ public class AttachmentUtils {
     }
 
     public static AttachmentMetadata decodeName(String name) throws IllegalArgumentException {
-        String decodedName = new String(BaseEncoding.base64Url().omitPadding().decode(name), Charsets.UTF_8);
+        String decodedName;
+        try {
+            decodedName = new String(BaseEncoding.base64Url().omitPadding().decode(name), Charsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("Unable to decode {}", name, e);
+            throw e;
+        }
         String[] splitted = Strings.splitByDelimNotInQuotes(decodedName, '-');
         if (null == splitted || 4 != splitted.length) {
             throw new IllegalArgumentException(name);
@@ -253,8 +264,9 @@ public class AttachmentUtils {
      * @param attachments The attachment service instance to use for the operation
      * @param collection The parent folder collection
      * @param originalMetadata The metadata of the attachment to copy
-     * @param targetObject The target groupware object for adding the attachment
+     * @param targetObjectID The target groupware object for adding the attachment
      * @return The copied attachment metadata
+     * @throws OXException In case attachment can't be copied
      */
     public static AttachmentMetadata copyAttachment(AttachmentBase attachments, FolderCollection<?> collection, AttachmentMetadata originalMetadata, int targetObjectID) throws OXException {
         DAVFactory factory = collection.getFactory();
@@ -277,11 +289,13 @@ public class AttachmentUtils {
      * @param attachments The attachment service instance to use for the operation
      * @param collection The parent folder collection
      * @param inputStream The attachment data to store
-     * @param targetObject The target groupware object for adding the attachment
+     * @param folderID The folder identifier
+     * @param objectID The attachment identifier
      * @param contentType The content type of the attachment
      * @param fileName The filename of the attachment
      * @param size The indicated size in bytes of the attachment
      * @return The added attachment's metadata
+     * @throws OXException If max upload size is surpassed or adding to attachments fails
      */
     public static AttachmentMetadata addAttachment(AttachmentBase attachments, FolderCollection<?> collection, InputStream inputStream, int folderID, int objectID, String contentType, String fileName, long size) throws OXException {
         long maxSize = AttachmentConfig.getMaxUploadSize();

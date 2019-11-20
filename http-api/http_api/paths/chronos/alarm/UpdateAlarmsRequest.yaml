@@ -19,6 +19,31 @@
         schema:
           type: integer
           format: int64
+      - $ref: '#/components/parameters/QueryParamChronosExpand'
+      - $ref: '#/components/parameters/QueryParamChronosScheduling'
+      - in: query
+        name: rangeStart
+        description: >
+          If expand is set to 'true' this parameter defines a lower inclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
+          Only events which start on or after this date are returned.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: rangeEnd
+        description: >
+          If expand is set to 'true' this parameter defines a upper exclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
+          Only events which end before this date are returned.
+        required: false
+        schema:
+          type: string
+
     responses:
       '200':
         description: >

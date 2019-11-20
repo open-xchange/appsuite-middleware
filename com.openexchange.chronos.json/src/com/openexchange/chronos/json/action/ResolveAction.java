@@ -59,7 +59,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
@@ -73,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
 public class ResolveAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_FIELDS);
 
     /**
      * Initializes a new {@link ResolveAction}.

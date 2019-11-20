@@ -6,11 +6,11 @@ tags: Administration, Command Line tools, User
 
 # NAME
 
-createuser - Checks for user existence.
+existsuser - Checks for user existence.
 
 # SYNOPSIS
 
-**createuser** [OPTION]...
+**existsuser** [OPTION]...
 
 # DESCRIPTION
 
@@ -50,7 +50,7 @@ This command line tool allows to check whether a user exists in a given context.
 
 # EXAMPLES
 
-**deleteuser -A contextAdmin -P secret -c 1138 -i 137**
+**existsuser -A contextAdmin -P secret -c 1138 -i 137**
 
 Deletes the user with the specified identifier in the specified context.
 

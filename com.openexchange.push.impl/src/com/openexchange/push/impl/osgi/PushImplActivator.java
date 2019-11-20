@@ -58,6 +58,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -132,6 +133,7 @@ public final class PushImplActivator extends HousekeepingActivator {
 
             // Thread pool service tracker
             trackService(ConfigurationService.class);
+            trackService(ConfigViewFactory.class);
             trackService(EventFactoryService.class);
             trackService(ThreadPoolService.class);
             trackService(EventAdmin.class);

@@ -132,7 +132,7 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
                 .setContent(new InternalMimePartFactory(serviceLookup, scheduleChange, recipientSettings))
                 .setAdditionalHeader(additionals)
                 .setPriority()
-                .setOXHeader(recipient, action, event)
+                .setOXHeader(recipient, action, event, scheduleChange.getOriginatorPartStat())
                 .setMailerInfo(serviceLookup.getOptionalService(VersionService.class))
                 .setTracing(resource.getUid())
                 .setOrganization(serviceLookup.getOptionalService(ContactService.class), session)

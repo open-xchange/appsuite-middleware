@@ -86,6 +86,10 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The attachment's metadata does not have a content-id.</li>
      */
     MISSING_METADATA_ATTACHMENT_REFERENCE("The attachment's metadata does not have a content-id.", CalendarExceptionMessages.MISSING_METADATA_ATTACHMENT_REFERENCE_MSG, Category.CATEGORY_ERROR, 4),
+    /**
+     * An unexpected error occurred: %1$s
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", null, CATEGORY_ERROR, 5)
     ;
 
     public static final String PREFIX = "CAL_JSON".intern();

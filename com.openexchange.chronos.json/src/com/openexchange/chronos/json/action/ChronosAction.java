@@ -159,7 +159,10 @@ public abstract class ChronosAction extends AbstractChronosAction {
     protected static TimeZone getTimeZone(AJAXRequestData requestData) {
         String timezoneId = requestData.getParameter("timezone");
         if (Strings.isEmpty(timezoneId)) {
-            timezoneId = requestData.getSession().getUser().getTimeZone();
+            ServerSession session = requestData.getSession();
+            if( session != null) {
+                timezoneId = session.getUser().getTimeZone();
+            }
         }
         return CalendarUtils.optTimeZone(timezoneId, TimeZones.UTC);
     }
@@ -459,13 +462,12 @@ public abstract class ChronosAction extends AbstractChronosAction {
     /**
      * Retrieves a unique id for the attachment
      *
-     * @param requestData The {@link AJAXRequestData}
+     * @param contextId The context id
      * @param eventId The {@link EventID}
      * @param managedId The managed ID
      * @return A unique ID for the attachment to scan
      */
-    protected String getUniqueId(AJAXRequestData requestData, EventID eventId, String managedId) {
-        int contextId = requestData.getSession().getContextId();
+    protected String getUniqueId(int contextId, EventID eventId, String managedId) {
         // Use also the occurrence id to distinguish any exceptions in the series
         // and in case that exception may have different attachments that the master series?
         return IDMangler.mangle(Integer.toString(contextId), eventId.getFolderID(), eventId.getObjectID(), /* eventId.getRecurrenceID().toString(), */ managedId);

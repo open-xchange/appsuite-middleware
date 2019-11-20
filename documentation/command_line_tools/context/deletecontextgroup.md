@@ -1,16 +1,16 @@
 ---
-title: deletecontext
+title: deletecontextgroup
 icon: far fa-circle
 tags: Administration, Command Line tools, Context
 ---
 
 # NAME
 
-deletecontext - deletes a context group.
+deletecontextgroup - deletes a context group.
 
 # SYNOPSIS
 
-**deletecontext** [OPTION]...
+**deletecontextgroup** [OPTION]...
 
 # DESCRIPTION
 

@@ -117,19 +117,21 @@ public class SyncFilesAction extends AbstractDriveAction {
          */
         try {
             DriveService driveService = Services.getService(DriveService.class, true);
+            boolean includeQuota = requestData.containsParameter("quota") ? requestData.getParameter("quota", Boolean.class).booleanValue() : false;
             SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles);
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
-            jsonObject.put("pathToRoot", syncResult.getPathToRoot());
-            if (null != session.isDiagnostics() || session.isIncludeQuota()) {
+            if (null != session.isDiagnostics() || includeQuota || session.getApiVersion() >= 8) {
+                JSONObject jsonObject = new JSONObject();
                 if (null != session.isDiagnostics()) {
                     jsonObject.put("diagnostics", syncResult.getDiagnostics());
                 }
-                if (session.isIncludeQuota()) {
+                if (includeQuota) {
                     jsonObject.put("quota", DriveJSONUtils.serializeQuota(syncResult.getQuota()));
                 }
+                jsonObject.put("pathToRoot", syncResult.getPathToRoot());
+                jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
+                return new AJAXRequestResult(jsonObject, "json");
             }
-            return new AJAXRequestResult(jsonObject, "json");
+            return new AJAXRequestResult(JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()), "json");
         } catch (OXException e) {
             if ("DRV".equals(e.getPrefix())) {
                 LOG.debug("Error performing syncFiles request", e);

@@ -101,15 +101,24 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractChronosAction.class);
     protected final ServiceLookup services;
 
+    // Mapping to CalendarParameters parameters
     protected static final String PARAM_RANGE_START = "rangeStart";
     protected static final String PARAM_RANGE_END = "rangeEnd";
     protected static final String PARAM_EXPAND = "expand";
     protected static final String PARAM_CHECK_CONFLICTS = "checkConflicts";
-    protected static final String PARAM_SEND_INTERNAL_NOTIFICATIONS = "sendInternalNotifications";
+    protected static final String PARAM_SCHEDULING = "scheduling";
     protected static final String PARAM_RECURRENCE_ID = "recurrenceId";
     protected static final String PARAM_RECURRENCE_RANGE = "recurrenceRange";
     protected static final String PARAM_SEQUENCE = "sequence";
-
+    protected static final String PARAM_PUSH_TOKEN = "pushToken";
+    protected static final String PARAM_FIELDS = "fields";
+    protected static final String PARAM_ORDER_BY = "sort";
+    protected static final String PARAM_ORDER = "order";
+    protected static final String PARAM_UPDATE_CACHE = "updateCache";
+    protected static final String PARAM_MASK_ID = "maskId";
+    protected static final String PARAM_LEFT_HAND_LIMIT = "left_hand_limit";
+    protected static final String PARAM_RIGHT_HAND_LIMIT = "right_hand_limit";
+    
     /**
      * Initializes a new {@link AbstractChronosAction}.
      */
@@ -302,9 +311,6 @@ public abstract class AbstractChronosAction implements AJAXActionService {
                     throw new IllegalArgumentException("Unexpected scheduling control value \"" + value + "\"");
                 }
                 return new AbstractMap.SimpleEntry<String, SchedulingControl>(PARAMETER_SCHEDULING, schedulingControl);
-            case PARAM_SEND_INTERNAL_NOTIFICATIONS:
-                return new AbstractMap.SimpleEntry<String, SchedulingControl>(
-                    PARAMETER_SCHEDULING, Boolean.parseBoolean(value) ? SchedulingControl.ALL : SchedulingControl.EXTERNAL_ONLY);
             case PARAMETER_MASK_ID:
                 return new AbstractMap.SimpleEntry<String, String>(PARAMETER_MASK_ID, value);
             case PARAMETER_PUSH_TOKEN:

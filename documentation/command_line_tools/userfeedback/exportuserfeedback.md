@@ -1,6 +1,6 @@
 ---
 title: exportuserfeedback
-icon: fa fa-files-o
+icon: far fa-circle
 tags: Administration, Command Line tools, User, Feedback
 ---
 

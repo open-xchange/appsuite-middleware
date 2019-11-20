@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
@@ -114,11 +115,54 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
          */
         Event originalEvent = loadEventData(objectId);
         List<Event> exceptions = null;
+        if (null != clientTimestamp) {
+            requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
+        }
+        
         if (null != recurrenceId) {
             if (isSeriesMaster(originalEvent)) {
-                recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
-                Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
-                originalEvent = originalExceptionEvent;
+				if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
+					recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
+					Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
+					originalEvent = originalExceptionEvent;
+				} else {
+					resultTracker.rememberOriginalEvent(originalEvent);
+					/*
+		             * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
+		             */
+		            Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
+		            Event newExceptionEvent = prepareException(originalEvent, recurrenceId);
+		            Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
+		            Check.quotaNotExceeded(storage, session);
+		            storage.getEventStorage().insertEvent(newExceptionEvent);
+		            storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalEvent.getAttendees());
+		            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalEvent.getAttachments());
+		            insertAlarms(newExceptionEvent, newExceptionAlarms, true);
+		            newExceptionEvent = loadEventData(newExceptionEvent.getId());
+		            resultTracker.trackCreation(newExceptionEvent, originalEvent);
+		            /*
+		             * perform alarm update & track results
+		             */
+                    resultTracker.rememberOriginalEvent(newExceptionEvent);
+                    List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
+                    updateAlarms(newExceptionEvent, calendarUserId, originalAlarms, alarms);
+                    Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+                    resultTracker.trackUpdate(newExceptionEvent, loadEventData(newExceptionEvent.getId()));
+                    /*
+                     * add change exception date to series master & track results
+                     */
+                    addChangeExceptionDate(originalEvent, recurrenceId, false);
+	                Event updatedMasterEvent = loadEventData(originalEvent.getId());
+	                resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
+                    /*
+                     * reset alarm triggers for series master event and new change exception
+                     */
+	                storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
+	                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
+                    storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
+                    storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+		            return resultTracker.getResult();
+				}
             } else if (false == isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(objectId, recurrenceId);
             }
@@ -133,9 +177,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
                 }
             }
         }
-        if (null != clientTimestamp) {
-            requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
-        }
+
         resultTracker.rememberOriginalEvent(originalEvent);
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
         /*
