@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.utils;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
@@ -291,6 +292,7 @@ public class SnippetProcessor {
         }
     }
 
+    private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
 
     /**
      * Returns the final url which might be different due to HTTP(S) redirects.
@@ -304,22 +306,18 @@ public class SnippetProcessor {
     private String getFinalURL(String url, boolean validate) throws IOException, OXException {
         URL u = new URL(url);
         if (validate) {validateUrl(u);}
-        if (u.getProtocol().equalsIgnoreCase("http")) {
-            HttpURLConnection con = (HttpURLConnection) u.openConnection();
-            con.setInstanceFollowRedirects(false);
-            con.connect();
-            con.getInputStream();
-            if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
-                String redirectUrl = con.getHeaderField("Location");
-                return getFinalURL(redirectUrl, validate);
-            }
-        } else if (u.getProtocol().equalsIgnoreCase("https")) {
-            HttpsURLConnection con = (HttpsURLConnection) u.openConnection();
-            con.setInstanceFollowRedirects(false);
-            con.connect();
-            con.getInputStream();
-            if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
-                String redirectUrl = con.getHeaderField("Location");
+
+        URLConnection urlConnnection = u.openConnection();
+        urlConnnection.setConnectTimeout(2500);
+        urlConnnection.setReadTimeout(2500);
+
+        if (urlConnnection instanceof HttpURLConnection) {
+            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
+            httpURLConnection.setInstanceFollowRedirects(false);
+            httpURLConnection.connect();
+            httpURLConnection.getInputStream();
+            if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
+                String redirectUrl = httpURLConnection.getHeaderField("Location");
                 return getFinalURL(redirectUrl, validate);
             }
         }
