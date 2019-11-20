@@ -1122,7 +1122,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return The possibly initialized address string
      */
     public static String init(String address) {
-        return init(address, false);
+        return init(address, true);
     }
 
     /**
