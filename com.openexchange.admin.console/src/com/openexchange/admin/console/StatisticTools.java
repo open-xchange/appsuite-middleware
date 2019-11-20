@@ -273,7 +273,6 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
             System.out.print(showEventAdminData(mbc));
             System.out.print(showNioBufferData(mbc));
-            System.out.println(showRtData(mbc));
             System.out.println(showPnsData(mbc));
             System.out.println(showWebSocketData(mbc));
             count++;
@@ -339,10 +338,6 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.niobufferstats) && 0 == count) {
             System.out.print(showNioBufferData(mbc));
-            count++;
-        }
-        if (null != parser.getOptionValue(this.rtstats) && 0 == count) {
-            System.out.print(showRtData(mbc));
             count++;
         }
         if (0 == count) {
@@ -606,7 +601,6 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the NIO buffer stats",
             false,
             NeededQuadState.notneeded);
-        this.rtstats = setShortLongOpt(parser, OPT_RT_BUFFER_STATS_SHORT, OPT_RT_BUFFER_STATS_LONG, "shows stats for the realtime component", false, NeededQuadState.notneeded);
 
 
     }
@@ -947,35 +941,6 @@ public class StatisticTools extends AbstractJMXTools {
         return getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=direct")
         .append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped"))
         .toString();
-    }
-
-    static String showRtData(final MBeanServerConnection mbeanServerConnection) {
-        String runLoopFillSum = "RunLoopFillSum";
-        StringBuilder sb = new StringBuilder();
-        try {
-            final ObjectName objectName = new ObjectName("com.openexchange.realtime:name=RunLoopManager");
-            Object fillSum = mbeanServerConnection.getAttribute(objectName, runLoopFillSum);
-            if (fillSum instanceof Map) {
-                Map<?, ?> fillSums = Map.class.cast(fillSum);
-                for (Entry<?, ?> entry : fillSums.entrySet()) {
-                    sb.append(objectName);
-                    sb.append(',');
-                    sb.append(runLoopFillSum);
-                    sb.append(',');
-                    sb.append(entry.getKey());
-                    sb.append(" = ");
-                    sb.append(entry.getValue());
-                    sb.append(LINE_SEPARATOR);
-                }
-            }
-        } catch (Exception e) {
-            sb.append("com.openexchange.realtime");
-            sb.append(" = ");
-            sb.append('[');
-            sb.append(e.toString());
-            sb.append(']');
-        }
-        return sb.toString();
     }
 
     private static String extractTextInBrackets(final String value, final int startIdx) {
