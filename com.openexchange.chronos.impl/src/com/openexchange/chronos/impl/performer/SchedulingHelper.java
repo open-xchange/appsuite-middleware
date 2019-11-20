@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.getDateInTimeZone;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
@@ -1109,16 +1110,16 @@ public class SchedulingHelper {
                 RecurrenceIterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, null, null);
                 while (iterator.hasNext()) {
                     eventEnd = getEndDate(iterator.next());
-                    if (eventEnd.after(dtNow) && (false == eventEnd.isFloating() || null == timeZone || eventEnd.swapTimeZone(timeZone).after(dtNow))) {
-                        break; // this occurrence already ends after now
+                    if (eventEnd.after(dtNow) && (false == eventEnd.isFloating() || null == timeZone || getDateInTimeZone(eventEnd, timeZone) > dtNow.getTimestamp())) {
+                        break; // this occurrence already ends after now in given timezone
                     }
                 }
             } else {
                 return false; // infinite recurrence
             }
         }
-        if (false == eventEnd.isFloating() && null != timeZone) {
-            eventEnd = eventEnd.swapTimeZone(timeZone);
+        if (eventEnd.isFloating() && null != timeZone) {
+            return getDateInTimeZone(eventEnd, timeZone) < dtNow.getTimestamp();
         }
         return eventEnd.before(dtNow);
     }
@@ -1232,11 +1233,9 @@ public class SchedulingHelper {
     private static DateTime getEndDate(Event event) {
         DateTime endDate = event.getEndDate();
         if (null == endDate) {
-            DateTime startDate = event.getStartDate();
-            TimeZone timeZone = null == startDate.getTimeZone() ? DateTime.UTC : startDate.getTimeZone();
-            endDate = new DateTime(timeZone, startDate.getTimestamp());
+            endDate = event.getStartDate();
             if (endDate.isAllDay()) {
-                endDate.addDuration(new Duration(1, 1, 0));
+                endDate = endDate.addDuration(new Duration(1, 1, 0));
             }
         }
         return endDate;
