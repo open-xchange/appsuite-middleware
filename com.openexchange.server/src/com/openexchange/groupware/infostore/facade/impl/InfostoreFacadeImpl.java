@@ -2463,6 +2463,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @throws OXException If remove operation fails
      */
     public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, boolean updateLastModified, ServerSession session) throws OXException {
+        return removeVersion(id, versionIds, allowRemoveCurrentVersion, updateLastModified, session, true);
+    }
+    
+    /**
+     * Removes denoted versions.
+     *
+     * @param id The document identifier
+     * @param versionIds The identifiers of the versions to remove
+     * @param allowRemoveCurrentVersion <code>true</code> to allow removing the current version; otherwise <code>false</code>
+     * @param updateLastModified Whether last-modified information is supposed to be updated
+     * @param session The session
+     * @param checkPermissions Whether to check for user permissions or not
+     * @return The identifiers of those versions that could <b>not</b> be deleted successfully
+     * @throws OXException If remove operation fails
+     */
+    public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, boolean updateLastModified, ServerSession session, boolean checkPermissions) throws OXException {
         if (null == versionIds || 0 == versionIds.length) {
             return new int[0];
         }
@@ -2480,9 +2496,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             LoggerHolder.LOG.trace("", x);
             return versionIds;
         }
-        EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
-        if (false == permission.canDeleteObject()) {
-            throw InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION.create();
+        if (checkPermissions) {
+            EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
+            if (false == permission.canDeleteObject()) {
+                throw InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION.create();
+            }
         }
 
         final StringBuilder versions = new StringBuilder().append('(');
