@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (7.10.3-2) stable; urgency=medium
+
+  * First candidate for 7.10.3 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 21 Nov 2019 14:48:36 +0100
+
 open-xchange-blackwhitelist (7.10.3-1) stable; urgency=medium
 
   * First preview for 7.10.3 release

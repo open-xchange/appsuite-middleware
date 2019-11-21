@@ -16,7 +16,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires:    systemd-rpm-macros
 %endif
 Version:          @OXVERSION@
-%define           ox_release 1
+%define           ox_release 2
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -137,6 +137,8 @@ systemctl daemon-reload &> /dev/null || :
 %endif
 
 %changelog
+* Thu Nov 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.3 release
 * Thu Oct 17 2019 Marcus Klein <marcus.klein@open-xchange.com>
 First preview for 7.10.3 release
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>
