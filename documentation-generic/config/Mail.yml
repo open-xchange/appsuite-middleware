@@ -882,7 +882,7 @@ properties:
         Setting this option to <code>false</code> means that no content from remote servers is loaded. This will e.g. block pictures embedded in
         the mail. The client still is capable to load the content on its own.
         
-        This option will only be evaluted if and only if neither the flag <code>load-remote-mail-content-by-default</code is set during a create 
+        This option will only be evaluted if and only if neither the flag <code>load-remote-mail-content-by-default</code> is set during a create 
         or change user operation nor the property <code>MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT</code> is set.
          
       defaultValue: false
