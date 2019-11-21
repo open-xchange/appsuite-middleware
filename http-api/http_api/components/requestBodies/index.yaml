@@ -52,11 +52,6 @@ deleteFoldersBody:
           type: string
   description: A JSON array with object IDs of the folders.
   required: true
-postAttachments:
-  content:
-    multipart/form-data:
-      schema:
-        $ref: '#/components/schemas/PostAttachmentsData'
 MailFilterDeletionBody:
   content:
     application/json:

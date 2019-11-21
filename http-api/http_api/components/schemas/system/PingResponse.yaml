@@ -3,4 +3,4 @@ properties:
   $ref: ../common/CommonResponseData.yaml
   data:
     type: boolean
-    description: true
+    description: 'true'
