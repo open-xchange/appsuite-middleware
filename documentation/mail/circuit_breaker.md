@@ -56,7 +56,7 @@ Furthermore, an administrator is allowed to specify overrides for either primary
 
 ## Specify the circuit breaker for primary account
 
-Example for an override for the primary account using the `"primary"` infix. Since primary IMAP and mail filter are typically hosted by the same service endpoint, the circuit breaker fr mail filter should be adjusted as well.
+Example for an override for the primary account using the `"primary"` infix. Since primary IMAP and mail filter are typically hosted by the same service endpoint, the circuit breaker for mail filter should be adjusted as well.
 
 ```
 # Circuit breaker config for primary mail account
