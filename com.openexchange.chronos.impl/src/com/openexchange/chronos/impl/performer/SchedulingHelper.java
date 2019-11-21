@@ -1024,7 +1024,8 @@ public class SchedulingHelper {
      * tracked events, and the optional parameter {@link CalendarParameters#PARAMETER_SCHEDULING}.
      * 
      * @param resource The event resource where scheduling messages are tracked for
-     * @param eventUpdates The corresponding event update, or <code>null</code> if not applicable
+     * @param eventUpdates The underlying event update representing the actual changes to inspect in favor of the whole resource,
+     *            or <code>null</code> if not applicable
      * @return <code>true</code> if scheduling messages and notifications should be tracked, <code>false</code>, otherwise
      */
     private boolean shouldTrack(CalendarObjectResource resource, List<EventUpdate> eventUpdates) {
@@ -1048,7 +1049,10 @@ public class SchedulingHelper {
          * don't track if affected events end in the past
          */
         try {
-            if (endsInPast(resource) && (null != eventUpdates && endsInPast(eventUpdates))) {
+            if (null != eventUpdates && endsInPast(eventUpdates)) {
+                LOG.trace("Actual changes in {} end in past, skip tracking of notifications and scheduling messages.", resource);
+                return false;
+            } else if (endsInPast(resource)) {
                 LOG.trace("{} ends in past, skip tracking of notifications and scheduling messages.", resource);
                 return false;
             }
@@ -1102,7 +1106,7 @@ public class SchedulingHelper {
         /*
          * if series master event, check end of recurrence
          */
-        if (null != event.getRecurrenceRule()) {
+        if (null != event.getRecurrenceRule() && null == event.getRecurrenceId()) {
             RecurrenceRule rule = initRecurrenceRule(event.getRecurrenceRule());
             if (null != rule.getUntil()) {
                 eventEnd = rule.getUntil(); // fixed until
