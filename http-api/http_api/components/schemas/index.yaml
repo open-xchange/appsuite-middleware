@@ -113,7 +113,13 @@ ContactUpdatesResponse:
 DistributionListMember:
   $ref: ./contacts/DistributionListMember.yaml
 ContactData:
-  $ref: ./contacts/ContactData.yaml
+  allOf:
+  - type: object
+    properties:
+      $ref: ./common/CommonObjectData.yaml
+  - type: object
+    properties:
+      $ref: ./contacts/RawContactData.yaml
 ContactDataWithInternalId:
   $ref: ./contacts/ContactDataWithInternalId.yaml
 ContactResponse:

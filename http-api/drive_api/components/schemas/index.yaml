@@ -35,7 +35,13 @@ ObjectPermission:
 DistributionListMember:
   $ref: ../../../http_api/components/schemas/contacts/DistributionListMember.yaml
 ContactData:
-  $ref: ../../../http_api/components/schemas/contacts/ContactData.yaml
+  allOf:
+  - type: object
+    properties:
+      $ref: ../../../http_api/components/schemas/common/CommonObjectData.yaml
+  - type: object
+    properties:
+      $ref: ../../../http_api/components/schemas/contacts/RawContactData.yaml
 ObjectExtendedPermission:
   $ref: ../../../http_api/components/schemas/infostore/InfoItemExtendedPermission.yaml
 DriveFileVersionMetadata:
