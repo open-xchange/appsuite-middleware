@@ -134,9 +134,6 @@ This command line tool shos runtime-stats of the node the tool runs on.
 **-n**, **--niobufferstats**
 : Shows the NIO buffer stats
   
-**-R**, **--rtstats**
-: Shows stats for the realtime component
-
 
 # SEE ALSO
 

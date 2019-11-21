@@ -490,25 +490,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return getFolderInfos(null, subscribedOnly);
     }
 
-    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
-    
-    private void bug55625Logging(String parentId) {
-        if (LOG2.isDebugEnabled()) {
-            if ("".equals(parentId)) {
-                LOG2.debug("IMAPFolderStorage: ListLsubEntry list is empty", new Exception("IMAPFolderStorage: ListLsubEntry list is empty"));
-            }
-        }
-    }
-    
     @Override
     public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
         try {
             final String pfn = null == optParentFullName ? null : (DEFAULT_FOLDER_ID.equals(optParentFullName) ? "" : optParentFullName);
             final List<ListLsubEntry> allEntries = ListLsubCache.getAllEntries(pfn, accountId, subscribedOnly, imapStore, session, this.ignoreSubscriptions);
-            if(allEntries.isEmpty()) {
-                bug55625Logging(optParentFullName);
-            }
-            
+
             // User's locale
             final Locale locale = (session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getInstance().getUser(session.getUserId(), session.getContextId())).getLocale();
 

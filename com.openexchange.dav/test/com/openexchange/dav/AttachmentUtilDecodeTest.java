@@ -175,5 +175,44 @@ public class AttachmentUtilDecodeTest {
         assertThat(I(metadata.getFolderId()), is(I(1)));
         assertThat(I(metadata.getModuleId()), is(I(1)));
     }
+    
+    @Test
+    public void testDecode_validUriWithSlashSuffix_MetadataParsed() throws Exception {
+        /*
+         * Metadata format 1-1-1-1
+         */
+        URI uri = new URI(prefixPath + "attachments/MS0xLTEtMQ/");
+        AttachmentMetadata metadata = decodeURI(uri, factory);
+        assertThat(I(metadata.getId()), is(I(1)));
+        assertThat(I(metadata.getAttachedId()), is(I(1)));
+        assertThat(I(metadata.getFolderId()), is(I(1)));
+        assertThat(I(metadata.getModuleId()), is(I(1)));
+    }
+    
+    @Test
+    public void testDecode_completeValidUri_MetadataParsed() throws Exception {
+        /*
+         * Metadata format 1-1-1-1
+         */
+        URI uri = new URI(prefixPath + "attachments/MS0xLTEtMQ/jochen%20bahncard%202018.jpg");
+        AttachmentMetadata metadata = decodeURI(uri, factory);
+        assertThat(I(metadata.getId()), is(I(1)));
+        assertThat(I(metadata.getAttachedId()), is(I(1)));
+        assertThat(I(metadata.getFolderId()), is(I(1)));
+        assertThat(I(metadata.getModuleId()), is(I(1)));
+    }
+    
+    @Test
+    public void testDecode_validUriWithInvalidSuffix_MetadataParsed() throws Exception {
+        /*
+         * Metadata format 1-1-1-1
+         */
+        URI uri = new URI(prefixPath + "attachments/MS0xLTEtMQ/isNotRelevantForTheEndocding");
+        AttachmentMetadata metadata = decodeURI(uri, factory);
+        assertThat(I(metadata.getId()), is(I(1)));
+        assertThat(I(metadata.getAttachedId()), is(I(1)));
+        assertThat(I(metadata.getFolderId()), is(I(1)));
+        assertThat(I(metadata.getModuleId()), is(I(1)));
+    }
 
 }

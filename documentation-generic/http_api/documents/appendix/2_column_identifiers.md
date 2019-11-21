@@ -525,6 +525,7 @@ specific field data of single or multiple objects.
 |64 | user |
 |128 | spam |
 |256 | forwarded |
+|512 | read acknowledged |
 
 </div>
 

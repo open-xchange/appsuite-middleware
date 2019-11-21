@@ -94,7 +94,6 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.TrashAwareFolderStorage;
 import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.mail.contentType.SentContentType;
@@ -1324,14 +1323,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
         return getSubfolders(parentId, storageParameters, null, translate);
     }
-    
-	private void bug55625Logging(String parentId) {
-		if (ListPerformer.LOG2.isDebugEnabled()) {
-			if (parentId.equals("default0")) {
-				ListPerformer.LOG2.debug("MailFolderStorage: Subfolder ids are empty", new Exception("MailFolderStorage: Subfolder ids are empty"));
-			}
-		}
-	}
 
     private SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters, final MailAccess<?, ?> mailAccessArg, final boolean translate) throws OXException {
         MailAccess<?, ?> mailAccess = null;
@@ -1343,13 +1334,11 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             }
 
             if (!session.getUserPermissionBits().hasWebMail()) {
-            	bug55625Logging(parentId);
                 return new SortableId[0];
             }
 
             FolderServiceDecorator fsDecorator = storageParameters.getDecorator();
             if (fsDecorator != null && !fsDecorator.isContentTypeAllowed(MailContentType.getInstance())) {
-            	bug55625Logging(parentId);
                 return new SortableId[0];
             }
 
@@ -1397,9 +1386,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 for (MailAccount account : accounts) {
                     list.add(new MailId(prepareFullname(account.getId(), MailFolder.DEFAULT_FOLDER_ID), j++).setName(MailFolder.DEFAULT_FOLDER_NAME));
                 }
-                if(list.isEmpty()) {
-                	bug55625Logging(parentId);
-                }
                 return list.toArray(new SortableId[list.size()]);
             }
 
@@ -1410,7 +1396,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             if (null == mailAccessArg) {
                 if (cannotConnect(session, accountId)) {
-                	bug55625Logging(parentId);
                     return new SortableId[0];
                 }
 
@@ -1501,9 +1486,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     int j = 0;
                     for (MailFolderInfo tmp : folderInfos) {
                         list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j++).setName(translate ? tmp.getDisplayName() : tmp.getName()));
-                    }
-                    if(list.isEmpty()) {
-                    	bug55625Logging(parentId);
                     }
                     return list.toArray(new SortableId[list.size()]);
                 }
@@ -1631,9 +1613,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             int j = 0;
             for (MailFolder tmp : children) {
                 list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j++).setName(tmp.getName()));
-            }
-            if(list.isEmpty()) {
-            	bug55625Logging(parentId);
             }
             return list.toArray(new SortableId[list.size()]);
         } finally {

@@ -739,9 +739,21 @@ final class ListLsubCollection implements Serializable {
         final ListLsubEntryImpl p = lle.getParentImpl();
         if (null != p) {
             p.removeChild(lle);
+            bug55625(p, lle);
             if (p.isDummy() && p.emptyChildren()) {
                 // Drop dummy parent, too
                 dropEntryFrom(p, map);
+            }
+        }
+    }
+    
+    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
+    
+    private static void bug55625(ListLsubEntryImpl parent, ListLsubEntryImpl child) {
+        if(LOG2.isDebugEnabled()) {
+            if(ROOT_FULL_NAME.equals(parent.getFullName())) {
+                String text = String.format("Removed %s from root", child.getFullName());
+                LOG2.debug(text, new Exception(text));
             }
         }
     }
@@ -1038,7 +1050,6 @@ final class ListLsubCollection implements Serializable {
             if (null != protocol) {
                 protocol.notifyResponseHandlers(r);
             }
-            bug55625(listResponses, map);
         } else {
             // Dispatch remaining untagged responses
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
@@ -1046,19 +1057,6 @@ final class ListLsubCollection implements Serializable {
                 protocol.notifyResponseHandlers(r);
                 protocol.handleResult(response);
             }
-        }
-    }
-    
-    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
-    
-    private void bug55625(List<ListLsubEntryImpl> listResponses, ConcurrentMap<String, ListLsubEntryImpl> map) {
-        ListLsubEntryImpl root = map.get(ROOT_FULL_NAME);
-        if(root!=null && (root.getChildren() == null || root.getChildren().isEmpty())) {
-            StringBuilder b = new StringBuilder("Root folder is empty. List Response: ");
-            for(ListLsubEntryImpl entry: listResponses) {
-                b.append(entry.toString()).append(" | ");
-            }
-            LOG2.debug(b.toString());
         }
     }
 

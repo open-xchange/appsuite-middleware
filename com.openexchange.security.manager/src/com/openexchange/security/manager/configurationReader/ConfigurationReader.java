@@ -73,6 +73,7 @@ public class ConfigurationReader {
     private final OXSecurityManager securityManager;
     private final ConfigurationService configService;
     private ArrayList<String> reloadableConfigurationPaths;
+    private static String FILE_PREFIX = "file:";
 
     /**
      * Private class that specifies which configuration should be loaded, and what permission applies
@@ -121,7 +122,7 @@ public class ConfigurationReader {
      */
     private SecurityAddition getSecurityAddition(String add) {
         Allow allow = getAllow(add);
-        boolean isFile = add.startsWith("file:");
+        boolean isFile = add.startsWith(FILE_PREFIX);
         add = cleanup(add);
         if (isFile) {
             return new SecurityAddition(add, true, allow);
@@ -177,7 +178,7 @@ public class ConfigurationReader {
         if (config == null) {
             return null;
         }
-        return config.replace(":RW", "").replace(":R", "").replace(":W", "").replace("file:", "").trim();
+        return config.replace(":RW", "").replace(":R", "").replace(":W", "").replace(FILE_PREFIX, "").trim();
     }
 
     /**
@@ -202,7 +203,7 @@ public class ConfigurationReader {
         if (permissionString != null) {
             String[] perms = permissionString.split(":");
             for (String perm : perms) {
-                FolderPermission folder = new FolderPermission(var + ": " + perm, perm, FolderPermission.Decision.ALLOW, allow, FolderPermission.Type.DIRECTORY);
+                FolderPermission folder = new FolderPermission(var + ": " + perm, perm, FolderPermission.Decision.ALLOW, allow, FolderPermission.Type.RECURSIVE);
                 folderPermissions.add(folder);
             }
         }
@@ -236,8 +237,9 @@ public class ConfigurationReader {
      */
     private void addFolder(ArrayList<FolderPermission> folderPermissions, String folder) {
         Allow allow = getAllow(folder);
-        folder = cleanup(folder);
-        FolderPermission folderToAdd = new FolderPermission(folder, folder, FolderPermission.Decision.ALLOW, allow, FolderPermission.Type.DIRECTORY);
+        FolderPermission.Type type = folder.startsWith(FILE_PREFIX) ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE;
+        final String directory = cleanup(folder);
+        FolderPermission folderToAdd = new FolderPermission(folder, directory, FolderPermission.Decision.ALLOW, allow, type);
         folderPermissions.add(folderToAdd);
     }
 
@@ -261,7 +263,7 @@ public class ConfigurationReader {
                 if (config.startsWith("$")) {
                     addVariable(folderPermissions, config);
                 } else {
-                    if (config.startsWith(File.separator)) {
+                    if (config.startsWith(File.separator) || config.startsWith(FILE_PREFIX + File.separator)) {
                         addFolder(folderPermissions, config);
                     } else {
                         addConfiguration(folderPermissions, config);

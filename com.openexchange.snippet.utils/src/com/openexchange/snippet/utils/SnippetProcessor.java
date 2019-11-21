@@ -63,12 +63,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
-import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
@@ -96,6 +97,7 @@ import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.utils.internal.Services;
+import com.openexchange.tools.net.URITools;
 import com.openexchange.version.VersionService;
 
 /**
@@ -242,7 +244,7 @@ public class SnippetProcessor {
 
                 // Check URL validity
                 try {
-                    src = getFinalURL(src, true);
+                    src = URITools.getFinalURL(src, Optional.of(validator));
                 } catch (IOException e) {
                     throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
@@ -291,67 +293,33 @@ public class SnippetProcessor {
         }
     }
 
-
-    /**
-     * Returns the final url which might be different due to HTTP(S) redirects.
-     *
-     * @param url The url to resolve
-     * @param validate check against protocol whitelist and host blacklist
-     * @return The final url
-     * @throws IOException if an I/O error occurs
-     * @throws OXException if validation fails
-     */
-    private String getFinalURL(String url, boolean validate) throws IOException, OXException {
-        URL u = new URL(url);
-        if (validate) {validateUrl(u);}
-        if (u.getProtocol().equalsIgnoreCase("http")) {
-            HttpURLConnection con = (HttpURLConnection) u.openConnection();
-            con.setInstanceFollowRedirects(false);
-            con.connect();
-            con.getInputStream();
-            if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
-                String redirectUrl = con.getHeaderField("Location");
-                return getFinalURL(redirectUrl, validate);
-            }
-        } else if (u.getProtocol().equalsIgnoreCase("https")) {
-            HttpsURLConnection con = (HttpsURLConnection) u.openConnection();
-            con.setInstanceFollowRedirects(false);
-            con.connect();
-            con.getInputStream();
-            if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
-                String redirectUrl = con.getHeaderField("Location");
-                return getFinalURL(redirectUrl, validate);
-            }
-        }
-        return url;
-    }
-
     /**
      * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
      *
      * @param url The URL to validate
-     * @throws OXException if the URL validation fails
+     * @return An optional OXException
      */
-    private void validateUrl(URL url) throws OXException {
+    private static Function<URL, Optional<OXException>> validator = (url) -> {
         String protocol = url.getProtocol();
         if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
-            throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString());
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
         }
 
         String host = Strings.asciiLowerCase(url.getHost());
         if (host == null || DENIED_HOSTS.contains(host)) {
-            throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString());
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
         }
 
         try {
             InetAddress inetAddress = InetAddress.getByName(url.getHost());
             if (InetAddresses.isInternalAddress(inetAddress)) {
-                throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString());
+                return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
             }
         } catch (UnknownHostException e) {
-            throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString());
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
         }
-    }
+        return Optional.empty();
+    };
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 3000;

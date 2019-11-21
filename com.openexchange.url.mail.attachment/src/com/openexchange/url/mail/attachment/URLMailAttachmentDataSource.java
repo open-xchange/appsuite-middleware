@@ -51,14 +51,15 @@ package com.openexchange.url.mail.attachment;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import javax.net.ssl.HttpsURLConnection;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.conversion.Data;
@@ -78,6 +79,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.net.URITools;
 
 /**
  * {@link URLMailAttachmentDataSource}
@@ -133,7 +135,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                url = new URL(getFinalURL(sUrl.trim(), true));
+                url = new URL(URITools.getFinalURL(sUrl.trim(), Optional.of(validator)));
             } catch (MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -261,40 +263,6 @@ public final class URLMailAttachmentDataSource implements DataSource {
         }
     }
 
-    /**
-     * Returns the final url which might be different due to HTTP(S) redirects.
-     *
-     * @param url The url to resolve
-     * @param validate check against protocol whitelist and host blacklist
-     * @return The final url
-     * @throws IOException if an I/O error occurs
-     * @throws OXException if validation fails
-     */
-    private String getFinalURL(String url, boolean validate) throws IOException, OXException {
-        URL u = new URL(url);
-        if (validate) {validateUrl(u);}
-        if (u.getProtocol().equalsIgnoreCase("http")) {
-            HttpURLConnection con = (HttpURLConnection) u.openConnection();
-            con.setInstanceFollowRedirects(false);
-            con.connect();
-            con.getInputStream();
-            if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
-                String redirectUrl = con.getHeaderField("Location");
-                return getFinalURL(redirectUrl, validate);
-            }
-        } else if (u.getProtocol().equalsIgnoreCase("https")) {
-            HttpsURLConnection con = (HttpsURLConnection) u.openConnection();
-            con.setInstanceFollowRedirects(false);
-            con.connect();
-            con.getInputStream();
-            if (con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || con.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
-                String redirectUrl = con.getHeaderField("Location");
-                return getFinalURL(redirectUrl, validate);
-            }
-        }
-        return url;
-    }
-
     private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
     private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
 
@@ -302,28 +270,29 @@ public final class URLMailAttachmentDataSource implements DataSource {
      * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
      *
      * @param url The URL to validate
-     * @throws OXException if the URL validation fails
+     * @return An optional OXException
      */
-    private void validateUrl(URL url) throws OXException {
+    private static Function<URL, Optional<OXException>> validator = (url) -> {
         String protocol = url.getProtocol();
         if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+            return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
         }
 
         String host = Strings.asciiLowerCase(url.getHost());
         if (host == null || DENIED_HOSTS.contains(host)) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+            return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
         }
 
         try {
             InetAddress inetAddress = InetAddress.getByName(url.getHost());
             if (InetAddresses.isInternalAddress(inetAddress)) {
-                throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+                return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
             }
         } catch (UnknownHostException e) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
+            return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
         }
-    }
+        return Optional.empty();
+    };
 
     @Override
     public String[] getRequiredArguments() {

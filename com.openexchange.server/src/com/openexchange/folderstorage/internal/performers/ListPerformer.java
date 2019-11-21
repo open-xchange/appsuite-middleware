@@ -61,8 +61,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
@@ -262,29 +260,18 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Need to get user-visible subfolders from appropriate storage
                  */
-                return logAndReturn(treeId, parentId, getSubfoldersFromStorages(treeId, parentId, all, checkOnly));
+                return getSubfoldersFromStorages(treeId, parentId, all, checkOnly);
             }
 
             subfolderIds = filterPOP3SubfolderIds(parentId, subfolderIds);
             if (0 == subfolderIds.length) {
-                return logAndReturn(treeId, parentId, new UserizedFolder[0]);
+                return new UserizedFolder[0];
             }
 
-            return logAndReturn(treeId, parentId, loadFolders(treeId, subfolderIds, all, checkOnly));
-        } catch (RuntimeException e) {
+            return loadFolders(treeId, subfolderIds, all, checkOnly);
+        } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    public static Logger LOG2 = LoggerFactory.getLogger(ListPerformer.class.getCanonicalName() + "2");
-
-    private UserizedFolder[] logAndReturn(final String treeId, final String parentId, UserizedFolder[] result) {
-        if (LOG2.isDebugEnabled()) {
-            if (treeId.equals("0") && parentId.equals("default0") && (result == null || result.length == 0)) {
-                LOG2.info("List request is empty!!!!!!", new Throwable("Public mail folder is missing"));
-            }
-        }
-        return result;
     }
 
     private List<SortableId> filterPOP3SubfolderIds(FolderStorage neededStorage, String treeId, String parentId, SortableId[] subfolderIds, StorageParameters newParameters) throws OXException {
@@ -404,25 +391,15 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
          */
         IdsOrObjects idsOrObjects = collectAndSortSubfolderIds(treeId, parentId, all, checkOnly);
         if (idsOrObjects.isEmpty()) {
-        	bug55625Logging(treeId, parentId);
             return new UserizedFolder[0];
         }
 
         return null != idsOrObjects.folders ? idsOrObjects.folders : loadFolders(treeId, idsOrObjects.ids, all, checkOnly);
     }
-    
-	private void bug55625Logging(String treeId, String parentId) {
-		if (LOG2.isDebugEnabled()) {
-			if (treeId.equals("0") && parentId.equals("default0")) {
-				LOG2.debug("Subfolder ids are empty", new Exception("Subfolder ids are empty"));
-			}
-		}
-	}
 
     private IdsOrObjects collectAndSortSubfolderIds(final String treeId, final String parentId, final boolean all, final boolean checkOnly) throws OXException {
         FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
         if (null == neededStorages || 0 == neededStorages.length) {
-        	bug55625Logging(treeId, parentId);
             return EMPTY_IDS_OR_OBJECTS;
         }
 
@@ -456,9 +433,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         for (final FolderStorage fs : openedStorages) {
                             fs.commitTransaction(storageParameters);
                         }
-                        if(subfolders.length == 0) {
-                        	bug55625Logging(treeId, parentId);
-                        }
+
                         return new IdsOrObjects(subfolders);
                     }
 
@@ -528,9 +503,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             SortableId subfolderId = allSubfolderIds.get(i);
             subfolderIds[i] = subfolderId.getId();
         }
-        if(subfolderIds.length == 0) {
-        	bug55625Logging(treeId, parentId);
-        }
+
         return new IdsOrObjects(subfolderIds);
     }
 
