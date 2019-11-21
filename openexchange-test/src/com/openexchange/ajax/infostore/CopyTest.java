@@ -69,7 +69,7 @@ import com.openexchange.test.TestInit;
 
 public class CopyTest extends InfostoreAJAXTest {
 
-    private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(Metadata.ID_LITERAL.getName(), Metadata.CREATION_DATE_LITERAL.getName(), Metadata.LAST_MODIFIED_LITERAL.getName(), Metadata.LAST_MODIFIED_UTC_LITERAL.getName(), Metadata.VERSION_LITERAL.getName(), Metadata.CURRENT_VERSION_LITERAL.getName(), Metadata.SEQUENCE_NUMBER_LITERAL.getName(), Metadata.CONTENT_LITERAL.getName(), new ResourceIDField().getColumnName()));
+    private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(Metadata.ID_LITERAL.getName(), Metadata.CREATION_DATE_LITERAL.getName(), Metadata.LAST_MODIFIED_LITERAL.getName(), Metadata.LAST_MODIFIED_UTC_LITERAL.getName(), Metadata.VERSION_LITERAL.getName(), Metadata.CURRENT_VERSION_LITERAL.getName(), Metadata.SEQUENCE_NUMBER_LITERAL.getName(), Metadata.CONTENT_LITERAL.getName()));
 
     @Test
     public void testCopy() throws Exception {
