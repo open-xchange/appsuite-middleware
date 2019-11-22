@@ -966,7 +966,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public String get(Event object) {
-                return object.getAttendeePrivileges().getValue();
+                return null == object.getAttendeePrivileges() ? DefaultAttendeePrivileges.DEFAULT.getValue() : object.getAttendeePrivileges().getValue();
             }
 
             @Override
