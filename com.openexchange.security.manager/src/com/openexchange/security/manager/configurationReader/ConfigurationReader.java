@@ -52,9 +52,12 @@ package com.openexchange.security.manager.configurationReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadables;
+import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.security.manager.OXSecurityManager;
 import com.openexchange.security.manager.impl.FolderPermission;
@@ -215,18 +218,31 @@ public class ConfigurationReader {
      *
      * @param folderPermissions
      * @param config Config to pull from the config file
+     * @throws OXException
      */
-    private void addConfiguration(ArrayList<FolderPermission> folderPermissions, String config) {
+    private void addConfiguration(ArrayList<FolderPermission> folderPermissions, String config) throws OXException {
         SecurityAddition toAdd = getSecurityAddition(config);  // Parse the configuration requirement for permissions
-        String directory = configService.getProperty(toAdd.getPath());  // Get the configured value from configuration service
-        addReloadConfigurationPath(toAdd.getPath());  // Keep track of configuration paths
-        if (directory != null && !directory.isEmpty()) {
-            // Create the folder permission
-            FolderPermission folder = new FolderPermission(config, directory, FolderPermission.Decision.ALLOW, toAdd.getAllow(), toAdd.isFile() ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE);
-            folderPermissions.add(folder);
+        Map<String, String> properties;
+        if (toAdd.getPath().contains("*")) {
+            properties = configService.getProperties(new WildcardNamePropertyFilter(toAdd.getPath()));
         } else {
-            LOG.debug("Security manager: Missing configuration for " + toAdd.getPath());
+            properties = new HashMap<String, String>();
+            properties.put(toAdd.getPath(), configService.getProperty(toAdd.getPath()));
+
         }
+        for (Map.Entry<String, String> property : properties.entrySet()) {
+            String configuration = property.getKey();
+            String directory = property.getValue();
+            addReloadConfigurationPath(configuration);  // Keep track of configuration paths
+            if (directory != null && !directory.isEmpty()) {
+                // Create the folder permission
+                FolderPermission folder = new FolderPermission(configuration, directory, FolderPermission.Decision.ALLOW, toAdd.getAllow(), toAdd.isFile() ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE);
+                folderPermissions.add(folder);
+            } else {
+                LOG.debug("Security manager: Missing configuration for " + configuration);
+            }
+        }
+
     }
 
     /**
