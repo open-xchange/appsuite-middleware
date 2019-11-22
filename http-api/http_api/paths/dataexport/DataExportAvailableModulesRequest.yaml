@@ -12,7 +12,7 @@
         content:
           application/json:
             schema:
-              type: string
+              $ref: '#/components/schemas/DataExportModules'
       '400':
         description: 'Bad request, response contains error message.'
       '401':

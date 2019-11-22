@@ -574,23 +574,38 @@ final class ListLsubCollection implements Serializable {
 
         // Debug logging
         if (debug) {
-            final StringBuilder sb = new StringBuilder(1024);
+            StringBuilder sb = new StringBuilder(256);
+            List<Object> args = new ArrayList<>();
             {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
-                sb.append("LIST cache contains after (re-)initialization:\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
+
+                sb.append("LIST cache contains after (re-)initialization:{}");
+                args.add(Strings.getLineSeparator());
+
+                for (Map.Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    sb.append("\"{}\"={}{}");
+                    args.add(entry.getKey());
+                    args.add(entry.getValue());
+                    args.add(Strings.getLineSeparator());
                 }
-                LOG.debug(sb.toString());
+                LOG.debug(sb.toString(), args.toArray(new Object[args.size()]));
             }
             {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
                 sb.setLength(0);
-                sb.append("LSUB cache contains after (re-)initialization:\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                args.clear();
+
+                TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
+
+                sb.append("LSUB cache contains after (re-)initialization:{}");
+                args.add(Strings.getLineSeparator());
+
+                for (Map.Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    sb.append("\"{}\"={}{}");
+                    args.add(entry.getKey());
+                    args.add(entry.getValue());
+                    args.add(Strings.getLineSeparator());
                 }
-                LOG.debug(sb.toString());
+                LOG.debug(sb.toString(), args.toArray(new Object[args.size()]));
             }
         }
 
@@ -621,9 +636,7 @@ final class ListLsubCollection implements Serializable {
                 ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
                 if (null != rootEntry) {
                     rootEntry.removeChildByFullName(lsubEntry.getFullName());
-                    if(LOG.isDebugEnabled()) {
-                    	LOG.debug("Dropped folder {} from root", lsubEntry.getFullName());
-                    }
+                    LOG2.debug("Dropped folder {} from root", lsubEntry.getFullName());
                 }
             }
         }
@@ -634,9 +647,7 @@ final class ListLsubCollection implements Serializable {
                 ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
                 if (null != rootEntry) {
                     rootEntry.removeChildByFullName(lsubEntry.getFullName());
-                    if(LOG.isDebugEnabled()) {
-                    	LOG.debug("Dropped folder {} from root", lsubEntry.getFullName());
-                    }
+                    LOG2.debug("Dropped folder {} from root", lsubEntry.getFullName());
                 }
             }
         }
@@ -739,21 +750,9 @@ final class ListLsubCollection implements Serializable {
         final ListLsubEntryImpl p = lle.getParentImpl();
         if (null != p) {
             p.removeChild(lle);
-            bug55625(p, lle);
             if (p.isDummy() && p.emptyChildren()) {
                 // Drop dummy parent, too
                 dropEntryFrom(p, map);
-            }
-        }
-    }
-    
-    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
-    
-    private static void bug55625(ListLsubEntryImpl parent, ListLsubEntryImpl child) {
-        if(LOG2.isDebugEnabled()) {
-            if(ROOT_FULL_NAME.equals(parent.getFullName())) {
-                String text = String.format("Removed %s from root", child.getFullName());
-                LOG2.debug(text, new Exception(text));
             }
         }
     }
@@ -935,6 +934,8 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
+    private static final org.slf4j.Logger LOG2 = org.slf4j.LoggerFactory.getLogger("com.openexchange.bug55625.logger");
+
     /**
      * Performs a LIST/LSUB command with specified IMAP protocol.
      *
@@ -1050,6 +1051,20 @@ final class ListLsubCollection implements Serializable {
             if (null != protocol) {
                 protocol.notifyResponseHandlers(r);
             }
+
+            if (LOG2.isDebugEnabled()) {
+                ListLsubEntryImpl root = map.get(ROOT_FULL_NAME);
+                if (root == null) {
+                    // Missing root folder
+                    outputListResponses(listResponses, "Missing root folder");
+                } else {
+                    Set<ListLsubEntryImpl> children = root.getChildrenSet();
+                    if (children.isEmpty()) {
+                        // Missing child folders
+                        outputListResponses(listResponses, "Missing root child folders");
+                    }
+                }
+            }
         } else {
             // Dispatch remaining untagged responses
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
@@ -1058,6 +1073,26 @@ final class ListLsubCollection implements Serializable {
                 protocol.handleResult(response);
             }
         }
+    }
+
+    private void outputListResponses(List<ListLsubEntryImpl> listResponses, String reason) {
+        List<Object> args = new ArrayList<>();
+        StringBuilder messageBuilder = new StringBuilder(listResponses.size() << 2);
+
+        messageBuilder.append(reason).append("{}");
+        args.add(Strings.getLineSeparator());
+
+        for (ListLsubEntryImpl listResponse : listResponses) {
+            messageBuilder.append("{}{}");
+            args.add(listResponse.toString());
+            args.add(Strings.getLineSeparator());
+        }
+
+        messageBuilder.append("{}{}");
+        args.add(Strings.getLineSeparator());
+        args.add(Strings.getLineSeparator());
+
+        LOG2.debug(messageBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
     private void handleNamespaces(final ConcurrentMap<String, ListLsubEntryImpl> map, final ListLsubEntryImpl rootEntry, final char separator) {
@@ -2373,10 +2408,7 @@ final class ListLsubCollection implements Serializable {
          * @param child The child LIST/LSUB entry
          */
         protected void removeChild(final ListLsubEntryImpl child) {
-            if (null == child) {
-                return;
-            }
-            if (null == children) {
+            if (null == child || null == children) {
                 return;
             }
             children.remove(child);
@@ -2388,10 +2420,7 @@ final class ListLsubCollection implements Serializable {
          * @param childFullName The child full-name
          */
         protected void removeChildByFullName(final String childFullName) {
-            if (null == childFullName) {
-                return;
-            }
-            if (null == children) {
+            if (null == childFullName || null == children) {
                 return;
             }
             for (Iterator<ListLsubEntryImpl> iter = children.iterator(); iter.hasNext(); ) {

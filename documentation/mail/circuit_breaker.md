@@ -30,7 +30,7 @@ The circuit breaker for connections to IMAP and mail filter endpoints ships with
 
 ## Generic IMAP circuit breaker
 
-First, there is a generic IMAP circuit breaker that applies to all IMAP end-point being connected to.
+First, there is a generic IMAP circuit breaker that applies to all IMAP end-points being connected to.
 
  - `com.openexchange.imap.breaker.enabled` The flag to enable/disable the generic IMAP circuit breaker. Default is `false`
  - `com.openexchange.imap.breaker.failureThreshold` The failure threshold; which is the number of successive failures that must occur in order to open the circuit. Default is `5`
@@ -56,7 +56,7 @@ Furthermore, an administrator is allowed to specify overrides for either primary
 
 ## Specify the circuit breaker for primary account
 
-Example for an override for the primary account using the `"primary"` infix. Since primary IMAP and mail filter are typically hosted by the same service endpoint, the circuit breaker fr mail filter should be adjusted as well.
+Example for an override for the primary account using the `"primary"` infix. Since primary IMAP and mail filter are typically hosted by the same service endpoint, the circuit breaker for mail filter should be adjusted as well.
 
 ```
 # Circuit breaker config for primary mail account

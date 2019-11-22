@@ -1,0 +1,92 @@
+type: object
+properties:
+  calendar:
+    type: object
+    description: The calendar module
+    properties:
+      enabled: 
+        type: boolean
+        description: Whether the calendar module is enabled        
+      includePublic:
+        type: boolean
+        description: The default setting for public folders if public folder export is available.
+      includeShared:
+        type: boolean
+        description: The default setting for shared folders if shared folder export is available.
+      includeUnsubscribed:
+        type: boolean
+        description: The default setting for unsubscribed folders if unsubscribed folder export is available.
+    required:
+      - enabled
+  contacts:
+    type: object
+    description: The contacts module
+    properties:
+      enabled: 
+        type: boolean
+        description: Whether the contacts module is enabled        
+      includePublic:
+        type: boolean
+        description: The default setting for public folders if public folder export is available.
+      includeShared:
+        type: boolean
+        description: The default setting for shared folders if shared folder export is available.
+    required:
+      - enabled
+  infostore:
+    type: object
+    description: The infostore module
+    properties:
+      enabled: 
+        type: boolean
+        description: Whether the infostore module is enabled        
+      includePublic:
+        type: boolean
+        description: The default setting for public folders if public folder export is available.
+      includeShared:
+        type: boolean
+        description: The default setting for shared folders if shared folder export is available.
+      includeTrash:
+        type: boolean
+        description: The default setting for the trash folder if trash folder export is available.
+      includeAllVersions:
+        type: boolean
+        description: The default setting for all versions export if all version export is available.        
+    required:
+      - enabled
+  mail:
+    type: object
+    description: The mail module
+    properties:
+      enabled: 
+        type: boolean
+        description: Whether the mail module is enabled        
+      includePublic:
+        type: boolean
+        description: The default setting for public folders if public folder export is available.
+      includeShared:
+        type: boolean
+        description: The default setting for shared folders if shared folder export is available.
+      includeTrash:
+        type: boolean
+        description: The default setting for the trash folder if trash folder export is available.
+      includeUnsubscribed:
+        type: boolean
+        description: The default setting for unsubscribed folders if unsubscribed folder export is available.           
+    required:
+      - enabled
+  tasks:
+    type: object
+    description: The tasks module
+    properties:
+      enabled: 
+        type: boolean
+        description: Whether the tasks module is enabled        
+      includePublic:
+        type: boolean
+        description: The default setting for public folders if public folder export is available.
+      includeShared:
+        type: boolean
+        description: The default setting for shared folders if shared folder export is available.
+    required:
+      - enabled             

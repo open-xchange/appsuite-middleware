@@ -113,7 +113,13 @@ ContactUpdatesResponse:
 DistributionListMember:
   $ref: ./contacts/DistributionListMember.yaml
 ContactData:
-  $ref: ./contacts/ContactData.yaml
+  allOf:
+  - type: object
+    properties:
+      $ref: ./common/CommonObjectData.yaml
+  - type: object
+    properties:
+      $ref: ./contacts/RawContactData.yaml
 ContactDataWithInternalId:
   $ref: ./contacts/ContactDataWithInternalId.yaml
 ContactResponse:
@@ -172,8 +178,6 @@ DateTimeData:
   $ref: ./chronos/DateTimeData.yaml
 Attendee:
   $ref: ./chronos/Attendee.yaml
-ChronosAttachment:
-  $ref: ./chronos/Attachment.yaml
 Alarm:
   $ref: ./chronos/Alarm.yaml
 CalendarUser:
@@ -536,6 +540,8 @@ DataExportWorkItem:
   $ref: ./dataexport/DataExportWorkItem.yaml
 DataExportResultFile:
   $ref: ./dataexport/DataExportResultFile.yaml
+DataExportModules:
+  $ref: ./dataexport/DataExportModules.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml

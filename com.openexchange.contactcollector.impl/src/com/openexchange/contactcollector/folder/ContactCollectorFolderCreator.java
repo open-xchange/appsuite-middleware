@@ -97,7 +97,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
-        if (!necessary()) {
+        if (!necessary() || login.getUser().isGuest()) {
             return;
         }
 

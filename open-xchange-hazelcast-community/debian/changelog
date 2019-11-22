@@ -1,3 +1,9 @@
+open-xchange-hazelcast-community (7.10.3-2) stable; urgency=medium
+
+  * First candidate for 7.10.3 release
+
+ -- Martin Schneider <martin.schneider@open-xchange.com>  Thu, 21 Nov 2019 14:47:33 +0100
+
 open-xchange-hazelcast-community (7.10.3-1) stable; urgency=medium
 
   * First preview for 7.10.3 release
