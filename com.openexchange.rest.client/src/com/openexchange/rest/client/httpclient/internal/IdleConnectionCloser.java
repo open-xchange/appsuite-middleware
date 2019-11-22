@@ -57,6 +57,13 @@ import com.openexchange.rest.client.osgi.RestClientServices;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
+/**
+ * 
+ * {@link IdleConnectionCloser}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
+ */
 public class IdleConnectionCloser implements Runnable {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(IdleConnectionCloser.class);

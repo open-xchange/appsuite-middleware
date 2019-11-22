@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.httpclient.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
@@ -74,6 +75,13 @@ import com.openexchange.metrics.noop.NoopCounter;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.rest.client.osgi.RestClientServices;
 
+/**
+ * 
+ * {@link ClientConnectionManager}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.10.3
+ */
 public class ClientConnectionManager extends PoolingHttpClientConnectionManager {
 
     private final MonitoringId monitoringId;
@@ -196,40 +204,40 @@ public class ClientConnectionManager extends PoolingHttpClientConnectionManager 
         List<MetricDescriptor> descriptors = new ArrayList<>(6);
         descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Max", MetricType.GAUGE)
             .withDescription("The configured maximum number of allowed persistent connections for all routes.")
-            .withMetricSupplier(() -> getTotalStats().getMax())
+            .withMetricSupplier(() -> I(getTotalStats().getMax()))
             .build());
 
         descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Route.Max", MetricType.GAUGE)
             .withDescription("The configured maximum number of allowed persistent connections per route.")
-            .withMetricSupplier(() -> getDefaultMaxPerRoute())
+            .withMetricSupplier(() -> I(getDefaultMaxPerRoute()))
             .build());
 
         descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Available", MetricType.GAUGE)
             .withDescription("The number of available persistent connections for all routes.")
-            .withMetricSupplier(() -> getTotalStats().getAvailable())
+            .withMetricSupplier(() -> I(getTotalStats().getAvailable()))
             .build());
 
         descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Leased", MetricType.GAUGE)
             .withDescription("The number of leased persistent connections for all routes.")
-            .withMetricSupplier(() -> getTotalStats().getLeased())
+            .withMetricSupplier(() -> I(getTotalStats().getLeased()))
             .build());
 
         descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Pending", MetricType.GAUGE)
             .withDescription("The number of pending threads waiting for a connection.")
-            .withMetricSupplier(() -> getTotalStats().getPending())
+            .withMetricSupplier(() -> I(getTotalStats().getPending()))
             .build());
 
         descriptors.add(monitoringId.newMetricBuilder("httpclient", "Pool.Total", MetricType.GAUGE)
             .withDescription("The total number of pooled connections for all routes.")
             .withMetricSupplier(() -> {
                 PoolStats stats = getTotalStats();
-                return stats.getLeased() + stats.getAvailable();
+                return I(stats.getLeased() + stats.getAvailable());
             })
             .build());
         return descriptors;
     }
 
-    private Counter getErrorCounter(String reason) {
+    Counter getErrorCounter(String reason) {
         MetricService metrics = RestClientServices.getOptionalService(MetricService.class);
         if (metrics == null) {
             return NoopCounter.getInstance();

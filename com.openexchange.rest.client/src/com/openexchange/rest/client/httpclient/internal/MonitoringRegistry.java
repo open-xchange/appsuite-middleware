@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.httpclient.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -87,7 +88,7 @@ public class MonitoringRegistry {
 
         int instances = existing.incrementAndGet();
         log("HTTP client with name '{}' was instantiated {} times!"
-            + "Connection pool monitoring will only reflect the most recent instance!", clientName, instances);
+            + "Connection pool monitoring will only reflect the most recent instance!", clientName, I(instances));
         return new MonitoringId(clientName, instances);
     }
 
@@ -107,12 +108,8 @@ public class MonitoringRegistry {
             return false;
         }
 
-        try {
-            if (existing.get() >= monitoringId.getInstanceId()) {
-                return true;
-            }
-        } catch (NumberFormatException e) {
-            // ignore
+        if (existing.get() >= monitoringId.getInstanceId()) {
+            return true;
         }
 
         return false;
