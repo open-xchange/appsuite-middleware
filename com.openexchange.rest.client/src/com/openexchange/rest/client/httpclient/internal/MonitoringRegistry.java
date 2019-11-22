@@ -82,13 +82,13 @@ public class MonitoringRegistry {
         AtomicInteger existing = registeredClients.putIfAbsent(clientName, new AtomicInteger(1));
         if (existing == null) {
             log("HTTP client with name '{}' was instantiated for the first time.");
-            return new MonitoringId(clientName, Integer.toString(1));
+            return new MonitoringId(clientName, 1);
         }
 
         int instances = existing.incrementAndGet();
         log("HTTP client with name '{}' was instantiated {} times!"
             + "Connection pool monitoring will only reflect the most recent instance!", clientName, instances);
-        return new MonitoringId(clientName, Integer.toString(instances));
+        return new MonitoringId(clientName, instances);
     }
 
     public void unregisterInstance(MonitoringId id) {
@@ -107,9 +107,8 @@ public class MonitoringRegistry {
             return false;
         }
 
-        // TODO: hack...
         try {
-            if (existing.get() >= Integer.parseInt(monitoringId.getInstanceId())) {
+            if (existing.get() >= monitoringId.getInstanceId()) {
                 return true;
             }
         } catch (NumberFormatException e) {

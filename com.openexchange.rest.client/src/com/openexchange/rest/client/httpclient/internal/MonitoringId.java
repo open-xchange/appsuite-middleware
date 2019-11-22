@@ -63,10 +63,10 @@ public class MonitoringId {
 
     private final String clientName;
 
-    private final String instanceId;
+    private final int instanceId;
 
 
-    public MonitoringId(String clientName, String instanceId) {
+    public MonitoringId(String clientName, int instanceId) {
         super();
         this.clientName = clientName;
         this.instanceId = instanceId;
@@ -76,13 +76,13 @@ public class MonitoringId {
         return clientName;
     }
 
-    public String getInstanceId() {
+    public int getInstanceId() {
         return instanceId;
     }
 
     public void applyDimensionsTo(MetricBuilder builder) {
         builder.addDimension("client", clientName);
-        builder.addDimension("instance", instanceId);
+        builder.addDimension("instance", Integer.toString(instanceId));
     }
 
     public MetricBuilder newMetricBuilder(String group, String name, MetricType type) {
@@ -96,7 +96,7 @@ public class MonitoringId {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((clientName == null) ? 0 : clientName.hashCode());
-        result = prime * result + ((instanceId == null) ? 0 : instanceId.hashCode());
+        result = prime * result + instanceId;
         return result;
     }
 
@@ -114,17 +114,14 @@ public class MonitoringId {
                 return false;
         } else if (!clientName.equals(other.clientName))
             return false;
-        if (instanceId == null) {
-            if (other.instanceId != null)
-                return false;
-        } else if (!instanceId.equals(other.instanceId))
+        if (instanceId != other.instanceId)
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return clientName + ':' + instanceId;
+        return clientName + ':' + Integer.toString(instanceId);
     }
 
 }
