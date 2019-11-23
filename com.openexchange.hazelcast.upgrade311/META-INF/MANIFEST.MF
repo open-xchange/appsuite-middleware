@@ -59,6 +59,6 @@ Import-Package: com.openexchange.caching,
  org.xml.sax.ext,
  org.xml.sax.helpers,
  sun.misc
-Bundle-Activator: com.openexchange.hazelcast.upgrade3100.osgi.HazelcastUpgradeActivator
+Bundle-Activator: com.openexchange.hazelcast.upgrade311.osgi.HazelcastUpgradeActivator
 Bundle-ClassPath: lib/hazelcast-all-3.11.1.jar,
  .
