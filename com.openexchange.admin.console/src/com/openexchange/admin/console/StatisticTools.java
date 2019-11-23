@@ -59,7 +59,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -150,9 +149,6 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_NIO_BUFFER_STATS_SHORT = 'n';
     private static final String OPT_NIO_BUFFER_STATS_LONG = "niobufferstats";
 
-    private static final char OPT_RT_BUFFER_STATS_SHORT= 'R';
-    private static final String OPT_RT_BUFFER_STATS_LONG = "rtstats";
-
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -182,7 +178,6 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption overviewstats = null;
     private CLIOption memorypoolstats = null;
     private CLIOption niobufferstats = null;
-    private CLIOption rtstats = null;
 
     /**
      * Option for garbage collection statistics
