@@ -336,9 +336,7 @@ public class StatisticTools extends AbstractJMXTools {
             count++;
         }
         if (0 == count) {
-            System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(
-                OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(
-                    ", ").append(OPT_ALL_STATS_LONG).append(", sessionstats)"));
+            System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(", sessionstats)"));
             parser.printUsage();
         } else if (count > 1) {
             System.err.println("More than one of the stat options given. Using the first one only");
@@ -361,11 +359,7 @@ public class StatisticTools extends AbstractJMXTools {
             threadInfo = threadBean.getThreadInfo(allThreadIds);
         }
         try {
-            allocatedBytes = (long[]) mbc.invoke(
-                srvThrdName,
-                "getThreadAllocatedBytes",
-                new Object[] { allThreadIds },
-                new String[] { "[J" });
+            allocatedBytes = (long[]) mbc.invoke(srvThrdName, "getThreadAllocatedBytes", new Object[] { allThreadIds }, new String[] { "[J" });
         } catch (javax.management.ReflectionException e) {
             System.err.println("AllocatedBytes is not supported on this JVM");
             // Simple set to an array of 0
@@ -382,11 +376,7 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         try {
-            userTime = (long[]) mbc.invoke(
-                srvThrdName,
-                "getThreadUserTime",
-                new Object[] { allThreadIds },
-                new String[] { "[J" });
+            userTime = (long[]) mbc.invoke(srvThrdName, "getThreadUserTime", new Object[] { allThreadIds }, new String[] { "[J" });
         } catch (javax.management.ReflectionException e) {
             userTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
@@ -405,23 +395,13 @@ public class StatisticTools extends AbstractJMXTools {
         sb.append(LINE_SEPARATOR);
         for (int i = 0; i < allThreadIds.length; i++) {
             if (stacktrace) {
-                arrayList.add(new ThreadOutputElem(
-                    allThreadIds[i],
-                    threadInfo[i].getThreadName(),
-                    allocatedBytes[i],
-                    cpuTime[i],
-                    userTime[i],
-                    threadInfo[i].getStackTrace()));
+                arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i], threadInfo[i].getStackTrace()));
             } else {
-                arrayList.add(new ThreadOutputElem(
-                    allThreadIds[i],
-                    threadInfo[i].getThreadName(),
-                    allocatedBytes[i],
-                    cpuTime[i],
-                    userTime[i]));
+                arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i]));
             }
         }
         Collections.sort(arrayList, new Comparator<ThreadOutputElem>() {
+
             @Override
             public int compare(final ThreadOutputElem o1, final ThreadOutputElem o2) {
                 if (o1.getAllocatedBytes() > o2.getAllocatedBytes()) {
@@ -454,134 +434,28 @@ public class StatisticTools extends AbstractJMXTools {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        this.xchangestats = setShortLongOpt(
-            parser,
-            OPT_STATS_SHORT,
-            OPT_STATS_LONG,
-            "shows Open-Xchange stats",
-            false,
-            NeededQuadState.notneeded);
-        this.threadpoolstats = setLongOpt(parser,
-            OPT_TPSTATS_LONG,
-            "shows OX-Server threadpool stats",
-            false,
-            false);
-        this.runtimestats = setShortLongOpt(
-            parser,
-            OPT_RUNTIME_STATS_SHORT,
-            OPT_RUNTIME_STATS_LONG,
-            "shows Java runtime stats",
-            false,
-            NeededQuadState.notneeded);
-        this.osstats = setShortLongOpt(
-            parser,
-            OPT_OS_STATS_SHORT,
-            OPT_OS_STATS_LONG,
-            "shows operating system stats",
-            false,
-            NeededQuadState.notneeded);
-        this.threadingstats = setShortLongOpt(
-            parser,
-            OPT_THREADING_STATS_SHORT,
-            OPT_THREADING_STATS_LONG,
-            "shows threading stats",
-            false,
-            NeededQuadState.notneeded);
-        this.allstats = setShortLongOpt(
-            parser,
-            OPT_ALL_STATS_SHORT,
-            OPT_ALL_STATS_LONG,
-            "shows all stats",
-            false,
-            NeededQuadState.notneeded);
-        this.showoperation = setShortLongOpt(
-            parser,
-            OPT_SHOWOPERATIONS_STATS_SHORT,
-            OPT_SHOWOPERATIONS_STATS_LONG,
-            "shows the operations for the registered beans",
-            false,
-            NeededQuadState.notneeded);
-        this.dooperation = setShortLongOpt(
-            parser,
-            OPT_DOOPERATIONS_STATS_SHORT,
-            OPT_DOOPERATIONS_STATS_LONG,
-            "operation",
-            "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>",
-            false);
-        this.sessionStats = setShortLongOpt(
-            parser,
-            'i',
-            "sessionstats",
-            "shows the statistics of the session container",
-            false,
-            NeededQuadState.notneeded);
-        this.cacheStats = setShortLongOpt(
-            parser,
-            OPT_CACHE_STATS_SHORT,
-            OPT_CACHE_STATS_LONG,
-            "shows the statistics of the cache objects",
-            false,
-            NeededQuadState.notneeded);
-        this.usmSessionStats = setShortLongOpt(
-            parser,
-            'u',
-            "usmsessionstats",
-            "shows the statistics of the USM session container",
-            false,
-            NeededQuadState.notneeded);
+        this.xchangestats = setShortLongOpt(parser, OPT_STATS_SHORT, OPT_STATS_LONG, "shows Open-Xchange stats", false, NeededQuadState.notneeded);
+        this.threadpoolstats = setLongOpt(parser, OPT_TPSTATS_LONG, "shows OX-Server threadpool stats", false, false);
+        this.runtimestats = setShortLongOpt(parser, OPT_RUNTIME_STATS_SHORT, OPT_RUNTIME_STATS_LONG, "shows Java runtime stats", false, NeededQuadState.notneeded);
+        this.osstats = setShortLongOpt(parser, OPT_OS_STATS_SHORT, OPT_OS_STATS_LONG, "shows operating system stats", false, NeededQuadState.notneeded);
+        this.threadingstats = setShortLongOpt(parser, OPT_THREADING_STATS_SHORT, OPT_THREADING_STATS_LONG, "shows threading stats", false, NeededQuadState.notneeded);
+        this.allstats = setShortLongOpt(parser, OPT_ALL_STATS_SHORT, OPT_ALL_STATS_LONG, "shows all stats", false, NeededQuadState.notneeded);
+        this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, NeededQuadState.notneeded);
+        this.dooperation = setShortLongOpt(parser, OPT_DOOPERATIONS_STATS_SHORT, OPT_DOOPERATIONS_STATS_LONG, "operation", "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>", false);
+        this.sessionStats = setShortLongOpt(parser, 'i', "sessionstats", "shows the statistics of the session container", false, NeededQuadState.notneeded);
+        this.cacheStats = setShortLongOpt(parser, OPT_CACHE_STATS_SHORT, OPT_CACHE_STATS_LONG, "shows the statistics of the cache objects", false, NeededQuadState.notneeded);
+        this.usmSessionStats = setShortLongOpt(parser, 'u', "usmsessionstats", "shows the statistics of the USM session container", false, NeededQuadState.notneeded);
         this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
         this.grizzlyStats = setShortLongOpt(parser, 'g', "grizzlystats", "shows the grizzly statistics", false, NeededQuadState.notneeded);
         this.pnsStats = setLongOpt(parser, "pnsstats", "shows the push notification service statistics", false, false);
         this.webSocketStats = setLongOpt(parser, "websocketstats", "shows the web socket statistics", false, false);
-        this.gcStats = setShortLongOpt(
-            parser,
-            OPT_GC_STATS_SHORT,
-            OPT_GC_STATS_LONG,
-            "shows the gc statistics",
-            false,
-            NeededQuadState.notneeded);
-        this.memorythreadstats = setShortLongOpt(
-            parser,
-            OPT_MEMORY_THREADS_STATS_SHORT,
-            OPT_MEMORY_THREADS_STATS_LONG,
-            "shows memory usage of threads",
-            false,
-            NeededQuadState.notneeded);
-        this.memorythreadstatsfull = setShortLongOpt(
-            parser,
-            OPT_MEMORY_THREADS_FULL_STATS_SHORT,
-            OPT_MEMORY_THREADS_FULL_STATS_LONG,
-            "shows memory usage of threads including stack traces",
-            false,
-            NeededQuadState.notneeded);
-        this.documentconverterstats = setShortLongOpt(
-            parser,
-            OPT_DOCUMENTCONVERTER_STATS_SHORT,
-            OPT_DOCUMENTCONVERTER_STATS_LONG,
-            "shows the documentconverter stats",
-            false,
-            NeededQuadState.notneeded);
-        this.imageconverterstats = setShortLongOpt(
-            parser,
-            OPT_IMAGECONVERTER_STATS_SHORT,
-            OPT_IMAGECONVERTER_STATS_LONG,
-            "shows the imageconverter stats",
-            false,
-            NeededQuadState.notneeded);
-        this.officestats = setShortLongOpt(
-            parser,
-            OPT_OFFICE_STATS_SHORT,
-            OPT_OFFICE_STATS_LONG,
-            "shows the office stats",
-            false,
-            NeededQuadState.notneeded);
-        this.eventadminstats = setShortLongOpt(
-            parser,
-            OPT_EVENT_ADMIN_STATS_SHORT,
-            OPT_EVENT_ADMIN_STATS_LONG,
-            "shows the OSGi EventAdmin stats",
-            false,
-            NeededQuadState.notneeded);
+        this.gcStats = setShortLongOpt(parser, OPT_GC_STATS_SHORT, OPT_GC_STATS_LONG, "shows the gc statistics", false, NeededQuadState.notneeded);
+        this.memorythreadstats = setShortLongOpt(parser, OPT_MEMORY_THREADS_STATS_SHORT, OPT_MEMORY_THREADS_STATS_LONG, "shows memory usage of threads", false, NeededQuadState.notneeded);
+        this.memorythreadstatsfull = setShortLongOpt(parser, OPT_MEMORY_THREADS_FULL_STATS_SHORT, OPT_MEMORY_THREADS_FULL_STATS_LONG, "shows memory usage of threads including stack traces", false, NeededQuadState.notneeded);
+        this.documentconverterstats = setShortLongOpt(parser, OPT_DOCUMENTCONVERTER_STATS_SHORT, OPT_DOCUMENTCONVERTER_STATS_LONG, "shows the documentconverter stats", false, NeededQuadState.notneeded);
+        this.imageconverterstats = setShortLongOpt(parser, OPT_IMAGECONVERTER_STATS_SHORT, OPT_IMAGECONVERTER_STATS_LONG, "shows the imageconverter stats", false, NeededQuadState.notneeded);
+        this.officestats = setShortLongOpt(parser, OPT_OFFICE_STATS_SHORT, OPT_OFFICE_STATS_LONG, "shows the office stats", false, NeededQuadState.notneeded);
+        this.eventadminstats = setShortLongOpt(parser, OPT_EVENT_ADMIN_STATS_SHORT, OPT_EVENT_ADMIN_STATS_LONG, "shows the OSGi EventAdmin stats", false, NeededQuadState.notneeded);
         this.generalstats = setLongOpt(parser, OPT_GENERAL_STATS_LONG, "shows the open-xchange general stats", false, false);
         this.mailinterfacestats = setLongOpt(parser, OPT_MAILINTERFACE_STATS_LONG, "shows the open-xchange mailinterface stats", false, false);
         this.poolingstats = setLongOpt(parser, OPT_POOLING_STATS_LONG, "shows the open-xchange pooling stats", false, false);
@@ -589,14 +463,7 @@ public class StatisticTools extends AbstractJMXTools {
         this.miscstats = setLongOpt(parser, OPT_MISC_STATS_LONG, "shows stats for general and threading", false, false);
         this.overviewstats = setLongOpt(parser, OPT_OVERVIEW_STATS_LONG, "shows stats for pooling and OperatingSystem", false, false);
         this.memorypoolstats = setLongOpt(parser, OPT_MEMORYPOOL_STATS_LONG, "shows stats for memory pool usage of the Java runtime", false, false);
-        this.niobufferstats = setShortLongOpt(
-            parser,
-            OPT_NIO_BUFFER_STATS_SHORT,
-            OPT_NIO_BUFFER_STATS_LONG,
-            "shows the NIO buffer stats",
-            false,
-            NeededQuadState.notneeded);
-
+        this.niobufferstats = setShortLongOpt(parser, OPT_NIO_BUFFER_STATS_SHORT, OPT_NIO_BUFFER_STATS_LONG, "shows the NIO buffer stats", false, NeededQuadState.notneeded);
 
     }
 
@@ -681,16 +548,14 @@ public class StatisticTools extends AbstractJMXTools {
          * query general information
          */
         StringBuilder sb = new StringBuilder();
-        for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node", "HazelcastInstance.EventService",
-            "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager" }) {
+        for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node", "HazelcastInstance.EventService", "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager" }) {
             for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
                 ObjectName objectName = mbean.getObjectName();
                 MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
                 for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     if ("HazelcastInstance".equals(type) && "config".equals(attributeInfo.getName())) {
                         String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
-                        for (String keyword : new String[] {
-                            "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=", "multicastConfig=" }) {
+                        for (String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=", "multicastConfig=" }) {
                             int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
                                 sb.append(objectName);
@@ -733,8 +598,7 @@ public class StatisticTools extends AbstractJMXTools {
         if (null == result || false == Boolean.class.isInstance(result) || Boolean.TRUE.equals(result)) {
             result = mbc.invoke(toolkitName, "supportsPartitionReplicas", new Object[0], new String[0]);
             if (null == result || false == Boolean.class.isInstance(result) || Boolean.FALSE.equals(result)) {
-                return sb.append("[No owner for all configured partition replicas detected, unable to retrieve map statistics]")
-                    .append(LINE_SEPARATOR).toString();
+                return sb.append("[No owner for all configured partition replicas detected, unable to retrieve map statistics]").append(LINE_SEPARATOR).toString();
             }
         }
         /*
@@ -775,24 +639,19 @@ public class StatisticTools extends AbstractJMXTools {
         // Iterate over the MBeans we are interested in, query by objectName
         for (final GrizzlyMBean grizzlyMBean : GrizzlyMBean.values()) {
             final ObjectName objectName = new ObjectName(grizzlyMBean.getObjectName());
-            final Set<ObjectInstance> mBeans = mbeanServerConnection.queryMBeans(objectName, null);
-            // Iterate over the found MBeans and print the desired attributes for this MBean. If no MBeans are found (jmx disabled) nothig
-            // will be printed to stdout
-            for (final ObjectInstance mBean : mBeans) {
-                for (final String attribute : grizzlyMBean.getAttributes()) {
-                    sb.append(objectName);
-                    sb.append(',');
-                    sb.append(attribute);
-                    sb.append(" = ");
-                    try {
-                        sb.append(mbeanServerConnection.getAttribute(objectName, attribute));
-                    } catch (Exception e) {
-                        sb.append('[');
-                        sb.append(e.getMessage());
-                        sb.append(']');
-                    }
-                    sb.append(LINE_SEPARATOR);
+            for (final String attribute : grizzlyMBean.getAttributes()) {
+                sb.append(objectName);
+                sb.append(',');
+                sb.append(attribute);
+                sb.append(" = ");
+                try {
+                    sb.append(mbeanServerConnection.getAttribute(objectName, attribute));
+                } catch (Exception e) {
+                    sb.append('[');
+                    sb.append(e.getMessage());
+                    sb.append(']');
                 }
+                sb.append(LINE_SEPARATOR);
             }
         }
         return sb.toString();
@@ -865,10 +724,7 @@ public class StatisticTools extends AbstractJMXTools {
 
                     if (attribute instanceof CompositeDataSupport) {
                         final CompositeDataSupport compositeDataSupport = (CompositeDataSupport) attribute;
-                        sb.append("[startTime=").append(compositeDataSupport.get("startTime")).append(", endTime=").append(
-                            compositeDataSupport.get("endTime")).append(", GcThreadCount=").append(
-                                compositeDataSupport.get("GcThreadCount")).append(", duration=").append(compositeDataSupport.get("duration")).append(
-                                    "]\n");
+                        sb.append("[startTime=").append(compositeDataSupport.get("startTime")).append(", endTime=").append(compositeDataSupport.get("endTime")).append(", GcThreadCount=").append(compositeDataSupport.get("GcThreadCount")).append(", duration=").append(compositeDataSupport.get("duration")).append("]\n");
                     } else if (attribute instanceof String[]) {
                         final String[] stringArray = (String[]) attribute;
                         sb.append(Arrays.toString(stringArray) + "\n");
@@ -919,9 +775,9 @@ public class StatisticTools extends AbstractJMXTools {
         return uptimeHours;
     }
 
-
     /**
      * Show NIO buffer stats
+     * 
      * @param mbeanServerConnection
      * @return
      * @throws InstanceNotFoundException
@@ -933,9 +789,7 @@ public class StatisticTools extends AbstractJMXTools {
      * @throws IOException
      */
     static String showNioBufferData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
-        return getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=direct")
-        .append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped"))
-        .toString();
+        return getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=direct").append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped")).toString();
     }
 
     private static String extractTextInBrackets(final String value, final int startIdx) {
