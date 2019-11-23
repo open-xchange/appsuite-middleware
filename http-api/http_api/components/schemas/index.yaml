@@ -121,7 +121,11 @@ ContactData:
     properties:
       $ref: ./contacts/RawContactData.yaml
 ContactDataWithInternalId:
-  $ref: ./contacts/ContactDataWithInternalId.yaml
+  allOf:
+  - $ref: ./contacts/ContactDataWithInternalId.yaml
+  - type: object
+    properties:
+      $ref: ./common/CommonObjectData.yaml
 ContactResponse:
   $ref: ./contacts/ContactResponse.yaml
 ContactUpdateData:
@@ -549,7 +553,11 @@ AutoConfigResponse:
 UsersResponse:
   $ref: ./user/UsersResponse.yaml
 UserData:
-  $ref: ./user/UserData.yaml
+  allOf:
+  - $ref: ./user/UserData.yaml
+  - type: object
+    properties:
+      $ref: ./common/CommonObjectData.yaml
 UserResponse:
   $ref: ./user/UserResponse.yaml
 UserSearchBody:

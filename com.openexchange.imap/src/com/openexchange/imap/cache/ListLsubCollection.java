@@ -1056,12 +1056,12 @@ final class ListLsubCollection implements Serializable {
                 ListLsubEntryImpl root = map.get(ROOT_FULL_NAME);
                 if (root == null) {
                     // Missing root folder
-                    outputListResponses(listResponses, "Missing root folder");
+                    outputListResponses(listResponses, (lsub ? "LSUB" : "LIST") + ": Missing root folder");
                 } else {
                     Set<ListLsubEntryImpl> children = root.getChildrenSet();
                     if (children.isEmpty()) {
                         // Missing child folders
-                        outputListResponses(listResponses, "Missing root child folders");
+                        outputListResponses(listResponses, (lsub ? "LSUB" : "LIST") + ": Missing root child folders");
                     }
                 }
             }

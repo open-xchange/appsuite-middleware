@@ -32,16 +32,16 @@ The circuit breaker for connections to IMAP and mail filter endpoints ships with
 
 First, there is a generic IMAP circuit breaker that applies to all IMAP end-points being connected to.
 
- - `com.openexchange.imap.breaker.enabled` The flag to enable/disable the generic IMAP circuit breaker. Default is `false`
- - `com.openexchange.imap.breaker.failureThreshold` The failure threshold; which is the number of successive failures that must occur in order to open the circuit. Default is `5`
- - `com.openexchange.imap.breaker.failureExecutions` The number of executions to measure the failures against. Default is the same setting as specified for `com.openexchange.imap.breaker.failureThreshold`
- - `com.openexchange.imap.breaker.successThreshold` The success threshold; which is the number of successive successful executions that must occur when in a half-open state in order to close the circuit. Default is `2`
- - `com.openexchange.imap.breaker.successExecutions` The number of executions to measure the successes against. Default is the same setting as specified for `com.openexchange.imap.breaker.successThreshold`
- - `com.openexchange.imap.breaker.delayMillis` The delay in milliseconds; the number of milliseconds to wait in open state before transitioning to half-open. Default is `60000`
+- `com.openexchange.imap.breaker.enabled` The flag to enable/disable the generic IMAP circuit breaker. Default is `false`
+- `com.openexchange.imap.breaker.failureThreshold` The failure threshold; which is the number of successive failures that must occur in order to open the circuit. Default is `5`
+- `com.openexchange.imap.breaker.failureExecutions` The number of executions to measure the failures against. Default is the same setting as specified for `com.openexchange.imap.breaker.failureThreshold`
+- `com.openexchange.imap.breaker.successThreshold` The success threshold; which is the number of successive successful executions that must occur when in a half-open state in order to close the circuit. Default is `2`
+- `com.openexchange.imap.breaker.successExecutions` The number of executions to measure the successes against. Default is the same setting as specified for `com.openexchange.imap.breaker.successThreshold`
+- `com.openexchange.imap.breaker.delayMillis` The delay in milliseconds; the number of milliseconds to wait in open state before transitioning to half-open. Default is `60000`
 
 Example for generic circuit breaker config
 
-```
+```properties
 com.openexchange.imap.breaker.enabled=true
 # Open the circuit if 10 out of the last 20 executions result in a failure
 com.openexchange.imap.breaker.failureThreshold=10
@@ -58,7 +58,7 @@ Furthermore, an administrator is allowed to specify overrides for either primary
 
 Example for an override for the primary account using the `"primary"` infix. Since primary IMAP and mail filter are typically hosted by the same service endpoint, the circuit breaker for mail filter should be adjusted as well.
 
-```
+```properties
 # Circuit breaker config for primary mail account
 com.openexchange.imap.breaker.primary.enabled=true
 com.openexchange.imap.breaker.primary.failureThreshold=5
@@ -100,7 +100,7 @@ Specify these options for each named IMAP circuit breaker through:
 
 Example for an override through a named circuit breaker
 
-```
+```properties
 com.openexchange.imap.breaker.gmail.enabled=true
 com.openexchange.imap.breaker.gmail.hosts=imap.gmail.com, imap.googlemail.com
 com.openexchange.imap.breaker.gmail.ports=
@@ -109,11 +109,102 @@ com.openexchange.imap.breaker.gmail.successThreshold=2
 com.openexchange.imap.breaker.gmail.delayMillis=60000
 ```
 
-# Monitoring & Tuning
+# Monitoring
 
-## Track response times & failure rates
+There are several ways to collect metrics from `JMX`, in this example we will keep focus on a plugin-in driven server agent called [Telegraf](https://github.com/influxdata/telegraf). This agent offers the [jolokia2](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/jolokia2) input plugin to read JMX metrics from one or more Jolokia agent REST endpoints.
 
+## Response times & failure rates
 
+With the following `MBeans` it's possible to track response times and failure rates:
 
-## Track status, configuration settings, trip count & denials per circuit breaker
+- `com.openexchange.metrics.imap`
+  - `errorRate`: Failed `IMAP` request meter per target server.
+  - `requestRate`: Overall `IMAP` request timer per target server.
+- `com.openexchange.metrics.mailfilter`
+  - `errorRate`: Failed `mail filter` request meter per target server.
+  - `requestRate`: Overall `mail filter` request timer per target server.
 
+This could be the `Jolokia Metric Configuration` to read the response times and failure rates from the `MBeans`:
+
+```plaintext
+  [[inputs.jolokia2_agent.metric]]
+    mbean = "com.openexchange.metrics:name=*Rate,type=*,server=*"
+    name = "ox_circuit_breaker"
+    tag_keys = ["type", "server", "name"]
+```
+
+and the graphical visualization in `Grafana`:
+
+- Error & Request Rate
+
+![rate](circuit_breaker/error_request_rate.png "error request rate")
+
+- Response Times
+
+![responsetimes](circuit_breaker/response_times.png "response times")
+
+## Status, configuration settings, trip count & denials per circuit breaker
+
+With the following `MBean` it's possible to track some circuit breaker specific metrics or settings:
+
+- `com.openexchange.metrics.circuit-breakers`
+  - `delayMillis`: The number of milliseconds to wait in open state before transitioning to half-open.
+  - `denialsMeter`: The occurrences when an access attempt has been denied because circuit breaker is currently open and thus not allowing executions to occur.
+  - `failureThreshold`: The number of successive failures that must occur in order to open the circuit.
+  - `status`: The current status of the circuit breaker.
+  - `successThreshold`: The number of successive successful executions that must occur when in a half-open state in order to close the circuit.
+  - `tripCount`: The number representing how often the circuit breaker tripped.
+
+The `Jolokia Metric Configuration` to read for example the status or the denials from the `MBean` could be:
+
+```plaintext
+  [[inputs.jolokia2_agent.metric]]
+    mbean = "com.openexchange.metrics:name=denialsMeter,type=circuit-breakers,account=*,protocol=*"
+    name = "ox_circuit_breaker"
+    paths = ["Count"]
+    tag_keys = ["name", "type", "protocol", "account"]
+
+  [[inputs.jolokia2_agent.metric]]
+    mbean = "com.openexchange.metrics:name=status,type=circuit-breakers,account=*,protocol=*"
+    name = "ox_circuit_breaker"
+    tag_keys = ["name", "type", "protocol", "account"]
+```
+
+and how it could be visualized:
+
+- Denials
+
+![denials](circuit_breaker/denials.png "denials")
+
+## Example Configuration
+
+Full example configuration of the [jolokia2](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/jolokia2) plugin to collect all `Circuit-Breaker` related metrics:
+
+### Jolokia Agent
+
+```plaintext
+[[inputs.jolokia2_agent]]
+  urls = ["http://${MIDDLEWARE_NODE}:8009/monitoring/jolokia"]
+  username = "${JOLOKIA_USER}"
+  password = "${JOLOKIA_PASSWORD}"
+```
+
+### Jolokia Metrics
+
+```plaintext
+  [[inputs.jolokia2_agent.metric]]
+    mbean = "com.openexchange.metrics:name=*Rate,type=*,server=*"
+    name = "ox_circuit_breaker"
+    tag_keys = ["type", "server", "name"]
+
+  [[inputs.jolokia2_agent.metric]]
+    mbean = "com.openexchange.metrics:name=denialsMeter,type=circuit-breakers,account=*,protocol=*"
+    name = "ox_circuit_breaker"
+    paths = ["Count"]
+    tag_keys = ["name", "type", "protocol", "account"]
+
+  [[inputs.jolokia2_agent.metric]]
+    mbean = "com.openexchange.metrics:name=status,type=circuit-breakers,account=*,protocol=*"
+    name = "ox_circuit_breaker"
+    tag_keys = ["name", "type", "protocol", "account"]
+```
