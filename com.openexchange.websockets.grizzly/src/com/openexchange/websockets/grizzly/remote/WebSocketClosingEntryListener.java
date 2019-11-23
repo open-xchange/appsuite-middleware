@@ -78,6 +78,9 @@ public class WebSocketClosingEntryListener implements com.hazelcast.core.EntryLi
 
     @Override
     public void entryEvicted(EntryEvent<String, String> event) {
+        if (event == null || event.getKey() == null) {
+            return;
+        }
         // Manually close associated Web Socket (if any available) to enforce re-establishing a new one
         MapKey key = MapKey.parseFrom(event.getKey());
         MapValue value = MapValue.parseFrom(event.getValue());
