@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.hazelcast.upgrade3100.osgi;
+package com.openexchange.hazelcast.upgrade311.osgi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
