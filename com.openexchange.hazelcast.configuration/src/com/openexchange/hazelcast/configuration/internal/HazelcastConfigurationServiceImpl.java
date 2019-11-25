@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ConfigLoader;
 import com.hazelcast.config.MapConfig;
@@ -78,6 +80,7 @@ import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.config.TopicConfig;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.spi.properties.GroupProperty;
 import com.openexchange.config.ConfigurationService;
@@ -310,6 +313,12 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
         if (Strings.isNotEmpty(groupName)) {
+            Bundle bundle = FrameworkUtil.getBundle(HazelcastInstance.class);
+            if (null == bundle) {
+                LOG.warn("Bundle for {} not found, unable to append version to group name.", HazelcastInstance.class);
+            } else {
+                groupName = groupName + '-' + bundle.getVersion();
+            }
             config.getGroupConfig().setName(groupName);
         } else if (join != KnownNetworkJoin.EMPTY) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");

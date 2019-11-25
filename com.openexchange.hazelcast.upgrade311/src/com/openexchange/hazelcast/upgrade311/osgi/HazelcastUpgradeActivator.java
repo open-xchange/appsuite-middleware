@@ -51,7 +51,9 @@ package com.openexchange.hazelcast.upgrade311.osgi;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.caching.events.CacheEventService;
@@ -73,6 +75,9 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastUpgradeActivator.class);
 
+    /** The version string of the 'legacy' hazelcast version that the old cluster is using */
+    private static final String LEGACY_HAZELCAST_VERSION = "3.11.1";
+
     private UpgradedCacheListener cacheListener;
 
     /**
@@ -89,10 +94,10 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.hazelcast.upgrade381\"");
-        ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
-        if (null != clientConfig) {
-            UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);
+        LOG.info("starting bundle {}", context.getBundle());
+        List<ClientConfig> clientConfigs = getConfigs(getService(ConfigurationService.class));
+        if (null != clientConfigs && 0 < clientConfigs.size()) {
+            UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfigs);
             String region = UpgradedCacheListener.CACHE_REGION;
             LOG.warn("Listening to events for cache region \"{}\". " +
                 "Please remember to uninstall this package once all nodes in the cluster have been upgraded.", region);
@@ -103,7 +108,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(HazelcastUpgradeActivator.class).info("stopping bundle: \"com.openexchange.hazelcast.upgrade381\"");
+        LOG.info("stopping bundle {}", context.getBundle());
         UpgradedCacheListener cacheListener = this.cacheListener;
         if (null != cacheListener) {
             CacheEventService cacheEventService = getService(com.openexchange.caching.events.CacheEventService.class);
@@ -116,13 +121,12 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     }
 
     /**
-     * Gets a suitable client configuration to connect to a legacy Hazelcast cluster.
+     * Gets suitable client configurations to connect to a legacy Hazelcast cluster.
      *
      * @param configService The configuration service
-     * @return The
-     * @throws OXException
+     * @return A non-empty list of possible client configurations, or <code>null</code> if no client configuration is possible or needed
      */
-    private ClientConfig getConfig(ConfigurationService configService) throws OXException {
+    private List<ClientConfig> getConfigs(ConfigurationService configService) throws OXException {
         /*
          * Check if enabled
          */
@@ -143,6 +147,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
          * Network config
          */
         ClientConfig config = new ClientConfig();
+        ClientConfig alternativeConfig = new ClientConfig();
         String[] nodeProperties = { "com.openexchange.hazelcast.network.join.static.nodes", "com.openexchange.hazelcast.network.client.nodes" };
         LOG.info("Hazelcast cluster discovery is \"{}\", looking for possible addresses at {}...", join, Arrays.toString(nodeProperties));
         for (String property : nodeProperties) {
@@ -150,11 +155,14 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
             if (null != members && 0 < members.length) {
                 for (String member : members) {
                     if (Strings.isNotEmpty(member)) {
+                        String hostAddress;
                         try {
-                            config.getNetworkConfig().addAddress(InetAddress.getByName(member).getHostAddress());
+                            hostAddress = InetAddress.getByName(member).getHostAddress();
                         } catch (UnknownHostException e) {
                             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, property);
                         }
+                        config.getNetworkConfig().addAddress(hostAddress);
+                        alternativeConfig.getNetworkConfig().addAddress(hostAddress);
                     }
                 }
             }
@@ -164,13 +172,14 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
             return null;
         }
         /*
-         * Group name & password
+         * Group name & versioned group name
          */
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
         if (Strings.isEmpty(groupName)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
         }
         config.getGroupConfig().setName(groupName);
+        alternativeConfig.getGroupConfig().setName(groupName + '-' + LEGACY_HAZELCAST_VERSION);
         /*
          * Serialization config
          */
@@ -179,8 +188,12 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
         for (ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
             config.getSerializationConfig().addClassDefinition(classDefinition);
+            alternativeConfig.getSerializationConfig().addClassDefinition(classDefinition);
         }
-        return config;
+        List<ClientConfig> clientConfigs = new ArrayList<ClientConfig>(2);
+        clientConfigs.add(config);
+        clientConfigs.add(alternativeConfig);
+        return clientConfigs;
     }
 
 }
