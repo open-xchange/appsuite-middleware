@@ -171,10 +171,6 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
         }
         config.getGroupConfig().setName(groupName);
-        String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
-        if (Strings.isNotEmpty(groupPassword)) {
-            config.getGroupConfig().setPassword(groupPassword);
-        }
         /*
          * Serialization config
          */
