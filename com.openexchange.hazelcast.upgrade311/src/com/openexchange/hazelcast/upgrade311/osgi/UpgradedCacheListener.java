@@ -86,16 +86,16 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpgradedCacheListener.class);
     private static final int SHUTDOWN_DELAY = 3000;
 
-    private final ClientConfig clientConfig;
+    private final List<ClientConfig> clientConfigs;
 
     /**
      * Initializes a new {@link UpgradedCacheListener}.
      *
-     * @param clientConfig The client configuration to use
+     * @param clientConfigs The client configuration(s) to use
      */
-    public UpgradedCacheListener(ClientConfig clientConfig) {
+    public UpgradedCacheListener(List<ClientConfig> clientConfigs) {
         super();
-        this.clientConfig = clientConfig;
+        this.clientConfigs = clientConfigs;
     }
 
     @Override
@@ -112,8 +112,11 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         /*
          * Propagate cache event through calling 'c.o.ms.internal.portable.PortableContextInvalidationCallable' on each remote member using a Hazelcast client
          */
-        HazelcastInstance client = HazelcastClient.newHazelcastClient(clientConfig);
-        LOG.info("Successfully initialzed Hazelcast client: {}", client);
+        HazelcastInstance client = getHazelcastClient();
+        if (null == client) {
+            LOG.warn("Unable to acquire Hazelcast client, unable to propagate event.");
+            return;
+        }
         /*
          * Determine remote members
          */
@@ -175,6 +178,23 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SHUTDOWN_DELAY));
         client.shutdown();
         LOG.info("Client shutdown completed.");
+    }
+
+    private HazelcastInstance getHazelcastClient() {
+        if (null != clientConfigs) {
+            for (int i = 0; i < clientConfigs.size(); i++) {
+                try {
+                    return HazelcastClient.newHazelcastClient(clientConfigs.get(i));
+                } catch (IllegalStateException e) {
+                    if (i + 1 < clientConfigs.size()) {
+                        LOG.info("Error initializing Hazelcast client, trying alternative configuration.");
+                    } else {
+                        LOG.error("Error initializing Hazelcast client", e);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private static <R> void cancelFutureSafe(Future<R> future) {
