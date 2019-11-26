@@ -66,6 +66,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -131,7 +132,13 @@ public class SessionRESTService {
                 throw ServiceExceptionCode.absentService(SessiondService.class);
             }
 
-            Session ses = sessiondService.getSession(session);
+            Session ses;
+            if (sessiondService instanceof SessiondServiceExtended) {
+                ses = ((SessiondServiceExtended) sessiondService).peekSession(session);
+            } else {
+                ses = sessiondService.getSession(session);
+            }
+
             if (ses == null) {
                 // No such session...
                 return new JSONObject(0);
@@ -156,4 +163,5 @@ public class SessionRESTService {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
+
 }
