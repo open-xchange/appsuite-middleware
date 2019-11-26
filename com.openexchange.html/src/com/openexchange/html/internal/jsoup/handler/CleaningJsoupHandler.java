@@ -632,7 +632,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                 boolean isFine = true;
                 for (final Attribute attribute : attributes) {
                     final String val = attribute.getValue();
-                    if (isNonJavaScriptURL(val, tagName, "url=")) {
+                    if (Strings.isEmpty(val) || isNonJavaScriptURL(val, tagName, "url=")) {
                         // Nothing
                     } else {
                         isFine = false;
@@ -757,6 +757,10 @@ public final class CleaningJsoupHandler implements JsoupHandler {
         if (false == isSafe(val, tagName)) {
             // Unsafe value
             return false;
+        }
+
+        if (Strings.isEmpty(val)) {
+            return true;
         }
 
         if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
@@ -973,6 +977,9 @@ public final class CleaningJsoupHandler implements JsoupHandler {
      * @return The checked attribute value
      */
     public static String checkPossibleURL(String val, StringBuilder urlBuilder) {
+        if (Strings.isEmpty(val)) {
+            return val;
+        }
         final Matcher m = PATTERN_URL_SOLE.matcher(val);
         if (!m.matches()) {
             return val;

@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -227,8 +228,11 @@ public class TaskCopyTask implements CopyUserTaskService {
                 }
                 ParticipantStorage.getInstance().insertInternals(dstCtx, dstCon, task.getObjectID(), internals, StorageType.ACTIVE);
                 ParticipantStorage.getInstance().insertExternals(dstCtx, dstCon, task.getObjectID(), externals, StorageType.ACTIVE);
-            } catch (final OXException e) {
-                throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
+            } catch (OXException e) {
+                if (!OXCalendarExceptionCodes.TASK_UID_ALREDY_EXISTS.equals(e)) {
+                    throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
+                }
+                // Otherwise continue...
             }
         }
     }

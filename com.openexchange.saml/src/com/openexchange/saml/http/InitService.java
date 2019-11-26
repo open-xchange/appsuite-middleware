@@ -127,6 +127,9 @@ public class InitService extends SAMLServlet {
         }
 
         try {
+            // Create a new HttpSession if missing
+            httpRequest.getSession(true);
+
             String redirectURI;
             if (flow.equals("login") || flow.equals("relogin")) {
                 redirectURI = tryAutoLogin(httpRequest, httpResponse);
