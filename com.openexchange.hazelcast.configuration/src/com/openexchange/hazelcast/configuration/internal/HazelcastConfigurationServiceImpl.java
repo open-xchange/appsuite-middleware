@@ -651,7 +651,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     /**
      * Constructs the effective group name to use in the cluster group configuration for Hazelcast. The full group name is constructed
-     * based on the configured group name prefix, appended with version identifier string of the underlying Hazelcast library.
+     * based on the configured group name prefix, optionally appended with a version identifier string of the underlying Hazelcast library.
      * <p/>
      * This needs to be done to form separate Hazelcast clusters during rolling upgrades of the nodes with incompatible Hazelcast
      * libraries.
@@ -662,11 +662,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
      * @return The full cluster group name
      */
     private static String buildGroupName(String groupName, Version version, boolean enterprise) {
-        StringBuilder stringBuilder = new StringBuilder(20).append(groupName).append('-').append(version.getMajor()).append('.').append(version.getMinor());
-        if (false == enterprise) {
-            stringBuilder.append('.').append(version.getMicro());
+        if (enterprise) {
+            return groupName;
         }
-        return stringBuilder.toString();
+        return new StringBuilder(20).append(groupName).append('-').append(version.getMajor()).append('.').append(version.getMinor()).toString();
     }
 
 }
