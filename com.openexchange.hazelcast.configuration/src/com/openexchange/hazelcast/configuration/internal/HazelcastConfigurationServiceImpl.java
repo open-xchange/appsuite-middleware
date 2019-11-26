@@ -67,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.Version;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ConfigLoader;
 import com.hazelcast.config.MapConfig;
@@ -317,7 +318,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             if (null == bundle) {
                 LOG.warn("Bundle for {} not found, unable to append version to group name.", HazelcastInstance.class);
             } else {
-                groupName = groupName + '-' + bundle.getVersion();
+                groupName = buildGroupName(groupName, bundle.getVersion(), null != config.getLicenseKey());
             }
             config.getGroupConfig().setName(groupName);
         } else if (join != KnownNetworkJoin.EMPTY) {
@@ -646,6 +647,26 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
         }
         return null;
+    }
+
+    /**
+     * Constructs the effective group name to use in the cluster group configuration for Hazelcast. The full group name is constructed
+     * based on the configured group name prefix, appended with version identifier string of the underlying Hazelcast library.
+     * <p/>
+     * This needs to be done to form separate Hazelcast clusters during rolling upgrades of the nodes with incompatible Hazelcast
+     * libraries.
+     *
+     * @param groupName The configured cluster group name
+     * @param version The version of the Hazelcast library
+     * @param enterprise <code>true</code> if enterprise features are available for rolling upgrades, <code>false</code>, otherwise
+     * @return The full cluster group name
+     */
+    private static String buildGroupName(String groupName, Version version, boolean enterprise) {
+        StringBuilder stringBuilder = new StringBuilder(20).append(groupName).append('-').append(version.getMajor()).append('.').append(version.getMinor());
+        if (false == enterprise) {
+            stringBuilder.append('.').append(version.getMicro());
+        }
+        return stringBuilder.toString();
     }
 
 }
