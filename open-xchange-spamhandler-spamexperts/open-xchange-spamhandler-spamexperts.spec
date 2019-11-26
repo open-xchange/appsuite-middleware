@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:	@OXVERSION@
-%define        ox_release 64
+%define        ox_release 65
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -75,6 +75,8 @@ ox_add_property com.openexchange.custom.spamexperts.trainhamfolder "Not Spam" /o
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Mon Nov 18 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-11-25 (5482)
 * Tue Oct 08 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-10-14 (5437)
 * Mon Sep 23 2019 Marcus Klein <marcus.klein@open-xchange.com>
