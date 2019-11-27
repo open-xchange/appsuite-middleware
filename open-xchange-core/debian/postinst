@@ -615,7 +615,7 @@ EOF
 
     # SCR-426
     if ! contains "Allow users to configure the showContactImage setting" /opt/open-xchange/etc/settings/ui.properties; then
-        cat <<EOF | (cd /opt/open-xchange/etc && patch -p3 -N -r -)
+        cat <<EOF | (cd /opt/open-xchange/etc && patch --strip=3 --forward --no-backup-if-mismatch --reject-file=- --fuzz=3 >/dev/null)
 diff --git a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties b/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
 index 3ce3af8146f..61ee86367b8 100644
 --- a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
@@ -722,7 +722,7 @@ EOF
 
     # SCR-522
     if ! contains "of other nodes via multicast) or \"dns\" to consult a DNS server to resolve the" /opt/open-xchange/etc/hazelcast.properties; then
-        cat <<EOF | (cd /opt/open-xchange/etc && patch -p1 -N -r -)
+        cat <<EOF | (cd /opt/open-xchange/etc && patch --strip=1 --forward --no-backup-if-mismatch --reject-file=- --fuzz=3 >/dev/null)
 diff --git a/hazelcast.properties b/hazelcast.properties
 index d56a04f3e1f..1214fd369fe 100644
 --- a/hazelcast.properties
