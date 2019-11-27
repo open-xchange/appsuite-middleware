@@ -58,7 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -95,7 +95,7 @@ public class RssActionTestReconfiguredPorts {
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
         PowerMockito.mockStatic(InetAddress.class);
         InetAddress inetAddress = Mockito.mock(InetAddress.class);
-        Mockito.when(InetAddress.getByName(ArgumentMatchers.anyString())).thenReturn(inetAddress);
+        Mockito.when(InetAddress.getByName(Matchers.anyString())).thenReturn(inetAddress);
 
         RssAction newAction = new RssAction();
         MockUtils.injectValueIntoPrivateField(newAction, "fetcher", Mockito.mock(TimeoutHttpURLFeedFetcher.class));

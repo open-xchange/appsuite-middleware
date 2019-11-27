@@ -60,7 +60,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -108,11 +108,11 @@ public class RssActionTest {
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
         PowerMockito.mockStatic(InetAddress.class);
         InetAddress inetAddress = Mockito.mock(InetAddress.class);
-        Mockito.when(InetAddress.getByName(ArgumentMatchers.anyString())).thenReturn(inetAddress);
+        Mockito.when(InetAddress.getByName(Matchers.anyString())).thenReturn(inetAddress);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn(RssProperties.PORT_WHITELIST_DEFAULT);
         Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
-        Mockito.when(fetcher.retrieveFeed(ArgumentMatchers.any())).thenReturn(Mockito.mock(SyndFeed.class));
+        Mockito.when(fetcher.retrieveFeed((URL) Matchers.any())).thenReturn(Mockito.mock(SyndFeed.class));
 
         action = new RssAction();
         MockitoAnnotations.initMocks(this);
