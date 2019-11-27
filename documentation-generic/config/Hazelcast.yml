@@ -43,7 +43,7 @@ properties:
       description: |
         Configures the name of the cluster. Only nodes using the same group name will join each other and form the cluster. 
         Required if [[com.openexchange.hazelcast.network.join]] is not <code>empty</code>. 
-        Please mind that the effective group name will be extended by a version string automatically. 
+        Please mind that the effective group name will be extended by a version string automatically for non-enterprise versions. 
       defaultValue:
       version:
       reloadable: false

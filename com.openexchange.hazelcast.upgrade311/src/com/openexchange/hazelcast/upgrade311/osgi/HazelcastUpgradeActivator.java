@@ -54,6 +54,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.osgi.framework.Version;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.caching.events.CacheEventService;
@@ -76,7 +77,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastUpgradeActivator.class);
 
     /** The version string of the 'legacy' hazelcast version that the old cluster is using */
-    private static final String LEGACY_HAZELCAST_VERSION = "3.11.1";
+    private static final Version LEGACY_HAZELCAST_VERSION = new Version(3, 11, 1);
 
     private UpgradedCacheListener cacheListener;
 
@@ -179,7 +180,8 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
         }
         config.getGroupConfig().setName(groupName);
-        alternativeConfig.getGroupConfig().setName(groupName + '-' + LEGACY_HAZELCAST_VERSION);
+        boolean enterprise = Strings.isNotEmpty(configService.getProperty("com.openexchange.hazelcast.licenseKey"));
+        alternativeConfig.getGroupConfig().setName(buildGroupName(groupName, LEGACY_HAZELCAST_VERSION, enterprise));
         /*
          * Serialization config
          */
@@ -192,8 +194,29 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         }
         List<ClientConfig> clientConfigs = new ArrayList<ClientConfig>(2);
         clientConfigs.add(config);
-        clientConfigs.add(alternativeConfig);
+        if (false == groupName.equals(alternativeConfig.getGroupConfig().getName())) {
+            clientConfigs.add(alternativeConfig);
+        }
         return clientConfigs;
+    }
+
+    /**
+     * Constructs the effective group name to use in the cluster group configuration for Hazelcast. The full group name is constructed
+     * based on the configured group name prefix, optionally appended with a version identifier string of the underlying Hazelcast library.
+     * <p/>
+     * This needs to be done to form separate Hazelcast clusters during rolling upgrades of the nodes with incompatible Hazelcast
+     * libraries.
+     *
+     * @param groupName The configured cluster group name
+     * @param version The version of the Hazelcast library
+     * @param enterprise <code>true</code> if enterprise features are available for rolling upgrades, <code>false</code>, otherwise
+     * @return The full cluster group name
+     */
+    private static String buildGroupName(String groupName, Version version, boolean enterprise) {
+        if (enterprise) {
+            return groupName;
+        }
+        return new StringBuilder(20).append(groupName).append('-').append(version.getMajor()).append('.').append(version.getMinor()).toString();
     }
 
 }
