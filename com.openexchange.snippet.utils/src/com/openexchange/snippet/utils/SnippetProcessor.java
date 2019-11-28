@@ -63,8 +63,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
@@ -95,6 +97,7 @@ import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.utils.internal.Services;
+import com.openexchange.tools.net.URITools;
 import com.openexchange.version.VersionService;
 
 /**
@@ -239,6 +242,13 @@ public class SnippetProcessor {
                     src = srcMatcher.group(2);
                 }
 
+                // Check URL validity
+                try {
+                    src = URITools.getFinalURL(src, Optional.of(validator));
+                } catch (IOException e) {
+                    throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+
                 // Check for valid URL
                 URL url;
                 try {
@@ -246,28 +256,6 @@ public class SnippetProcessor {
                 } catch (Exception e) {
                     // No... it's not
                     throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid image URL: " + src);
-                }
-
-                // Check URL validity
-                {
-                    String protocol = url.getProtocol();
-                    if (null == protocol || false == ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
-                        throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + src);
-                    }
-
-                    String host = Strings.asciiLowerCase(url.getHost());
-                    if (null == host || DENIED_HOSTS.contains(host)) {
-                        throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + src);
-                    }
-
-                    try {
-                        InetAddress inetAddress = InetAddress.getByName(url.getHost());
-                        if (InetAddresses.isInternalAddress(inetAddress)) {
-                            throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + src);
-                        }
-                    } catch (UnknownHostException e) {
-                        throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid image URL: " + src);
-                    }
                 }
 
                 // Check max. number of images
@@ -304,6 +292,34 @@ public class SnippetProcessor {
             snippet.addAttachment(attachment);
         }
     }
+
+    /**
+     * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
+     *
+     * @param url The URL to validate
+     * @return An optional OXException
+     */
+    private static Function<URL, Optional<OXException>> validator = (url) -> {
+        String protocol = url.getProtocol();
+        if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+        }
+
+        String host = Strings.asciiLowerCase(url.getHost());
+        if (host == null || DENIED_HOSTS.contains(host)) {
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+        }
+
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            if (InetAddresses.isInternalAddress(inetAddress)) {
+                return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+            }
+        } catch (UnknownHostException e) {
+            return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
+        }
+        return Optional.empty();
+    };
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 3000;
