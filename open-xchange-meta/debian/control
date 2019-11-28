@@ -104,3 +104,31 @@ Section: oldlibs
 Priority: extra
 Description: Empty transitional package.
  This package can be removed as the printing logic was moved to the client-side.
+
+Package: open-xchange-realtime-core
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package can be removed as the realtime logic was moved to the collaboration-server.
+
+Package: open-xchange-realtime-json
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package can be removed as the realtime logic was moved to the collaboration-server.
+
+Package: open-xchange-events
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package can be removed as realtime events are deprecated.
+
+Package: open-xchange-events-json
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package can be removed as realtime events are deprecated.

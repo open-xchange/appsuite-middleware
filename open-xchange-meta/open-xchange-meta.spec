@@ -286,6 +286,66 @@ Authors:
 
 # ----------------------------------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-core
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-core
+Empty transitional package. This package can be removed as the realtime logic
+was moved to the collaboration-server.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-json
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-json
+Empty transitional package. This package can be removed as the realtime logic
+was moved to the collaboration-server.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-events
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-events
+Empty transitional package. This package can be removed as realtime events are
+deprecated.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-realtime-events-json
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-realtime-events-json
+Empty transitional package. This package can be removed as realtime events are
+deprecated.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+
 %description
 Open-Xchange Meta packages
 
@@ -380,6 +440,22 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-calendar-printing
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-core
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-json
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-events
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-realtime-events-json
 %defattr(-,root,root)
 %doc README.TXT
 
