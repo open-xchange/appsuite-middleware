@@ -77,6 +77,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.net.URITools;
 
 /**
  * {@link URLMailAttachmentDataSource}
@@ -132,8 +133,8 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                url = new URL(sUrl.trim());
-                validateUrl(url);
+                url = new URL(URITools.getFinalURL(sUrl.trim()));
+                validate(url);
             } catch (final MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -164,7 +165,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 urlCon.connect();
             } catch (final SocketTimeoutException e) {
                 /*
-                 * Time-out elapsed
+                 * Time-out elapsedg
                  */
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -268,9 +269,10 @@ public final class URLMailAttachmentDataSource implements DataSource {
      * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
      *
      * @param url The URL to validate
-     * @throws OXException if the URL validation fails
+     * @return An optional OXException
+     * @throws OXException 
      */
-    private void validateUrl(URL url) throws OXException {
+    private void validate(URL url) throws OXException {
         String protocol = url.getProtocol();
         if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
             throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
@@ -289,7 +291,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
         } catch (UnknownHostException e) {
             throw DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString());
         }
-    }
+    };
 
     @Override
     public String[] getRequiredArguments() {
