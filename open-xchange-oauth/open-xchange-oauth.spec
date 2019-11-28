@@ -96,26 +96,28 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.oauth.yahoo.productName REPLACE_WITH_YOUR_REGISTERED_YAHOO_APP /opt/open-xchange/etc/yahoooauth.properties
 
     SCR=SCR-316
-    ox_scr_todo ${SCR} && {
-      old_prefix=com.openexchange.oauth.msliveconnect
-      new_prefix=com.openexchange.oauth.microsoft.graph
-      old_pfile=/opt/open-xchange/etc/msliveconnectoauth.properties
-      new_pfile=/opt/open-xchange/etc/microsoftgraphoauth.properties
-      if [ -e $old_pfile ]
-      then
-        redirect=$(ox_read_property ${old_prefix}.redirectUrl ${old_pfile})
-        if [[ ( -n "${redirect}") && (! "${redirect}" = REPLACE_THIS*) ]]
+    if ox_scr_todo ${SCR}
+    then
+        old_prefix=com.openexchange.oauth.msliveconnect
+        new_prefix=com.openexchange.oauth.microsoft.graph
+        old_pfile=/opt/open-xchange/etc/msliveconnectoauth.properties
+        new_pfile=/opt/open-xchange/etc/microsoftgraphoauth.properties
+        if [ -e $old_pfile ]
         then
-          ox_set_property ${new_prefix}.redirectUrl ${redirect} ${new_pfile}
+          redirect=$(ox_read_property ${old_prefix}.redirectUrl ${old_pfile})
+          if [[ ( -n "${redirect}") && (! "${redirect}" = REPLACE_THIS*) ]]
+          then
+            ox_set_property ${new_prefix}.redirectUrl ${redirect} ${new_pfile}
+          fi
+          enabled=$(ox_read_property ${old_prefix} ${old_pfile})
+          if [[ "${enabled}" = true ]]
+          then
+            ox_set_property ${new_prefix} ${enabled} ${new_pfile}
+          fi
         fi
-        enabled=$(ox_read_property ${old_prefix} ${old_pfile})
-        if [[ "${enabled}" = true ]]
-        then
-          ox_set_property ${new_prefix} ${enabled} ${new_pfile}
-        fi
-      fi
-      ox_scr_done ${SCR}
-    }
+        ox_scr_done ${SCR}
+    fi
+
 fi
 
 %clean
