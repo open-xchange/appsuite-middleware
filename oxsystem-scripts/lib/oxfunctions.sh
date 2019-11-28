@@ -821,10 +821,11 @@ ox_set_max_heap() {
 OX_SCR_DB=/opt/open-xchange/etc/scr_db
 # Check if a SCR has to be run
 # Example usage:
-# ox_scr_todo 1234 && {
+# if ox_scr_todo 1234
+# then
 #   whatever_is_requested_in_scr_1234
 #   ox_scr_done 1234
-# }
+# fi
 ox_scr_todo() {
   local scr="$1"
   test -z "$scr" && die "ox_check_scr: missing property argument (arg 1)"
