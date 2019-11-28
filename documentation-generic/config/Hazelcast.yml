@@ -52,6 +52,19 @@ properties:
       file: hazelcast.properties
       packageName: open-xchange-core
       tags: ["Hazelcast"]
+    - key: com.openexchange.hazelcast.group.name.appendVersion
+      description: |
+        Specifies whether a version identifier will be appended automatically to the cluster group name prior joining the cluster 
+        to avoid attempts to join a cluster running an incompatible version of Hazelcast, and should be set to <code>true</code> when 
+        performing a rolling upgrade from a previous release. 
+      defaultValue: false
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.group.name
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.group.password
       description: |
         The password used when joining the cluster. Please change this value, and ensure it's equal on all nodes in the cluster!!!
