@@ -7,6 +7,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.events.apn"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.events.apn2"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.events.apn2.util"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.events.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.events.subscribe"/>
 </provider>

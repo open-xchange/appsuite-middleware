@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,74 +47,52 @@
  *
  */
 
-package com.openexchange.drive.events.apn.internal;
+package com.openexchange.drive.events.apn2.util;
 
-import com.openexchange.config.lean.Property;
-
+import com.openexchange.drive.events.subscribe.Subscription;
+import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 
 /**
+ * {@link NotificationResponseAndSubscription}
  *
- * {@link DriveEventsAPNProperty}
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.2
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.4
  */
-public enum DriveEventsAPNProperty implements Property {
+public class NotificationResponseAndSubscription {
+
+    private final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture;
+    private final Subscription subscription;
 
     /**
-     * Enables or disables push event notifications to clients using the Apple Push Notification service (APNS).
-     * This requires a valid configuration for the APNS certificate and keys, or install the restricted components packages for drive.
-     * Default: false
+     * Initializes a new {@link NotificationResponseAndSubscription}.
+     *
+     * @param sendNotificationFuture The result of the push operation
+     * @param subscription The subscription related to the push operation
      */
-    enabled(Boolean.FALSE),
-
-    /**
-     * Indicates which APNS service is used when sending push notifications to devices.
-     * A value of "true" will use the production service, a value of "false" the sandbox service.
-     * Default: true
-     */
-    production(Boolean.TRUE),
-
-    /**
-     * Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys for the application, e.g. "/opt/open-xchange/etc/drive-apns.p12".
-     * Required if com.openexchange.drive.events.apn.[os].enabled is "true" and the package containing the restricted drive components is not installed.
-     * Default: no default
-     */
-    keystore(null),
-
-    /**
-     * Note that blank or null passwords are in violation of the PKCS #12 specifications. Required if "com.openexchange.drive.events.apn.[os].enabled"
-     * is "true" .
-     * Default: no default
-     */
-    password(null),
-
-    /**
-     * Specifies the topic to use for OX Drive push notifications. Topic is the app's bundleId
-     * Default: no default
-     */
-    topic(null)
-
-    ;
-
-    public static final String FRAGMENT_FILE_NAME = "drive.properties";
-    public static final String OPTIONAL_FIELD = "os";
-    private static final String PREFIX = "com.openexchange.drive.events.apn.[os].";
-
-    private final Object defaultValue;
-
-    private DriveEventsAPNProperty(Object defaultValue) {
-        this.defaultValue = defaultValue;
+    public NotificationResponseAndSubscription(PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture, Subscription subscription) {
+        super();
+        this.sendNotificationFuture = sendNotificationFuture;
+        this.subscription = subscription;
     }
 
-    @Override
-    public String getFQPropertyName() {
-        return PREFIX + name();
+    /**
+     * Gets the {@link PushNotificationFuture}
+     *
+     * @return The PushNotificationFuture
+     */
+    public PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> getSendNotificationFuture() {
+        return sendNotificationFuture;
     }
 
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    /**
+     * Gets the {@link Subscription}
+     *
+     * @return The subscription
+     */
+    public Subscription getSubscription() {
+        return subscription;
     }
 
 }
