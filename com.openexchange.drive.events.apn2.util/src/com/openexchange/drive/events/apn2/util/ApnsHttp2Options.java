@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.events.apn2;
+package com.openexchange.drive.events.apn2.util;
 
 import java.io.File;
 import java.util.Arrays;
