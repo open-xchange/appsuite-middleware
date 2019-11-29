@@ -240,7 +240,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * track reply message from calendar user to organizer
              */
-            schedulingHelper.trackReply(result.getUpdatedResource(), result.getSeriesMaster(), result.getEventUpdate());
+            Attendee userAttendee = find(eventUpdate.getOriginal().getAttendees(), calendarUserId);
+            schedulingHelper.trackReply(userAttendee, result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate);
         } else {
             /*
              * track deletions for newly created delete exceptions
@@ -551,7 +552,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  */
                 List<EventUpdate> attendeeReplies = extractReplies(attendeeEventUpdates, calendarUser);
                 if (0 < attendeeReplies.size()) {
-                    schedulingHelper.trackReply(getUpdatedResource(attendeeReplies), attendeeReplies);
+                    schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeReplies), attendeeReplies);
                 }
                 return true;
             }

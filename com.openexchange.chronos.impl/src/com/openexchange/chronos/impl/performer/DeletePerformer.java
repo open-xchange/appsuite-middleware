@@ -167,10 +167,10 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             if (isSeriesException(originalEvent)) {
                 Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
                 List<EventUpdate> attendeeEventUpdates = deleteException(originalSeriesMaster, originalEvent, userAttendee);
-                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
+                schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
             } else {
                 List<EventUpdate> attendeeEventUpdates = delete(originalEvent, userAttendee);
-                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
+                schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
             }
         }
     }
@@ -290,7 +290,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                      * creation of new delete exception
                      */
                     List<EventUpdate> attendeeEventUpdates = deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
-                    schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), originalEvent, attendeeEventUpdates);
+                    schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), originalEvent, attendeeEventUpdates);
                 }
             } else if (isSeriesException(originalEvent)) {
                 /*
@@ -298,7 +298,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                  */
                 Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
                 List<EventUpdate> attendeeEventUpdates = deleteException(originalSeriesMaster, originalEvent, userAttendee);
-                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
+                schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
             } else {
                 /*
                  * unsupported, otherwise
