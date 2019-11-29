@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.events.apn2.internal;
+package com.openexchange.drive.events.apn2.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;

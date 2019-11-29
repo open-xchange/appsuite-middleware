@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.events.apn2;
+package com.openexchange.drive.events.apn2.util;
 
 /**
  * {@link ApnsHttp2OptionsProvider} - Provides the options to communicate with the Apple Push Notification System via HTTP/2.

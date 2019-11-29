@@ -71,6 +71,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -91,7 +92,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -170,10 +171,11 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
             if (Strings.isNotEmpty(keystore)) {
                 String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
                 boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
+                String topic = getProperty(properties, DriveEventsAPNProperty.topic, optionals);
 
                 // Check file path validity
                 if (new File(keystore).exists()) {
-                    return new APNAccess(keystore, password, production);
+                    return new APNAccess(keystore, password, production, topic);
                 }
 
                 // Assume file is given as resource identifier
@@ -182,7 +184,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                     if(keystoreBytes.length == 0) {
                         return null;
                     }
-                    return new APNAccess(keystoreBytes, password, production);
+                    return new APNAccess(keystoreBytes, password, production, topic);
                 } catch (IOException e) {
                     LOG.warn("Error instantiating APNS options from resource {}", keystore, e);
                 }
