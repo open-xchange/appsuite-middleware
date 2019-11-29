@@ -363,7 +363,10 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             final Event masterEvent = change.getMasterEvent();
             for (final Iterator<EventConflict> iterator = conflicts.iterator(); iterator.hasNext();) {
                 final EventConflict conflict = iterator.next();
-                if (currentEvent != null && (currentEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
+                if (null != conflict.getConflictingEvent()) {
+                    continue;
+                }
+                if (currentEvent != null && currentEvent.getId() != null && (currentEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
                     iterator.remove();
                     continue;
                 }
