@@ -400,6 +400,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
                 notificationOrganizer.setFolderId(getFolderIdForUser(update, ctx.getContextId(), organizer.getEntity()));
             } else {
                 notificationOrganizer.setLocale(user.getLocale());
+                notificationOrganizer.setTimezone(null == update.getStartDate() ? TimeZone.getDefault() : update.getStartDate().getTimeZone());
             }
             notificationOrganizer.setDisplayName(organizer.getCn());
             notificationOrganizer.setConfiguration(configuration);
