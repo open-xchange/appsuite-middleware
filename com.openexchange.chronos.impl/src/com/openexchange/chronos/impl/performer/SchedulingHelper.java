@@ -178,7 +178,7 @@ public class SchedulingHelper {
      */
     public void trackCreation(CalendarObjectResource createdResource, List<? extends CalendarUser> consideredRecipients) {
         try {
-            CalendarUser originator = getOriginator(getEffectiveCalendarUser(createdResource));
+            CalendarUser originator = getOriginator(lookupCalendarUser(createdResource));
             LOG.trace("Tracking 'create' scheduling messages and notifications [originator={}, createdResource={}]", originator, createdResource);
             if (false == shouldTrack(createdResource)) {
                 return;
@@ -298,7 +298,7 @@ public class SchedulingHelper {
      */
     private void trackUpdate(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, List<? extends CalendarUser> consideredRecipients) {
         try {
-            CalendarUser originator = getOriginator(getEffectiveCalendarUser(updatedResource));
+            CalendarUser originator = getOriginator(lookupCalendarUser(updatedResource));
             LOG.trace("Tracking 'update' scheduling messages and notifications [originator={}, updatedResource={}, seriesMaster={}, eventUpdates={}]",
                 originator, updatedResource, seriesMaster, eventUpdates);
             if (false == shouldTrack(updatedResource, eventUpdates)) {
@@ -428,7 +428,7 @@ public class SchedulingHelper {
      */
     public void trackDeletion(CalendarObjectResource deletedResource, Event seriesMaster, List<? extends CalendarUser> consideredRecipients) {
         try {
-            CalendarUser originator = getOriginator(getEffectiveCalendarUser(deletedResource));
+            CalendarUser originator = getOriginator(lookupCalendarUser(deletedResource));
             LOG.trace("Tracking 'delete' scheduling messages and notifications [originator={}, deletedResource={}, seriesMaster={}]",
                 originator, deletedResource, seriesMaster);
             if (false == shouldTrack(deletedResource)) {
@@ -964,7 +964,7 @@ public class SchedulingHelper {
      * @param resource The calendar object resource to determine the effective calendar user for
      * @return The effective calendar user
      */
-    private CalendarUser getEffectiveCalendarUser(CalendarObjectResource resource) {
+    private CalendarUser lookupCalendarUser(CalendarObjectResource resource) {
         if (isOrganizerSchedulingResource(resource, calendarUser.getEntity())) {
             return resource.getOrganizer();
         } else if (isAttendeeSchedulingResource(resource, calendarUser.getEntity())) {
