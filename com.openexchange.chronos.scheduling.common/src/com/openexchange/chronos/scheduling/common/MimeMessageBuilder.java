@@ -200,7 +200,10 @@ public class MimeMessageBuilder {
      * @throws MessagingException If setting fails
      */
     public MimeMessageBuilder setReadReceiptHeader(CalendarUser originator) throws MessagingException {
-        mime.setHeader(HEADER_DISPNOTTO, originator.getEMail());
+        String email = CalendarUtils.optEMailAddress(originator.getUri());
+        if (null != email) {
+            mime.setHeader(HEADER_DISPNOTTO, email);
+        }
         return this;
     }
 

@@ -146,7 +146,7 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
              */
             return transportMail(session, mime);
         } catch (OXException | MessagingException e) {
-            LOGGER.error("Unable to send message from {} to {}", originator.getEMail(), recipient.getEMail(), e);
+            LOGGER.error("Unable to send message from {} to {}", originator, recipient, e);
         }
         return ScheduleStatus.NOT_DELIVERED;
     }
