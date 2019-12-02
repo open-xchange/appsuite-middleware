@@ -51,6 +51,7 @@ package com.openexchange.ajax.drive.test;
 
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
@@ -141,6 +142,19 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     }
 
     @Test
+    public void testSyncFiles_quotaSent() throws ApiException {
+        DriveSyncFilesBody body = new DriveSyncFilesBody();
+        DriveSubfoldersResponse synchronizableFolders = driveApi.getSynchronizableFolders(apiClient.getSession(), infostoreFolder);
+        String path = synchronizableFolders.getData().get(0).getPath();
+        DriveExtendedActionsResponse syncFiles = driveApi.syncFiles(apiClient.getSession(), infostoreFolder, path, body, I(2), null, null, Boolean.TRUE, null, null, null);
+
+        assertNull(syncFiles.getError());
+        assertFalse(syncFiles.getData().getQuota().isEmpty());
+        assertTrue(syncFiles.getData().getActions().isEmpty());
+    }
+
+    @Ignore("Unfortunately the client isn't able to deserialize this response schema design.")
+    @Test
     public void testSyncFiles_quotaNotSent() throws ApiException {
         DriveSyncFilesBody body = new DriveSyncFilesBody();
         DriveSubfoldersResponse synchronizableFolders = driveApi.getSynchronizableFolders(apiClient.getSession(), infostoreFolder);
@@ -151,6 +165,7 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
         assertTrue(syncFiles.getData().getActions().isEmpty());
     }
 
+    @Ignore("Unfortunately the client isn't able to deserialize this response schema design.")
     @Test
     public void testSyncFiles_quotaFalse() throws ApiException {
         DriveSyncFilesBody body = new DriveSyncFilesBody();
