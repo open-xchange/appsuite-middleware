@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,39 +47,43 @@
  *
  */
 
-package com.openexchange.appsuite;
+package com.openexchange.appsuite.history.impl;
 
+import com.openexchange.apps.manifests.ManifestBuilder;
+import com.openexchange.apps.manifests.ManifestProvider;
+import com.openexchange.session.Session;
 
 /**
- * {@link FileContribution}
+ * {@link HistoryManifestProvider} - is a {@link ManifestProvider} which provides manifest for older appsuite versions
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class FileContribution {
-    private byte[] data;
-    private boolean disableCaching;
-    
-    public FileContribution(byte[] data, boolean cache) {
+public class HistoryManifestProvider implements ManifestProvider {
+
+    private final String version;
+    private final ManifestBuilder builder;
+
+    /**
+     * Initializes a new {@link HistoryManifestProvider}.
+     *
+     * @param version The version of this provider
+     * @param builder The {@link ManifestBuilder}
+     */
+    public HistoryManifestProvider(String version, ManifestBuilder builder) {
         super();
-        this.disableCaching = !cache;
-        this.data = data;
+        this.version = version;
+        this.builder = builder;
     }
 
-    public byte[] getData() {
-        return data;
+    @Override
+    public boolean isApplicable(Session session, String version) {
+        return this.version.equalsIgnoreCase(version);
     }
-    
-    public void setData(byte[] data) {
-        this.data = data;
+
+    @Override
+    public ManifestBuilder getManifestBuilder() {
+        return builder;
     }
-    
-    public boolean isCachingDisabled() {
-        return disableCaching;
-    }
-    
-    public void setDisableCaching(boolean disableCaching) {
-        this.disableCaching = disableCaching;
-    }
-    
-    
+
 }

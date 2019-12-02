@@ -54,8 +54,10 @@ import java.io.File;
 import java.io.FileReader;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.apps.manifests.DefaultManifestBuilder;
+import com.openexchange.apps.manifests.ManifestProvider;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
-import com.openexchange.apps.manifests.json.ManifestBuilder;
+import com.openexchange.apps.manifests.json.ProviderAwareManifestBuilder;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
@@ -64,6 +66,7 @@ import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -76,7 +79,7 @@ import com.openexchange.serverconfig.ServerConfigService;
  */
 public class ManifestJSONActivator extends AJAXModuleActivator implements ForcedReloadable {
 
-    private ManifestBuilder manifestBuilder;
+    private DefaultManifestBuilder manifestBuilder;
 
     /**
      * Initializes a new {@link ManifestJSONActivator}.
@@ -122,6 +125,9 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         // And track ManifestContributors
         ManifestContributorTracker manifestContributors = new ManifestContributorTracker(context);
         rememberTracker(manifestContributors);
+        // Add tracker for ManifestProviders
+        RankingAwareNearRegistryServiceTracker<ManifestProvider> manifestProviderTracker = new RankingAwareNearRegistryServiceTracker<>(context, ManifestProvider.class);
+        rememberTracker(manifestProviderTracker);
         trackService(HostnameService.class);
         openTrackers();
 
@@ -132,10 +138,10 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         // Register as Reloadable
         registerService(Reloadable.class, this);
 
-        ManifestBuilder manifestBuilder = new ManifestBuilder(initialManifests, manifestContributors);
+        DefaultManifestBuilder manifestBuilder = new DefaultManifestBuilder(initialManifests, manifestContributors);
         this.manifestBuilder = manifestBuilder;
         manifestContributors.setManifestBuilder(manifestBuilder);
-        registerModule(new ManifestActionFactory(this, manifestBuilder), "apps/manifests");
+        registerModule(new ManifestActionFactory(this, new ProviderAwareManifestBuilder(manifestProviderTracker, manifestBuilder)), "apps/manifests");
     }
 
     private JSONArray readManifests(ConfigurationService configService) {
@@ -160,7 +166,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         for (String path : paths) {
             File file = new File(path);
             if (file.exists() && file.isDirectory()) {
-                File[] filesInDir = file.listFiles();
+                File[] filesInDir = file.listFiles((f, name) -> name.contentEquals("version.txt") == false);
                 if (null != filesInDir) {
                     for (File f : filesInDir) {
                         read(f, manifests);
@@ -192,7 +198,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
 
     @Override
     public synchronized void reloadConfiguration(ConfigurationService configService) {
-        ManifestBuilder manifestBuilder = this.manifestBuilder;
+        DefaultManifestBuilder manifestBuilder = this.manifestBuilder;
         if (null != manifestBuilder) {
             // Read manifests from files
             JSONArray initialManifests = readManifests(configService);

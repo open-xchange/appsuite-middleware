@@ -53,6 +53,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.apps.manifests.ManifestBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -67,6 +68,12 @@ public class ManifestActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
+    /**
+     * Initializes a new {@link ManifestActionFactory}.
+     * 
+     * @param services The {@link ServiceLookup}
+     * @param manifestBuilder The {@link ManifestBuilder}
+     */
     public ManifestActionFactory(ServiceLookup services, ManifestBuilder manifestBuilder) {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();

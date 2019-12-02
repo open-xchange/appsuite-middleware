@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,44 @@
  *
  */
 
-package com.openexchange.apps.manifests.json;
+package com.openexchange.appsuite.history.impl;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.apps.manifests.ManifestBuilder;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.appsuite.DefaultFileCache;
+import com.openexchange.appsuite.FileCache;
+import com.openexchange.appsuite.FileCacheProvider;
+import com.openexchange.session.Session;
 
 /**
- * {@link AllAction} - Get all manifests from server. 
+ * {@link HistoryFileCacheProvider}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-@DispatcherNotes(noSession = true)
-public class AllAction implements AJAXActionService {
+public class HistoryFileCacheProvider implements FileCacheProvider {
 
-    private final ManifestBuilder manifestBuilder;
-
-    public AllAction(ManifestBuilder manifestBuilder) {
+    private final String version;
+    private final FileCache cache;
+    
+    /**
+     * Initializes a new {@link HistoryFileCacheProvider}.
+     * 
+     * @param version The version of this {@link DefaultFileCache}
+     * @param fileCache The {@link DefaultFileCache} containing the files
+     */
+    public HistoryFileCacheProvider(String version, FileCache fileCache) {
         super();
-        this.manifestBuilder = manifestBuilder;
+        this.version = version;
+        this.cache = fileCache;
     }
-
+    
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String version = requestData.getParameter("version");
-        return new AJAXRequestResult(manifestBuilder.buildManifests(session, version), "json");
+    public FileCache getData() {
+        return cache;
     }
 
+	@Override
+	public boolean isApplicable(Session session, String version, String path) {
+		return this.version.equalsIgnoreCase(version);
+	}
+	
 }

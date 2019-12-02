@@ -49,9 +49,13 @@
 
 package com.openexchange.security.manager.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.security.AccessControlException;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
@@ -61,10 +65,13 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageInfoService;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.security.manager.OXSecurityManager;
-import com.openexchange.security.manager.configurationReader.FileStorageReader;
+import com.openexchange.security.manager.SecurityManagerPropertyProvider;
 import com.openexchange.security.manager.configurationReader.ConfigurationReader;
+import com.openexchange.security.manager.configurationReader.FileStorageReader;
 import com.openexchange.security.manager.impl.FolderPermission;
 import com.openexchange.security.manager.impl.OXSecurityManagerImpl;
 
@@ -75,9 +82,9 @@ import com.openexchange.security.manager.impl.OXSecurityManagerImpl;
  * @since v7.10.3
  */
 public class SecurityManagerActivator extends HousekeepingActivator {
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SecurityManagerActivator.class);
     private static final String TEST_FILE = "openexchange.security.policy.deny.testfile";
+    final ConcurrentHashMap<Integer, SecurityManagerPropertyProvider> providers = new ConcurrentHashMap<>();;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -101,7 +108,6 @@ public class SecurityManagerActivator extends HousekeepingActivator {
         }
 
         LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
-
         OXSecurityManager securityManager = new OXSecurityManagerImpl(this);
         securityManager.loadFromPolicyFile();
 
@@ -128,7 +134,8 @@ public class SecurityManagerActivator extends HousekeepingActivator {
             @Override
             public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
                 ConfigurationService configService = context.getService(reference);
-                ConfigurationReader secConfig = new ConfigurationReader(securityManager, configService);
+
+                ConfigurationReader secConfig = new ConfigurationReader(new AtomicReference<ConcurrentHashMap<Integer, SecurityManagerPropertyProvider>>(providers), configService);
                 try {
                     List<FolderPermission> folderPermissions = secConfig.readConfigFolders();
                     if (folderPermissions != null) {
@@ -160,6 +167,34 @@ public class SecurityManagerActivator extends HousekeepingActivator {
             }
 
         };
+
+        track(SecurityManagerPropertyProvider.class, new SimpleRegistryListener<SecurityManagerPropertyProvider>() {
+
+            @Override
+            public void added(ServiceReference<SecurityManagerPropertyProvider> ref, SecurityManagerPropertyProvider service) {
+                providers.put(I(service.hashCode()), service);
+                ConfigurationReader opt = getOptionalService(ConfigurationReader.class);
+                if(opt != null) {
+                    Optional<Object> props = Optional.ofNullable(ref.getProperty(SecurityManagerPropertyProvider.PROPS_SERVICE_KEY));
+                    if(props.isPresent()) {
+                        Optional<List<FolderPermission>> newPerms = opt.checkProvider(Strings.splitByComma(props.get().toString()), service);
+                        if(newPerms.isPresent()) {
+                            try {
+                                securityManager.insertFolderPolicy(newPerms.get());
+                            } catch (OXException e) {
+                                LOG.error("!!!!!!!  Problem loading allowed file paths from registered provider.  Server will likely not function properly.", e);
+                            }
+                        }
+                    } else {
+                        LOG.warn("Missing properties in the SecurityManagerPropertyProvider service dictionary of bundle {}", ref.getBundle().getSymbolicName());
+                    }
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<SecurityManagerPropertyProvider> ref, SecurityManagerPropertyProvider service) {
+                providers.remove(I(service.hashCode()));
+            }});
 
         // Wait for database service to be loaded.  Once loaded, add filestores from configdb
         ServiceTrackerCustomizer<DatabaseService, DatabaseService> DatabaseServiceTracker = new ServiceTrackerCustomizer<DatabaseService, DatabaseService>() {
@@ -198,6 +233,7 @@ public class SecurityManagerActivator extends HousekeepingActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         LOG.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        this.providers.clear();
         super.stopBundle();
     }
 

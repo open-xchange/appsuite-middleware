@@ -60,5 +60,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ManifestContributor {
+    
+    /**
+     * Get additional manifest entries 
+     *
+     * @param session The users session
+     * @return The {@link JSONArray} containing additional entries
+     * @throws OXException in case of errors
+     */
     public JSONArray getAdditionalManifests(ServerSession session) throws OXException;
 }

@@ -49,95 +49,16 @@
 
 package com.openexchange.appsuite;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.java.Streams;
+import com.openexchange.appsuite.DefaultFileCache.Filter;
 
 /**
- * An in-memory file cache for small files (mostly UI files). Since all data is held in RAM, this class should only be used as a singleton.
- * This pretty much restricts it to only storing publicly accessible files (e.g. the UI).
+ * 
+ * {@link FileCache}
  *
- * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-public class FileCache {
-
-    /** The logger constant */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileCache.class);
-
-    public static interface Filter {
-
-        String resolve(String path);
-
-        byte[] filter(ByteArrayOutputStream baos);
-    }
-
-    private static class CacheEntry {
-
-        private final File path;
-
-        private long timestamp = Long.MIN_VALUE;
-
-        private byte[] data = null;
-
-        public CacheEntry(File path) {
-            this.path = path;
-        }
-
-        public byte[] getData(Filter filter) {
-            long current = path.lastModified();
-            if (current == timestamp) {
-                return data;
-            }
-            timestamp = current;
-
-            // Read the entire file into a byte array
-            LOG.debug("Reading '{}'", path);
-            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
-            InputStream in = null;
-            try {
-                in = new FileInputStream(path);
-                final int buflen = 2048;
-                final byte[] buf = new byte[buflen];
-                for (int read = in.read(buf, 0, buflen); read > 0; read = in.read(buf, 0, buflen)) {
-                    baos.write(buf, 0, read);
-                }
-                baos.flush(); // no-op
-                data = filter == null ? baos.toByteArray() : filter.filter(baos);
-            } catch (IOException e) {
-                LOG.debug("Could not read from '{}'", path, e);
-                data = null;
-            } finally {
-                Streams.close(in);
-            }
-
-            return data;
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------------------------------
-
-    private final Map<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
-    private final File[] roots;
-    private final String[] prefixes;
-
-    public FileCache(File root) throws IOException {
-        this(new File[] { root });
-    }
-
-    public FileCache(File[] roots) throws IOException {
-        super();
-        this.roots = roots;
-        this.prefixes = new String[roots.length];
-        int i = 0;
-        for (File root : roots) {
-            prefixes[i++] = root.getCanonicalPath() + File.separatorChar;
-        }
-    }
+public interface FileCache {
 
     /**
      * Returns the file contents as a byte array.
@@ -146,41 +67,11 @@ public class FileCache {
      * @param filter An optional Filter which processes loaded file data.
      * @return The file contents as a byte array, or null if the file does not exist or is not a normal file.
      */
-    public byte[] get(String path, Filter filter) {
-        String pathToUse = filter == null ? path : filter.resolve(path);
-        for (int i = 0; i < roots.length; i++) {
-            File f = new File(roots[i], pathToUse);
-            try {
-                if (!f.getCanonicalPath().startsWith(prefixes[i])) {
-                    continue;
-                }
-            } catch (@SuppressWarnings("unused") IOException e) {
-                continue;
-            }
-            if (f.isFile()) {
-                CacheEntry entry = cache.get(pathToUse);
-                if (entry == null) {
-                    entry = new CacheEntry(f);
-                    cache.put(pathToUse, entry);
-                }
-                return entry.getData(filter);
-            }
-        }
-        StringBuilder sb = new StringBuilder("Could not find '");
-        sb.append(new File(roots[0], pathToUse));
-        for (int i = 1; i < roots.length; i++) {
-            sb.append("'\n            or '");
-            sb.append(new File(roots[i], pathToUse));
-        }
-        sb.append('\'');
-        LOG.debug(sb.toString());
-        return null;
-    }
+	byte[] get(String path, Filter filter);
 
     /**
      * Clears the cache.
      */
-    public void clear() {
-        cache.clear();
-    }
+	void clear();
+
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,32 @@
  *
  */
 
-package com.openexchange.apps.manifests.json;
+package com.openexchange.apps.manifests;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.apps.manifests.ManifestBuilder;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
- * {@link AllAction} - Get all manifests from server. 
+ * {@link ManifestProvider} provides alternative manifest files in form of a {@link ManifestBuilder}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.4
  */
-@DispatcherNotes(noSession = true)
-public class AllAction implements AJAXActionService {
+public interface ManifestProvider {
 
-    private final ManifestBuilder manifestBuilder;
-
-    public AllAction(ManifestBuilder manifestBuilder) {
-        super();
-        this.manifestBuilder = manifestBuilder;
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String version = requestData.getParameter("version");
-        return new AJAXRequestResult(manifestBuilder.buildManifests(session, version), "json");
-    }
-
+    /**
+     * Checks if this {@link ManifestProvider} is applicable.
+     *
+     * @param session The user session
+     * @param version The requested version
+     * @return <code>true</code> if it is applicable, <code>false</code> otherwise
+     */
+    public boolean isApplicable(Session session, String version);
+    
+    /**
+     * Gets the {@link ManifestBuilder}
+     *
+     * @return The {@link DefaultManifestBuilder}
+     */
+    public ManifestBuilder getManifestBuilder();
+    
 }

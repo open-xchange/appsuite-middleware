@@ -55,11 +55,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.exception.OXException;
-import com.openexchange.security.manager.OXSecurityManager;
+import com.openexchange.security.manager.SecurityManagerPropertyProvider;
 import com.openexchange.security.manager.impl.FolderPermission;
 import com.openexchange.security.manager.impl.FolderPermission.Allow;
 
@@ -73,10 +76,12 @@ public class ConfigurationReader {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationReader.class);
 
-    private final OXSecurityManager securityManager;
     private final ConfigurationService configService;
     private ArrayList<String> reloadableConfigurationPaths;
+
+    private final AtomicReference<ConcurrentHashMap<Integer, SecurityManagerPropertyProvider>> providerRef;
     private static String FILE_PREFIX = "file:";
+    private final HashMap<String, SecurityAddition> missing = new HashMap<>(); // contains missing configurations
 
     /**
      * Private class that specifies which configuration should be loaded, and what permission applies
@@ -111,10 +116,16 @@ public class ConfigurationReader {
         }
     }
 
-    public ConfigurationReader(OXSecurityManager securityManager, ConfigurationService configService) {
-        this.securityManager = securityManager;
+    /**
+     * Initializes a new {@link ConfigurationReader}.
+     *
+     * @param propProviders A list of {@link SecurityManagerPropertyProvider}s
+     * @param configService The {@link ConfigurationService}
+     */
+    public ConfigurationReader(AtomicReference<ConcurrentHashMap<Integer, SecurityManagerPropertyProvider>> ref, ConfigurationService configService) {
         this.configService = configService;
         this.reloadableConfigurationPaths = new ArrayList<String>(1);
+        this.providerRef = ref;
     }
 
     /**
@@ -150,7 +161,7 @@ public class ConfigurationReader {
 
     /**
      * Gets Allow type from the end of a configuration
-     * 
+     *
      * @param config
      * @return
      */
@@ -173,7 +184,7 @@ public class ConfigurationReader {
 
     /**
      * Removes file prefix and write permission suffixes
-     * 
+     *
      * @param config
      * @return
      */
@@ -187,7 +198,7 @@ public class ConfigurationReader {
     /**
      * Adds a system variable containg directories, separated with ":"
      * Example is sun.boot.class.path
-     * 
+     *
      * @param folderPermissions
      * @param config
      */
@@ -227,7 +238,13 @@ public class ConfigurationReader {
             properties = configService.getProperties(new WildcardNamePropertyFilter(toAdd.getPath()));
         } else {
             properties = new HashMap<String, String>();
-            properties.put(toAdd.getPath(), configService.getProperty(toAdd.getPath()));
+            Optional<String> f = providerRef.get().values().stream().map((p) -> p.getFolder(toAdd.getPath())).filter((folder) -> folder.isPresent()).map((folder) -> folder.get()).findFirst();
+            Optional<String> opt = Optional.ofNullable(f.orElseGet(() -> configService.getProperty(toAdd.getPath())));
+            if(opt.isPresent()) {
+                properties.put(toAdd.getPath(), opt.get());
+            } else {
+                missing.put(toAdd.getPath(), toAdd);
+            }
 
         }
         for (Map.Entry<String, String> property : properties.entrySet()) {
@@ -260,6 +277,40 @@ public class ConfigurationReader {
     }
 
     /**
+     * Checks if any of the missing providers can be provided by the given provider
+     *
+     * @param provider The provider to check
+     * @return An optional list of new {@link FolderPermission}s
+     */
+    public Optional<List<FolderPermission>> checkProvider(String[] props, SecurityManagerPropertyProvider provider) {
+        if(missing.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<FolderPermission> permissions = new ArrayList<>();
+        for(String prop : props) {
+            if(missing.containsKey(prop) == false) {
+                continue;
+            }
+            SecurityAddition add = missing.get(prop);
+            Optional<String> opt = provider.getFolder(add.getPath());
+            if(opt.isPresent() == false) {
+                continue;
+            }
+            String directory = opt.get();
+            String configuration = add.getPath();
+            addReloadConfigurationPath(configuration);  // Keep track of configuration paths
+            if (directory != null && !directory.isEmpty()) {
+                // Create the folder permission
+                missing.remove(prop);
+                FolderPermission folder = new FolderPermission(configuration, directory, FolderPermission.Decision.ALLOW, add.getAllow(), add.isFile() ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE);
+                permissions.add(folder);
+            }
+        }
+        return permissions.isEmpty() ? Optional.empty() : Optional.of(permissions);
+    }
+
+    /**
      * Reads the list of configuration values we need from the security files.
      * Pulls the values from config service, and if directory or file
      *
@@ -273,6 +324,7 @@ public class ConfigurationReader {
             LOG.error("Problem loading list of configuration settings from config file for security settings", e);
         }
         if (configurations != null) {
+            missing.clear();
             reloadableConfigurationPaths = new ArrayList<String>(configurations.size());
             ArrayList<FolderPermission> folderPermissions = new ArrayList<FolderPermission>(configurations.size());
             for (String config : configurations) {

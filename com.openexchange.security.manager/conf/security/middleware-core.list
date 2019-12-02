@@ -20,10 +20,14 @@ com.openexchange.import.mapper.path
 # File Items
 com.openexchange.fileItem.spoolPath
 
-#Frontend
-com.openexchange.apps.path
+# Frontend
+com.openexchange.apps.path:RW
 com.openexchange.apps.tzdata
-com.openexchange.apps.manifestPath
+com.openexchange.apps.manifestPath:RW
+
+# Frontend history
+com.openexchange.apps.backupPath:RW
+com.openexchange.apps.manifestBackupPath:RW
 
 # Server
 UPLOAD_DIRECTORY:RW

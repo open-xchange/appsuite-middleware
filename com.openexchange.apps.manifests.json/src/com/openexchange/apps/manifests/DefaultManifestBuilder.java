@@ -47,40 +47,40 @@
  *
  */
 
-package com.openexchange.apps.manifests.json;
+package com.openexchange.apps.manifests;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ManifestBuilder} - Build manifests based on manifest files and registered {@link ManifestContributor}s.
+ * {@link DefaultManifestBuilder} - Build manifests based on manifest files and registered {@link ManifestContributor}s.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class ManifestBuilder {
+public class DefaultManifestBuilder implements ManifestBuilder {
 
-    final private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestBuilder.class);
+    final private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultManifestBuilder.class);
 
     private final AtomicReference<JSONArray> initialManifestsReference;
     private final ServiceListing<ManifestContributor> manifestContributors;
     private volatile JSONArray cachedResult;
 
     /**
-     * Initializes a new {@link ManifestBuilder}.
+     * Initializes a new {@link DefaultManifestBuilder}.
      *
      * @param manifests The JSON array providing the manifests
      * @param manifestContributorTracker The contributor tracker
      */
-    public ManifestBuilder(JSONArray manifests, ServiceListing<ManifestContributor> manifestContributors) {
+    public DefaultManifestBuilder(JSONArray manifests, ServiceListing<ManifestContributor> manifestContributors) {
         super();
         this.initialManifestsReference = new AtomicReference<JSONArray>(manifests);
         this.manifestContributors = manifestContributors;
@@ -103,16 +103,15 @@ public class ManifestBuilder {
         cachedResult = null;
     }
 
-    /**
-     * Compute the manifests from files and {@link ManifestContributor}s.
-     *
-     * @param session The {@link ServerSession}
-     * @throws OXException
-     */
-    public JSONArray buildManifests(ServerSession session) throws OXException {
+    @Override
+    public JSONArray buildManifests(ServerSession session, String version) throws OXException {
         // Any contributors?
-        List<ManifestContributor> contributors = manifestContributors.getServiceList();
-        boolean noContributors = contributors.isEmpty();
+        boolean noContributors = false;
+        List<ManifestContributor> contributors = Collections.emptyList();
+        if(manifestContributors != null) {
+            contributors = manifestContributors.getServiceList();
+            noContributors = contributors.isEmpty();
+        }
         if (noContributors) {
             // Check cached result
             JSONArray cached = cachedResult;

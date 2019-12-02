@@ -69,6 +69,10 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 /opt/open-xchange/etc/as-config-defaults.yml
+%dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/*
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 %config(noreplace) /opt/open-xchange/etc/as-config.yml
 %config(noreplace) /opt/open-xchange/etc/manifests.properties
 %config(noreplace) /opt/open-xchange/etc/meta/appsuite.yaml
