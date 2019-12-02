@@ -82,6 +82,7 @@ import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.ConfiguredServer;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.Attribute;
@@ -451,6 +452,9 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             isDefault = accountDescription.getId() == MailAccount.DEFAULT_ID;
             if (isDefault && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(session.getUserId(), session.getContextId(), MailAccounts.isGuest(session)))) {
                 ConfiguredServer mailServer = MailProperties.getInstance().getMailServer(session.getUserId(), session.getContextId());
+                if (mailServer == null) {
+                    throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + session.getUserId() + " in context " + session.getContextId());
+                }
                 mailProvider = getMailProviderByURL(mailServer.getUrlString(false));
             } else {
                 mailProvider = getMailProviderByURL(mailServerURL);

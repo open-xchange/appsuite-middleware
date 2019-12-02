@@ -467,13 +467,18 @@ public abstract class MailConfig {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The appropriate mail server URL or <code>null</code>
+     * @throws OXException If URL information cannot be returned
      */
-    public static final UrlInfo getMailServerURL(MailAccount mailAccount, int userId, int contextId) {
+    public static final UrlInfo getMailServerURL(MailAccount mailAccount, int userId, int contextId) throws OXException {
         if (!mailAccount.isDefaultAccount()) {
             return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuestAccount(mailAccount)))) {
-            return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+            ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
+            if (server == null) {
+                throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
+            }
+            return new UrlInfo(server.getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
         }
         return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
     }
@@ -491,7 +496,11 @@ public abstract class MailConfig {
         int contextId = session.getContextId();
         if (MailAccount.DEFAULT_ID == accountId && ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource(userId, contextId, MailAccounts.isGuest(session)))) {
             if (!Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-                return new UrlInfo(MailProperties.getInstance().getMailServer(userId, contextId).getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
+                ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
+                if (server == null) {
+                    throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
+                }
+                return new UrlInfo(server.getUrlString(true), MailProperties.getInstance().isMailStartTls(userId, contextId));
             }
         }
 
@@ -647,6 +656,9 @@ public abstract class MailConfig {
                     case GLOBAL:
                         {
                             ConfiguredServer server = MailProperties.getInstance().getMailServer(iUserId, ctx.getContextId());
+                            if (server == null) {
+                                throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + iUserId + " in context " + ctx.getContextId());
+                            }
                             shouldMatch = toSocketAddrString(server.getHostName(), server.getPort());
                         }
                         break;

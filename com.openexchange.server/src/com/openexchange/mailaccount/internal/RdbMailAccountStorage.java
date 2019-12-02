@@ -110,6 +110,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.config.ConfiguredServer;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -1356,6 +1357,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getMailServer(userId, contextId);
+                    if (server == null) {
+                        throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
+                    }
                     retval.setMailServer(server.getHostName());
                     String protocol = server.getProtocol();
                     if (null != protocol) {
@@ -1380,6 +1384,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             case GLOBAL:
                 {
                     ConfiguredServer server = MailProperties.getInstance().getTransportServer(userId, contextId);
+                    if (server == null) {
+                        throw MailConfigException.create("Property \"com.openexchange.mail.mailServer\" not set in mail properties for user " + userId + " in context " + contextId);
+                    }
                     retval.setTransportServer(server.getHostName());
                     String protocol = server.getProtocol();
                     if (null != protocol) {
