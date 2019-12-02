@@ -519,7 +519,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
                 String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
                 int spamAction;
-                if (usm.isSpamEnabled()) {
+                if (usm.isSpamEnabled() && spamFullname != null && trashFullname != null) {
                     if (spamFullname.equals(sourceFullname)) {
                         spamAction = trashFullname.equals(destFullname) ? SPAM_NOOP : SPAM_HAM;
                     } else {
