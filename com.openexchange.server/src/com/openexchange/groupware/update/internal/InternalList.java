@@ -735,7 +735,9 @@ public final class InternalList {
 
         // Add 'checksum' column to attachment tablesm see MW-1235
         list.add(new com.openexchange.groupware.update.tasks.AddChecksumColumnToAttachmentsTablesUpdateTask());
-
+        
+        // +++++++++++++++++++++++++++++++++ Version 7.12.0 starts here. +++++++++++++++++++++++++++++++++
+        // list.add(new com.openexchange.groupware.update.tasks.DropUWAWidgetsTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

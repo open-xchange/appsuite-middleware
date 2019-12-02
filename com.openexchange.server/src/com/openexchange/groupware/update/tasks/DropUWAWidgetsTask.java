@@ -47,20 +47,21 @@
  *
  */
 
-package com.openexchange.frontend.uwa.internal.groupware;
-
-import com.openexchange.groupware.update.CreateTableUpdateTask;
-
+package com.openexchange.groupware.update.tasks;
 
 /**
- * {@link CreatePositionsTableTask}
+ * {@link DropUWAWidgetsTask} - Delete the UWAWidget related tables 
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.4
  */
-public class CreatePositionsTableTask extends CreateTableUpdateTask {
+public class DropUWAWidgetsTask extends AbstractDropTableTask {
 
-    public CreatePositionsTableTask() {
-        super(new CreatePositionsTable(), new String[0]);
+    /**
+     * Initializes a new {@link DropICalIDsTableTask}.
+     */
+    public DropUWAWidgetsTask() {
+        super("uwaWidget", "uwaWidgetPosition");
     }
 
 }
