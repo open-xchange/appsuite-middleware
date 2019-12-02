@@ -309,6 +309,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             if (cause instanceof Error) {
                 throw (Error) cause;
             }
+            LOGGER.error("lookUpRemoteSessionFor failed with an ExecutionException", cause);
             throw new IllegalStateException("Not unchecked", cause);
         }
     }
