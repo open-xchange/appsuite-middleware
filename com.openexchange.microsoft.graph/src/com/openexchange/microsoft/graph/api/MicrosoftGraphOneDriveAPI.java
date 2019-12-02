@@ -281,7 +281,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_copy">Copy a file or folder</a>
      */
     public String copyItemAsync(String accessToken, String itemId, JSONObject body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itmes/" + itemId + "/copy");
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/items/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         request.sethBodyEntity(new JSONObjectEntity(body));
