@@ -129,13 +129,13 @@ public final class URLMailAttachmentDataSource implements DataSource {
         }
         URLConnection urlCon = null;
         try {
-            final URL url;
             try {
                 final String sUrl = dataArguments.get("url");
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                url = new URL(URITools.getFinalURL(sUrl.trim(), Optional.of(validator)));
+                //url = new URL(URITools.getFinalURL(sUrl.trim(), Optional.of(validator)));
+                urlCon = URITools.getTerminalConnection(sUrl.trim(), Optional.of(validator));
             } catch (MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -155,8 +155,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
             /*
              * Open URL connection from parsed URL
              */
-            urlCon = url.openConnection();
-            if ("https".equalsIgnoreCase(url.getProtocol())) {
+            if ("https".equalsIgnoreCase(urlCon.getURL().getProtocol())) {
                 SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
                 ((HttpsURLConnection) urlCon).setSSLSocketFactory(factoryProvider.getDefault());
             }

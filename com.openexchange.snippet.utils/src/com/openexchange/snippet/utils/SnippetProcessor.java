@@ -242,17 +242,10 @@ public class SnippetProcessor {
                     src = srcMatcher.group(2);
                 }
 
-                // Check URL validity
-                try {
-                    src = URITools.getFinalURL(src, Optional.of(validator));
-                } catch (IOException e) {
-                    throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                }
-
                 // Check for valid URL
-                URL url;
+                URLConnection con;
                 try {
-                    url = new URL(src);
+                    con = URITools.getTerminalConnection(src, Optional.of(validator));
                 } catch (Exception e) {
                     // No... it's not
                     throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid image URL: " + src);
@@ -265,7 +258,7 @@ public class SnippetProcessor {
                 }
 
                 // Get content identifier for URL resource
-                String contentId = loadImage(url, count, maxImageSize, attachments, isSignature);
+                String contentId = loadImage(con, count, maxImageSize, attachments, isSignature);
 
                 if (null == contentId) {
                     // No valid image data accessible through URL. Drop <img> tag
@@ -324,11 +317,10 @@ public class SnippetProcessor {
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 3000;
 
-    private String loadImage(URL url, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
+    private String loadImage(URLConnection con, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
         ThresholdFileHolder fileHolder = null;
         InputStream in = null;
         try {
-            URLConnection con = url.openConnection();
             if (con instanceof HttpURLConnection) {
                 return loadHttpImage((HttpURLConnection) con, count, maxImageSize, attachments, isSignature);
             }
