@@ -148,16 +148,24 @@ public class DovecotPushListener implements PushListener, Runnable {
         this.services = services;
     }
 
-    private boolean isUserValid() {
+    private boolean isUserValid(boolean ccheckContext) {
         try {
-            ContextService contextService = services.getService(ContextService.class);
-            Context context = contextService.loadContext(registrationContext.getContextId());
-            if (!context.isEnabled()) {
-                return false;
+            Context context = null;
+            if (ccheckContext) {
+                ContextService contextService = services.getService(ContextService.class);
+                context = contextService.loadContext(registrationContext.getContextId());
+                if (!context.isEnabled()) {
+                    return false;
+                }
             }
 
             UserService userService = services.getService(UserService.class);
-            User user = userService.getUser(registrationContext.getUserId(), context);
+            User user;
+            if (context == null) {
+                user = userService.getUser(registrationContext.getUserId(), registrationContext.getContextId());
+            } else {
+                user = userService.getUser(registrationContext.getUserId(), context);
+            }
             return user.isMailEnabled();
         } catch (OXException e) {
             return false;
@@ -167,7 +175,7 @@ public class DovecotPushListener implements PushListener, Runnable {
     @Override
     public void run() {
         try {
-            if (!isUserValid()) {
+            if (!isUserValid(false)) {
                 unregister(false);
                 return;
             }
