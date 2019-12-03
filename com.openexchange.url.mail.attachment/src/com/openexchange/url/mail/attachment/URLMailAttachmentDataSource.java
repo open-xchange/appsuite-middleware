@@ -49,8 +49,11 @@
 
 package com.openexchange.url.mail.attachment;
 
+import static com.openexchange.java.Autoboxing.I;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -96,6 +99,9 @@ public final class URLMailAttachmentDataSource implements DataSource {
     private static final String LOCAL_HOST_NAME;
     private static final String LOCAL_HOST_ADDRESS;
 
+    private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
+    private static final String LOCATION_HEADER = "Location";
+
     static {
         // Host name initialization
         String localHostName;
@@ -127,13 +133,12 @@ public final class URLMailAttachmentDataSource implements DataSource {
         }
         URLConnection urlCon = null;
         try {
-            final URL url;
             try {
                 final String sUrl = dataArguments.get("url");
                 if (null == sUrl) {
                     throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
                 }
-                url = validate(sUrl.trim());
+                urlCon = validate(sUrl.trim());
             } catch (final MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
@@ -153,8 +158,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
             /*
              * Open URL connection from parsed URL
              */
-            urlCon = url.openConnection();
-            if ("https".equalsIgnoreCase(url.getProtocol())) {
+            if ("https".equalsIgnoreCase(urlCon.getURL().getProtocol())) {
                 SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
                 ((HttpsURLConnection) urlCon).setSSLSocketFactory(factoryProvider.getDefault());
             }
@@ -264,42 +268,53 @@ public final class URLMailAttachmentDataSource implements DataSource {
     private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
     private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
 
-    /**
-     * Validates the given URL according to whitelisted protocols and blacklisted hosts.
-     *
-     * @param surl The URL to validate
-     * @return An optional OXException
-     * @throws OXException 
-     */
-    private URL validate(String sUrl) throws OXException, MalformedURLException {
-        String finalURL = null;
-        try {
-            finalURL = URITools.getFinalURL(sUrl.trim());
-        } catch (Exception e) {
-            // Don't disclose any information to caller
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
-        }
-        URL url = new URL(finalURL);
-        String protocol = url.getProtocol();
-        if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
-        }
+	/**
+	 * Validates the given URL according to whitelisted protocols and blacklisted
+	 * hosts.
+	 *
+	 * @param surl The URL to validate
+	 * @return
+	 * @throws OXException
+	 * @throws IOException
+	 */
+	private URLConnection validate(String sUrl) throws OXException, IOException {
+		URL url = new URL(sUrl);
+		String protocol = url.getProtocol();
+		if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
+			throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
+		}
 
-        String host = Strings.asciiLowerCase(url.getHost());
-        if (host == null || DENIED_HOSTS.contains(host)) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
-        }
+		String host = Strings.asciiLowerCase(url.getHost());
+		if (host == null || DENIED_HOSTS.contains(host)) {
+			throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
+		}
 
-        try {
-            InetAddress inetAddress = InetAddress.getByName(url.getHost());
-            if (InetAddresses.isInternalAddress(inetAddress)) {
-                throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
-            }
-        } catch (UnknownHostException e) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
-        }
-        return url;
-    }
+		try {
+			InetAddress inetAddress = InetAddress.getByName(url.getHost());
+			if (InetAddresses.isInternalAddress(inetAddress)) {
+				throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
+			}
+		} catch (UnknownHostException e) {
+			throw DataExceptionCodes.INVALID_ARGUMENT.create("url", sUrl.toString());
+		}
+
+		URLConnection urlConnection = url.openConnection();
+		if (urlConnection instanceof HttpURLConnection) {
+			HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
+			httpURLConnection.setConnectTimeout(2500);
+			httpURLConnection.setReadTimeout(2500);
+			httpURLConnection.setInstanceFollowRedirects(false);
+			httpURLConnection.connect();
+			httpURLConnection.getInputStream();
+			if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
+				String redirectUrl = httpURLConnection.getHeaderField(LOCATION_HEADER);
+				httpURLConnection.disconnect();
+				return validate(redirectUrl);
+			}
+		}
+
+		return urlConnection;
+	}
 
     @Override
     public String[] getRequiredArguments() {

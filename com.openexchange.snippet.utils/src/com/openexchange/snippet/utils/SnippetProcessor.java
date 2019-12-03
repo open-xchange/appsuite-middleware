@@ -49,12 +49,14 @@
 
 package com.openexchange.snippet.utils;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -203,6 +205,9 @@ public class SnippetProcessor {
     private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
     private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
 
+    private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
+    private static final String LOCATION_HEADER = "Location";
+
     /**
      * Process the images in the snippet, extracts them and convert them to attachments.
      *
@@ -240,13 +245,6 @@ public class SnippetProcessor {
                     src = srcMatcher.group(2);
                 }
 
-                // Check URL validity
-                try {
-                    src = URITools.getFinalURL(src);
-                } catch (IOException e) {
-                    throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + src); // Don't disclose information to caller.
-                }
-
                 // Check for valid URL
                 URL url;
                 try {
@@ -255,7 +253,12 @@ public class SnippetProcessor {
                     // No... it's not
                     throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid image URL: " + src);
                 }
-                validate(url);
+                URLConnection urlConnection = null;
+                try {
+					urlConnection = validate(src);
+				} catch (OXException | IOException e) {
+                    throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid image URL: " + src);
+				}
 
                 // Check max. number of images
                 count++;
@@ -264,7 +267,7 @@ public class SnippetProcessor {
                 }
 
                 // Get content identifier for URL resource
-                String contentId = loadImage(url, count, maxImageSize, attachments, isSignature);
+                String contentId = loadImage(urlConnection, count, maxImageSize, attachments, isSignature);
 
                 if (null == contentId) {
                     // No valid image data accessible through URL. Drop <img> tag
@@ -296,10 +299,13 @@ public class SnippetProcessor {
      * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
      *
      * @param url The URL to validate
+     * @return 
      * @return An optional OXException
      * @throws OXException 
+     * @throws IOException 
      */
-    private void validate(URL url) throws OXException {
+    private URLConnection validate(String sUrl) throws OXException, IOException {
+    	URL url = new URL(sUrl);
         String protocol = url.getProtocol();
         if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString());
@@ -318,16 +324,30 @@ public class SnippetProcessor {
         } catch (UnknownHostException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString());
         }
-    };
+		URLConnection urlConnection = url.openConnection();
+		if (urlConnection instanceof HttpURLConnection) {
+			HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
+			httpURLConnection.setConnectTimeout(2500);
+			httpURLConnection.setReadTimeout(2500);
+			httpURLConnection.setInstanceFollowRedirects(false);
+			httpURLConnection.connect();
+			httpURLConnection.getInputStream();
+			if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
+				String redirectUrl = httpURLConnection.getHeaderField(LOCATION_HEADER);
+				httpURLConnection.disconnect();
+				return validate(redirectUrl);
+			}
+		}
+		return urlConnection;
+    }
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 3000;
 
-    private String loadImage(URL url, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
+    private String loadImage(URLConnection con, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
         ThresholdFileHolder fileHolder = null;
         InputStream in = null;
         try {
-            URLConnection con = url.openConnection();
             if (con instanceof HttpURLConnection) {
                 return loadHttpImage((HttpURLConnection) con, count, maxImageSize, attachments, isSignature);
             }

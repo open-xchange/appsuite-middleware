@@ -92,6 +92,8 @@ public final class URITools {
 
     private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
 
+    private static final String LOCATION_HEADER = "Location";
+
     /**
      * Returns the final url which might be different due to HTTP(S) redirects.
      *
@@ -112,11 +114,13 @@ public final class URITools {
             httpURLConnection.connect();
             httpURLConnection.getInputStream();
             if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
-                String redirectUrl = httpURLConnection.getHeaderField("Location");
+                String redirectUrl = httpURLConnection.getHeaderField(LOCATION_HEADER);
                 httpURLConnection.disconnect();
                 return getFinalURL(redirectUrl);
             }
+            httpURLConnection.disconnect();
         }
+        
         return url;
     }
 }
