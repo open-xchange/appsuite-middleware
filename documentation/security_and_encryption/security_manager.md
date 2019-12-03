@@ -4,15 +4,23 @@ icon: fa-link
 tags: Security, Configuration
 ---
 
-The Appsuite middleware server utilizes the java security manager, along with the OSGI security manager, to help prevent abnormal or unauthorized access to system resources.  The primary focus currently is preventing any file system access that isn't required for normal appsuite functionality
+The OX Security Manager utilizes the java security manager, along with the OSGI security manager, to help prevent abnormal or unauthorized access to system resources.  The primary focus currently is preventing any file system access that isn't required for normal appsuite functionality
 
 # Enabling Security Manager
 
 The security manager must be started using JAVA parameters specified in ox-scriptconf.sh
 
 ```
--Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy
+-Dorg.osgi.framework.security=osgi -Djava.security.policy=/opt/open-xchange/etc/all.policy -Dopenexchange.security.policy=/opt/open-xchange/etc/security/policies.policy -Duser.dir=/opt/open-xchange/bundles -Djna.platform.library.path=/usr/lib/x86_64-linux-gnu:/usr/lib64
 ```
+
+To enable the OX Security Manager, you must edit the ox-scriptconf.sh file located in /opt/open-xchange/etc directory. The following line starting with JAVA\_OPTS\_SECURITY should be commented out in the default installation.  Remove the # at the beginning of the line to activate the security manager, then restart the middleware.
+
+In many installations, this is the only step that will be required.
+
+When fully loaded, the Security Manager will test to see if it can read from the root directory. This should be blocked if everything is installed properly. When operating correctly, there will be one line in the logs during startup (INFO level), that reads: “Security manager started successfully and functioning"
+
+## Startup Configuration Details
 
 The parameters are as follows
 
@@ -31,12 +39,23 @@ This all.policy file is loaded for the java security manager.  This policy file 
 ```
 This the security policy file loaded for the OSGI security manager.  The format of this file will be specified below.  This file is loaded very early during startup, and should permit access to the OX configuration files and well as the java temporary storage.  Additional restrictions can be added to this file.  The order of rules is important, and one of the final rules should be a general denial of the file system.
 
+```
+-Duser.dir=/opt/open-xchange/bundles
+```
+The user.dir specifies the java working directory to be whitelisted
+
+```
+-Djna.platform.library.path=/usr/lib/x86_64-linux-gnu:/usr/lib64
+```
+Specifies the lookup path for jna.platform library.  Required for hunspell.
+
 # Configuring Security Manager
 
 ## Configuration file loading
 
-The majority of file system whitelisting will be done by checking existing configuraiton files.  This minimizes the amount of configuration required.
-During startup, the `security-manager.list` file is parsed from the configuration directory.  This file contains a list of configuration settings to use to create a whitelist of files and directories the middleware should be allowed to access.  This file will come preloaded with the basic settings required for appsuite function.  This file may be adjusted for any other configurations required
+The majority of file system whitelisting will be done by checking existing configuration files.  This minimizes the amount of configuration required.
+
+During startup, the .list files are parsed from the security configuration directory (for example /opt/open-xchange/etc/security).  These files contains a list of configuration settings to use to create a whitelist of files and directories the middleware should be allowed to access.  These files will come with the basic settings required for appsuite function as well as individual installed components (Guard, Documents, etc).  Additional .list files may be created to whitelist additional directories and files.
 
 Sample configuration
 
@@ -48,6 +67,19 @@ file:com.openexchange.documentconverter.blacklistFile
 ```
 The format is [file:]configuration[permissions] with the items in brackets optional.  If the line entry begins with "file:", then the configuration is going to specify a file only, and not authorize the entire directory.
 Default permission is read-only.  If write is required, ":RW" or ":W" should be appended to the configuration
+
+Java and environment variables may be used. To specify a java variable, use ${var}. To specify a environment variable, use $var.
+
+Examples: 
+
+```
+${jna.platform.library.path} 
+$PATH
+```
+Additional .list files may be added to the security directory.
+
+**Do not edit the shipped .list files, as they will be over-written during updates. If you need to add additional configuration parameters, please create new .list files**
+
 
 ## Policy File Configuration
 
