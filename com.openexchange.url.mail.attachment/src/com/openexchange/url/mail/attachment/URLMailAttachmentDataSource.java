@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -129,17 +128,10 @@ public final class URLMailAttachmentDataSource implements DataSource {
         }
         URLConnection urlCon = null;
         try {
-            try {
-                final String sUrl = dataArguments.get("url");
-                if (null == sUrl) {
-                    throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
-                }
-                //url = new URL(URITools.getFinalURL(sUrl.trim(), Optional.of(validator)));
-                urlCon = URITools.getTerminalConnection(sUrl.trim(), Optional.of(validator));
-            } catch (MalformedURLException e) {
-                throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-            }
-            final int timeoutMillis;
+            /*
+             * Determine read/connect timeout
+             */
+            int timeoutMillis;
             {
                 final String sTimeoutMillis = dataArguments.get("timeout");
                 if (null == sTimeoutMillis) {
@@ -153,20 +145,28 @@ public final class URLMailAttachmentDataSource implements DataSource {
                 }
             }
             /*
-             * Open URL connection from parsed URL
+             * Get URL
              */
-            if ("https".equalsIgnoreCase(urlCon.getURL().getProtocol())) {
-                SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
-                ((HttpsURLConnection) urlCon).setSSLSocketFactory(factoryProvider.getDefault());
-            }
-            urlCon.setConnectTimeout(timeoutMillis);
-            urlCon.setReadTimeout(timeoutMillis);
             try {
-                urlCon.connect();
-            } catch (final SocketTimeoutException e) {
-                /*
-                 * Time-out elapsed
-                 */
+                String sUrl = dataArguments.get("url");
+                if (null == sUrl) {
+                    throw DataExceptionCodes.MISSING_ARGUMENT.create("url");
+                }
+                Function<URLConnection, Optional<OXException>> decorator = con -> {
+                    try {
+                        if ("https".equalsIgnoreCase(con.getURL().getProtocol())) {
+                            SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
+                            ((HttpsURLConnection) con).setSSLSocketFactory(factoryProvider.getDefault());
+                        }
+                        con.setConnectTimeout(timeoutMillis);
+                        con.setReadTimeout(timeoutMillis);
+                        return Optional.empty();
+                    } catch (Exception e) {
+                        return Optional.of(DataExceptionCodes.ERROR.create(e, e.getMessage()));
+                    }
+                };
+                urlCon = URITools.getTerminalConnection(sUrl.trim(), Optional.of(VALIDATOR), Optional.of(decorator));
+            } catch (MalformedURLException e) {
                 throw DataExceptionCodes.ERROR.create(e, e.getMessage());
             }
             /*
@@ -266,12 +266,12 @@ public final class URLMailAttachmentDataSource implements DataSource {
     private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
 
     /**
-     * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
+     * Validates the given URL according to white-listed protocols and blacklisted hosts.
      *
      * @param url The URL to validate
      * @return An optional OXException
      */
-    private static Function<URL, Optional<OXException>> validator = (url) -> {
+    private static Function<URL, Optional<OXException>> VALIDATOR = (url) -> {
         String protocol = url.getProtocol();
         if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
             return Optional.of(DataExceptionCodes.INVALID_ARGUMENT.create("url", url.toString()));
