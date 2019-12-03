@@ -47,82 +47,21 @@
  *
  */
 
-package com.openexchange.filestore.swift.impl;
-
-import org.apache.http.client.HttpClient;
+package com.openexchange.groupware.update.tasks;
 
 /**
- * {@link SwiftConfig}
+ * {@link DropSwiftFilestoreTask} - Drops Swift Filestore related tables
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.4
  */
-public final class SwiftConfig {
-
-    private final HttpClient httpClient;
-    private final EndpointPool endpointPool;
-    private final String userName;
-    private final AuthInfo authValue;
-    private final String filestoreId;
+public class DropSwiftFilestoreTask extends AbstractDropTableTask {
 
     /**
-     * Initializes a new {@link SwiftConfig}.
-     *
-     * @param httpClient The associated HTTP client
-     * @param endpointPool The end-point pool
+     * Initializes a new {@link DropSwiftFilestoreTask}.
      */
-    public SwiftConfig(String filestoreId, String userName, AuthInfo authValue, HttpClient httpClient, EndpointPool endpointPool) {
-        super();
-        this.filestoreId = filestoreId;
-        this.userName = userName;
-        this.authValue = authValue;
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
-    }
-
-    /**
-     * Gets the file storage identifier
-     *
-     * @return The file storage identifier
-     */
-    public String getFilestoreId() {
-        return filestoreId;
-    }
-
-    /**
-     * Gets the user name
-     *
-     * @return The user name
-     */
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * Gets the auth info
-     *
-     * @return The auth info
-     */
-    public AuthInfo getAuthInfo() {
-        return authValue;
-    }
-
-    /**
-     * Gets the <code>HttpClient</code> instance.
-     *
-     * @return The <code>HttpClient</code> instance
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
+    public DropSwiftFilestoreTask() {
+        super("swift_filestore");
     }
 
 }
