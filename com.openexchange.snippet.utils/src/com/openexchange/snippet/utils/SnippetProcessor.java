@@ -245,7 +245,7 @@ public class SnippetProcessor {
                 // Check for valid URL
                 URLConnection con;
                 try {
-                    con = URITools.getTerminalConnection(src, Optional.of(validator));
+                    con = URITools.getTerminalConnection(src, Optional.of(VALIDATOR), Optional.of(DECORATOR));
                 } catch (Exception e) {
                     // No... it's not
                     throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid image URL: " + src);
@@ -286,13 +286,30 @@ public class SnippetProcessor {
         }
     }
 
+    private static final int READ_TIMEOUT = 10000;
+    private static final int CONNECT_TIMEOUT = 3000;
+
+    private static Function<URLConnection, Optional<OXException>> DECORATOR = con -> {
+        try {
+            con.setConnectTimeout(CONNECT_TIMEOUT);
+            con.setReadTimeout(READ_TIMEOUT);
+            if (con instanceof HttpURLConnection) {
+                HttpURLConnection httpCon = (HttpURLConnection) con;
+                httpCon.setRequestMethod("GET");
+            }
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.of(SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage()));
+        }
+    };
+
     /**
-     * Validates the given URL according to whitelisted prtocols ans blacklisted hosts.
+     * Validates the given URL according to white-listed protocols and blacklisted hosts.
      *
      * @param url The URL to validate
      * @return An optional OXException
      */
-    private static Function<URL, Optional<OXException>> validator = (url) -> {
+    private static Function<URL, Optional<OXException>> VALIDATOR = (url) -> {
         String protocol = url.getProtocol();
         if (protocol == null || !ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
             return Optional.of(SnippetExceptionCodes.UNEXPECTED_ERROR.create("Invalid image URL: " + url.toString()));
@@ -314,27 +331,23 @@ public class SnippetProcessor {
         return Optional.empty();
     };
 
-    private static final int READ_TIMEOUT = 10000;
-    private static final int CONNECT_TIMEOUT = 3000;
-
-    private String loadImage(URLConnection con, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
+    private String loadImage(URLConnection connectedCon, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
         ThresholdFileHolder fileHolder = null;
         InputStream in = null;
         try {
-            if (con instanceof HttpURLConnection) {
-                return loadHttpImage((HttpURLConnection) con, count, maxImageSize, attachments, isSignature);
+            if (connectedCon instanceof HttpURLConnection) {
+                return loadHttpImage((HttpURLConnection) connectedCon, count, maxImageSize, attachments, isSignature);
             }
 
             // Generic URLConnection handling
-            con.connect();
-            in = con.getInputStream();
+            in = connectedCon.getInputStream();
 
-            int contentLength = con.getContentLength();
+            int contentLength = connectedCon.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
                 throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(maxImageSize), Long.valueOf(maxImageSize));
             }
 
-            String contentType = con.getHeaderField("content-type");
+            String contentType = connectedCon.getHeaderField("content-type");
             if (Strings.isNotEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
                 throw SnippetExceptionCodes.INVALID_IMAGE_DATA.create();
             }
@@ -362,28 +375,23 @@ public class SnippetProcessor {
         }
     }
 
-    private String loadHttpImage(HttpURLConnection httpCon, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
+    private String loadHttpImage(HttpURLConnection connectedHttpCon, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
         ThresholdFileHolder fileHolder = null;
         InputStream in = null;
         try {
-            httpCon.setRequestMethod("GET");
-            httpCon.setConnectTimeout(CONNECT_TIMEOUT);
-            httpCon.setReadTimeout(READ_TIMEOUT);
-            httpCon.connect();
-
-            int responseCode = httpCon.getResponseCode();
+            int responseCode = connectedHttpCon.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
                 return null;
             }
 
-            in = httpCon.getInputStream();
+            in = connectedHttpCon.getInputStream();
 
-            int contentLength = httpCon.getContentLength();
+            int contentLength = connectedHttpCon.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
                 throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(maxImageSize), Long.valueOf(maxImageSize));
             }
 
-            String contentType = httpCon.getHeaderField("content-type");
+            String contentType = connectedHttpCon.getHeaderField("content-type");
             if (Strings.isNotEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
                 throw SnippetExceptionCodes.INVALID_IMAGE_DATA.create();
             }
@@ -408,7 +416,7 @@ public class SnippetProcessor {
             throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in, fileHolder);
-            httpCon.disconnect();
+            connectedHttpCon.disconnect();
         }
     }
 
