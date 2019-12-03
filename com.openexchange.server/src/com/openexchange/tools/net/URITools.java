@@ -94,6 +94,8 @@ public final class URITools {
 
     private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
 
+    private static final String LOCATION_HEADER = "Location";
+
     /**
      * Returns the final url which might be different due to HTTP(S) redirects.
      *
@@ -122,11 +124,49 @@ public final class URITools {
             httpURLConnection.connect();
             httpURLConnection.getInputStream();
             if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
-                String redirectUrl = httpURLConnection.getHeaderField("Location");
+                String redirectUrl = httpURLConnection.getHeaderField(LOCATION_HEADER);
                 httpURLConnection.disconnect();
                 return getFinalURL(redirectUrl, validator);
             }
+            httpURLConnection.disconnect();
         }
+        
         return url;
+    }
+
+    /**
+     * Returns an URLConnection for the final url, depending on HTTP redirects.
+     *
+     * @param url The url to connect to
+     * @param validator An optional validation of the any of the redirect hops, which returns an optional OXException if validation fails
+     * @return
+     * @throws OXException 
+     * @throws IOException 
+     */
+    public static URLConnection getTerminalConnection(String url, Optional<Function<URL, Optional<OXException>>> validator) throws IOException, OXException {
+        URL u = new URL(url);
+        if (validator.isPresent()) {
+            Optional<OXException> exception = validator.get().apply(u);
+            if (exception.isPresent()) {
+                throw exception.get();
+            }
+        }
+
+        URLConnection urlConnnection = u.openConnection();
+
+        if (urlConnnection instanceof HttpURLConnection) {
+            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
+            httpURLConnection.setConnectTimeout(2500);
+            httpURLConnection.setReadTimeout(2500);
+            httpURLConnection.setInstanceFollowRedirects(false);
+            httpURLConnection.connect();
+            httpURLConnection.getInputStream();
+            if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
+                String redirectUrl = httpURLConnection.getHeaderField(LOCATION_HEADER);
+                httpURLConnection.disconnect();
+                return getTerminalConnection(redirectUrl, validator);
+            }
+        }
+        return urlConnnection;
     }
 }
