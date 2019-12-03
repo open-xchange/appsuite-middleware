@@ -89,20 +89,49 @@ public final class URITools {
         }
         return retval;
     }
+    
+    /** Validates a given URL */
+    public static interface UrlValidator {
+        
+        /**
+         * Validates specified URL.
+         * 
+         * @param url The URL to validate
+         * @throws OXException If validation results failure
+         */
+        void validate(URL url) throws OXException;
+    }
+    
+    /** Decorates a given {@link URLConnection} instance */
+    public static interface URLConnectionDecorator {
+        
+        /**
+         * Decorates specified {@link URLConnection} instance.
+         * 
+         * @param urlConnection The URL connection to decorate
+         * @throws OXException If decoration fails
+         */
+        void decorate(URLConnection urlConnection) throws OXException;
+    }
 
     private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
 
     private static final String LOCATION_HEADER = "Location";
 
     /**
-     * Returns the final url which might be different due to HTTP(S) redirects.
+     * Returns the final URL which might be different due to HTTP(S) redirects.
      *
-     * @param url The url to resolve
-     * @return The final url
-     * @throws IOException if an I/O error occurs
+     * @param url The URL to resolve
+     * @param optValidator An optional validation of the any of the redirect hops, which returns an optional OXException if validation fails
+     * @return The final URL
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws IOException If an I/O error occurs
      */
-    public static String getFinalURL(String url) throws IOException, OXException {
+    public static String getFinalURL(String url, UrlValidator optValidator) throws IOException, OXException {
         URL u = new URL(url);
+        if (optValidator != null) {
+            optValidator.validate(u);
+        }
 
         URLConnection urlConnnection = u.openConnection();
         urlConnnection.setConnectTimeout(2500);
@@ -112,15 +141,62 @@ public final class URITools {
             HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
             httpURLConnection.setInstanceFollowRedirects(false);
             httpURLConnection.connect();
-            httpURLConnection.getInputStream();
+
             if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
                 String redirectUrl = httpURLConnection.getHeaderField(LOCATION_HEADER);
                 httpURLConnection.disconnect();
-                return getFinalURL(redirectUrl);
+                return getFinalURL(redirectUrl, optValidator);
             }
             httpURLConnection.disconnect();
         }
-        
+
         return url;
+    }
+
+    /**
+     * Returns an URL connection for the final URL, depending on HTTP redirects.
+     *
+     * @param url The URL to connect to
+     * @param optValidator An optional validation of the any of the redirect hops, which returns an optional OXException if validation fails
+     * @param optDecorator An optional decorator for the probing URL connection instance
+     * @return The terminal <b>connected</b> URL connection
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OPen-Xchange error occurs
+     */
+    public static URLConnection getTerminalConnection(String url, UrlValidator optValidator, URLConnectionDecorator optDecorator) throws IOException, OXException {
+        // Initialize URL instance
+        URL u = new URL(url);
+
+        // Validate
+        if (optValidator != null) {
+            optValidator.validate(u);
+        }
+
+        // Get connection
+        URLConnection urlConnnection = u.openConnection();
+
+        // Decorate
+        if (optDecorator != null) {
+            optDecorator.decorate(urlConnnection);
+        } else {
+            urlConnnection.setConnectTimeout(2500);
+            urlConnnection.setReadTimeout(2500);
+        }
+
+        // Connect
+        if (urlConnnection instanceof HttpURLConnection) {
+            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
+            httpURLConnection.setInstanceFollowRedirects(false);
+            httpURLConnection.connect();
+
+            if (REDIRECT_RESPONSE_CODES.contains(I(httpURLConnection.getResponseCode()))) {
+                String redirectUrl = httpURLConnection.getHeaderField(LOCATION_HEADER);
+                httpURLConnection.disconnect();
+                return getTerminalConnection(redirectUrl, optValidator, optDecorator);
+            }
+        } else {
+            urlConnnection.connect();
+        }
+        return urlConnnection;
     }
 }
