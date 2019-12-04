@@ -225,8 +225,9 @@ public interface ConfigDatabaseService {
     Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException;
 
     /**
-     * Invalidates all cached database pooling information for one or more contexts. This are especially the assignments to database servers.
-     * @param contextIds unique identifiers of the contexts.
+     * Invalidates all cached database pooling information for one or more contexts. Especially the assignments to database servers.
+     *
+     * @param contextIds The unique identifiers of the contexts.
      */
     void invalidate(int... contextIds);
 
