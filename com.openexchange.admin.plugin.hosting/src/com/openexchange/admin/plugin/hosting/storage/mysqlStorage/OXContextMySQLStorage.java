@@ -55,6 +55,7 @@ import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.log.LogProperties.Name.DATABASE_POOL_ID;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -145,6 +146,7 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.CompletionFuture;
@@ -1434,10 +1436,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         ResultSet rs = null;
         try {
             con = cache.getReadConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
+            stmt = con.prepareStatement("SELECT cid, write_db_pool_id FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schema);
             rs = stmt.executeQuery();
-            List<Integer> contextIds = new LinkedList<Integer>();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+
+            // Pool identifier
+            int poolId = rs.getInt(2);
+            LogProperties.putProperty(DATABASE_POOL_ID, Integer.toString(poolId));
+
+            // Collect context identifiers
+            List<Integer> contextIds = new ArrayList<Integer>(64);
+            contextIds.add(Autoboxing.valueOf(rs.getInt(1)));
+            // Add rest
             while (rs.next()) {
                 contextIds.add(Autoboxing.valueOf(rs.getInt(1)));
             }

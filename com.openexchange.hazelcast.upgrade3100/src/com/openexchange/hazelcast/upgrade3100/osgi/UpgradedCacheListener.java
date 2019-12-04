@@ -209,8 +209,11 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
                 // Cache key
                 CacheKey ck = (CacheKey) key;
                 int poolId = ck.getContextId();
-                String schema = ck.getKeys()[0];
-                schemas.add(new PoolAndSchema(poolId, schema));
+                String[] keyz = ck.getKeys();
+                if (keyz.length > 0) {
+                    String schema = keyz[0];
+                    schemas.add(new PoolAndSchema(poolId, schema));
+                }
             } else {
                 LOG.warn("Skipping unexpected cache key: {}", key);
             }
